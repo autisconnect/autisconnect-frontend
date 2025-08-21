@@ -1,0 +1,1902 @@
+// ProfessionalDashboard.jsx
+
+import React, { useState, useEffect, useContext } from 'react';
+import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
+import { Calendar2Check, People, ClockHistory, ChatDots, FileEarmarkText, GraphUp, Bell, BoxArrowUpRight, Wallet2, PlusCircle } from 'react-bootstrap-icons';
+import { Line, Bar, Pie } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler,
+} from 'chart.js';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext';
+import logohori from './assets/logo.png';
+import './App.css';
+
+// Registrar componentes do Chart.js
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
+
+// Componente ErrorBoundary
+class ErrorBoundary extends React.Component {
+    state = { hasError: false, error: null };
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.error('ErrorBoundary caught an error:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <Container className="mt-5">
+                    <Alert variant="danger">
+                        Algo deu errado: {this.state.error?.message || 'Erro desconhecido'}. Por favor, recarregue a página.
+                    </Alert>
+                </Container>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+const ProfessionalDashboard = () => {
+    const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const { id: dashboardId } = useParams();
+
+    // Estados
+    const [activeTab, setActiveTab] = useState('overview');
+    const [patients, setPatients] = useState([]);
+    const [consultations, setConsultations] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [assistants, setAssistants] = useState([]);
+    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+    const [showPatientModal, setShowPatientModal] = useState(false);
+    const [showEditPatientModal, setShowEditPatientModal] = useState(false);
+    const [editingPatient, setEditingPatient] = useState(null);
+    const [showNoteModal, setShowNoteModal] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [newNote, setNewNote] = useState({ title: '', content: '' });
+    const [loading, setLoading] = useState(true);
+    const [loadingCharts, setLoadingCharts] = useState(false);
+    const [loadingPatients, setLoadingPatients] = useState(false);
+    const [loadingConsultations, setLoadingConsultations] = useState(false);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [professionalInfo, setProfessionalInfo] = useState({
+        name: '',
+        specialty: '',
+        totalPatients: 0,
+        todayAppointments: 0,
+        weekAppointments: 0
+    });
+    const [newAssistant, setNewAssistant] = useState({ nome: '', cpf: '', email: '', password: '', status: 'ativo', telefone: '' });
+
+    const [newPatient, setNewPatient] = useState({
+        name: '',
+        birthDate: '',
+        phone: '',
+        email: '',
+        diagnosis: '',
+        notes: ''
+    });
+    const [newAppointment, setNewAppointment] = useState({
+        patientId: '',
+        appointment_date: '',
+        appointment_time: '',
+        appointment_type: 'Consulta Regular',
+        status: 'Realizada',
+        payment_method: 'Pix',
+        payment_details: '',
+        payment_status: 'Pendente',
+        value: '',
+        notes: ''
+    });
+    const [patientProgressData, setPatientProgressData] = useState({
+        labels: [],
+        datasets: []
+    });
+    const [diagnosisDistribution, setDiagnosisDistribution] = useState({
+        labels: [],
+        datasets: [
+            {
+                data: [],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                ],
+                borderWidth: 1,
+            },
+        ],
+    });
+    const [appointmentTypeData, setAppointmentTypeData] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: 'Tipos de Consulta',
+                data: [],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                ],
+                borderWidth: 1,
+            },
+        ],
+    });
+
+    // Funções de API
+    const getAuthHeaders = () => ({
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+    });
+
+    const fetchAssistants = async () => {
+        if (!user) return;
+        try {
+            const res = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token' )}` },
+            });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Falha ao buscar colaboradores.');
+            }
+            const data = await res.json();
+            setAssistants(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error('Erro ao buscar colaboradores:', err);
+            setError('Não foi possível carregar os colaboradores. ' + err.message);
+            setAssistants([]);
+        }
+    };
+
+    const handleAddAssistant = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccessMessage('');
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants`, {
+                method: 'POST',
+                headers: getAuthHeaders( ), // Reutilizando a função auxiliar
+                body: JSON.stringify(newAssistant),
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Falha ao adicionar colaborador.');
+            }
+
+            setNewAssistant({ nome: '', cpf: '', email: '', password: '', status: 'ativo' });
+            setSuccessMessage('Colaborador cadastrado com sucesso!');
+            fetchAssistants(); // Recarrega a lista
+        } catch (err) {
+            console.error('Erro ao adicionar colaborador:', err);
+            setError(err.message);
+        }
+    };
+
+    const handleToggleStatus = async (assistantId, currentStatus) => {
+        const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
+        setError('');
+        setSuccessMessage('');
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants/${assistantId}/status`, {
+                method: 'PUT',
+                headers: getAuthHeaders( ),
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Falha ao atualizar status.');
+            }
+            setSuccessMessage('Status do colaborador atualizado!');
+            fetchAssistants(); // Recarrega a lista para refletir a mudança
+        } catch (err) {
+            console.error('Erro ao atualizar status do colaborador', err);
+            setError(err.message);
+        }
+    };
+
+    const fetchDashboardData = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/dashboard/${user.id}`, {
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao buscar dados do dashboard.');
+            }
+
+            const data = await response.json();
+            setProfessionalInfo({
+                name: data.professional.name,
+                specialty: data.professional.specialty,
+                totalPatients: data.stats.totalPatients,
+                todayAppointments: data.stats.todayAppointments,
+                weekAppointments: data.stats.weekAppointments
+            });
+        } catch (err) {
+            console.error('Erro ao buscar dados do dashboard:', err);
+            setError(err.message);
+        }
+    };
+
+    const fetchPatients = async () => {
+        try {
+            setLoadingPatients(true);
+            const query = statusFilter && statusFilter !== 'todos' ? `?status=${statusFilter}` : '';
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients${query}`, {
+                headers: getAuthHeaders()
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao buscar pacientes.');
+            }
+            const data = await response.json();
+            setPatients(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error('Erro ao buscar pacientes:', err);
+            setError('Erro ao carregar pacientes: ' + err.message);
+            setPatients([]);
+        } finally {
+            setLoadingPatients(false);
+        }
+    };
+
+    const handleUpdatePatient = async (e) => {
+        e.preventDefault();
+        if (!editingPatient || !editingPatient.id) {
+            setError('Nenhum paciente selecionado para edição.');
+            return;
+        }
+
+        // 1. Formata a data para o formato AAAA-MM-DD que o MySQL espera.
+        let formattedBirthDate = null;
+        if (editingPatient.birthDate) {
+            // Previne erros com datas inválidas e formata corretamente.
+            try {
+                formattedBirthDate = new Date(editingPatient.birthDate).toISOString().split('T')[0];
+            } catch (dateError) {
+                console.error("Data de nascimento inválida:", editingPatient.birthDate);
+                setError("O formato da data de nascimento é inválido.");
+                return;
+            }
+        }
+
+        // 2. Cria um payload limpo, enviando apenas os campos necessários.
+        //    Mapeia 'editingPatient.observacoes' para o campo 'notes' que o backend espera.
+        const payload = {
+            name: editingPatient.name,
+            birthDate: formattedBirthDate,
+            phone: editingPatient.phone,
+            email: editingPatient.email,
+            diagnosis: editingPatient.diagnosis,
+            notes: editingPatient.observacoes // Mapeamento correto
+        };
+
+        // Log para depuração final, para ter certeza do que está sendo enviado.
+        console.log("Enviando payload para atualização:", payload);
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${editingPatient.id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders( ),
+                body: JSON.stringify(payload)
+            });
+
+            // 3. Tratamento de erro robusto que não quebra com respostas não-JSON.
+            if (!response.ok) {
+                let errorData;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    errorData = await response.json();
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`Erro no servidor: ${response.status} - ${errorText}`);
+                }
+                throw new Error(errorData.error || 'Falha ao atualizar dados do paciente.');
+            }
+
+            setSuccessMessage('Dados do paciente atualizados com sucesso!');
+            setShowEditPatientModal(false);
+            
+            // 4. Atualiza a lista de pacientes e o painel de detalhes na interface.
+            await fetchPatients();
+            setSelectedPatient(prev => ({...prev, ...editingPatient})); // Atualiza o card de detalhes
+            setEditingPatient(null);
+
+        } catch (err) {
+            console.error('Erro ao atualizar paciente:', err);
+            setError(err.message);
+        }
+    };
+
+
+
+    const fetchConsultations = async () => {
+        if (!user) return;
+        setLoadingConsultations(true);
+        try {
+            const response = await fetch(`http://localhost:5000/api/appointments/professional/${user.id}`, {
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao buscar agendamentos.');
+            }
+
+            const data = await response.json();
+            setConsultations(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error('Erro ao buscar agendamentos:', err);
+            setError(err.message);
+            setConsultations([]);
+        } finally {
+            setLoadingConsultations(false);
+        }
+    };
+
+    const fetchPatientProgress = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patient-progress`, {
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao buscar progresso dos pacientes.');
+            }
+
+            const data = await response.json();
+            const labels = [...new Set(data.map(item => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
+            const metrics = ['Comunicacao', 'Interacao_Social', 'Comportamento'];
+            const datasets = metrics.map(metric => ({
+                label: metric,
+                data: labels.map(label => {
+                    const item = data.find(d =>
+                        new Date(d.recorded_date).toLocaleDateString('pt-BR') === label &&
+                        d.metric_type === metric
+                    );
+                    return item ? item.score : null;
+                }),
+                borderColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 1)' :
+                            metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 1)' :
+                            'rgba(255, 99, 132, 1)',
+                backgroundColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 0.2)' :
+                                metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 0.2)' :
+                                'rgba(255, 99, 132, 0.2)',
+                fill: true,
+                tension: 0.4
+            }));
+
+            setPatientProgressData({ labels, datasets });
+        } catch (err) {
+            console.error('Erro ao buscar progresso dos pacientes:', err);
+            setError(err.message);
+        }
+    };
+
+    const fetchDiagnosisDistribution = async () => {
+        setLoadingCharts(true);
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/diagnosis-distribution`, {
+                headers: getAuthHeaders(),
+            });
+
+            if (response.status === 404) {
+                console.warn('Rota de distribuição de diagnósticos não encontrada');
+                setDiagnosisDistribution({
+                    labels: [],
+                    datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+                });
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao buscar distribuição de diagnósticos.');
+            }
+
+            const data = await response.json();
+            setDiagnosisDistribution({
+                labels: data.labels,
+                datasets: [
+                    {
+                        data: data.data,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                        ],
+                        borderWidth: 1,
+                    },
+                ],
+            });
+        } catch (err) {
+            console.error('Erro ao buscar distribuição de diagnósticos:', err);
+            setError(err.message);
+            setDiagnosisDistribution({
+                labels: [],
+                datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+            });
+        } finally {
+            setLoadingCharts(false);
+        }
+    };
+
+    const fetchAppointmentTypes = async () => {
+        setLoadingCharts(true);
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/appointment-types`, {
+                headers: getAuthHeaders(),
+            });
+
+            if (response.status === 404) {
+                console.warn('Rota de tipos de consulta não encontrada');
+                setAppointmentTypeData({
+                    labels: [],
+                    datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+                });
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao buscar tipos de consulta.');
+            }
+
+            const data = await response.json();
+            setAppointmentTypeData({
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Tipos de Consulta',
+                        data: data.data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                        ],
+                        borderWidth: 1,
+                    },
+                ],
+            });
+        } catch (err) {
+            console.error('Erro ao buscar tipos de consulta:', err);
+            setError(err.message);
+            setAppointmentTypeData({
+                labels: [],
+                datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+            });
+        } finally {
+            setLoadingCharts(false);
+        }
+    };
+
+    const handleAddPatient = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ ...newPatient, status: 'ativo' })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao adicionar paciente.');
+            }
+
+            setNewPatient({
+                name: '',
+                birthDate: '',
+                phone: '',
+                email: '',
+                diagnosis: '',
+                notes: ''
+            });
+            setShowPatientModal(false);
+            fetchPatients();
+            fetchDashboardData();
+            fetchDiagnosisDistribution();
+            setSuccessMessage('Paciente cadastrado com sucesso!');
+        } catch (err) {
+            console.error('Erro ao adicionar paciente:', err);
+            setError(err.message);
+        }
+    };
+
+    const handleAddAppointment = async (e) => {
+        e.preventDefault();
+        if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
+            setError('Paciente, data, hora e valor são obrigatórios.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/appointments`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    patient_id: newAppointment.patientId,
+                    appointment_date: newAppointment.appointment_date,
+                    appointment_time: newAppointment.appointment_time,
+                    appointment_type: newAppointment.appointment_type,
+                    status: newAppointment.status,
+                    payment_method: newAppointment.payment_method,
+                    payment_details: newAppointment.payment_details,
+                    payment_status: newAppointment.payment_status,
+                    value: newAppointment.value,
+                    notes: newAppointment.notes,
+                    professional_id: user.id
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao registrar consulta.');
+            }
+
+            setShowAppointmentModal(false);
+            setSuccessMessage('Consulta registrada com sucesso!');
+            setNewAppointment({
+                patientId: '',
+                appointment_date: '',
+                appointment_time: '',
+                appointment_type: 'Consulta Regular',
+                status: 'Realizada',
+                payment_method: 'Pix',
+                payment_details: '',
+                payment_status: 'Pendente',
+                value: '',
+                notes: ''
+            });
+            
+            fetchConsultations();
+            fetchDashboardData();
+            fetchAppointmentTypes();
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err) {
+            console.error('Erro ao registrar consulta:', err);
+            setError(err.message);
+        }
+    };
+
+    const handleAddNote = async (e) => {
+        e.preventDefault();
+        if (!selectedPatient) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${selectedPatient.id}/notes`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(newNote)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao adicionar nota.');
+            }
+
+            setNewNote({ title: '', content: '' });
+            setShowNoteModal(false);
+            fetchPatientNotes(selectedPatient.id);
+            setSuccessMessage('Nota adicionada com sucesso!');
+        } catch (err) {
+            console.error('Erro ao adicionar nota:', err);
+            setError(err.message);
+        }
+    };
+
+    const fetchPatientNotes = async (patientId) => {
+        try {
+            if (!patientId) {
+                throw new Error('ID do paciente inválido.');
+            }
+
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/notes`, {
+                headers: getAuthHeaders( )
+            });
+
+            // ==================================================================
+            // >>>>> LÓGICA DE TRATAMENTO DE ERRO MELHORADA <<<<<
+            // ==================================================================
+            if (!response.ok) {
+                const contentType = response.headers.get("content-type");
+                let errorText = `Falha ao buscar notas. Status: ${response.status}`;
+
+                // Tenta ler o erro como JSON apenas se a resposta for JSON
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorData = await response.json();
+                    errorText = errorData.error || errorText;
+                } else {
+                    // Se não for JSON (provavelmente HTML), apenas pega o texto do status
+                    errorText = `Erro no servidor: ${response.statusText}`;
+                }
+                throw new Error(errorText);
+            }
+            // ==================================================================
+
+            const notes = await response.json();
+            setSelectedPatient(prev => ({
+                ...prev,
+                notes: Array.isArray(notes) ? notes : []
+            }));
+
+        } catch (err) {
+            console.error('Erro ao buscar notas:', err);
+            setError('Erro ao carregar notas do paciente: ' + err.message);
+            // Garante que as notas fiquem vazias em caso de erro
+            setSelectedPatient(prev => ({
+                ...prev,
+                notes: []
+            }));
+        }
+    };
+
+
+    const handleUpdateStatus = async (patientId, newStatus) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/status`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha ao atualizar status.');
+            }
+
+            await fetchPatients();
+            if (selectedPatient && selectedPatient.id === patientId) {
+                setSelectedPatient({ ...selectedPatient, status: newStatus });
+            }
+            setSuccessMessage('Status do paciente atualizado!');
+        } catch (err) {
+            console.error('Erro ao atualizar status:', err);
+            setError('Erro ao atualizar status do paciente: ' + err.message);
+        }
+    };
+
+    const handlePatientRowClick = async (patient) => {
+        try {
+            if (!patient || !patient.id) {
+                console.error('Paciente inválido:', patient);
+                setError('Paciente inválido selecionado.');
+                setSelectedPatient(null);
+                return;
+            }
+            setSelectedPatient({ ...patient, notes: [] });
+            await fetchPatientNotes(patient.id);
+        } catch (err) {
+            console.error('Erro ao selecionar paciente:', err);
+            setError('Erro ao carregar detalhes do paciente: ' + err.message);
+            setSelectedPatient(null);
+        }
+    };
+
+    const handlePatientSelect = async (patient) => {
+        try {
+            if (!patient || !patient.id) {
+                console.error('Paciente inválido:', patient);
+                setError('Paciente inválido selecionado.');
+                setSelectedPatient(null);
+                return;
+            }
+
+            setSelectedPatient({ ...patient, notes: [] });
+            await fetchPatientNotes(patient.id);
+            window.open(`/patient-details/${patient.id}`, '_blank', 'noopener,noreferrer');
+        } catch (err) {
+            console.error('Erro ao selecionar paciente:', err);
+            setError('Erro ao carregar detalhes do paciente: ' + err.message);
+            setSelectedPatient(null);
+        }
+    };
+
+    // Funções auxiliares
+    const formatDate = (dateString) => {
+        return dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
+    };
+
+    const formatTime = (timeString) => {
+        return timeString ? timeString.substring(0, 5) : 'N/A';
+    };
+
+    const getStatusBadge = (status) => {
+        return status === 'Realizada' ? 'success' : 'secondary';
+    };
+
+    const getTodayAppointments = () => {
+        const today = new Date();
+        return consultations.filter(consultation => {
+            const appointmentDate = new Date(consultation.appointment_date);
+            return appointmentDate.getDate() === today.getDate() &&
+                appointmentDate.getMonth() === today.getMonth() &&
+                appointmentDate.getFullYear() === today.getFullYear();
+        });
+    };
+
+    const filteredPatients = patients.filter(patient => {
+        const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            patient.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = statusFilter === '' || statusFilter === 'todos' || patient.status === statusFilter;
+        return matchesSearch && matchesFilter;
+    });
+
+    const filteredAssistants = assistants.filter(assistant => {
+        return statusFilter === '' || statusFilter === 'todos' || assistant.status === statusFilter;
+    });
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    // Opções para gráficos
+    const lineOptions = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'Progresso dos Pacientes' }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 5,
+                title: { display: true, text: 'Nível (1-5)' }
+            }
+        }
+    };
+
+    const pieOptions = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right' },
+            title: { display: true, text: 'Distribuição de Diagnósticos' }
+        }
+    };
+
+    const barOptions = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Tipos de Consulta' }
+        }
+    };
+
+    // useEffect para validação de autenticação
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        if (user.tipo_usuario !== 'medicos_terapeutas' || dashboardId !== user.id.toString()) {
+            navigate(`/professional-dashboard/${user.id}`);
+            return;
+        }
+        setLoading(false);
+    }, [user, navigate, dashboardId]);
+
+    // useEffect para carregar dados
+    useEffect(() => {
+        if (!user || loading) return;
+        const fetchAllData = async () => {
+            await Promise.all([
+                fetchDashboardData(),
+                fetchPatients(),
+                fetchConsultations(),
+                fetchAssistants(),
+                fetchPatientProgress(),
+                fetchDiagnosisDistribution(),
+                fetchAppointmentTypes()
+            ]);
+        };
+        fetchAllData();
+    }, [user, loading]);
+
+    // useEffect para sincronizar fetchPatients com statusFilter
+    useEffect(() => {
+        if (!user || loading) return;
+        fetchPatients();
+    }, [statusFilter, user, loading]);
+
+    if (loading) {
+        return (
+            <Container className="text-center mt-5">
+                <Spinner animation="border" />
+                <p>Carregando dashboard...</p>
+            </Container>
+        );
+    }
+
+    return (
+        <Container fluid className="py-4 patient-details-page">
+            <style>
+                {`
+                    @media print {
+                        body * { visibility: hidden; }
+                        .printable-prescription, .printable-prescription * { visibility: visible; }
+                        .printable-prescription { position: absolute; top: 0; left: 0; width: 100%; }
+                        .print-header, .print-footer { margin: 20px 0; }
+                        .print-header h4, .print-footer p { margin: 5px 0; }
+                        .print-footer .signature-line { border-top: 1px solid #000; width: 200px; margin-top: 20px; }
+                        .no-print { display: none; }
+                        .prescription-observations { margin-top: 10px; margin-bottom: 20px; font-size: 14px; }
+                    }
+                `}
+            </style>
+
+            {successMessage && (
+                <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
+                    {successMessage}
+                </Alert>
+            )}
+
+            
+            <div className="professional-dashboard">
+
+            <Row className="professional-header-row mb-4 align-items-center">
+                
+                {/* Coluna da Logo */}
+                <Col xs="auto">
+                    <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
+                </Col>
+
+                {/* Coluna do Título e Informações do Profissional */}
+                <Col>
+                    <h1 className="professional-name mb-0">Dashboard Profissional</h1>
+                    <p className="professional-specialty text-muted mb-0">{professionalInfo.name} - {professionalInfo.specialty}</p>
+                </Col>
+
+                {/* Coluna dos Cards de Resumo */}
+                <Col xs="auto">
+                    <div className="d-flex gap-3">
+                        <Card className="summary-card">
+                            <Card.Body>
+                                <div className="d-flex align-items-center">
+                                    <People className="summary-icon text-primary me-3" />
+                                    <div>
+                                        <div className="summary-value">{professionalInfo.totalPatients}</div>
+                                        <div className="summary-label">Pacientes Ativos</div>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                        <Card className="summary-card">
+                            <Card.Body>
+                                <div className="d-flex align-items-center">
+                                    <Calendar2Check className="summary-icon text-success me-3" />
+                                    <div>
+                                        <div className="summary-value">{professionalInfo.todayAppointments}</div>
+                                        <div className="summary-label">Consultas Hoje</div>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </div>
+                </Col>
+
+                {/* Coluna do Botão de Logout */}
+                <Col xs="auto">
+                    <Button variant="danger" onClick={handleLogout}>Sair</Button>
+                </Col>
+            </Row>
+
+                <Container fluid className="py-4 professional-dashboard">
+                    {/* Mensagens de feedback */}
+                    {successMessage && (
+                        <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
+                            {successMessage}
+                        </Alert>
+                    )}
+                    {error && (
+                        <Alert variant="danger" onClose={() => setError('')} dismissible>
+                            {error}
+                        </Alert>
+                    )}
+
+                    {/* Alertas para feedback */}
+                    {successMessage && (
+                        <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
+                            {successMessage}
+                        </Alert>
+                    )}
+                    {error && (
+                        <Alert variant="danger" onClose={() => setError('')} dismissible>
+                            {error}
+                        </Alert>
+                    )}
+
+                    {/* Navegação por Abas */}
+                    <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+                        <Nav variant="tabs" className="mb-4">
+                            <Nav.Item>
+                                <Nav.Link eventKey="overview"><GraphUp className="me-2" />Visão Geral</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="patients"><People className="me-2" />Pacientes</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="appointments"><Calendar2Check className="me-2" />Consultas</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="reports"><FileEarmarkText className="me-2" />Relatórios</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="assistants"><People className="me-2" />Colaboradores</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link onClick={() => window.open(`/financial-dashboard/${user.id}`, '_blank', 'noopener,noreferrer')}>
+                                    <Wallet2 className="me-2" />Financeiro
+                                </Nav.Link>
+                            </Nav.Item>
+                        </Nav>
+
+                        <Tab.Content>
+                            {/* Aba Visão Geral */}
+                            <Tab.Pane eventKey="overview">
+                                <Row>
+                                    <Col md={8}>
+                                        <Card className="mb-4">
+                                            <Card.Header><h5>Consultas de Hoje</h5></Card.Header>
+                                            <Card.Body>
+                                                {loadingConsultations ? (
+                                                    <div className="text-center">
+                                                        <Spinner animation="border" size="sm" />
+                                                        <span className="ms-2">Carregando consultas...</span>
+                                                    </div>
+                                                ) : getTodayAppointments().length > 0 ? (
+                                                    <Table responsive>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Horário</th>
+                                                                <th>Paciente</th>
+                                                                <th>Tipo</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {getTodayAppointments().map(consultation => (
+                                                                <tr key={consultation.id}>
+                                                                    <td>{formatTime(consultation.appointment_time)}</td>
+                                                                    <td>{consultation.patient_name}</td>
+                                                                    <td>{consultation.appointment_type}</td>
+                                                                    <td><Badge bg={getStatusBadge(consultation.status)}>{consultation.status}</Badge></td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </Table>
+                                                ) : (
+                                                    <p className="text-muted">Nenhuma consulta agendada para hoje.</p>
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+
+                                        <Row>
+                                            <Col md={6}>
+                                                <Card>
+                                                    <Card.Header><h6>Progresso dos Pacientes</h6></Card.Header>
+                                                    <Card.Body>
+                                                        {loadingCharts ? (
+                                                            <div className="text-center">
+                                                                <Spinner animation="border" size="sm" />
+                                                                <span className="ms-2">Carregando dados...</span>
+                                                            </div>
+                                                        ) : patientProgressData.labels.length === 0 ? (
+                                                            <p className="text-muted">Nenhum dado disponível para progresso dos pacientes.</p>
+                                                        ) : (
+                                                            <Line data={patientProgressData} options={lineOptions} />
+                                                        )}
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Card>
+                                                    <Card.Header><h6>Tipos de Consulta</h6></Card.Header>
+                                                    <Card.Body>
+                                                        {loadingCharts ? (
+                                                            <div className="text-center">
+                                                                <Spinner animation="border" size="sm" />
+                                                                <span className="ms-2">Carregando dados...</span>
+                                                            </div>
+                                                        ) : appointmentTypeData.labels.length === 0 ? (
+                                                            <p className="text-muted">Nenhum dado disponível para tipos de consulta.</p>
+                                                        ) : (
+                                                            <Bar data={appointmentTypeData} options={barOptions} />
+                                                        )}
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                    <Col md={4}>
+                                        <Card className="mb-4">
+                                            <Card.Header><h6>Distribuição de Diagnósticos</h6></Card.Header>
+                                            <Card.Body>
+                                                {loadingCharts ? (
+                                                    <div className="text-center">
+                                                        <Spinner animation="border" size="sm" />
+                                                        <span className="ms-2">Carregando dados...</span>
+                                                    </div>
+                                                ) : diagnosisDistribution.labels.length === 0 ? (
+                                                    <p className="text-muted">Nenhum dado disponível para distribuição de diagnósticos.</p>
+                                                ) : (
+                                                    <Pie data={diagnosisDistribution} options={pieOptions} />
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+
+                                        <Card>
+                                            <Card.Header><h6>Notificações Recentes</h6></Card.Header>
+                                            <Card.Body>
+                                                {notifications.slice(0, 5).map(notification => (
+                                                    <div key={notification.id} className="d-flex align-items-start mb-3">
+                                                        <Bell className={`me-2 mt-1 ${notification.read ? 'text-muted' : 'text-primary'}`} />
+                                                        <div className="flex-grow-1">
+                                                            <p className={`mb-1 ${notification.read ? 'text-muted' : ''}`}>
+                                                                {notification.message}
+                                                            </p>
+                                                            <small className="text-muted">{formatDate(notification.date)}</small>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                </Row>
+                            </Tab.Pane>
+
+                            {/* Aba Pacientes */}
+                            <Tab.Pane eventKey="patients">
+                                <Row className="mb-3">
+                                    <Col md={6}>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Buscar pacientes..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                    </Col>
+                                    <Col md={3}>
+                                        <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                                            <option value="" disabled>Filtrar por Status</option>
+                                            <option value="todos">Todos</option>
+                                            <option value="ativo">Ativo</option>
+                                            <option value="inativo">Inativo</option>
+                                        </Form.Select>
+                                    </Col>
+                                    <Col md={3}>
+                                        <Button variant="primary" onClick={() => setShowPatientModal(true)} className="w-100">
+                                            Adicionar Paciente
+                                        </Button>
+                                    </Col>
+                                </Row>
+
+                                <Row>
+                                    <Col md={8}>
+                                        <Card>
+                                            <Card.Header><h5>Lista de Pacientes</h5></Card.Header>
+                                            <Card.Body>
+                                                {loadingPatients ? (
+                                                    <div className="text-center">
+                                                        <Spinner animation="border" />
+                                                        <p>Carregando pacientes...</p>
+                                                    </div>
+                                                ) : filteredPatients.length > 0 ? (
+                                                    <Table responsive hover>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Nome</th>
+                                                                <th>Data de Nascimento</th>
+                                                                <th>Diagnóstico</th>
+                                                                <th>Status</th>
+                                                                <th>Última Consulta</th>
+                                                                <th>Ações</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {filteredPatients.map(patient => (
+                                                                <tr key={patient.id}>
+                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
+                                                                        {patient.name}
+                                                                    </td>
+                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
+                                                                        {formatDate(patient.birthDate)}
+                                                                    </td>
+                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
+                                                                        {patient.diagnosis}
+                                                                    </td>
+                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
+                                                                        {patient.status}
+                                                                    </td>
+                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
+                                                                        {formatDate(patient.registrationDate)}
+                                                                    </td>
+                                                                    <td>
+                                                                        <Button
+                                                                            variant="outline-primary"
+                                                                            size="sm"
+                                                                            onClick={() => handlePatientSelect(patient)}
+                                                                        >
+                                                                            Ver Detalhes
+                                                                        </Button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </Table>
+                                                ) : (
+                                                    <p className="text-muted">Nenhum paciente encontrado.</p>
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <Col md={4}>
+                                        {selectedPatient && selectedPatient.id ? (
+                                            <Card>
+                                                <Card.Header><h6>Detalhes do Paciente</h6>
+                                                </Card.Header>
+                                                    <Button 
+                                                        variant="outline-secondary" 
+                                                        size="sm"
+                                                        className="m-2" // Adiciona uma pequena margem para espaçamento
+                                                        onClick={() => {
+                                                            console.log("Abrindo modal de edição para o paciente:", selectedPatient);
+                                                            setEditingPatient(selectedPatient);
+                                                            setShowEditPatientModal(true);
+                                                        }}
+                                                    >
+                                                        Editar
+                                                    </Button>
+                                                <Card.Body>
+                                                    <h5>{selectedPatient.name || 'Nome não disponível'}</h5>
+                                                    <p><strong>Data de Nascimento:</strong> {selectedPatient.birthDate ? new Date(selectedPatient.birthDate).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                                                    <p><strong>Telefone:</strong> {selectedPatient.phone || 'N/A'}</p>
+                                                    <p><strong>Email:</strong> {selectedPatient.email || 'N/A'}</p>
+                                                    <p><strong>Diagnóstico:</strong> {selectedPatient.diagnosis || 'N/A'}</p>
+                                                    <p><strong>Observações:</strong> {selectedPatient.observacoes || 'Nenhuma observação.'}</p>
+                                                    <p><strong>Status:</strong> {selectedPatient.status || 'N/A'}</p>
+                                                    <Button
+                                                        variant={selectedPatient.status === 'ativo' ? 'warning' : 'success'}
+                                                        size="sm"
+                                                        onClick={() => handleUpdateStatus(selectedPatient.id, selectedPatient.status === 'ativo' ? 'inativo' : 'ativo')}
+                                                    >
+                                                        {selectedPatient.status === 'ativo' ? 'Desativar' : 'Ativar'}
+                                                    </Button>
+                                                    <hr />
+                                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                                        <h6>Notas</h6>
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            size="sm"
+                                                            onClick={() => setShowNoteModal(true)}
+                                                            disabled={!selectedPatient.id}
+                                                        >
+                                                            Adicionar Nota
+                                                        </Button>
+                                                    </div>
+                                                    {selectedPatient.notes && Array.isArray(selectedPatient.notes) && selectedPatient.notes.length > 0 ? (
+                                                        selectedPatient.notes.map(note => (
+                                                            note && note.id ? (
+                                                                <div key={note.id} className="mb-3 p-2 border rounded">
+                                                                    <h6>{note.title || 'Sem título'}</h6>
+                                                                    <p className="mb-1">{note.content || 'Sem conteúdo'}</p>
+                                                                    <small className="text-muted">
+                                                                        {note.createdAt ? new Date(note.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
+                                                                    </small>
+                                                                </div>
+                                                            ) : null
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-muted">Nenhuma nota registrada.</p>
+                                                    )}
+                                                </Card.Body>
+                                            </Card>
+                                        ) : (
+                                            <Card>
+                                                <Card.Body>
+                                                    <p className="text-muted">Selecione um paciente para ver os detalhes.</p>
+                                                </Card.Body>
+                                            </Card>
+                                        )}
+                                    </Col>
+                                </Row>
+                            </Tab.Pane>
+
+                            {/* Aba Consultas */}
+                            <Tab.Pane eventKey="appointments">
+                                <Card>
+                                    <Card.Header>
+                                        <Row className="align-items-center">
+                                        <Col>
+                                            <h5>Histórico Geral de Consultas</h5>
+                                        </Col>
+                                        </Row>
+                                    </Card.Header>
+                                    <Row className="align-items-center">
+                                        <p></p>
+                                    <Col md={3} className="ms-auto text-end">
+                                        <Button 
+                                        variant="primary" 
+                                        onClick={() => setShowAppointmentModal(true)} 
+                                        className="w-100"
+                                        >
+                                        Agendar Consulta
+                                        </Button>
+                                    </Col>
+                                    </Row>
+                                    <Card.Body>
+                                        {loadingConsultations ? (
+                                            <div className="text-center">
+                                                <Spinner animation="border" />
+                                                <p>Carregando consultas...</p>
+                                            </div>
+                                        ) : consultations.length > 0 ? (
+                                            <Table responsive hover>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Data</th>
+                                                        <th>Hora</th>
+                                                        <th>Paciente</th>
+                                                        <th>Tipo</th>
+                                                        <th>Status</th>
+                                                        <th>Observações</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {consultations.map(consultation => (
+                                                        <tr key={consultation.id}>
+                                                            <td>{formatDate(consultation.appointment_date)}</td>
+                                                            <td>{formatTime(consultation.appointment_time)}</td>
+                                                            <td>{consultation.patient_name || 'N/A'}</td>
+                                                            <td>{consultation.appointment_type || 'N/A'}</td>
+                                                            <td><Badge bg={getStatusBadge(consultation.status)}>{consultation.status || 'N/A'}</Badge></td>
+                                                            <td>{consultation.notes || 'N/A'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </Table>
+                                        ) : (
+                                            <p className="text-muted">Nenhuma consulta encontrada.</p>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Tab.Pane>
+
+                            {/* Aba Relatórios */}
+                            <Tab.Pane eventKey="reports">
+                                <Row>
+                                    <Col md={6}>
+                                        <Card className="mb-4">
+                                            <Card.Header><h6>Distribuição de Diagnósticos</h6></Card.Header>
+                                            <Card.Body>
+                                                {loadingCharts ? (
+                                                    <div className="text-center">
+                                                        <Spinner animation="border" size="sm" />
+                                                        <span className="ms-2">Carregando dados...</span>
+                                                    </div>
+                                                ) : diagnosisDistribution.labels.length === 0 ? (
+                                                    <p className="text-muted">Nenhum dado disponível para distribuição de diagnósticos.</p>
+                                                ) : (
+                                                    <Pie data={diagnosisDistribution} options={pieOptions} />
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Card className="mb-4">
+                                            <Card.Header><h6>Tipos de Consulta</h6></Card.Header>
+                                            <Card.Body>
+                                                {loadingCharts ? (
+                                                    <div className="text-center">
+                                                        <Spinner animation="border" size="sm" />
+                                                        <span className="ms-2">Carregando dados...</span>
+                                                    </div>
+                                                ) : appointmentTypeData.labels.length === 0 ? (
+                                                    <p className="text-muted">Nenhum dado disponível para tipos de consulta.</p>
+                                                ) : (
+                                                    <Bar data={appointmentTypeData} options={barOptions} />
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                </Row>
+                            </Tab.Pane>
+
+                            {/* Aba Colaboradores */}
+                            <Tab.Pane eventKey="assistants">
+                                <Card>
+                                    <Card.Header><h5>Gerenciar Colaboradores</h5></Card.Header>
+                                    <Card.Body>
+                                        <Form onSubmit={handleAddAssistant} className="mb-4 p-3 border rounded">
+                                            <h6>Adicionar Novo Colaborador</h6>
+                                            <Row className="align-items-end g-3">
+                                                <Col md={3}>
+                                                    <Form.Group>
+                                                        <Form.Label>Nome</Form.Label>
+                                                        <Form.Control
+                                                            placeholder="Nome completo"
+                                                            value={newAssistant.nome}
+                                                            onChange={e => setNewAssistant({...newAssistant, nome: e.target.value})}
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={2}>
+                                                    <Form.Group>
+                                                        <Form.Label>CPF</Form.Label>
+                                                        <Form.Control
+                                                            placeholder="CPF (opcional)"
+                                                            value={newAssistant.cpf}
+                                                            onChange={e => setNewAssistant({...newAssistant, cpf: e.target.value})}
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={2}>
+                                                    <Form.Group>
+                                                        <Form.Label>Telefone</Form.Label>
+                                                        <Form.Control
+                                                            placeholder="Telefone"
+                                                            value={newAssistant.telefone || ''}
+                                                            onChange={e => setNewAssistant({...newAssistant, telefone: e.target.value})}
+                                                            required // Torna o campo obrigatório no formulário
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+  
+                                                <Col md={3}>
+                                                    <Form.Group>
+                                                        <Form.Label>Email (para login)</Form.Label>
+                                                        <Form.Control
+                                                            type="email"
+                                                            placeholder="Email"
+                                                            value={newAssistant.email}
+                                                            onChange={e => setNewAssistant({...newAssistant, email: e.target.value})}
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={2}>
+                                                    <Form.Group>
+                                                        <Form.Label>Senha</Form.Label>
+                                                        <Form.Control
+                                                            type="password"
+                                                            placeholder="Senha"
+                                                            value={newAssistant.password}
+                                                            onChange={e => setNewAssistant({...newAssistant, password: e.target.value})}
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={2}>
+                                                    <Button type="submit" className="w-100">Adicionar</Button>
+                                                </Col>
+                                            </Row>
+                                        </Form>
+
+                                        <Row className="mb-3">
+                                            <Col md={4}>
+                                                <Form.Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                                                    <option value="todos">Todos os status</option>
+                                                    <option value="ativo">Apenas Ativos</option>
+                                                    <option value="inativo">Apenas Inativos</option>
+                                                </Form.Select>
+                                            </Col>
+                                        </Row>
+
+                                        <h6>Colaboradores Cadastrados</h6>
+                                        <Table striped bordered hover responsive>
+                                            <thead>
+                                                <tr>
+                                                    <th>Nome</th>
+                                                    <th>CPF</th>
+                                                    <th>Email</th>
+                                                    <th>Status</th>
+                                                    <th>Ação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredAssistants.length > 0 ? filteredAssistants.map(a => (
+                                                    <tr key={a.id}>
+                                                        <td>{a.nome}</td>
+                                                        <td>{a.cpf || 'N/A'}</td>
+                                                        <td>{a.email}</td>
+                                                        <td><Badge bg={a.status === 'ativo' ? 'success' : 'secondary'}>{a.status}</Badge></td>
+                                                        <td>
+                                                            <Button
+                                                                variant={a.status === 'ativo' ? 'warning' : 'success'}
+                                                                size="sm"
+                                                                onClick={() => handleToggleStatus(a.id, a.status)}
+                                                            >
+                                                                {a.status === 'ativo' ? 'Desativar' : 'Ativar'}
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr><td colSpan="5" className="text-center">Nenhum colaborador cadastrado.</td></tr>
+                                                )}
+                                            </tbody>
+                                        </Table>
+                                    </Card.Body>
+                                </Card>
+                            </Tab.Pane>
+                        </Tab.Content>
+                    </Tab.Container>
+                </Container>
+
+                {/* Modal para Adicionar Paciente */}
+                <Modal show={showPatientModal} onHide={() => setShowPatientModal(false)} size="lg">
+                    <Modal.Header closeButton>
+                        <Modal.Title>Adicionar Novo Paciente</Modal.Title>
+                    </Modal.Header>
+                    <Form onSubmit={handleAddPatient}>
+                        <Modal.Body>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Nome Completo *</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            value={newPatient.name}
+                                            onChange={(e) => setNewPatient({...newPatient, name: e.target.value})}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Data de Nascimento</Form.Label>
+                                        <Form.Control
+                                            type="date"
+                                            value={newPatient.birthDate}
+                                            onChange={(e) => setNewPatient({...newPatient, birthDate: e.target.value})}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Telefone</Form.Label>
+                                        <Form.Control
+                                            type="tel"
+                                            value={newPatient.phone}
+                                            onChange={(e) => setNewPatient({...newPatient, phone: e.target.value})}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Email</Form.Label>
+                                        <Form.Control
+                                            type="email"
+                                            value={newPatient.email}
+                                            onChange={(e) => setNewPatient({...newPatient, email: e.target.value})}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Diagnóstico do Transtorno do Espectro Autista (TEA)</Form.Label>
+                                
+                                {/* Grupo de botões para selecionar o nível */}
+                                <div className="d-flex gap-2">
+                                    <Button
+                                        variant={newPatient.diagnosis === 'Nível 1' ? 'primary' : 'outline-primary'}
+                                        onClick={() => setNewPatient({...newPatient, diagnosis: 'Nível 1'})}
+                                    >
+                                        Nível 1
+                                    </Button>
+                                    <Button
+                                        variant={newPatient.diagnosis === 'Nível 2' ? 'primary' : 'outline-primary'}
+                                        onClick={() => setNewPatient({...newPatient, diagnosis: 'Nível 2'})}
+                                    >
+                                        Nível 2
+                                    </Button>
+                                    <Button
+                                        variant={newPatient.diagnosis === 'Nível 3' ? 'primary' : 'outline-primary'}
+                                        onClick={() => setNewPatient({...newPatient, diagnosis: 'Nível 3'})}
+                                    >
+                                        Nível 3
+                                    </Button>
+                                </div>
+                                <Form.Text className="text-muted">
+                                    Selecione o nível de suporte necessário.
+                                </Form.Text>
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Observações</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    value={newPatient.notes}
+                                    onChange={(e) => setNewPatient({...newPatient, notes: e.target.value})}
+                                />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowPatientModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Adicionar Paciente
+                            </Button>
+                        </Modal.Footer>
+                    </Form>
+                </Modal>
+
+                {/* Modal para Agendar Consulta */}
+                <Modal show={showAppointmentModal} onHide={() => setShowAppointmentModal(false)} size="lg">
+                    <Modal.Header closeButton>
+                        <Modal.Title>Registrar Nova Consulta</Modal.Title>
+                    </Modal.Header>
+                    <Form onSubmit={handleAddAppointment}>
+                        <Modal.Body>
+                            <Form.Group className="mb-3" controlId="appointmentPatient">
+                                <Form.Label>Paciente *</Form.Label>
+                                <Form.Select
+                                    name="patientId"
+                                    value={newAppointment.patientId}
+                                    onChange={(e) => setNewAppointment({...newAppointment, patientId: e.target.value})}
+                                    required
+                                >
+                                    <option value="">Selecione um paciente</option>
+                                    {patients.map(patient => (
+                                        <option key={patient.id} value={patient.id}>
+                                            {patient.name}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </Form.Group>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="appointmentDate">
+                                        <Form.Label>Data da Consulta *</Form.Label>
+                                        <Form.Control
+                                            type="date"
+                                            name="appointment_date"
+                                            value={newAppointment.appointment_date}
+                                            onChange={(e) => setNewAppointment({...newAppointment, appointment_date: e.target.value})}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="appointmentTime">
+                                        <Form.Label>Hora da Consulta *</Form.Label>
+                                        <Form.Control
+                                            type="time"
+                                            name="appointment_time"
+                                            value={newAppointment.appointment_time}
+                                            onChange={(e) => setNewAppointment({...newAppointment, appointment_time: e.target.value})}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="appointmentType">
+                                        <Form.Label>Tipo de Consulta</Form.Label>
+                                        <Form.Select
+                                            name="appointment_type"
+                                            value={newAppointment.appointment_type}
+                                            onChange={(e) => setNewAppointment({...newAppointment, appointment_type: e.target.value})}
+                                        >
+                                            <option value="Consulta Regular">Consulta Regular</option>
+                                            <option value="Consulta Inicial">Consulta Inicial</option>
+                                            <option value="Acompanhamento">Acompanhamento</option>
+                                            <option value="Avaliação">Avaliação</option>
+                                            <option value="Terapia">Terapia</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="appointmentStatus">
+                                        <Form.Label>Status da Consulta</Form.Label>
+                                        <Form.Select
+                                            name="status"
+                                            value={newAppointment.status}
+                                            onChange={(e) => setNewAppointment({...newAppointment, status: e.target.value})}
+                                        >
+                                            <option value="Realizada">Realizada</option>
+                                            <option value="Agendada">Agendada</option>
+                                            <option value="Confirmada">Confirmada</option>
+                                            <option value="Cancelada">Cancelada</option>
+                                            <option value="Não Realizada">Não Realizada</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="appointmentValue">
+                                        <Form.Label>Valor da Consulta (R$) *</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            step="0.01"
+                                            name="value"
+                                            placeholder="Ex: 150.00"
+                                            value={newAppointment.value}
+                                            onChange={(e) => setNewAppointment({...newAppointment, value: e.target.value})}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="paymentStatus">
+                                        <Form.Label>Status do Pagamento</Form.Label>
+                                        <Form.Select
+                                            name="payment_status"
+                                            value={newAppointment.payment_status}
+                                            onChange={(e) => setNewAppointment({...newAppointment, payment_status: e.target.value})}
+                                        >
+                                            <option value="Pendente">Pendente</option>
+                                            <option value="Pago">Pago</option>
+                                            <option value="Atrasado">Atrasado</option>
+                                            <option value="Isento">Isento</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <hr />
+                            <h5>Detalhes do Pagamento</h5>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3" controlId="paymentMethod">
+                                        <Form.Label>Forma de Pagamento</Form.Label>
+                                        <Form.Select
+                                            name="payment_method"
+                                            value={newAppointment.payment_method}
+                                            onChange={(e) => setNewAppointment({...newAppointment, payment_method: e.target.value})}
+                                        >
+                                            <option value="Pix">Pix</option>
+                                            <option value="Crédito">Cartão de Crédito</option>
+                                            <option value="Débito">Cartão de Débito</option>
+                                            <option value="Dinheiro">Dinheiro</option>
+                                            <option value="Plano de Saúde">Plano de Saúde</option>
+                                            <option value="Outros">Outros</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                                {(newAppointment.payment_method === 'Plano de Saúde' || newAppointment.payment_method === 'Outros') && (
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="paymentDetails">
+                                            <Form.Label>Especifique</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="payment_details"
+                                                placeholder="Ex: Unimed ou Transferência"
+                                                value={newAppointment.payment_details}
+                                                onChange={(e) => setNewAppointment({...newAppointment, payment_details: e.target.value})}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                )}
+                            </Row>
+                            <Form.Group className="mb-3" controlId="appointmentNotes">
+                                <Form.Label>Observações</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    name="notes"
+                                    value={newAppointment.notes}
+                                    onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
+                                    placeholder="Digite observações sobre a consulta"
+                                />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowAppointmentModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Salvar Consulta
+                            </Button>
+                        </Modal.Footer>
+                    </Form>
+                </Modal>
+
+                {/* Modal para Adicionar Nota */}
+                <Modal show={showNoteModal} onHide={() => setShowNoteModal(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Adicionar Nota</Modal.Title>
+                    </Modal.Header>
+                    <Form onSubmit={handleAddNote}>
+                        <Modal.Body>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Título *</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={newNote.title}
+                                    onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Conteúdo *</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={5}
+                                    value={newNote.content}
+                                    onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                                    required
+                                />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowNoteModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Adicionar Nota
+                            </Button>
+                        </Modal.Footer>
+                    </Form>
+                </Modal>
+
+                {/* >>>>> MODAL PARA EDITAR PACIENTE <<<<< */}
+                <Modal show={showEditPatientModal} onHide={() => setShowEditPatientModal(false)} size="lg">
+                    <Modal.Header closeButton>
+                        <Modal.Title>Editar Dados do Paciente</Modal.Title>
+                    </Modal.Header>
+                    <Form onSubmit={handleUpdatePatient}>
+                        <Modal.Body>
+                            {editingPatient && (
+                                <>
+                                    <Row>
+                                        <Col md={12}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label>Nome Completo *</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    value={editingPatient.name || ''}
+                                                    onChange={(e) => setEditingPatient({...editingPatient, name: e.target.value})}
+                                                    required
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col md={6}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label>Data de Nascimento</Form.Label>
+                                                <Form.Control
+                                                    type="date"
+                                                    value={editingPatient.birthDate ? editingPatient.birthDate.split('T')[0] : ''}
+                                                    onChange={(e) => setEditingPatient({...editingPatient, birthDate: e.target.value})}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col md={6}>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label>Telefone</Form.Label>
+                                                <Form.Control
+                                                    type="tel"
+                                                    value={editingPatient.phone || ''}
+                                                    onChange={(e) => setEditingPatient({...editingPatient, phone: e.target.value})}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Email</Form.Label>
+                                        <Form.Control
+                                            type="email"
+                                            value={editingPatient.email || ''}
+                                            onChange={(e) => setEditingPatient({...editingPatient, email: e.target.value})}
+                                        />
+                                    </Form.Group>
+                                    
+                                    {/* Campo de Diagnóstico com botões */}
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Diagnóstico do Transtorno do Espectro Autista (TEA)</Form.Label>
+                                        <div className="d-flex gap-2">
+                                            <Button
+                                                variant={editingPatient.diagnosis === 'Nível 1' ? 'primary' : 'outline-primary'}
+                                                onClick={() => setEditingPatient({...editingPatient, diagnosis: 'Nível 1'})}
+                                            >
+                                                Nível 1
+                                            </Button>
+                                            <Button
+                                                variant={editingPatient.diagnosis === 'Nível 2' ? 'primary' : 'outline-primary'}
+                                                onClick={() => setEditingPatient({...editingPatient, diagnosis: 'Nível 2'})}
+                                            >
+                                                Nível 2
+                                            </Button>
+                                            <Button
+                                                variant={editingPatient.diagnosis === 'Nível 3' ? 'primary' : 'outline-primary'}
+                                                onClick={() => setEditingPatient({...editingPatient, diagnosis: 'Nível 3'})}
+                                            >
+                                                Nível 3
+                                            </Button>
+                                        </div>
+                                    </Form.Group>
+
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Observações</Form.Label>
+                                        <Form.Control
+                                            as="textarea"
+                                            rows={3}
+                                            value={editingPatient.observacoes || ''}
+                                            onChange={(e) => setEditingPatient({...editingPatient, observacoes: e.target.value})}
+                                        />
+                                    </Form.Group>
+                                </>
+                            )}
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setShowEditPatientModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Salvar Alterações
+                            </Button>
+                        </Modal.Footer>
+                    </Form>
+                </Modal>
+            </div>
+        </Container>
+    );
+};
+
+export default ProfessionalDashboard;

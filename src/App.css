@@ -1,0 +1,2565 @@
+/* Importação de Fontes Google */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap");
+
+
+/* Reset e Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.App {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+    line-height: 1.6;
+    color: #343a40;
+    overflow-x: hidden;
+}
+
+/* Tipografia */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+h1 { font-size: 2.5rem; font-weight: 700; }
+h2 { font-size: 2rem; font-weight: 600; }
+h3 { font-size: 1.75rem; font-weight: 600; }
+h4 { font-size: 1.5rem; font-weight: 500; }
+h5 { font-size: 1.25rem; font-weight: 500; }
+h6 { font-size: 1rem; font-weight: 500; }
+
+p, span, div {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400;
+}
+
+/* Logo */
+.logo {
+    height: 60px;
+    width: auto;
+    max-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+/* Botões Globais */
+.btn {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    border: none;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    color: #ffffff;
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: #ffffff;
+    border-color: #007bff;
+}
+
+.btn-light {
+    background: #ffffff;
+    color: #007bff;
+    border: 2px solid transparent;
+}
+
+.btn-light:hover {
+    background: #f8f9fa;
+    color: #0056b3;
+    border-color: #007bff;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: #ffffff;
+}
+
+/* Seção Hero */
+.hero-section {
+    background: linear-gradient(135deg, #007bff 0%, #ADD8E6 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 1px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 1000\"><defs><pattern id=\"grid\" width=\"50\" height=\"50\" patternUnits=\"userSpaceOnUse\"><path d=\"M 50 0 L 0 0 0 50\" fill=\"none\" stroke=\"rgba(255,255,255,0.05)\" stroke-width=\"1\"/></pattern></defs><rect width=\"100%\" height=\"100%\" fill=\"url(%23grid)\"/></svg>");
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 1s ease-out;
+}
+
+.hero-section .lead {
+    font-size: 1.25rem;
+    color: #ffffff;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.hero-logo {
+    max-width: 500px;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.2));
+    animation: fadeInRight 1s ease-out 0.4s both;
+}
+
+/* Seção de Estatísticas */
+.stats-section {
+    background: #f8f9fa;
+    padding: 80px 0;
+    position: relative;
+}
+
+.stats-section h2 {
+    color: #343a40;
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.stat-item {
+    background: #ffffff;
+    padding: 2.5rem 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+    border: 1px solid rgba(0, 123, 255, 0.1);
+}
+
+.stat-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Seção de Recursos */
+.features-section {
+    background: linear-gradient(135deg, #ADD8E6 0%, #e3f2fd 100%);
+    padding: 80px 0;
+    position: relative;
+}
+
+.features-section h2 {
+    color: #343a40;
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.feature-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.feature-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007bff 0%, #20c997 100%);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card .card-body {
+    padding: 2rem;
+}
+
+.feature-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-wrapper {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.2) 0%, rgba(32, 201, 151, 0.2) 100%);
+}
+
+.feature-icon {
+    color: #007bff;
+    font-size: 2rem;
+}
+
+.feature-card .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #343a40;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.feature-card .card-text {
+    color: #6c757d;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* Seção de Serviços */
+.services-section {
+    background: #ffffff;
+    padding: 80px 0;
+}
+
+.services-section h2 {
+    color: #343a40;
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.service-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.service-card .card-img-top {
+    height: 250px;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.service-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.service-card .card-body {
+    padding: 2rem;
+}
+
+.service-card .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 1rem;
+}
+
+.service-card .card-text {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* Seção de Depoimentos */
+.testimonials-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 80px 0;
+}
+
+.testimonials-section h2 {
+    color: #343a40;
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.testimonial-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    margin: 0 auto;
+    max-width: 800px;
+    position: relative;
+}
+
+.testimonial-card::before {
+    content: "\"";
+    position: absolute;
+    top: -20px;
+    left: 30px;
+    font-size: 6rem;
+    color: #007bff;
+    opacity: 0.3;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+}
+
+.testimonial-rating {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.testimonial-card .card-text {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: #343a40;
+    line-height: 1.8;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.testimonial-card .card-subtitle {
+    font-weight: 600;
+    color: #6c757d;
+    text-align: center;
+}
+
+/* Carrossel de Depoimentos */
+.carousel-indicators {
+    bottom: -50px;
+}
+
+.carousel-indicators button {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin: 0 8px;
+    background-color: #dee2e6;
+    border: 2px solid #007bff;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.carousel-indicators .active {
+    background-color: #007bff;
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Seção Call to Action */
+.cta-section {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    padding: 80px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1000 1000\"><defs><pattern id=\"dots\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"rgba(255,255,255,0.1)\"/></pattern></defs><rect width=\"100%\" height=\"100%\" fill=\"url(%23dots)\"/></svg>");
+    pointer-events: none;
+}
+
+.cta-section h2 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.cta-section p {
+    color: #ffffff;
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-section .btn {
+    background: #ffffff;
+    color: #007bff;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.cta-section .btn:hover {
+    background: #f8f9fa;
+    color: #0056b3;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    color: #ffffff;
+    padding: 40px 0 20px;
+    text-align: center;
+}
+
+.footer p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.footer a:hover {
+    color: #ADD8E6;
+    text-decoration: underline;
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Efeitos de Hover Globais */
+.hover-effect {
+    transition: all 0.3s ease;
+}
+
+.hover-effect:hover {
+    transform: translateY(-3px);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-section .lead {
+        font-size: 1.1rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+    }
+    
+    .feature-card .card-body,
+    .service-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .testimonial-card {
+        padding: 2rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 60px 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .stats-section,
+    .features-section,
+    .services-section,
+    .testimonials-section,
+    .cta-section {
+        padding: 60px 0;
+    }
+    
+    .stat-item {
+        padding: 2rem 1rem;
+    }
+    
+    .feature-card .card-body,
+    .service-card .card-body {
+        padding: 1.25rem;
+    }
+}
+
+/* Estilos para outras páginas (mantidos para compatibilidade) */
+.login-section {
+    background: linear-gradient(135deg, #007bff 0%, #ADD8E6 100%);
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: center;
+}
+
+.signup-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: calc(100vh - 70px);
+    padding: 2rem 0;
+}
+
+.dashboard-section {
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 70px);
+}
+
+/* Cards e Elementos de Dashboard */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Alertas */
+.alert {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Formulários */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Navbar personalizada */
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff !important;
+}
+
+.navbar-brand img {
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+/* Utilitários */
+.text-gradient {
+    background: linear-gradient(135deg, #007bff 0%, #20c997 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: rgba(255, 0, 0, 0.5);
+    background-clip: text;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.bg-gradient-light {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.shadow-custom {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.border-radius-custom {
+    border-radius: 15px;
+}
+
+/* ProfessionalDashboard specific styles */
+.professional-dashboard {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.professional-dashboard .dropdown-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.professional-dashboard .table tbody tr {
+    cursor: pointer;
+}
+
+.professional-dashboard .table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* PatientDetails specific styles */
+.patient-details-dashboard {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.patient-details-dashboard .nav-tabs .nav-link {
+    color: #007bff;
+}
+
+.patient-details-dashboard .nav-tabs .nav-link.active {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Login and Signup specific styles */
+.login-section,
+.signup-section {
+    padding-top: 70px;
+    padding-bottom: 50px;
+    background-color: #f8f9fa;
+}
+
+.login-section .card,
+.signup-section .card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Password strength bar in Signup */
+.progress {
+    height: 5px;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ServiceDashboard.css */
+
+/* Reset and Global Styles for ServiceDashboard */
+.service-dashboard {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+    line-height: 1.6;
+    color: #343a40;
+    overflow-x: hidden;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Typography */
+.service-dashboard h1, 
+.service-dashboard h2, 
+.service-dashboard h3, 
+.service-dashboard h4, 
+.service-dashboard h5, 
+.service-dashboard h6 {
+    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.service-dashboard h1 { font-size: 2.5rem; font-weight: 700; }
+.service-dashboard h4 { font-size: 1.5rem; font-weight: 500; }
+.service-dashboard h5 { font-size: 1.25rem; font-weight: 500; }
+
+.service-dashboard p, 
+.service-dashboard span, 
+.service-dashboard div {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400;
+}
+
+/* Navbar */
+.service-navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff !important;
+    padding: 0.5rem 1rem;
+}
+
+.service-navbar .logo {
+    height: 60px;
+    width: auto;
+    max-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.service-navbar .logo:hover {
+    transform: scale(1.05);
+}
+
+.service-navbar .btn {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.service-navbar .btn:hover {
+    background: #6c757d;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Hero Section */
+.service-hero-section {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 300px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.service-hero-overlay {
+    /*background: linear-gradient(135deg, rgba(0, 123, 255, 0.8) 0%, rgba(173, 216, 230, 0.8) 100%);*/
+    width: 100%;
+    padding: 2rem;
+    border-radius: 15px;
+    
+}
+
+.service-hero-overlay h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+.service-hero-overlay p {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #be1773;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    width: 50%;            /* metade da largura */
+    margin-left: 0;     /* empurra para o lado direito */
+    margin-right: auto;       /* garante alinhamento à direita */
+    text-align: left;      /* texto alinhado à esquerda dentro da caixa */
+}
+
+
+
+
+
+.service-hero-overlay .lead {
+    font-size: 1.25rem;
+    color: #ffffff;
+    opacity: 0.95;
+}
+
+/* Navigation Sidebar */
+.service-dashboard-nav {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.service-dashboard-nav .nav-link {
+    color: #343a40;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.service-dashboard-nav .nav-link:hover,
+.service-dashboard-nav .nav-link.active {
+    background: #007bff;
+    color: #ffffff;
+}
+
+.service-dashboard-nav .btn {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: #ffffff;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.service-dashboard-nav .btn:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Content Area */
+.service-dashboard-content .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.service-dashboard-content .card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.service-dashboard-content .card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0;
+}
+
+.service-dashboard-content .list-group-item {
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+}
+
+.service-dashboard-content .badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Map */
+.service-dashboard-content .leaflet-container {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Feedback Section */
+.feedback-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.feedback-item:last-child {
+    border-bottom: none;
+}
+
+/* Modal */
+.service-dashboard .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.service-dashboard .modal-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.service-dashboard .modal-footer {
+    border-top: 1pxアイデア solid #dee2e6;
+}
+
+.service-dashboard .form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.service-dashboard .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.service-dashboard .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    color: #ffffff;
+}
+
+.service-dashboard .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+}
+
+.service-dashboard .btn-secondary {
+    background: #6c757d;
+    border: none;
+    color: #ffffff;
+}
+
+.service-dashboard .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Alerts */
+.service-dashboard .alert {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsiveness */
+@media (max-width: 992px) {
+    .service-hero-section {
+        min-height: 250px;
+    }
+    
+    .service-hero-overlay h1 {
+        font-size: 2rem;
+    }
+    
+    .service-hero-overlay .lead {
+        font-size: 1rem;
+    }
+    
+    .service-dashboard-nav {
+        padding: 1rem;
+    }
+    
+    .service-dashboard-nav .nav-link {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .service-dashboard-content .card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .service-hero-section {
+        min-height: 200px;
+    }
+    
+    .service-hero-overlay {
+        padding: 1.5rem;
+    }
+    
+    .service-hero-overlay h1 {
+        font-size: 1.75rem;
+    }
+    
+    .service-hero-overlay .lead {
+        font-size: 0.9rem;
+    }
+    
+    .service-dashboard-nav .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Signup.css */
+/* Root styles for Signup component */
+.signup {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+    line-height: 1.6;
+    color: #343a40;
+    overflow-x: hidden;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Typography */
+.signup h2 {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: #343a40;
+    margin-bottom: 1.5rem;
+}
+
+.signup .lead {
+    font-size: 1.25rem;
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+/* Navbar */
+.signup .navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff !important;
+    padding: 0.5rem 1rem;
+}
+
+.signup .navbar .logo {
+    height: 60px;
+    width: auto;
+    max-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.signup .navbar .logo:hover {
+    transform: scale(1.05);
+}
+
+.signup .navbar .ms-auto svg {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.signup .navbar .ms-auto svg:hover {
+    color: #0056b3;
+    transform: scale(1.1);
+}
+
+/* Signup Section */
+.signup-section {
+    padding-top: 70px;
+    padding-bottom: 50px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%)
+}
+
+/* Cards */
+.signup .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.signup .card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.signup .card-title {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #343a40;
+    text-align: center;
+}
+
+.signup .card-header {
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    font-family: "Montserrat", sans-serif;
+}
+
+.signup .card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    color: #ffffff;
+}
+
+.signup .card-header.bg-success {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%) !important;
+    color: #ffffff;
+}
+
+.signup .card-header.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    color: #343a40;
+}
+
+/* Form Elements */
+.signup .form-control,
+.signup .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.signup .form-control:focus,
+.signup .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.signup .form-label {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    color: #343a40;
+}
+
+.signup .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.signup .form-check-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.signup .form-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Progress Bar for Password Strength */
+.signup .progress {
+    height: 5px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+}
+
+.signup .progress-bar {
+    transition: width 0.3s ease;
+}
+
+.signup .progress-bar.bg-danger {
+    background-color: #dc3545;
+}
+
+.signup .progress-bar.bg-warning {
+    background-color: #ffc107;
+}
+
+.signup .progress-bar.bg-success {
+    background-color: #28a745;
+}
+
+.signup .text-danger,
+.signup .text-warning,
+.signup .text-success {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Buttons */
+.signup .btn {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.signup .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: #ffffff;
+}
+
+.signup .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.signup .btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Alerts */
+.signup .alert {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .signup h2 {
+        font-size: 2rem;
+    }
+
+    .signup .lead {
+        font-size: 1.1rem;
+    }
+
+    .signup .card {
+        max-width: 100%;
+    }
+
+    .signup .form-control,
+    .signup .form-select {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+    }
+
+    .signup .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .signup-section {
+        padding-top: 60px;
+        padding-bottom: 40px;
+    }
+
+    .signup h2 {
+        font-size: 1.75rem;
+    }
+
+    .signup .lead {
+        font-size: 1rem;
+    }
+
+    .signup .card-body {
+        padding: 1.25rem;
+    }
+
+    .signup .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Login.css */
+/* Root styles for Login component */
+.login {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+    line-height: 1.6;
+    color: #343a40;
+    overflow-x: hidden;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Typography */
+.login h2 {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: #343a40;
+    margin-bottom: 1.5rem;
+}
+
+.login .lead {
+    font-size: 1.25rem;
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+/* Navbar */
+.login .navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff !important;
+    padding: 0.5rem 1rem;
+}
+
+.login .navbar .logo {
+    height: 60px;
+    width: auto;
+    max-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.login .navbar .logo:hover {
+    transform: scale(1.05);
+}
+
+.login .navbar .ms-auto svg {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login .navbar .ms-auto svg:hover {
+    color: #0056b3;
+    transform: scale(1.1);
+}
+
+/* Login Section */
+.login-section {
+    padding-top: 70px;
+    padding-bottom: 50px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%)
+}
+
+/* Card */
+.login .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    background: #ffffff;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.login .card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+}
+
+.login .card-title {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #343a40;
+    text-align: center;
+}
+
+/* Form Elements */
+.login .form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.login .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.login .form-label {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    color: #343a40;
+}
+
+/* Buttons */
+.login .btn {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: #ffffff;
+}
+
+.login .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.login .btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Spinner */
+.login .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+/* Alert */
+.login .alert {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    font-size: 0.95rem;
+    max-width: 400px;
+    margin: 0 auto 1.5rem;
+}
+
+/* Signup Link */
+.login .text-center a {
+    font-size: 0.9rem;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login .text-center a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .login h2 {
+        font-size: 2rem;
+    }
+
+    .login .lead {
+        font-size: 1.1rem;
+    }
+
+    .login .card {
+        max-width: 100%;
+    }
+
+    .login .form-control {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+    }
+
+    .login .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-section {
+        padding-top: 60px;
+        padding-bottom: 40px;
+    }
+
+    .login h2 {
+        font-size: 1.75rem;
+    }
+
+    .login .lead {
+        font-size: 1rem;
+    }
+
+    .login .card-body {
+        padding: 1.25rem;
+    }
+
+    .login .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Estilos para SecretaryDashboard.jsx */
+
+.secretary-dashboard {
+    background-color: #f8f9fa; /* Light background */
+    min-height: 100vh;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.secretary-dashboard .card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: none;
+    overflow: hidden; /* Ensure content respects border-radius */
+}
+
+.secretary-dashboard .card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+    font-weight: 600;
+    color: #343a40;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.secretary-dashboard .nav-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 15px 20px;
+    transition: all 0.3s ease;
+}
+
+.secretary-dashboard .nav-tabs .nav-link.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background-color: transparent;
+}
+
+.secretary-dashboard .nav-tabs .nav-link:hover {
+    color: #0056b3;
+    border-bottom-color: #0056b3;
+}
+
+.secretary-dashboard .table thead th {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.secretary-dashboard .table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.secretary-dashboard .badge {
+    padding: 0.5em 0.75em;
+    border-radius: 50rem;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.secretary-dashboard .modal-content {
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.secretary-dashboard .modal-header {
+    border-bottom: none;
+    padding: 20px;
+}
+
+.secretary-dashboard .modal-body {
+    padding: 20px;
+}
+
+.secretary-dashboard .modal-footer {
+    border-top: none;
+    padding: 20px;
+}
+
+/* Custom styles for specific elements if needed */
+.secretary-dashboard .d-flex.align-items-start.mb-3 {
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.secretary-dashboard .d-flex.align-items-start.mb-3:hover {
+    background-color: #e9ecef;
+}
+
+.secretary-dashboard .form-control, .secretary-dashboard .form-select {
+    border-radius: 8px;
+    border-color: #ced4da;
+}
+
+.secretary-dashboard .btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.secretary-dashboard .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.secretary-dashboard .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.secretary-dashboard .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.secretary-dashboard .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+.secretary-dashboard .btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.secretary-dashboard .btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.secretary-dashboard .alert {
+    border-radius: 8px;
+}
+
+.secretary-dashboard .spinner-border {
+    color: #007bff;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    .secretary-dashboard .nav-tabs .nav-link {
+        padding: 10px 12px;
+        font-size: 0.9em;
+    }
+    .secretary-dashboard .card-header h5 {
+        font-size: 1.1em;
+    }
+}
+
+/* PatientDetails */
+
+/* ================================================================== */
+/* ========= ESTILOS PARA ANÁLISE DE IA (NÍVEIS 1, 2, 3) ========== */
+/* ================================================================== */
+
+/* Estilo geral para os cabeçalhos dos cards de IA */
+.card-header h5 {
+    color: #0d6efd; /* Um azul primário para destacar */
+    font-weight: 600;
+}
+
+/* --- IA Nível 1: Análise de Padrões --- */
+
+/* Estiliza a tabela de distribuição de emoções */
+.table-ia-distribution {
+    margin-bottom: 0;
+}
+
+.table-ia-distribution td {
+    vertical-align: middle;
+    padding: 0.5rem;
+}
+
+/* Estiliza os badges de tendência para serem mais claros */
+.badge-trend {
+    font-size: 0.9em;
+    padding: 0.4em 0.6em;
+    width: 45px; /* Largura fixa para alinhamento */
+    text-align: center;
+}
+
+/* Estiliza a lista de tendências */
+.list-unstyled.trend-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.list-unstyled.trend-list li:last-child {
+    border-bottom: none;
+}
+
+/* Estiliza o alerta de picos emocionais */
+.alert-emotional-peak {
+    background-color: #fff3cd; /* Amarelo claro do Bootstrap 'warning' */
+    border-left: 5px solid #ffc107; /* Borda amarela forte à esquerda */
+    color: #664d03;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+}
+
+
+/* --- IA Nível 2: Resumo Inteligente --- */
+
+/* Estiliza o parágrafo principal do resumo */
+.lead.ai-summary {
+    font-size: 1.1rem; /* Um pouco maior para fácil leitura */
+    line-height: 1.6;
+    color: #495057; /* Um cinza escuro, mais suave que preto puro */
+}
+
+.lead.ai-summary strong {
+    color: #0d6efd; /* Destaca as palavras-chave em azul */
+    font-weight: 600;
+}
+
+
+/* --- IA Nível 3: Projeções e Anomalias --- */
+
+.card-ia-prediction h6 {
+    color: #5c677d;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.card-ia-prediction p {
+    font-size: 1rem;
+    color: #212529;
+    margin-bottom: 1rem;
+}
+
+/* Estilo específico para o alerta de anomalia */
+.alert-anomaly {
+    background-color: #f8d7da; /* Vermelho claro do Bootstrap 'danger' */
+    border-left: 5px solid #dc3545; /* Borda vermelha forte à esquerda */
+    color: #58151c;
+    font-weight: 500;
+}
+
+.alert-anomaly strong {
+    color: #58151c;
+    font-weight: 700;
+}
+
+
+
+
+
+
+
+
+/* ================================================================== */
+/* ========== ESTILOS PARA A PÁGINA DE DETALHES DO PACIENTE ========= */
+/* ================================================================== */
+
+/* Fundo e Cores Gerais */
+.patient-details-page {
+    background-color: #f8f9fa; /* Um cinza muito claro, para os cards se destacarem */
+    min-height: 100vh;
+}
+
+/* Cabeçalho com a Logo */
+.details-header {
+    text-align: center;
+    padding: 1rem 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.details-logo {
+    max-height: 60px; /* Ajuste a altura conforme necessário */
+    width: auto;
+}
+
+/* Estilo dos Cards */
+.patient-details-page .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.patient-details-page .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.patient-details-page .card-header {
+    background: linear-gradient(135deg, #007bff, #4e54c8); /* Gradiente azul AutisConnect */
+    color: white; /* <<< CORREÇÃO AQUI: Garante que o texto seja branco */
+    font-weight: 600;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 0.75rem 1.25rem;
+}
+
+.patient-details-page .card-header h5 {
+    color: white; /* Força a cor do h5 para branco */
+}
+
+/* Estilo das Abas (Tabs) */
+.patient-details-page .nav-tabs .nav-link {
+    font-weight: 500;
+    color: #495057;
+    border-bottom-width: 3px;
+    border-bottom-color: transparent;
+}
+
+.patient-details-page .nav-tabs .nav-link.active {
+    color: #007bff;
+    border-color: #dee2e6 #dee2e6 #007bff;
+    background-color: #fff;
+}
+
+/* Estilo dos Cards de Análise de IA */
+.card-ia-prediction .card-header,
+.ai-summary-card .card-header {
+    background: linear-gradient(135deg, #6a11cb, #2575fc); /* Gradiente roxo/azul para IA */
+}
+
+.ai-summary {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #343a40;
+}
+
+.alert-anomaly {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 5px solid #dc3545;
+    color: #58151c;
+}
+
+/* Estilo das Métricas e Tabelas */
+.insight-metric {
+    text-align: center;
+    padding: 1rem;
+}
+
+.insight-metric .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #007bff;
+}
+
+.insight-metric .metric-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.patient-details-page .table {
+    margin-top: 1rem;
+}
+
+/* Estilo dos Botões */
+.patient-details-page .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.patient-details-page .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.patient-details-page .btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.patient-details-page .btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* ========== ESTILOS PARA O NOVO CABEÇALHO DO PACIENTE ============= */
+
+.patient-header-row {
+    background-color: #ffffff;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.back-button-standalone {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Espaço entre o ícone e o texto */
+}
+
+.details-logo {
+    max-height: 50px; /* Um pouco menor para não dominar */
+    width: auto;
+}
+
+.patient-name {
+    font-size: 1.75rem; /* Ajustado para o layout central */
+    font-weight: 700;
+    color: #343a40;
+}
+
+.patient-info-block {
+    display: flex;
+    gap: 1.5rem;
+    background-color: #f8f9fa;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.info-item strong {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.info-item span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #343a40;
+}
+
+
+
+/* ================================================================== */
+/* ====== ESTILOS PARA O DASHBOARD DO PROFISSIONAL (HEADER) ========= */
+/* ================================================================== */
+
+.professional-header-row {
+    background-color: #ffffff;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.professional-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.professional-specialty {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.summary-card {
+    border: none;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.summary-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.summary-card .card-body {
+    padding: 0.75rem 1.25rem;
+}
+
+.summary-icon {
+    font-size: 2rem; /* Tamanho dos ícones */
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+/* Ajustes gerais para o dashboard profissional */
+.professional-dashboard .nav-tabs .nav-link.active {
+    background-color: #e9ecef;
+    border-color: #dee2e6 #dee2e6 #dee2e6;
+}
+
+.professional-dashboard .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+
+
+/* ================================================================== */
+/* ====== ESTILO DE CARD HEADER PADRÃO PARA A PLATAFORMA ============ */
+/* ================================================================== */
+
+/* Regra principal e genérica para o cabeçalho dos cards */
+.autisconnect-card-header {
+    background: linear-gradient(135deg, #007bff, #4e54c8); /* Gradiente azul AutisConnect */
+    color: white; /* Garante que o texto seja branco */
+    font-weight: 600;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 0.75rem 1.25rem;
+}
+
+/* Garante que qualquer tag h5 dentro do header também seja branca */
+.autisconnect-card-header h5 {
+    color: white;
+}
+
+/* Aplica o estilo genérico aos cards de ambas as páginas */
+.patient-details-page .card .card-header,
+.professional-dashboard .card .card-header,
+.financial-dashboard .card .card-header,
+.secretary-dashboard .card .card-header,
+.emotion-detector-page .card .card-header,
+.stroke-risk-monitor-page .card .card-header,
+.trigger-recorder-page .card .card-header,
+.stereotypy-monitor-page .card .card-header,
+.parent-dashboard-page .card .card-header {
+    /* Herda todos os estilos da classe .autisconnect-card-header */
+    background: linear-gradient(135deg, #007bff, #4e54c8);
+    color: white;
+    font-weight: 600;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 0.75rem 1.25rem;
+}
+
+/* Regra específica para os títulos h5 em ambas as páginas */
+.patient-details-page .card .card-header h5,
+.professional-dashboard .card .card-header h5,
+.financial-dashboard .card .card-header h5,
+.secretary-dashboard .card .card-header h5,
+.emotion-detector-page .card .card-header h5,
+.stroke-risk-monitor-page .card .card-header h5,
+.trigger-recorder-page .card .card-header h5,
+.stereotypy-monitor-page .card .card-header h5,
+.parent-dashboard-page .card .card-header h5  {
+    color: white;
+}
+
+/* Estilo dos Cards de Análise de IA (mantém o gradiente roxo) */
+.card-ia-prediction .card-header,
+.ai-summary-card .card-header {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+
+
+
+
+
+
+
+
+
+/* ================================================================== */
+/* ============ ESTILOS GLOBAIS PARA OS MODAIS (POP-UPS) ============ */
+/* ================================================================== */
+
+/* Estilo do Cabeçalho do Modal */
+.modal-header {
+    background: linear-gradient(135deg, #007bff, #4e54c8); /* Gradiente padrão AutisConnect */
+    color: white;
+    border-bottom: none; /* Remove a borda inferior padrão */
+}
+
+/* Estilo do Título do Modal */
+.modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+/* Estilo do Botão de Fechar (o 'X' no canto) */
+.modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Deixa o 'X' branco e visível */
+}
+
+/* Estilo do Corpo do Modal */
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Estilo para os títulos <h5> dentro do corpo do modal */
+.modal-body h5 {
+    font-weight: 600;
+    color: #495057;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Estilo do Rodapé do Modal */
+.modal-footer {
+    background-color: #f8f9fa; /* Um cinza claro para separar visualmente */
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilo dos botões dentro do rodapé para garantir consistência */
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    font-weight: 500;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.modal-footer .btn-secondary {
+    font-weight: 500;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================== */
+/* >>>>> ADICIONE ESTE CSS NO FINAL DE App.css <<<<< */
+/* ================================================================== */
+
+/* Estilos para a nova faixa de recursos na Hero Section */
+.hero-features-strip {
+  padding: 2rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem; /* Espaçamento acima da faixa */
+}
+
+.feature-item-col {
+  display: flex;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.feature-item-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  width: 100%;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Espaço entre o ícone e o texto */
+  padding: 15px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.feature-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px); /* Efeito de levantar ao passar o mouse */
+}
+
+.feature-item-icon {
+  flex-shrink: 0; /* Impede que o ícone seja espremido */
+}
+
+/* Ajusta o tamanho do ícone dentro do novo layout */
+.feature-item-icon .feature-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.feature-item-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #f8f9fa; /* Cor do texto */
+  text-align: left;
+}
+
+/* Ajustes para telas menores */
+@media (max-width: 992px) {
+  .hero-features-strip {
+    /* Em telas menores, os itens vão quebrar em 3 por linha */
+    justify-content: center;
+  }
+  .feature-item-col {
+    flex: 0 0 33.33%; /* 3 itens por linha */
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-item-col {
+    flex: 0 0 50%; /* 2 itens por linha */
+  }
+}
+
+@media (max-width: 576px) {
+  .feature-item {
+    flex-direction: column; /* Ícone em cima, texto embaixo */
+    text-align: center;
+    gap: 10px;
+  }
+  .feature-item-title {
+    text-align: center;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* ================================================================== */
+/* Estilos específicos para a grade de monitoramento no ParentDashboard */
+/* ================================================================== */
+
+.monitoring-item {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.monitoring-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+.monitoring-item .monitoring-image {
+    max-height: 150px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
