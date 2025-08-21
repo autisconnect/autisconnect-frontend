@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { FaListAlt, FaCalendarCheck, FaComments, FaMapMarkerAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import logohori from '../assets/logohoriz copy.jpg';
-import './app.css';
+//import './app.css';
 
 // --- Leaflet Icon Fix ---
 delete L.Icon.Default.prototype._getIconUrl;
