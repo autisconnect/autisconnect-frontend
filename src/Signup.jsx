@@ -190,20 +190,26 @@ function Signup() {
             return;
         }
 
-        try {
-            setIsLoading(true);
+        // 1. DEFINA A URL DA API AQUI DENTRO
+        // Esta linha usa a URL do Render quando online, ou localhost para desenvolvimento.
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-            // Monta o payload em duas etapas para garantir que tipo_usuario não seja sobrescrito
+        try {
+            setIsLoading(true );
+
             const payload = {
-                ...formData,                 // 1. Comece com todos os dados do formulário
-                username: formData.email,    // 2. Adicione/sobrescreva o username
-                password: formData.password, // 3. Adicione/sobrescreva a senha
-                tipo_usuario: tipoUsuario    // 4. Adicione/sobrescreva o tipo_usuario por último
+                ...formData,
+                username: formData.email,
+                password: formData.password,
+                tipo_usuario: tipoUsuario
             };
 
             console.log("Enviando este payload para o backend:", payload);
 
-        const response = await axios.post("http://localhost:5000/api/signup", payload );
+            // 2. USE A VARIÁVEL API_URL NA SUA REQUISIÇÃO
+            // Note o uso de crases (`) para montar a URL completa.
+            const response = await axios.post(`${API_URL}/api/signup`, payload);
+
             setSuccess(response.data.message || 'Cadastro realizado com sucesso!');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
