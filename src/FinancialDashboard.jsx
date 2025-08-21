@@ -6,7 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import logohori from './assets/logo.png';
 import { ArrowLeft } from 'react-bootstrap-icons';
-import './App.css';
+//import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 

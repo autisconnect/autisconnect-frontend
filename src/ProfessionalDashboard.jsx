@@ -20,7 +20,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import logohori from './assets/logo.png';
-import './App.css';
+//import './App.css';
 
 // Registrar componentes do Chart.js
 ChartJS.register(

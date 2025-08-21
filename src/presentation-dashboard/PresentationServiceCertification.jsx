@@ -4,7 +4,7 @@ import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstra
 import { FaCertificate, FaCheckCircle, FaUsers, FaBuilding, FaLightbulb } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import logohori from '../assets/logohoriz.jpg';
-import './App.css';
+//import './App.css';
 
 function PresentationServiceCertification() {
     const navigate = useNavigate();

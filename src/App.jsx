@@ -35,7 +35,7 @@ import PresentationStereotypyMonitor from './presentation-dashboard/Presentation
 import PresentationSecretaryDashboard from './presentation-dashboard/PresentationSecretaryDashboard';
 
 
-import './App.css';
+//import './app.css';
 
 // Componente para renderizar o dashboard público correto com base no ID
 const PublicServiceDashboard = () => {

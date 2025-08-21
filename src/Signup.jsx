@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
 import axios from 'axios';
 import logohori from './assets/logohoriz.jpg';
-import './App.css';
+//import './App.css';
 
 function Signup() {
     const [tipoUsuario, setTipoUsuario] = useState('');

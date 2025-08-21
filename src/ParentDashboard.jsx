@@ -19,7 +19,7 @@ import {
     Legend,
     Filler,
 } from 'chart.js';
-import './App.css';
+//import './App.css';
 
 import emotionalMonitoringImg from './assets/emotional_monitoring.png';
 import strokeRiskImg from './assets/stroke_risk.png';

@@ -6,7 +6,7 @@ import logohori from './assets/logo.png';
 import pais from './assets/pais.png';
 import medicos from './assets/medicos.png';
 import servicos from './assets/servicos.png';
-import './App.css';
+//import './App.css';
 
 const Home = () => {
     const [showWelcome, setShowWelcome] = useState(false);
