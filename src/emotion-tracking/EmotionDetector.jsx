@@ -18,7 +18,7 @@ import {
 } from 'chart.js';
 import { X } from 'react-bootstrap-icons';
 import logohori from '../assets/logo.png';
-import '../App.css';
+import './App.css';
 
 // Registrar os componentes do Chart.js
 ChartJS.register(

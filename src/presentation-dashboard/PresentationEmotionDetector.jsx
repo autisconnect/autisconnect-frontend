@@ -4,7 +4,7 @@ import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstra
 import { FaVideo, FaChartLine, FaChartBar, FaLightbulb, FaInfoCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import logohori from '../assets/logo.png';
-import '../App.css';
+import './App.css';
 
 // Importe as novas imagens que você vai criar
 import emotionHero from '../assets/emotion-hero.png';
