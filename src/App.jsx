@@ -9,9 +9,9 @@ import ProfessionalDashboard from './ProfessionalDashboard';
 import FinancialDashboard from './FinancialDashboard'; // <-- IMPORTAÇÃO ADICIONADA
 import SecretaryDashboard from './SecretaryDashboard';
 import ServiceDashboard from './ServiceDashboard';
-//import ServiceDashboard01 from './service_dashboard/ServiceDashboard01';
-//import ServiceDashboard17 from './service_dashboard/ServiceDashboard17';
-//import ServiceDashboard18 from './service_dashboard/ServiceDashboard18';
+import ServiceDashboard01 from './service_dashboard/ServiceDashboard01';
+import ServiceDashboard17 from './service_dashboard/ServiceDashboard17';
+import ServiceDashboard18 from './service_dashboard/ServiceDashboard18';
 import EmotionDetector from './emotion-tracking/EmotionDetector';
 import EmotionChart from './emotion-tracking/EmotionChart';
 import SessionsGraph from './emotion-tracking/SessionsGraph';
