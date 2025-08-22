@@ -1,6 +1,6 @@
 // ProfessionalDashboard.jsx
 
-import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
 import { Calendar2Check, People, ClockHistory, ChatDots, FileEarmarkText, GraphUp, Bell, BoxArrowUpRight, Wallet2, PlusCircle } from 'react-bootstrap-icons';
 import { Line, Bar, Pie } from 'react-chartjs-2';
