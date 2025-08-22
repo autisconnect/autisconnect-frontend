@@ -63,6 +63,7 @@ ChartJS.register(
 } */}
 
 const ProfessionalDashboard = () => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id: dashboardId } = useParams();
