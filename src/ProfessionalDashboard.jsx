@@ -1,6 +1,6 @@
 // ProfessionalDashboard.jsx
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
 import { Calendar2Check, People, ClockHistory, ChatDots, FileEarmarkText, GraphUp, Bell, BoxArrowUpRight, Wallet2, PlusCircle } from 'react-bootstrap-icons';
 import { Line, Bar, Pie } from 'react-chartjs-2';
@@ -36,8 +36,8 @@ ChartJS.register(
     Filler
 );
 
-// Componente ErrorBoundary
-class ErrorBoundary extends React.Component {
+// Componente ErrorBoundary SAIR
+{/*class ErrorBoundary extends React.Component {
     state = { hasError: false, error: null };
 
     static getDerivedStateFromError(error) {
@@ -60,7 +60,7 @@ class ErrorBoundary extends React.Component {
         }
         return this.props.children;
     }
-}
+} */}
 
 const ProfessionalDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -174,7 +174,7 @@ const ProfessionalDashboard = () => {
     const fetchAssistants = async () => {
         if (!user) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants`, {
+            const res = await fetch(`${API_URL}/api/professional/${user.id}/assistants`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token' )}` },
             });
             if (!res.ok) {
@@ -195,7 +195,7 @@ const ProfessionalDashboard = () => {
         setError('');
         setSuccessMessage('');
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/assistants`, {
                 method: 'POST',
                 headers: getAuthHeaders( ), // Reutilizando a função auxiliar
                 body: JSON.stringify(newAssistant),
@@ -220,7 +220,7 @@ const ProfessionalDashboard = () => {
         setError('');
         setSuccessMessage('');
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants/${assistantId}/status`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/assistants/${assistantId}/status`, {
                 method: 'PUT',
                 headers: getAuthHeaders( ),
                 body: JSON.stringify({ status: newStatus })
@@ -239,7 +239,7 @@ const ProfessionalDashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/dashboard/${user.id}`, {
+            const response = await fetch(`${API_URL}/api/professional/dashboard/${user.id}`, {
                 headers: getAuthHeaders()
             });
 
@@ -266,7 +266,7 @@ const ProfessionalDashboard = () => {
         try {
             setLoadingPatients(true);
             const query = statusFilter && statusFilter !== 'todos' ? `?status=${statusFilter}` : '';
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients${query}`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patients${query}`, {
                 headers: getAuthHeaders()
             });
             if (!response.ok) {
@@ -319,7 +319,7 @@ const ProfessionalDashboard = () => {
         console.log("Enviando payload para atualização:", payload);
 
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${editingPatient.id}`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patients/${editingPatient.id}`, {
                 method: 'PUT',
                 headers: getAuthHeaders( ),
                 body: JSON.stringify(payload)
@@ -358,7 +358,7 @@ const ProfessionalDashboard = () => {
         if (!user) return;
         setLoadingConsultations(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/appointments/professional/${user.id}`, {
+            const response = await fetch(`${API_URL}/api/appointments/professional/${user.id}`, {
                 headers: getAuthHeaders()
             });
 
@@ -380,7 +380,7 @@ const ProfessionalDashboard = () => {
 
     const fetchPatientProgress = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patient-progress`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patient-progress`, {
                 headers: getAuthHeaders()
             });
 
@@ -421,7 +421,7 @@ const ProfessionalDashboard = () => {
     const fetchDiagnosisDistribution = async () => {
         setLoadingCharts(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/diagnosis-distribution`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/diagnosis-distribution`, {
                 headers: getAuthHeaders(),
             });
 
@@ -476,7 +476,7 @@ const ProfessionalDashboard = () => {
     const fetchAppointmentTypes = async () => {
         setLoadingCharts(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/appointment-types`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/appointment-types`, {
                 headers: getAuthHeaders(),
             });
 
@@ -532,7 +532,7 @@ const ProfessionalDashboard = () => {
     const handleAddPatient = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patients`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({ ...newPatient, status: 'ativo' })
@@ -570,7 +570,7 @@ const ProfessionalDashboard = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/appointments`, {
+            const response = await fetch(`${API_URL}/api/appointments`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({
@@ -623,7 +623,7 @@ const ProfessionalDashboard = () => {
         if (!selectedPatient) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${selectedPatient.id}/notes`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patients/${selectedPatient.id}/notes`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(newNote)
@@ -650,7 +650,7 @@ const ProfessionalDashboard = () => {
                 throw new Error('ID do paciente inválido.');
             }
 
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/notes`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patients/${patientId}/notes`, {
                 headers: getAuthHeaders( )
             });
 
@@ -693,7 +693,7 @@ const ProfessionalDashboard = () => {
 
     const handleUpdateStatus = async (patientId, newStatus) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/status`, {
+            const response = await fetch(`${API_URL}/api/professional/${user.id}/patients/${patientId}/status`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({ status: newStatus })
