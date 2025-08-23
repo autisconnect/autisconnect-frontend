@@ -36,109 +36,180 @@ const NotAssociatedError = () => (
 );
 
 
-// --- COMPONENTE PRINCIPAL ---
-const SecretaryDashboard = () => {
+  // --- COMPONENTE PRINCIPAL ---
+  const SecretaryDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // --- ESTADOS ---
+    // Estados
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState(''); // Adicionado
     const [activeTab, setActiveTab] = useState('overview');
     const [appointments, setAppointments] = useState([]);
     const [patients, setPatients] = useState([]);
     const [professional, setProfessional] = useState(null);
     const [messages, setMessages] = useState([]);
-
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedPatient, setSelectedPatient] = useState(null);
-    
-    // ... (outros estados para modais e formulários)
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-    const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
+    const [newAppointment, setNewAppointment] = useState({
+      patientId: '',
+      appointment_date: '',
+      appointment_time: '',
+      value: '',
+      appointment_type: 'Consulta Regular',
+      status: 'Agendada',
+      payment_method: 'Pix',
+      payment_details: '',
+      payment_status: 'Pendente',
+      notes: '',
+    });
+    const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' }); // Adicionado
+    const [newPatient, setNewPatient] = useState({
+      name: '',
+      birthDate: '',
+      phone: '',
+      email: '',
+      diagnosis: '',
+      observacoes: '', // Alterado de 'notes' para 'observacoes'
+    }); // Adicionado
+    const [editingPatient, setEditingPatient] = useState(null); // Adicionado
+    const [showEditPatientModal, setShowEditPatientModal] = useState(false); // Adicionado
+    const [filters, setFilters] = useState({ date: '', patientId: '', status: '' }); // Adicionado
+    const [showCommunicationModal, setShowCommunicationModal] = useState(false); // Adicionado
+    const [showNoteModal, setShowNoteModal] = useState(false); // Adicionado
+    const [newNote, setNewNote] = useState({ title: '', content: '' }); // Adicionado
+    const [authValidated, setAuthValidated] = useState(true); // Adicionado
+
+    // Função auxiliar para obter cabeçalhos autenticados
+    const getAuthHeaders = () => {
+      const token = localStorage.getItem('token');
+      return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    };
 
 
+    // Função auxiliar para chamadas fetch com token
+    const fetchWithToken = async (url, setter, errorMessage) => {
+      try {
+        const response = await fetch(url, { headers: getAuthHeaders() });
+        if (!response.ok) throw new Error(errorMessage);
+        const data = await response.json();
+        setter(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
     // --- LÓGICA DE BUSCA DE DADOS ---
     const fetchData = useCallback(async () => {
-        if (!user || !user.id) return;
+      if (!user || !user.id) return;
 
-        setLoading(true);
-        setError('');
+      setLoading(true);
+      setError('');
 
-        const token = localStorage.getItem('token');
-        if (!token) {
-            logout();
-            navigate('/login');
-            return;
+      const token = localStorage.getItem('token');
+      if (!token) {
+        logout();
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const professionalUrl = `${API_URL}/api/secretary/professionals`;
+        const profResponse = await fetch(professionalUrl, { headers: getAuthHeaders() });
+
+        if (profResponse.status === 404) {
+          throw new Error('NotAssociated');
         }
-        
-        const headers = { Authorization: `Bearer ${token}` };
-
-        try {
-            // A rota agora inclui o ID da secretária, que vem do contexto de autenticação (user.id)
-            const professionalUrl = `${API_URL}/api/secretary/${user.id}/professionals`;
-            
-            const profResponse = await fetch(professionalUrl, { headers });
-
-            if (profResponse.status === 404) {
-                 // O backend respondeu que a associação não foi encontrada. Este é o nosso erro específico.
-                throw new Error("NotAssociated");
-            }
-            if (!profResponse.ok) {
-                throw new Error("Falha ao buscar dados do profissional.");
-            }
-            
-            const profData = await profResponse.json();
-            setProfessional(profData[0] || null);
-
-            // Se o profissional foi encontrado, busca o resto dos dados
-            if (profData.length > 0) {
-                const [patResponse, appResponse, msgResponse] = await Promise.all([
-                    fetch(`${API_URL}/api/secretary/${user.id}/patients`, { headers }),
-                    fetch(`${API_URL}/api/secretary/${user.id}/appointments`, { headers }),
-                    fetch(`${API_URL}/api/secretary/${user.id}/messages`, { headers }),
-                ]);
-
-                setPatients(await patResponse.json());
-                setAppointments(await appResponse.json());
-                setMessages(await msgResponse.json());
-            }
-
-        } catch (err) {
-            console.error("Erro detalhado ao buscar dados:", err.message);
-            if (err.message === "NotAssociated") {
-                setError("NotAssociated"); // Seta o erro especial para mostrar a mensagem correta
-            } else {
-                setError("Ocorreu um erro de comunicação com o servidor. Verifique sua conexão e tente novamente.");
-            }
-        } finally {
-            setLoading(false);
+        if (!profResponse.ok) {
+          throw new Error('Falha ao buscar dados do profissional.');
         }
+
+        const profData = await profResponse.json();
+        setProfessional(profData[0] || null);
+
+        if (profData.length > 0) {
+          const [patResponse, appResponse, msgResponse] = await Promise.all([
+            fetch(`${API_URL}/api/secretary/patients`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/secretary/appointments`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/secretary/messages`, { headers: getAuthHeaders() }),
+          ]);
+
+          if (!patResponse.ok || !appResponse.ok || !msgResponse.ok) {
+            throw new Error('Falha ao buscar dados.');
+          }
+
+          setPatients(await patResponse.json());
+          setAppointments(await appResponse.json());
+          setMessages(await msgResponse.json());
+        }
+      } catch (err) {
+        console.error('Erro detalhado ao buscar dados:', err.message);
+        if (err.message === 'NotAssociated') {
+          setError('NotAssociated');
+        } else {
+          setError('Ocorreu um erro de comunicação com o servidor. Verifique sua conexão e tente novamente.');
+        }
+      } finally {
+        setLoading(false);
+      }
     }, [user, navigate, logout]);
 
+     // Adiciona tratamento de erros para Socket.IO
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+      socket.on('connect_error', (err) => {
+        console.error('Socket.IO connection error:', err);
+        setError('Erro de conexão com o servidor em tempo real.');
+      });
+
+      socket.on('connect', () => {
+        console.log('Socket.IO connected');
+      });
+
+      return () => {
+        socket.off('connect_error');
+        socket.off('connect');
+      };
+    }, []);
 
   const handleAddAppointment = async (e) => {
     e.preventDefault();
-    if (!professional?.id) { setError('Profissional não identificado.'); return; }
+    if (!professional?.id) {
+      setError('Profissional não identificado.');
+      return;
+    }
     if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
-      setError('Paciente, data, hora e valor são obrigatórios.'); return;
+      setError('Paciente, data, hora e valor são obrigatórios.');
+      return;
     }
     try {
       const response = await fetch(`${API_URL}/api/secretary/appointments`, {
-        method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ ...newAppointment, professional_id: professional.id }),
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ ...newAppointment, professional_id: professional.id }),
       });
       if (!response.ok) throw new Error((await response.json()).error || 'Falha ao registrar consulta.');
       setShowAppointmentModal(false);
-      setNewAppointment({ patientId: '', appointment_date: '', appointment_time: '', appointment_type: 'Consulta Regular', status: 'Agendada', payment_method: 'Pix', payment_details: '', payment_status: 'Pendente', value: '', notes: '' });
+      setNewAppointment({
+        patientId: '',
+        appointment_date: '',
+        appointment_time: '',
+        appointment_type: 'Consulta Regular',
+        status: 'Agendada',
+        payment_method: 'Pix',
+        payment_details: '',
+        payment_status: 'Pendente',
+        value: '',
+        notes: '',
+      });
       setSuccessMessage('Consulta registrada com sucesso!');
-      await fetchAllData();
+      await fetchData(); // Substituído fetchAllData por fetchData
       socket.emit('newAppointment', { professionalId: professional.id });
       setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err) { setError(err.message); }
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const handleSendMessage = async (e) => {
@@ -221,15 +292,27 @@ const SecretaryDashboard = () => {
 
   const handleUpdatePatient = async (e) => {
     e.preventDefault();
-    if (!editingPatient || !editingPatient.id) { setError('Nenhum paciente selecionado para edição.'); return; }
+    if (!editingPatient || !editingPatient.id) {
+      setError('Nenhum paciente selecionado para edição.');
+      return;
+    }
     let formattedBirthDate = null;
     if (editingPatient.birthDate) {
       formattedBirthDate = new Date(editingPatient.birthDate).toISOString().split('T')[0];
     }
-    const payload = { name: editingPatient.name, birthDate: formattedBirthDate, phone: editingPatient.phone, email: editingPatient.email, diagnosis: editingPatient.diagnosis, notes: editingPatient.observacoes };
+    const payload = {
+      nome_completo: editingPatient.name, // Alterado para nome_completo
+      data_nascimento: formattedBirthDate,
+      telefone: editingPatient.phone,
+      email: editingPatient.email,
+      diagnostico: editingPatient.diagnosis,
+      observacoes: editingPatient.observacoes,
+    };
     try {
       const response = await fetch(`${API_URL}/api/secretary/patients/${editingPatient.id}`, {
-        method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload)
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -238,7 +321,7 @@ const SecretaryDashboard = () => {
       setSuccessMessage('Dados do paciente atualizados com sucesso!');
       setShowEditPatientModal(false);
       await fetchWithToken(`${API_URL}/api/secretary/patients`, setPatients, 'Erro ao buscar pacientes');
-      setSelectedPatient(prev => ({ ...prev, ...editingPatient, observacoes: payload.notes }));
+      setSelectedPatient((prev) => ({ ...prev, ...editingPatient, observacoes: payload.observacoes }));
       setEditingPatient(null);
     } catch (err) {
       console.error('Erro ao atualizar paciente:', err);
@@ -399,6 +482,15 @@ const SecretaryDashboard = () => {
   }, [appointments]);
 
   if (!authValidated) return <Container className="text-center mt-5"><Spinner animation="border" /><p>Validando...</p></Container>;
+
+    if (loading) {
+    return (
+      <Container className="text-center mt-5">
+        <Spinner animation="border" />
+        <p>Carregando...</p>
+      </Container>
+    );
+  }
 
   return (
     // >>>>> CLASSE ADICIONADA AQUI <<<<<
