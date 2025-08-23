@@ -49,6 +49,10 @@ const SecretaryDashboard = () => {
     const [patients, setPatients] = useState([]);
     const [professional, setProfessional] = useState(null);
     const [messages, setMessages] = useState([]);
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [selectedPatient, setSelectedPatient] = useState(null);
     
     // ... (outros estados para modais e formulários)
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
