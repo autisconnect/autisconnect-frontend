@@ -1,112 +1,121 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Spinner, Alert } from 'react-bootstrap';
-import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, PieChart, ArrowLeft, People } from 'react-bootstrap-icons';
-import { useNavigate, useParams } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext';
+import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, People } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext'; // Corrigido o caminho do contexto
 import io from 'socket.io-client';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import logohori from './assets/logo.png';
 
-// URL da API definida uma única vez
+// --- CONFIGURAÇÕES GLOBAIS ---
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend );
+const socket = io(API_URL);
 
-// Socket.IO usa a mesma URL da API
-const socket = io(API_URL, {
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-});
-
+// --- COMPONENTES AUXILIARES ---
 const DashboardCard = ({ title, children, isLoading }) => (
-  <Card className="h-100 shadow-sm">
-    <Card.Header>
-      <h5 className="mb-0">{title}</h5>
-    </Card.Header>
-    <Card.Body>
-      {isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}
-    </Card.Body>
-  </Card>
+    <Card className="h-100 shadow-sm">
+        <Card.Header><h5 className="mb-0">{title}</h5></Card.Header>
+        <Card.Body>{isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}</Card.Body>
+    </Card>
 );
 
+const NotAssociatedError = () => (
+    <Alert variant="warning">
+        <Alert.Heading>Vínculo Profissional Necessário</Alert.Heading>
+        <p>
+            Você ainda não está associada a um profissional. Para acessar as funcionalidades do dashboard,
+            é necessário que o profissional responsável faça a sua vinculação através do painel dele.
+        </p>
+        <hr />
+        <p className="mb-0">
+            Por favor, entre em contato com o profissional ou com o suporte técnico.
+        </p>
+    </Alert>
+);
+
+
+// --- COMPONENTE PRINCIPAL ---
 const SecretaryDashboard = () => {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const { id: secretaryId } = useParams();
+    const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-  // --- ESTADOS ---
-  const [authValidated, setAuthValidated] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
-  const [appointments, setAppointments] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [professional, setProfessional] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' });
-  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-  const [showCommunicationModal, setShowCommunicationModal] = useState(false);
-  const [showPatientModal, setShowPatientModal] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [showEditPatientModal, setShowEditPatientModal] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
-  const [showNoteModal, setShowNoteModal] = useState(false);
-  const [newNote, setNewNote] = useState({ title: '', content: '' });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [newPatient, setNewPatient] = useState({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
-  const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', appointment_type: 'Consulta Regular', status: 'Agendada', payment_method: 'Pix', payment_details: '', payment_status: 'Pendente', value: '', notes: '' });
-  const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
+    // --- ESTADOS ---
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [activeTab, setActiveTab] = useState('overview');
+    const [appointments, setAppointments] = useState([]);
+    const [patients, setPatients] = useState([]);
+    const [professional, setProfessional] = useState(null);
+    const [messages, setMessages] = useState([]);
+    
+    // ... (outros estados para modais e formulários)
+    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+    const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
 
-  // --- FUNÇÕES DE API ---
-  const getAuthHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json',
-  });
 
-  const fetchWithToken = useCallback(async (url, setData, errorMsg) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Token ausente.');
-      const response = await fetch(url, { headers: getAuthHeaders() });
-      if (response.status === 401) throw new Error('Sessão expirada.');
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({ error: `Falha na requisição para ${url}` }));
-        throw new Error(errData.error || errorMsg);
-      }
-      const data = await response.json();
-      setData(data);
-    } catch (err) {
-      console.error(`Error fetching ${url}:`, err.message);
-      setError(err.message);
-    }
-  }, []);
+    // --- LÓGICA DE BUSCA DE DADOS ---
+    const fetchData = useCallback(async () => {
+        if (!user || !user.id) return;
 
-  const fetchAllData = useCallback(async () => {
-    setLoadingData(true);
-    setError('');
-    await Promise.all([
-      fetchWithToken(`${API_URL}/api/secretary/patients`, setPatients, 'Erro ao buscar pacientes'),
-      fetchWithToken(`${API_URL}/api/secretary/professionals`, (data) => setProfessional(data[0] || null), 'Erro ao buscar profissional'),
-      fetchWithToken(`${API_URL}/api/secretary/appointments`, setAppointments, 'Erro ao buscar consultas'),
-      fetchWithToken(`${API_URL}/api/secretary/messages`, setMessages, 'Erro ao buscar mensagens'),
-    ]);
-    setLoadingData(false);
-  }, [fetchWithToken]);
+        setLoading(true);
+        setError('');
 
-  useEffect(() => {
-    if (!user) { navigate('/login'); return; }
-    if (user.tipo_usuario !== 'secretaria' || (secretaryId && parseInt(secretaryId, 10) !== user.id)) {
-      logout(); navigate('/login'); return;
-    }
-    setAuthValidated(true);
-  }, [user, secretaryId, navigate, logout]);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            logout();
+            navigate('/login');
+            return;
+        }
+        
+        const headers = { Authorization: `Bearer ${token}` };
 
-  useEffect(() => {
-    if (authValidated) { fetchAllData(); }
-  }, [authValidated, fetchAllData]);
+        try {
+            // A rota agora inclui o ID da secretária, que vem do contexto de autenticação (user.id)
+            const professionalUrl = `${API_URL}/api/secretary/${user.id}/professionals`;
+            
+            const profResponse = await fetch(professionalUrl, { headers });
+
+            if (profResponse.status === 404) {
+                 // O backend respondeu que a associação não foi encontrada. Este é o nosso erro específico.
+                throw new Error("NotAssociated");
+            }
+            if (!profResponse.ok) {
+                throw new Error("Falha ao buscar dados do profissional.");
+            }
+            
+            const profData = await profResponse.json();
+            setProfessional(profData[0] || null);
+
+            // Se o profissional foi encontrado, busca o resto dos dados
+            if (profData.length > 0) {
+                const [patResponse, appResponse, msgResponse] = await Promise.all([
+                    fetch(`${API_URL}/api/secretary/${user.id}/patients`, { headers }),
+                    fetch(`${API_URL}/api/secretary/${user.id}/appointments`, { headers }),
+                    fetch(`${API_URL}/api/secretary/${user.id}/messages`, { headers }),
+                ]);
+
+                setPatients(await patResponse.json());
+                setAppointments(await appResponse.json());
+                setMessages(await msgResponse.json());
+            }
+
+        } catch (err) {
+            console.error("Erro detalhado ao buscar dados:", err.message);
+            if (err.message === "NotAssociated") {
+                setError("NotAssociated"); // Seta o erro especial para mostrar a mensagem correta
+            } else {
+                setError("Ocorreu um erro de comunicação com o servidor. Verifique sua conexão e tente novamente.");
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [user, navigate, logout]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
   const handleAddAppointment = async (e) => {
     e.preventDefault();
