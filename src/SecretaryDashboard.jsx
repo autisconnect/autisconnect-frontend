@@ -21,21 +21,6 @@ const DashboardCard = ({ title, children, isLoading }) => (
     </Card>
 );
 
-const NotAssociatedError = () => (
-    <Alert variant="warning">
-        <Alert.Heading>Vínculo Profissional Necessário</Alert.Heading>
-        <p>
-            Você ainda não está associada a um profissional. Para acessar as funcionalidades do dashboard,
-            é necessário que o profissional responsável faça a sua vinculação através do painel dele.
-        </p>
-        <hr />
-        <p className="mb-0">
-            Por favor, entre em contato com o profissional ou com o suporte técnico.
-        </p>
-    </Alert>
-);
-
-
   // --- COMPONENTE PRINCIPAL ---
   const SecretaryDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -116,7 +101,7 @@ const NotAssociatedError = () => (
       }
 
       try {
-        const professionalUrl = `${API_URL}/api/secretary/professionals`;
+        const professionalUrl = `${API_URL}/api/secretary/${user.id}/professionals`;
         const profResponse = await fetch(professionalUrl, { headers: getAuthHeaders() });
 
         if (profResponse.status === 404) {
@@ -131,9 +116,9 @@ const NotAssociatedError = () => (
 
         if (profData.length > 0) {
           const [patResponse, appResponse, msgResponse] = await Promise.all([
-            fetch(`${API_URL}/api/secretary/patients`, { headers: getAuthHeaders() }),
-            fetch(`${API_URL}/api/secretary/appointments`, { headers: getAuthHeaders() }),
-            fetch(`${API_URL}/api/secretary/messages`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/secretary/${user.id}/patients`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/secretary/${user.id}/appointments`, { headers: getAuthHeaders() }),
+            fetch(`${API_URL}/api/secretary/${user.id}/messages`, { headers: getAuthHeaders() }),
           ]);
 
           if (!patResponse.ok || !appResponse.ok || !msgResponse.ok) {
