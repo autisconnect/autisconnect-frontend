@@ -4,7 +4,7 @@ import { ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 import logohori from './assets/logohoriz.jpg';
 import { AuthContext } from './context/AuthContext.jsx';
-import apiClient from './services/api';
+import apiClient from '../services/api';
 import './App.css';
 
 function Login() {
@@ -79,7 +79,7 @@ function Login() {
             setLoading(false);
         }
     };
-    
+
     return (
         <div className="App">
             <Navbar bg="light" expand="lg" fixed="top" className="mb-4">
