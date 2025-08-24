@@ -1,5 +1,3 @@
-// ProfessionalDashboard.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
 import { Calendar2Check, People, ClockHistory, ChatDots, FileEarmarkText, GraphUp, Bell, BoxArrowUpRight, Wallet2, PlusCircle } from 'react-bootstrap-icons';
@@ -19,6 +17,7 @@ import {
 } from 'chart.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
+import apiClient from './services/api.js';
 import logohori from './assets/logo.png';
 import './App.css';
 
@@ -170,85 +169,64 @@ const ProfessionalDashboard = () => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
     });
-
+//ok
+        // Função genérica para tratar erros de API
+    const handleApiError = (err, context) => {
+        console.error(`Erro ao ${context}:`, err);
+        const message = err.response?.data?.error || err.response?.data?.message || `Erro ao ${context}. Tente novamente.`;
+        setError(message);
+    };
+//ok
     const fetchAssistants = async () => {
         if (!user) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token' )}` },
-            });
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error || 'Falha ao buscar colaboradores.');
-            }
-            const data = await res.json();
-            setAssistants(Array.isArray(data) ? data : []);
+            const response = await apiClient.get(`/professional/${user.id}/assistants`);
+            setAssistants(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
-            console.error('Erro ao buscar colaboradores:', err);
-            setError('Não foi possível carregar os colaboradores. ' + err.message);
-            setAssistants([]);
+            handleApiError(err, 'buscar colaboradores');
         }
     };
-
+//ok
     const handleAddAssistant = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccessMessage('');
+        if (!user) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants`, {
-                method: 'POST',
-                headers: getAuthHeaders( ), // Reutilizando a função auxiliar
-                body: JSON.stringify(newAssistant),
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Falha ao adicionar colaborador.');
-            }
-
-            setNewAssistant({ nome: '', cpf: '', email: '', password: '', status: 'ativo' });
-            setSuccessMessage('Colaborador cadastrado com sucesso!');
-            fetchAssistants(); // Recarrega a lista
+            await apiClient.post(`/professional/${user.id}/assistants`, newAssistant);
+            setSuccessMessage('Colaborador adicionado com sucesso!');
+            setNewAssistant({ nome: '', cpf: '', email: '', password: '', status: 'ativo', telefone: '' });
+            fetchAssistants();
         } catch (err) {
-            console.error('Erro ao adicionar colaborador:', err);
-            setError(err.message);
+            handleApiError(err, 'adicionar colaborador');
         }
     };
-
+//ok
     const handleToggleStatus = async (assistantId, currentStatus) => {
+        if (!user) return; // Verificação de segurança
+
         const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
-        setError('');
-        setSuccessMessage('');
+        
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/assistants/${assistantId}/status`, {
-                method: 'PUT',
-                headers: getAuthHeaders( ),
-                body: JSON.stringify({ status: newStatus })
-            });
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || 'Falha ao atualizar status.');
-            }
+            // URL relativa. O corpo da requisição é o segundo argumento.
+            await apiClient.put(
+                `/professional/${user.id}/assistants/${assistantId}/status`,
+                { status: newStatus }
+            );
+
             setSuccessMessage('Status do colaborador atualizado!');
-            fetchAssistants(); // Recarrega a lista para refletir a mudança
+            
+            // Atualiza a lista de colaboradores na interface.
+            fetchAssistants();
+
         } catch (err) {
-            console.error('Erro ao atualizar status do colaborador', err);
-            setError(err.message);
+            // Usa a função genérica para exibir o erro.
+            handleApiError(err, 'atualizar o status do colaborador');
         }
     };
-
+//ok
     const fetchDashboardData = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/dashboard/${user.id}`, {
-                headers: getAuthHeaders()
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao buscar dados do dashboard.');
-            }
-
-            const data = await response.json();
+        const response = await apiClient.get(`/professional/dashboard/${user.id}`);
+        const data = response.data; // Com Axios, os dados já vêm em .data
             setProfessionalInfo({
                 name: data.professional.name,
                 specialty: data.professional.specialty,
@@ -261,135 +239,60 @@ const ProfessionalDashboard = () => {
             setError(err.message);
         }
     };
-
+//ok
     const fetchPatients = async () => {
+        if (!user) return;
         try {
-            setLoadingPatients(true);
             const query = statusFilter && statusFilter !== 'todos' ? `?status=${statusFilter}` : '';
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients${query}`, {
-                headers: getAuthHeaders()
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao buscar pacientes.');
-            }
-            const data = await response.json();
-            setPatients(Array.isArray(data) ? data : []);
+            const response = await apiClient.get(`/professional/${user.id}/patients${query}`);
+            setPatients(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
-            console.error('Erro ao buscar pacientes:', err);
-            setError('Erro ao carregar pacientes: ' + err.message);
-            setPatients([]);
-        } finally {
-            setLoadingPatients(false);
+            handleApiError(err, 'buscar pacientes');
         }
     };
-
+//ok
     const handleUpdatePatient = async (e) => {
         e.preventDefault();
-        if (!editingPatient || !editingPatient.id) {
-            setError('Nenhum paciente selecionado para edição.');
-            return;
-        }
-
-        // 1. Formata a data para o formato AAAA-MM-DD que o MySQL espera.
-        let formattedBirthDate = null;
-        if (editingPatient.birthDate) {
-            // Previne erros com datas inválidas e formata corretamente.
-            try {
-                formattedBirthDate = new Date(editingPatient.birthDate).toISOString().split('T')[0];
-            } catch (dateError) {
-                console.error("Data de nascimento inválida:", editingPatient.birthDate);
-                setError("O formato da data de nascimento é inválido.");
-                return;
-            }
-        }
-
-        // 2. Cria um payload limpo, enviando apenas os campos necessários.
-        //    Mapeia 'editingPatient.observacoes' para o campo 'notes' que o backend espera.
-        const payload = {
-            name: editingPatient.name,
-            birthDate: formattedBirthDate,
-            phone: editingPatient.phone,
-            email: editingPatient.email,
-            diagnosis: editingPatient.diagnosis,
-            notes: editingPatient.observacoes // Mapeamento correto
-        };
-
-        // Log para depuração final, para ter certeza do que está sendo enviado.
-        console.log("Enviando payload para atualização:", payload);
-
+        if (!editingPatient || !user) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${editingPatient.id}`, {
-                method: 'PUT',
-                headers: getAuthHeaders( ),
-                body: JSON.stringify(payload)
-            });
-
-            // 3. Tratamento de erro robusto que não quebra com respostas não-JSON.
-            if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    errorData = await response.json();
-                } else {
-                    const errorText = await response.text();
-                    throw new Error(`Erro no servidor: ${response.status} - ${errorText}`);
-                }
-                throw new Error(errorData.error || 'Falha ao atualizar dados do paciente.');
-            }
-
-            setSuccessMessage('Dados do paciente atualizados com sucesso!');
+            const payload = {
+                name: editingPatient.name,
+                birthDate: editingPatient.birthDate ? new Date(editingPatient.birthDate).toISOString().split('T')[0] : null,
+                phone: editingPatient.phone,
+                email: editingPatient.email,
+                diagnosis: editingPatient.diagnosis,
+                notes: editingPatient.observacoes
+            };
+            await apiClient.put(`/professional/${user.id}/patients/${editingPatient.id}`, payload);
+            setSuccessMessage('Paciente atualizado com sucesso!');
             setShowEditPatientModal(false);
-            
-            // 4. Atualiza a lista de pacientes e o painel de detalhes na interface.
-            await fetchPatients();
-            setSelectedPatient(prev => ({...prev, ...editingPatient})); // Atualiza o card de detalhes
-            setEditingPatient(null);
-
+            fetchPatients();
+            setSelectedPatient(prev => ({ ...prev, ...editingPatient }));
         } catch (err) {
-            console.error('Erro ao atualizar paciente:', err);
-            setError(err.message);
+            handleApiError(err, 'atualizar paciente');
         }
     };
-
-
-
+//ok
     const fetchConsultations = async () => {
         if (!user) return;
-        setLoadingConsultations(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/appointments/professional/${user.id}`, {
-                headers: getAuthHeaders()
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao buscar agendamentos.');
-            }
-
-            const data = await response.json();
-            setConsultations(Array.isArray(data) ? data : []);
+            const response = await apiClient.get(`/appointments/professional/${user.id}`);
+            setConsultations(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
-            console.error('Erro ao buscar agendamentos:', err);
-            setError(err.message);
-            setConsultations([]);
-        } finally {
-            setLoadingConsultations(false);
+            handleApiError(err, 'buscar consultas');
         }
     };
-
+//ok
     const fetchPatientProgress = async () => {
+        if (!user) return; // Verificação de segurança
+
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patient-progress`, {
-                headers: getAuthHeaders()
-            });
+            // URL relativa, o apiClient cuida do resto.
+            const response = await apiClient.get(`/professional/${user.id}/patient-progress`);
+            
+            const data = response.data; // Dados já vêm em .data com Axios
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao buscar progresso dos pacientes.');
-            }
-
-            const data = await response.json();
+            // A lógica para processar os dados e montar o gráfico permanece a mesma.
             const labels = [...new Set(data.map(item => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
             const metrics = ['Comunicacao', 'Interacao_Social', 'Comportamento'];
             const datasets = metrics.map(metric => ({
@@ -412,34 +315,27 @@ const ProfessionalDashboard = () => {
             }));
 
             setPatientProgressData({ labels, datasets });
+
         } catch (err) {
-            console.error('Erro ao buscar progresso dos pacientes:', err);
-            setError(err.message);
+            // Usa a função genérica para exibir o erro.
+            handleApiError(err, 'buscar o progresso dos pacientes');
+            
+            // Zera os dados do gráfico em caso de erro.
+            setPatientProgressData({ labels: [], datasets: [] });
         }
     };
-
+//ok
     const fetchDiagnosisDistribution = async () => {
+        if (!user) return; // Verificação de segurança
+
         setLoadingCharts(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/diagnosis-distribution`, {
-                headers: getAuthHeaders(),
-            });
+            // URL relativa, o apiClient cuida do resto.
+            const response = await apiClient.get(`/professional/${user.id}/diagnosis-distribution`);
+            
+            const data = response.data; // Dados já vêm em .data com Axios
 
-            if (response.status === 404) {
-                console.warn('Rota de distribuição de diagnósticos não encontrada');
-                setDiagnosisDistribution({
-                    labels: [],
-                    datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
-                });
-                return;
-            }
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao buscar distribuição de diagnósticos.');
-            }
-
-            const data = await response.json();
+            // Atualiza o estado do gráfico com os dados recebidos.
             setDiagnosisDistribution({
                 labels: data.labels,
                 datasets: [
@@ -462,8 +358,10 @@ const ProfessionalDashboard = () => {
                 ],
             });
         } catch (err) {
-            console.error('Erro ao buscar distribuição de diagnósticos:', err);
-            setError(err.message);
+            // O tratamento de erro do Axios já lida com status 404 e outros.
+            handleApiError(err, 'buscar a distribuição de diagnósticos');
+            
+            // Em caso de erro, zera os dados do gráfico.
             setDiagnosisDistribution({
                 labels: [],
                 datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
@@ -472,29 +370,18 @@ const ProfessionalDashboard = () => {
             setLoadingCharts(false);
         }
     };
-
+//ok
     const fetchAppointmentTypes = async () => {
+        if (!user) return; // Verificação de segurança
+
         setLoadingCharts(true);
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/appointment-types`, {
-                headers: getAuthHeaders(),
-            });
+            // URL relativa, o apiClient cuida do resto.
+            const response = await apiClient.get(`/professional/${user.id}/appointment-types`);
+            
+            const data = response.data; // Dados já vêm em .data com Axios
 
-            if (response.status === 404) {
-                console.warn('Rota de tipos de consulta não encontrada');
-                setAppointmentTypeData({
-                    labels: [],
-                    datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
-                });
-                return;
-            }
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao buscar tipos de consulta.');
-            }
-
-            const data = await response.json();
+            // Atualiza o estado do gráfico com os dados recebidos.
             setAppointmentTypeData({
                 labels: data.labels,
                 datasets: [
@@ -518,8 +405,10 @@ const ProfessionalDashboard = () => {
                 ],
             });
         } catch (err) {
-            console.error('Erro ao buscar tipos de consulta:', err);
-            setError(err.message);
+            // O tratamento de erro do Axios já lida com status 404 e outros.
+            handleApiError(err, 'buscar tipos de consulta');
+            
+            // Em caso de erro, zera os dados do gráfico para não exibir informação antiga.
             setAppointmentTypeData({
                 labels: [],
                 datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
@@ -528,73 +417,58 @@ const ProfessionalDashboard = () => {
             setLoadingCharts(false);
         }
     };
-
+//ok
     const handleAddPatient = async (e) => {
         e.preventDefault();
+        if (!user) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ ...newPatient, status: 'ativo' })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao adicionar paciente.');
-            }
-
-            setNewPatient({
-                name: '',
-                birthDate: '',
-                phone: '',
-                email: '',
-                diagnosis: '',
-                notes: ''
-            });
+            await apiClient.post(`/professional/${user.id}/patients`, { ...newPatient, status: 'ativo' });
+            setSuccessMessage('Paciente adicionado com sucesso!');
             setShowPatientModal(false);
+            setNewPatient({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
             fetchPatients();
             fetchDashboardData();
-            fetchDiagnosisDistribution();
-            setSuccessMessage('Paciente cadastrado com sucesso!');
         } catch (err) {
-            console.error('Erro ao adicionar paciente:', err);
-            setError(err.message);
+            handleApiError(err, 'adicionar paciente');
         }
     };
-
+//ok
     const handleAddAppointment = async (e) => {
         e.preventDefault();
+
+        // Verificação de segurança e validação dos campos
+        if (!user) {
+            setError('Usuário não autenticado.');
+            return;
+        }
         if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
             setError('Paciente, data, hora e valor são obrigatórios.');
             return;
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/appointments`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({
-                    patient_id: newAppointment.patientId,
-                    appointment_date: newAppointment.appointment_date,
-                    appointment_time: newAppointment.appointment_time,
-                    appointment_type: newAppointment.appointment_type,
-                    status: newAppointment.status,
-                    payment_method: newAppointment.payment_method,
-                    payment_details: newAppointment.payment_details,
-                    payment_status: newAppointment.payment_status,
-                    value: newAppointment.value,
-                    notes: newAppointment.notes,
-                    professional_id: user.id
-                })
-            });
+            // Monta o corpo da requisição com os nomes de campo que o backend espera
+            const payload = {
+                patient_id: newAppointment.patientId,
+                appointment_date: newAppointment.appointment_date,
+                appointment_time: newAppointment.appointment_time,
+                appointment_type: newAppointment.appointment_type,
+                status: newAppointment.status,
+                payment_method: newAppointment.payment_method,
+                payment_details: newAppointment.payment_details,
+                payment_status: newAppointment.payment_status,
+                value: newAppointment.value,
+                notes: newAppointment.notes,
+                professional_id: user.id // Adiciona o ID do profissional logado
+            };
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao registrar consulta.');
-            }
+            // A URL é relativa. O payload é o segundo argumento.
+            await apiClient.post('/appointments', payload);
 
-            setShowAppointmentModal(false);
             setSuccessMessage('Consulta registrada com sucesso!');
+            setShowAppointmentModal(false);
+
+            // Limpa o formulário para o próximo agendamento
             setNewAppointment({
                 patientId: '',
                 appointment_date: '',
@@ -608,110 +482,108 @@ const ProfessionalDashboard = () => {
                 notes: ''
             });
             
+            // Atualiza os dados relevantes no dashboard
             fetchConsultations();
             fetchDashboardData();
             fetchAppointmentTypes();
+
+            // Limpa a mensagem de sucesso após 3 segundos
             setTimeout(() => setSuccessMessage(''), 3000);
+
         } catch (err) {
-            console.error('Erro ao registrar consulta:', err);
-            setError(err.message);
+            // Usa a função genérica para exibir o erro.
+            handleApiError(err, 'registrar a consulta');
         }
     };
-
+//ok
     const handleAddNote = async (e) => {
         e.preventDefault();
-        if (!selectedPatient) return;
+        
+        // Verificações de segurança
+        if (!user || !selectedPatient) {
+            setError('Usuário ou paciente não selecionado.');
+            return;
+        }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${selectedPatient.id}/notes`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(newNote)
-            });
+            // A URL é relativa. O corpo da requisição (newNote) é o segundo argumento.
+            await apiClient.post(
+                `/professional/${user.id}/patients/${selectedPatient.id}/notes`, 
+                newNote
+            );
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao adicionar nota.');
-            }
-
+            setSuccessMessage('Nota adicionada com sucesso!');
+            
+            // Limpa o formulário e fecha o modal
             setNewNote({ title: '', content: '' });
             setShowNoteModal(false);
+            
+            // Atualiza a lista de notas do paciente selecionado
             fetchPatientNotes(selectedPatient.id);
-            setSuccessMessage('Nota adicionada com sucesso!');
+
         } catch (err) {
-            console.error('Erro ao adicionar nota:', err);
-            setError(err.message);
+            // Usa a função genérica para exibir o erro.
+            handleApiError(err, 'adicionar nota');
         }
     };
-
+//ok
     const fetchPatientNotes = async (patientId) => {
+        // Verificações de segurança iniciais
+        if (!user || !patientId) {
+            setError('Não foi possível buscar as notas: ID do usuário ou do paciente está faltando.');
+            return;
+        }
+
         try {
-            if (!patientId) {
-                throw new Error('ID do paciente inválido.');
-            }
+            // A URL é relativa, o apiClient cuida da base e do token.
+            const response = await apiClient.get(`/professional/${user.id}/patients/${patientId}/notes`);
 
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/notes`, {
-                headers: getAuthHeaders( )
-            });
+            // Com Axios (usado pelo apiClient), os dados já vêm em response.data
+            const notes = response.data;
 
-            // ==================================================================
-            // >>>>> LÓGICA DE TRATAMENTO DE ERRO MELHORADA <<<<<
-            // ==================================================================
-            if (!response.ok) {
-                const contentType = response.headers.get("content-type");
-                let errorText = `Falha ao buscar notas. Status: ${response.status}`;
-
-                // Tenta ler o erro como JSON apenas se a resposta for JSON
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    const errorData = await response.json();
-                    errorText = errorData.error || errorText;
-                } else {
-                    // Se não for JSON (provavelmente HTML), apenas pega o texto do status
-                    errorText = `Erro no servidor: ${response.statusText}`;
-                }
-                throw new Error(errorText);
-            }
-            // ==================================================================
-
-            const notes = await response.json();
+            // Atualiza o estado do paciente selecionado com as notas recebidas.
             setSelectedPatient(prev => ({
                 ...prev,
-                notes: Array.isArray(notes) ? notes : []
+                notes: Array.isArray(notes) ? notes : [] // Garante que 'notes' seja sempre um array.
             }));
 
         } catch (err) {
-            console.error('Erro ao buscar notas:', err);
-            setError('Erro ao carregar notas do paciente: ' + err.message);
-            // Garante que as notas fiquem vazias em caso de erro
+            // Usa a função genérica para exibir o erro.
+            handleApiError(err, 'buscar as notas do paciente');
+            
+            // Em caso de erro, garante que o painel de notas fique vazio.
             setSelectedPatient(prev => ({
                 ...prev,
                 notes: []
             }));
         }
     };
-
-
+//ok
     const handleUpdateStatus = async (patientId, newStatus) => {
+        if (!user) return; // Adiciona uma verificação de segurança
+
         try {
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/status`, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ status: newStatus })
-            });
+            // A URL agora é relativa e o apiClient cuida do resto (URL base, token).
+            // O método é PUT e o corpo da requisição é o segundo argumento.
+            await apiClient.put(
+                `/professional/${user.id}/patients/${patientId}/status`, 
+                { status: newStatus }
+            );
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha ao atualizar status.');
-            }
-
-            await fetchPatients();
-            if (selectedPatient && selectedPatient.id === patientId) {
-                setSelectedPatient({ ...selectedPatient, status: newStatus });
-            }
             setSuccessMessage('Status do paciente atualizado!');
+
+            // Atualiza a lista de pacientes na interface para refletir a mudança.
+            await fetchPatients(); 
+
+            // Se o paciente atualizado for o que está selecionado no painel de detalhes,
+            // atualiza o status dele lá também.
+            if (selectedPatient && selectedPatient.id === patientId) {
+                setSelectedPatient(prev => ({ ...prev, status: newStatus }));
+            }
+
         } catch (err) {
-            console.error('Erro ao atualizar status:', err);
-            setError('Erro ao atualizar status do paciente: ' + err.message);
+            // Usa a função genérica para exibir o erro.
+            handleApiError(err, 'atualizar status do paciente');
         }
     };
 
@@ -821,6 +693,7 @@ const ProfessionalDashboard = () => {
             title: { display: true, text: 'Tipos de Consulta' }
         }
     };
+
 
     // useEffect para validação de autenticação
     useEffect(() => {
