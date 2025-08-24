@@ -1,18 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import {
-    Container,
-    Navbar,
-    Form,
-    Card,
-    Button,
-    Alert,
-    Spinner,
-} from 'react-bootstrap';
+import React, { useState, useContext } from 'react';
+import { Container, Navbar, Form, Card, Button, Alert, Spinner } from 'react-bootstrap';
 import { ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 import logohori from './assets/logohoriz.jpg';
 import { AuthContext } from './context/AuthContext.jsx';
+import apiClient from './services/api';
 import './App.css';
 
 function Login() {
@@ -21,9 +13,8 @@ function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { login, user } = useContext(AuthContext);
+    const { login } = useContext(AuthContext);
 
-  
     const handleBackToHome = () => navigate('/');
 
     // Função para redirecionar com base no tipo de usuário e ID
@@ -32,30 +23,16 @@ function Login() {
         
         // Garantir que userId seja um número
         const id = parseInt(userId, 10);
-        
         if (isNaN(id) || id <= 0) {
-            console.error('ID de usuário inválido:', userId);
-            setError('Erro ao determinar o ID do usuário. Contate o suporte.');
+            setError('Erro ao determinar o ID do usuário.');
             return;
         }
-        
         switch (tipoUsuario) {
-            case 'pais_responsavel':
-                navigate(`/parent-dashboard/${id}`);
-                break;
-            case 'medicos_terapeutas':
-                navigate(`/professional-dashboard/${id}`);
-                break;
-            case 'servicos_locais':
-                navigate(`/service-dashboard/${id}`);
-                break;
-            case 'secretaria':
-                navigate(`/secretary-dashboard/${id}`); // Redireciona para o dashboard da secretária
-                break;
-            default:
-                console.error('Tipo de usuário desconhecido:', tipoUsuario);
-                setError('Erro ao determinar o tipo de usuário. Contate o suporte.');
-                navigate('/');
+            case 'pais_responsavel': navigate(`/parent-dashboard/${id}`); break;
+            case 'medicos_terapeutas': navigate(`/professional-dashboard/${id}`); break;
+            case 'servicos_locais': navigate(`/service-dashboard/${id}`); break;
+            case 'secretaria': navigate(`/secretary-dashboard/${id}`); break;
+            default: setError('Tipo de usuário desconhecido.'); navigate('/');
         }
     };
 
@@ -66,37 +43,27 @@ function Login() {
 
         try {
             console.log(`Tentando login para usuário: ${username}`);
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const response = await axios.post(`${API_URL}/api/login`, { username, password });  
-            console.log('Resposta do servidor:', response.data);
             
+            // --- LINHA CORRIGIDA ---
+            // A URL completa é gerenciada pelo apiClient
+            const response = await apiClient.post('/login', { username, password });
+            
+            console.log('Resposta do servidor:', response.data);
             const { token, userId, tipo_usuario } = response.data;
 
             if (!token || !userId || !tipo_usuario) {
-                console.error('Resposta de login inválida do servidor. Dados recebidos:', response.data);
-                throw new Error('Resposta de login inválida do servidor. Faltam dados essenciais.');
+                throw new Error('Resposta de login inválida do servidor.');
             }
 
-            // Garantir que userId seja um número
             const id = parseInt(userId, 10);
-            
             if (isNaN(id) || id <= 0) {
-                console.error('ID de usuário inválido retornado pelo servidor:', userId);
                 throw new Error('ID de usuário inválido retornado pelo servidor.');
             }
 
             localStorage.setItem('token', token);
-
-            // Atualizar o contexto de autenticação
-            const loginSuccess = login({ 
-                id: id, 
-                token: token, 
-                username: username, 
-                tipo_usuario: tipo_usuario 
-            });
+            const loginSuccess = login({ id, token, username, tipo_usuario });
 
             if (loginSuccess) {
-                console.log('Login bem-sucedido, redirecionando para dashboard específico');
                 redirectToDashboard(tipo_usuario, id);
             } else {
                 setError('Erro ao processar login. Tente novamente.');
@@ -112,7 +79,7 @@ function Login() {
             setLoading(false);
         }
     };
-
+    
     return (
         <div className="App">
             <Navbar bg="light" expand="lg" fixed="top" className="mb-4">

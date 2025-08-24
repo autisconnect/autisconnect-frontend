@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Navbar, Nav, Button, Form, Card, Alert, Row, Col } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Container, Navbar, Form, Card, Button, Alert, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
-import axios from 'axios';
+import apiClient from './services/api';
 import logohori from './assets/logohoriz.jpg';
 import './App.css';
 
@@ -192,23 +192,24 @@ function Signup() {
 
         try {
             setIsLoading(true);
-
-            // Monta o payload em duas etapas para garantir que tipo_usuario não seja sobrescrito
             const payload = {
-                ...formData,                 // 1. Comece com todos os dados do formulário
-                username: formData.email,    // 2. Adicione/sobrescreva o username
-                password: formData.password, // 3. Adicione/sobrescreva a senha
-                tipo_usuario: tipoUsuario    // 4. Adicione/sobrescreva o tipo_usuario por último
+                ...formData,
+                username: formData.email,
+                tipo_usuario: tipoUsuario
             };
 
             console.log("Enviando este payload para o backend:", payload);
 
-        const response = await axios.post("http://localhost:5000/api/signup", payload );
+            const response = await apiClient.post("/signup", payload);
             setSuccess(response.data.message || 'Cadastro realizado com sucesso!');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
             console.error('Erro ao cadastrar:', err);
-            setError(err.response?.data?.message || 'Erro ao cadastrar. Tente novamente.');
+            if (err.response && err.response.data) {
+                setError(err.response.data.error || 'Erro desconhecido do servidor.');
+            } else {
+                setError('Erro de rede. Não foi possível conectar ao servidor.');
+            }
         } finally {
             setIsLoading(false);
         }
