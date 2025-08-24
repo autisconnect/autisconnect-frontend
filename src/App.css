@@ -2330,8 +2330,7 @@ p, span, div {
 .emotion-detector-page .card .card-header,
 .stroke-risk-monitor-page .card .card-header,
 .trigger-recorder-page .card .card-header,
-.stereotypy-monitor-page .card .card-header,
-.parent-dashboard-page .card .card-header {
+.stereotypy-monitor-page .card .card-header {
     /* Herda todos os estilos da classe .autisconnect-card-header */
     background: linear-gradient(135deg, #007bff, #4e54c8);
     color: white;
@@ -2349,8 +2348,7 @@ p, span, div {
 .emotion-detector-page .card .card-header h5,
 .stroke-risk-monitor-page .card .card-header h5,
 .trigger-recorder-page .card .card-header h5,
-.stereotypy-monitor-page .card .card-header h5,
-.parent-dashboard-page .card .card-header h5  {
+.stereotypy-monitor-page .card .card-header h5  {
     color: white;
 }
 
@@ -2532,34 +2530,4 @@ p, span, div {
   .feature-item-title {
     text-align: center;
   }
-}
-
-
-
-
-
-
-
-
-
-
-/* ================================================================== */
-/* Estilos específicos para a grade de monitoramento no ParentDashboard */
-/* ================================================================== */
-
-.monitoring-item {
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.monitoring-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-.monitoring-item .monitoring-image {
-    max-height: 150px;
-    object-fit: contain;
-    margin-bottom: 1rem;
 }

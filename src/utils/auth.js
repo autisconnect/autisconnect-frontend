@@ -1,17 +1,37 @@
 import axios from 'axios';
 
-export const initializeAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/verify`, {
-            headers: { Authorization: `Bearer ${token}` },
+const login = async () => {
+    try {
+        const response = await axios.post('http://localhost:5000/login', {
+            username: 'admin',
+            password: 'admin123',
         });
-        return response.data;
-        } catch (error) {
-        localStorage  .removeItem('token');
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        return token;
+    } catch (error) {
+        console.error('Erro ao fazer login:', error);
         throw error;
-        }
     }
-    return null;
 };
+
+const getToken = () => {
+    return localStorage.getItem('token');
+};
+
+const setToken = (token) => {
+    localStorage.setItem('token', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+};
+
+const initializeAuth = async () => {
+    let token = getToken();
+    if (!token) {
+        token = await login();
+    } else {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+};
+
+export { login, getToken, setToken, initializeAuth };

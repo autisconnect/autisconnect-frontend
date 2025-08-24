@@ -20,7 +20,7 @@ import {
     Legend,
     Filler,
 } from 'chart.js';
-//import './App.css';
+import './App.css';
 
 // Register Chart.js components
 ChartJS.register(

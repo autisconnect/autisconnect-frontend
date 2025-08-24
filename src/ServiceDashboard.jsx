@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import userPhoto18 from './assets/UsersPhoto/UsersPhoto18.jpg';
 import userPhoto17 from './assets/UsersPhoto/UsersPhoto17.jpg';
-//import './app.css';
+import './app.css';
 
 // Configuração base da API
 const API_BASE_URL = 'http://localhost:5000/api';

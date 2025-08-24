@@ -4,7 +4,7 @@ import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstra
 import { FaUsers, FaUserPlus, FaChartPie, FaWallet, FaBrain, FaVideo, FaMicrophone } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import logohori from '../assets/logo.png';
-//import './App.css';
+import '../App.css';
 
 // Importe as novas imagens que você vai criar
 import heroImage from '../assets/professional-hero.png'; 

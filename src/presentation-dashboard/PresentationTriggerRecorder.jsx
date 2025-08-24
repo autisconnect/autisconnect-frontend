@@ -3,7 +3,7 @@ import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstra
 import { FaMicrophone, FaSpellCheck, FaBrain, FaHistory } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import logohori from '../assets/logo.png';
-//import './App.css';
+import '../App.css';
 
 // Importe as imagens que você vai criar
 import recorderMain from '../assets/recorder-main.png';

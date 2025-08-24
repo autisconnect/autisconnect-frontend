@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
 import axios from 'axios';
 import logohori from './assets/logohoriz.jpg';
-//import './App.css';
+import './App.css';
 
 function Signup() {
     const [tipoUsuario, setTipoUsuario] = useState('');
@@ -190,26 +190,20 @@ function Signup() {
             return;
         }
 
-        // 1. DEFINA A URL DA API AQUI DENTRO
-        // Esta linha usa a URL do Render quando online, ou localhost para desenvolvimento.
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
         try {
-            setIsLoading(true );
+            setIsLoading(true);
 
+            // Monta o payload em duas etapas para garantir que tipo_usuario não seja sobrescrito
             const payload = {
-                ...formData,
-                username: formData.email,
-                password: formData.password,
-                tipo_usuario: tipoUsuario
+                ...formData,                 // 1. Comece com todos os dados do formulário
+                username: formData.email,    // 2. Adicione/sobrescreva o username
+                password: formData.password, // 3. Adicione/sobrescreva a senha
+                tipo_usuario: tipoUsuario    // 4. Adicione/sobrescreva o tipo_usuario por último
             };
 
             console.log("Enviando este payload para o backend:", payload);
 
-            // 2. USE A VARIÁVEL API_URL NA SUA REQUISIÇÃO
-            // Note o uso de crases (`) para montar a URL completa.
-            const response = await axios.post(`${API_URL}/api/signup`, payload);
-
+        const response = await axios.post("http://localhost:5000/api/signup", payload );
             setSuccess(response.data.message || 'Cadastro realizado com sucesso!');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
