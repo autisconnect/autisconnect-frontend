@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal,
 import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, People } from 'react-bootstrap-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from './context/AuthContext';
 import apiClient from '../services/api.js';
 
 import { Bar, Doughnut } from 'react-chartjs-2';
