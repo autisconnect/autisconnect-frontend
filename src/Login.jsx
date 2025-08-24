@@ -4,7 +4,7 @@ import { ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 import logohori from './assets/logohoriz.jpg';
 import { AuthContext } from './context/AuthContext.jsx';
-import apiClient from '../services/api';
+import apiClient from './services/api.js';
 import './App.css';
 
 function Login() {
