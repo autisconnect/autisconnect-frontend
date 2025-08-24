@@ -3,7 +3,7 @@ import { Container, Navbar, Card, Table, Form, Button, ListGroup, Nav, Tab, Row,
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import logohori from './assets/logohoriz copy.jpg';
-import './app.css';
+import './App.css';
 
 // Importar as imagens de monitoramento
 import emotionalMonitoringImg from './assets/emotional_monitoring.png';
