@@ -334,8 +334,14 @@ const SecretaryDashboard = () => {
         fetchAllData();
     }, [user, navigate, secretaryId, logout, fetchAllData]);
 
-    if (loading) {
-        return <Container className="text-center mt-5"><Spinner animation="border" /><p>Carregando dashboard...</p></Container>;
+    if (loading) { // CORRIGIDO: Usando 'loading'
+        return (
+            <Container fluid className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Carregando...</span>
+                </Spinner>
+            </Container>
+        );
     }
 
   return (
