@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext, useCallback, useMemo } from 're
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Spinner, Alert } from 'react-bootstrap';
 import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, People } from 'react-bootstrap-icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext';
-import apiClient from './services/api.js';
+import { AuthContext } from '../context/AuthContext';
+import apiClient from '../services/api.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-import logohori from './assets/logo.png';
-import './App.css';
+import logohori from '../assets/logo.png';
+import '../App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -51,10 +51,10 @@ const SecretaryDashboard = () => {
         setError(message);
     };
 //ok
-    // Usa 'useCallback' para evitar recriações desnecessárias.
     const fetchAllData = useCallback(async () => {
         if (!user) return;
         setLoading(true);
+        setError('');
         try {
             const [patientsRes, profRes, appointmentsRes, messagesRes] = await Promise.all([
                 apiClient.get('/secretary/patients'),
