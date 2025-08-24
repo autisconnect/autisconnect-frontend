@@ -425,9 +425,8 @@ const ProfessionalDashboard = () => {
         }
 
         try {
-            // Monta o corpo da requisição com os nomes de campo que o backend espera
             const payload = {
-                patient_id: newAppointment.patientId,
+                patientId: newAppointment.patientId, // O backend espera 'patientId'
                 appointment_date: newAppointment.appointment_date,
                 appointment_time: newAppointment.appointment_time,
                 appointment_type: newAppointment.appointment_type,
@@ -437,7 +436,7 @@ const ProfessionalDashboard = () => {
                 payment_status: newAppointment.payment_status,
                 value: newAppointment.value,
                 notes: newAppointment.notes,
-                professional_id: user.id // Adiciona o ID do profissional logado
+                // O professional_id é adicionado pelo backend a partir do token, não precisa enviar.
             };
 
             // A URL é relativa. O payload é o segundo argumento.
