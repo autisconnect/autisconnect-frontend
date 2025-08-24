@@ -8,7 +8,6 @@ import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaFacebook, FaInstagram, FaClock, 
 import { useParams } from 'react-router-dom';
 import logohori from '../assets/logohoriz copy.jpg';
 import nrmendfsystems from '../assets/17.jpg';
-import '../app.css';
 
 // --- Leaflet Icon Fix ---
 delete L.Icon.Default.prototype._getIconUrl;

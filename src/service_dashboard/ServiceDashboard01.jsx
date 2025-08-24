@@ -7,7 +7,6 @@ import 'leaflet/dist/leaflet.css';
 import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaFacebook, FaInstagram, FaClock, FaListAlt, FaCertificate, FaUsers, FaComments, FaCalendarCheck, FaStar, FaStarHalfAlt, FaRegStar, FaTimes } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import logohori from '../assets/logohoriz copy.jpg';
-import '../app.css';
 
 // --- Leaflet Icon Fix ---
 delete L.Icon.Default.prototype._getIconUrl;
