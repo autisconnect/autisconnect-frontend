@@ -284,43 +284,26 @@ const ProfessionalDashboard = () => {
     };
 //ok
     const fetchPatientProgress = async () => {
-        if (!user) return; // Verificação de segurança
-
+        if (!user) return;
         try {
-            // URL relativa, o apiClient cuida do resto.
             const response = await apiClient.get(`/professional/${user.id}/patient-progress`);
-            
-            const data = response.data; // Dados já vêm em .data com Axios
-
-            // A lógica para processar os dados e montar o gráfico permanece a mesma.
+            const data = response.data;
             const labels = [...new Set(data.map(item => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
             const metrics = ['Comunicacao', 'Interacao_Social', 'Comportamento'];
             const datasets = metrics.map(metric => ({
                 label: metric,
                 data: labels.map(label => {
-                    const item = data.find(d =>
-                        new Date(d.recorded_date).toLocaleDateString('pt-BR') === label &&
-                        d.metric_type === metric
-                    );
+                    const item = data.find(d => new Date(d.recorded_date).toLocaleDateString('pt-BR') === label && d.metric_type === metric);
                     return item ? item.score : null;
                 }),
-                borderColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 1)' :
-                            metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 1)' :
-                            'rgba(255, 99, 132, 1)',
-                backgroundColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 0.2)' :
-                                metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 0.2)' :
-                                'rgba(255, 99, 132, 0.2)',
+                borderColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 1)' : metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 1)' : 'rgba(255, 99, 132, 1)',
+                backgroundColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 0.2)' : metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 0.2)' : 'rgba(255, 99, 132, 0.2)',
                 fill: true,
                 tension: 0.4
             }));
-
             setPatientProgressData({ labels, datasets });
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'buscar o progresso dos pacientes');
-            
-            // Zera os dados do gráfico em caso de erro.
             setPatientProgressData({ labels: [], datasets: [] });
         }
     };
@@ -372,51 +355,25 @@ const ProfessionalDashboard = () => {
     };
 //ok
     const fetchAppointmentTypes = async () => {
-        if (!user) return; // Verificação de segurança
-
-        setLoadingCharts(true);
+        if (!user) return;
         try {
-            // URL relativa, o apiClient cuida do resto.
             const response = await apiClient.get(`/professional/${user.id}/appointment-types`);
-            
-            const data = response.data; // Dados já vêm em .data com Axios
-
-            // Atualiza o estado do gráfico com os dados recebidos.
+            const data = response.data;
             setAppointmentTypeData({
                 labels: data.labels,
-                datasets: [
-                    {
-                        label: 'Tipos de Consulta',
-                        data: data.data,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                        ],
-                        borderWidth: 1,
-                    },
-                ],
+                datasets: [{
+                    label: 'Tipos de Consulta',
+                    data: data.data,
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 1,
+                }],
             });
         } catch (err) {
-            // O tratamento de erro do Axios já lida com status 404 e outros.
             handleApiError(err, 'buscar tipos de consulta');
-            
-            // Em caso de erro, zera os dados do gráfico para não exibir informação antiga.
-            setAppointmentTypeData({
-                labels: [],
-                datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
-            });
-        } finally {
-            setLoadingCharts(false);
+            setAppointmentTypeData({ labels: [], datasets: [{ data: [] }] });
         }
-    };
+    };s
 //ok
     const handleAddPatient = async (e) => {
         e.preventDefault();
@@ -435,154 +392,61 @@ const ProfessionalDashboard = () => {
 //ok
     const handleAddAppointment = async (e) => {
         e.preventDefault();
-
-        // Verificação de segurança e validação dos campos
-        if (!user) {
-            setError('Usuário não autenticado.');
-            return;
-        }
+        if (!user) { setError('Usuário não autenticado.'); return; }
         if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
             setError('Paciente, data, hora e valor são obrigatórios.');
             return;
         }
-
         try {
-            // Monta o corpo da requisição com os nomes de campo que o backend espera
-            const payload = {
-                patient_id: newAppointment.patientId,
-                appointment_date: newAppointment.appointment_date,
-                appointment_time: newAppointment.appointment_time,
-                appointment_type: newAppointment.appointment_type,
-                status: newAppointment.status,
-                payment_method: newAppointment.payment_method,
-                payment_details: newAppointment.payment_details,
-                payment_status: newAppointment.payment_status,
-                value: newAppointment.value,
-                notes: newAppointment.notes,
-                professional_id: user.id // Adiciona o ID do profissional logado
-            };
-
-            // A URL é relativa. O payload é o segundo argumento.
+            const payload = { ...newAppointment, patient_id: newAppointment.patientId, professional_id: user.id };
             await apiClient.post('/appointments', payload);
-
             setSuccessMessage('Consulta registrada com sucesso!');
             setShowAppointmentModal(false);
-
-            // Limpa o formulário para o próximo agendamento
-            setNewAppointment({
-                patientId: '',
-                appointment_date: '',
-                appointment_time: '',
-                appointment_type: 'Consulta Regular',
-                status: 'Realizada',
-                payment_method: 'Pix',
-                payment_details: '',
-                payment_status: 'Pendente',
-                value: '',
-                notes: ''
-            });
-            
-            // Atualiza os dados relevantes no dashboard
+            setNewAppointment({ patientId: '', appointment_date: '', appointment_time: '', appointment_type: 'Consulta Regular', status: 'Realizada', payment_method: 'Pix', payment_details: '', payment_status: 'Pendente', value: '', notes: '' });
             fetchConsultations();
             fetchDashboardData();
             fetchAppointmentTypes();
-
-            // Limpa a mensagem de sucesso após 3 segundos
             setTimeout(() => setSuccessMessage(''), 3000);
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'registrar a consulta');
         }
     };
 //ok
     const handleAddNote = async (e) => {
         e.preventDefault();
-        
-        // Verificações de segurança
-        if (!user || !selectedPatient) {
-            setError('Usuário ou paciente não selecionado.');
-            return;
-        }
-
+        if (!user || !selectedPatient) { setError('Usuário ou paciente não selecionado.'); return; }
         try {
-            // A URL é relativa. O corpo da requisição (newNote) é o segundo argumento.
-            await apiClient.post(
-                `/professional/${user.id}/patients/${selectedPatient.id}/notes`, 
-                newNote
-            );
-
+            await apiClient.post(`/professional/${user.id}/patients/${selectedPatient.id}/notes`, newNote);
             setSuccessMessage('Nota adicionada com sucesso!');
-            
-            // Limpa o formulário e fecha o modal
             setNewNote({ title: '', content: '' });
             setShowNoteModal(false);
-            
-            // Atualiza a lista de notas do paciente selecionado
             fetchPatientNotes(selectedPatient.id);
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'adicionar nota');
         }
     };
 //ok
     const fetchPatientNotes = async (patientId) => {
-        // Verificações de segurança iniciais
-        if (!user || !patientId) {
-            setError('Não foi possível buscar as notas: ID do usuário ou do paciente está faltando.');
-            return;
-        }
-
+        if (!user || !patientId) { setError('Não foi possível buscar as notas: ID do usuário ou do paciente está faltando.'); return; }
         try {
-            // A URL é relativa, o apiClient cuida da base e do token.
             const response = await apiClient.get(`/professional/${user.id}/patients/${patientId}/notes`);
-
-            // Com Axios (usado pelo apiClient), os dados já vêm em response.data
-            const notes = response.data;
-
-            // Atualiza o estado do paciente selecionado com as notas recebidas.
-            setSelectedPatient(prev => ({
-                ...prev,
-                notes: Array.isArray(notes) ? notes : [] // Garante que 'notes' seja sempre um array.
-            }));
-
+            setSelectedPatient(prev => ({ ...prev, notes: Array.isArray(response.data) ? response.data : [] }));
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'buscar as notas do paciente');
-            
-            // Em caso de erro, garante que o painel de notas fique vazio.
-            setSelectedPatient(prev => ({
-                ...prev,
-                notes: []
-            }));
+            setSelectedPatient(prev => ({ ...prev, notes: [] }));
         }
     };
 //ok
     const handleUpdateStatus = async (patientId, newStatus) => {
-        if (!user) return; // Adiciona uma verificação de segurança
-
+        if (!user) return;
         try {
-            // A URL agora é relativa e o apiClient cuida do resto (URL base, token).
-            // O método é PUT e o corpo da requisição é o segundo argumento.
-            await apiClient.put(
-                `/professional/${user.id}/patients/${patientId}/status`, 
-                { status: newStatus }
-            );
-
+            await apiClient.put(`/professional/${user.id}/patients/${patientId}/status`, { status: newStatus });
             setSuccessMessage('Status do paciente atualizado!');
-
-            // Atualiza a lista de pacientes na interface para refletir a mudança.
-            await fetchPatients(); 
-
-            // Se o paciente atualizado for o que está selecionado no painel de detalhes,
-            // atualiza o status dele lá também.
+            await fetchPatients();
             if (selectedPatient && selectedPatient.id === patientId) {
                 setSelectedPatient(prev => ({ ...prev, status: newStatus }));
             }
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'atualizar status do paciente');
         }
     };
@@ -694,25 +558,15 @@ const ProfessionalDashboard = () => {
         }
     };
 
-
-    // useEffect para validação de autenticação
     useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-
+        if (!user) { navigate('/login'); return; }
         if (user.tipo_usuario !== 'medicos_terapeutas' || dashboardId !== user.id.toString()) {
             navigate(`/professional-dashboard/${user.id}`);
             return;
         }
-        setLoading(false);
-    }, [user, navigate, dashboardId]);
-
-    // useEffect para carregar dados
-    useEffect(() => {
-        if (!user || loading) return;
         const fetchAllData = async () => {
+            setLoading(true);
+            setError('');
             await Promise.all([
                 fetchDashboardData(),
                 fetchPatients(),
@@ -722,23 +576,18 @@ const ProfessionalDashboard = () => {
                 fetchDiagnosisDistribution(),
                 fetchAppointmentTypes()
             ]);
+            setLoading(false);
         };
         fetchAllData();
-    }, [user, loading]);
+    }, [user, navigate, dashboardId]);
 
-    // useEffect para sincronizar fetchPatients com statusFilter
     useEffect(() => {
         if (!user || loading) return;
         fetchPatients();
-    }, [statusFilter, user, loading]);
+    }, [statusFilter]);
 
     if (loading) {
-        return (
-            <Container className="text-center mt-5">
-                <Spinner animation="border" />
-                <p>Carregando dashboard...</p>
-            </Container>
-        );
+        return <Container className="text-center mt-5"><Spinner animation="border" /><p>Carregando dashboard...</p></Container>;
     }
 
     return (
