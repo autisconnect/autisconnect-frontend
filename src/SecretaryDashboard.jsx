@@ -2,8 +2,10 @@ import React, { useState, useEffect, useContext, useCallback, useMemo } from 're
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Spinner, Alert } from 'react-bootstrap';
 import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, People } from 'react-bootstrap-icons';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import { AuthContext } from '../context/AuthContext';
 import apiClient from '../services/api.js';
+
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import logohori from '../assets/logo.png';
@@ -12,7 +14,10 @@ import '../App.css';
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 const DashboardCard = ({ title, children, isLoading }) => (
-    <Card className="h-100 shadow-sm"><Card.Header><h5 className="mb-0">{title}</h5></Card.Header><Card.Body>{isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}</Card.Body></Card>
+    <Card className="h-100 shadow-sm">
+        <Card.Header><h5 className="mb-0">{title}</h5></Card.Header>
+        <Card.Body>{isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}</Card.Body>
+    </Card>
 );
 
 const SecretaryDashboard = () => {
@@ -24,25 +29,18 @@ const SecretaryDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [activeTab, setActiveTab] = useState('overview');
-    const [appointments, setAppointments] = useState([]);
     const [patients, setPatients] = useState([]);
     const [professional, setProfessional] = useState(null);
+    const [appointments, setAppointments] = useState([]);
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' });
-    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-    const [showCommunicationModal, setShowCommunicationModal] = useState(false);
-    const [showPatientModal, setShowPatientModal] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState(null);
+    const [showPatientModal, setShowPatientModal] = useState(false);
     const [showEditPatientModal, setShowEditPatientModal] = useState(false);
-    const [editingPatient, setEditingPatient] = useState(null);
-    const [showNoteModal, setShowNoteModal] = useState(false);
-    const [newNote, setNewNote] = useState({ title: '', content: '' });
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
     const [newPatient, setNewPatient] = useState({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
+    const [editingPatient, setEditingPatient] = useState(null);
     const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
-    const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
+    const [patientStatusFilter, setPatientStatusFilter] = useState('ativos');
 //ok
     // --- FUNÇÕES DE API ---
     const handleApiError = (err, context) => {
