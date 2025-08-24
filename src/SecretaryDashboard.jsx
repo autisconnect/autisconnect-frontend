@@ -11,116 +11,67 @@ import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-{/* const socket = io('http://localhost:5000', {
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-} ); */}
-//ok
 const DashboardCard = ({ title, children, isLoading }) => (
-    <Card className="h-100 shadow-sm">
-        <Card.Header><h5 className="mb-0">{title}</h5></Card.Header>
-        <Card.Body>{isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}</Card.Body>
-    </Card>
+    <Card className="h-100 shadow-sm"><Card.Header><h5 className="mb-0">{title}</h5></Card.Header><Card.Body>{isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}</Card.Body></Card>
 );
 
 const SecretaryDashboard = () => {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const { id: secretaryId } = useParams();
+    const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const { id: secretaryId } = useParams();
 
-  // --- ESTADOS ---
-  const [authValidated, setAuthValidated] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
-  const [appointments, setAppointments] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [professional, setProfessional] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' });
-  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-  const [showCommunicationModal, setShowCommunicationModal] = useState(false);
-  const [showPatientModal, setShowPatientModal] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [showEditPatientModal, setShowEditPatientModal] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
-  const [showNoteModal, setShowNoteModal] = useState(false);
-  const [newNote, setNewNote] = useState({ title: '', content: '' });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [newPatient, setNewPatient] = useState({
-    name: '',
-    birthDate: '',
-    phone: '',
-    email: '',
-    diagnosis: '',
-    notes: ''
-  });
-
-  const [newAppointment, setNewAppointment] = useState({
-    patientId: '', appointment_date: '', appointment_time: '', appointment_type: 'Consulta Regular',
-    status: 'Agendada', payment_method: 'Pix', payment_details: '', payment_status: 'Pendente',
-    value: '', notes: '',
-  });
-  const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
-
+    // --- ESTADOS ---
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [activeTab, setActiveTab] = useState('overview');
+    const [appointments, setAppointments] = useState([]);
+    const [patients, setPatients] = useState([]);
+    const [professional, setProfessional] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' });
+    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+    const [showCommunicationModal, setShowCommunicationModal] = useState(false);
+    const [showPatientModal, setShowPatientModal] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [showEditPatientModal, setShowEditPatientModal] = useState(false);
+    const [editingPatient, setEditingPatient] = useState(null);
+    const [showNoteModal, setShowNoteModal] = useState(false);
+    const [newNote, setNewNote] = useState({ title: '', content: '' });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [newPatient, setNewPatient] = useState({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
+    const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
+    const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
 //ok
-  // --- FUNÇÕES DE API ---
-    // Função genérica para tratar erros de API, mantendo o código limpo.
+    // --- FUNÇÕES DE API ---
     const handleApiError = (err, context) => {
         console.error(`Erro ao ${context}:`, err);
         const message = err.response?.data?.error || err.response?.data?.message || `Erro ao ${context}. Tente novamente.`;
         setError(message);
     };
-
-    // Função única para buscar todos os dados iniciais do dashboard.
+//ok
     // Usa 'useCallback' para evitar recriações desnecessárias.
     const fetchAllData = useCallback(async () => {
-        if (!user) return; // Não faz nada se o usuário não estiver logado.
-
-        setLoadingData(true); // Ativa o spinner principal.
-        setError('');
-
+        if (!user) return;
+        setLoading(true);
         try {
-            // Executa todas as chamadas de API em paralelo para máxima performance.
             const [patientsRes, profRes, appointmentsRes, messagesRes] = await Promise.all([
                 apiClient.get('/secretary/patients'),
                 apiClient.get('/secretary/professionals'),
                 apiClient.get('/secretary/appointments'),
                 apiClient.get('/secretary/messages')
             ]);
-
-            // Atualiza os estados com os dados recebidos.
-            // A verificação 'Array.isArray' previne erros se a API retornar algo inesperado.
             setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
             setProfessional(profRes.data[0] || null);
             setAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
             setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
-
         } catch (err) {
-            // Se qualquer uma das chamadas falhar, o erro é capturado aqui.
             handleApiError(err, 'carregar os dados do dashboard');
         } finally {
-            // Garante que o spinner principal seja desativado, mesmo se ocorrer um erro.
-            setLoadingData(false);
+            setLoading(false);
         }
-    }, [user]); // A função só será recriada se o objeto 'user' mudar.
-//ok
-    useEffect(() => {
-        if (!user) { navigate('/login'); return; }
-        if (user.tipo_usuario !== 'secretaria' || (secretaryId && parseInt(secretaryId, 10) !== user.id)) {
-            logout();
-            navigate('/login');
-            return;
-        }
-        fetchAllData();
-    }, [user, navigate, secretaryId, logout, fetchAllData]);
-
-  useEffect(() => {
-    if (authValidated) { fetchAllData(); }
-  }, [authValidated, fetchAllData]);
+    }, [user]);
 //ok
     const handleAddAppointment = async (e) => {
         e.preventDefault();
@@ -369,9 +320,21 @@ const SecretaryDashboard = () => {
       },
     };
   }, [appointments]);
+//ok
+    useEffect(() => {
+        if (!user) { navigate('/login'); return; }
+        if (user.tipo_usuario !== 'secretaria' || (secretaryId && parseInt(secretaryId, 10) !== user.id)) {
+            logout();
+            navigate('/login');
+            return;
+        }
+        fetchAllData();
+    }, [user, navigate, secretaryId, logout, fetchAllData]);
 
-  if (!authValidated) return <Container className="text-center mt-5"><Spinner animation="border" /><p>Validando...</p></Container>;
-
+    if (loading) {
+        return <Container className="text-center mt-5"><Spinner animation="border" /><p>Carregando dashboard...</p></Container>;
+    }
+    
   return (
     <Container fluid className="py-4 secretary-dashboard">
       <Row className="professional-header-row mb-4 align-items-center">
