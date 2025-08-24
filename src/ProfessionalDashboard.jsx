@@ -1,20 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
-import { Calendar2Check, People, ClockHistory, ChatDots, FileEarmarkText, GraphUp, Bell, BoxArrowUpRight, Wallet2, PlusCircle } from 'react-bootstrap-icons';
+import { Calendar2Check, People, GraphUp, Wallet2, PlusCircle, FileEarmarkText, Bell } from 'react-bootstrap-icons'; // Ícones adicionados
 import { Line, Bar, Pie } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
@@ -22,18 +10,8 @@ import logohori from './assets/logo.png';
 import './App.css';
 
 // Registrar componentes do Chart.js
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler );
+
 
 // Componente ErrorBoundary
 class ErrorBoundary extends React.Component {
