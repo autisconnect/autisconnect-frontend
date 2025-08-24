@@ -285,28 +285,46 @@ const ProfessionalDashboard = () => {
 //ok
     const fetchPatientProgress = async () => {
         if (!user) return;
+
         try {
             const response = await apiClient.get(`/professional/${user.id}/patient-progress`);
-            const data = response.data;
+            
+            // =================================================================
+            // >>>>> LINHA DA CORREÇÃO ADICIONADA AQUI <<<<<
+            // Garante que 'data' seja sempre um array, mesmo que a API retorne null ou undefined.
+            const data = Array.isArray(response.data) ? response.data : [];
+            // =================================================================
+
+            // O resto da lógica para processar os dados permanece a mesma.
             const labels = [...new Set(data.map(item => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
             const metrics = ['Comunicacao', 'Interacao_Social', 'Comportamento'];
             const datasets = metrics.map(metric => ({
                 label: metric,
                 data: labels.map(label => {
-                    const item = data.find(d => new Date(d.recorded_date).toLocaleDateString('pt-BR') === label && d.metric_type === metric);
+                    const item = data.find(d =>
+                        new Date(d.recorded_date).toLocaleDateString('pt-BR') === label &&
+                        d.metric_type === metric
+                    );
                     return item ? item.score : null;
                 }),
-                borderColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 1)' : metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 1)' : 'rgba(255, 99, 132, 1)',
-                backgroundColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 0.2)' : metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 0.2)' : 'rgba(255, 99, 132, 0.2)',
+                borderColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 1)' :
+                            metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 1)' :
+                            'rgba(255, 99, 132, 1)',
+                backgroundColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 0.2)' :
+                                metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 0.2)' :
+                                'rgba(255, 99, 132, 0.2)',
                 fill: true,
                 tension: 0.4
             }));
+
             setPatientProgressData({ labels, datasets });
+
         } catch (err) {
             handleApiError(err, 'buscar o progresso dos pacientes');
             setPatientProgressData({ labels: [], datasets: [] });
         }
     };
+
 //ok
     const fetchDiagnosisDistribution = async () => {
         if (!user) return; // Verificação de segurança
