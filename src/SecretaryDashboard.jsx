@@ -119,14 +119,13 @@ const SecretaryDashboard = () => {
 //ok
     const handleAddPatient = async (e) => {
         e.preventDefault();
-        if (!professional?.id) { setError('Profissional associado não encontrado.'); return; }
+        if (!user) return;
         try {
             await apiClient.post('/secretary/patients', newPatient);
-            setSuccessMessage('Paciente cadastrado com sucesso!');
+            setSuccessMessage('Paciente adicionado com sucesso!');
             setShowPatientModal(false);
             setNewPatient({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
-            const patientsRes = await apiClient.get('/secretary/patients');
-            setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+            fetchAllData(); // Simplificado para buscar todos os dados novamente
         } catch (err) {
             handleApiError(err, 'adicionar paciente');
         }
@@ -158,7 +157,10 @@ const SecretaryDashboard = () => {
 //ok
     const handleUpdatePatient = async (e) => {
         e.preventDefault();
-        if (!editingPatient?.id) { setError('Nenhum paciente selecionado para edição.'); return; }
+        if (!editingPatient?.id || !user) {
+            setError('Nenhum paciente selecionado para edição.');
+            return;
+        }
         try {
             const payload = {
                 name: editingPatient.name,
@@ -168,17 +170,18 @@ const SecretaryDashboard = () => {
                 diagnosis: editingPatient.diagnosis,
                 notes: editingPatient.observacoes
             };
+            // USA O apiClient E A ROTA CORRETA
             await apiClient.put(`/secretary/patients/${editingPatient.id}`, payload);
             setSuccessMessage('Dados do paciente atualizados com sucesso!');
             setShowEditPatientModal(false);
-            const patientsRes = await apiClient.get('/secretary/patients');
-            setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+            fetchAllData(); // Simplificado para buscar todos os dados novamente
             setSelectedPatient(prev => ({ ...prev, ...editingPatient, observacoes: payload.notes }));
             setEditingPatient(null);
         } catch (err) {
             handleApiError(err, 'atualizar paciente');
         }
     };
+
 //ok
     const handleUpdateStatus = async (patientId, newStatus) => {
         try {
@@ -334,7 +337,7 @@ const SecretaryDashboard = () => {
     if (loading) {
         return <Container className="text-center mt-5"><Spinner animation="border" /><p>Carregando dashboard...</p></Container>;
     }
-    
+
   return (
     <Container fluid className="py-4 secretary-dashboard">
       <Row className="professional-header-row mb-4 align-items-center">
