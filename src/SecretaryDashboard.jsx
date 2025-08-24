@@ -37,10 +37,17 @@ const SecretaryDashboard = () => {
     const [showPatientModal, setShowPatientModal] = useState(false);
     const [showEditPatientModal, setShowEditPatientModal] = useState(false);
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+    const [showCommunicationModal, setShowCommunicationModal] = useState(false);
+    const [showNoteModal, setShowNoteModal] = useState(false);
     const [newPatient, setNewPatient] = useState({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
     const [editingPatient, setEditingPatient] = useState(null);
     const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
-    const [patientStatusFilter, setPatientStatusFilter] = useState('ativos');
+    const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' });
+    const [newNote, setNewNote] = useState({ title: '', content: '' });
+    const [activeTab, setActiveTab] = useState('overview');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
 //ok
     // --- FUNÇÕES DE API ---
     const handleApiError = (err, context) => {
@@ -220,27 +227,16 @@ const SecretaryDashboard = () => {
         }
     };
 //ok
-  const filteredPatients = useMemo(() => {
-      // 1. Garante que 'patients' seja sempre um array.
-      if (!Array.isArray(patients)) return [];
-
-      return patients.filter(patient => {
-          const searchTermLower = searchTerm.toLowerCase();
-
-          // 2. Verifica o nome do paciente. O '?.' protege contra nomes nulos.
-          const nameMatch = patient.name?.toLowerCase().includes(searchTermLower);
-
-          // 3. CORREÇÃO: Verifica o diagnóstico apenas se ele existir.
-          //    Se 'patient.diagnosis' for nulo, a expressão inteira se torna 'false' com segurança.
-          const diagnosisMatch = patient.diagnosis ? patient.diagnosis.toLowerCase().includes(searchTermLower) : false;
-          
-          // 4. Verifica o status.
-          const statusMatch = !statusFilter || patient.status === statusFilter;
-
-          // Retorna true se a busca corresponder ao nome OU ao diagnóstico, E também ao filtro de status.
-          return (nameMatch || diagnosisMatch) && statusMatch;
-      });
-  }, [patients, searchTerm, statusFilter]);
+    const filteredPatients = useMemo(() => {
+        if (!Array.isArray(patients)) return [];
+        return patients.filter(patient => {
+            const searchTermLower = searchTerm.toLowerCase();
+            const nameMatch = patient.name?.toLowerCase().includes(searchTermLower);
+            const diagnosisMatch = patient.diagnosis ? patient.diagnosis.toLowerCase().includes(searchTermLower) : false;
+            const statusMatch = !statusFilter || patient.status === statusFilter;
+            return (nameMatch || diagnosisMatch) && statusMatch;
+        });
+    }, [patients, searchTerm, statusFilter]);
 
 
   const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
@@ -250,17 +246,17 @@ const SecretaryDashboard = () => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
   };
-
-  const filteredAppointments = useMemo(() => {
-    if (!Array.isArray(appointments)) return [];
-    return appointments.filter(app => {
-      const appointmentDate = app.appointment_date ? app.appointment_date.split('T')[0] : '';
-      const matchesDate = !filters.date || appointmentDate === filters.date;
-      const matchesPatient = !filters.patientId || app.patient_id.toString() === filters.patientId;
-      const matchesStatus = !filters.status || app.status === filters.status;
-      return matchesDate && matchesPatient && matchesStatus;
-    });
-  }, [appointments, filters]);
+//ok
+    const filteredAppointments = useMemo(() => {
+        if (!Array.isArray(appointments)) return [];
+        return appointments.filter(app => {
+            const appointmentDate = app.appointment_date ? app.appointment_date.split('T')[0] : '';
+            const matchesDate = !filters.date || appointmentDate === filters.date;
+            const matchesPatient = !filters.patientId || app.patient_id.toString() === filters.patientId;
+            const matchesStatus = !filters.status || app.status === filters.status;
+            return matchesDate && matchesPatient && matchesStatus;
+        });
+    }, [appointments, filters]);
 
   const { appointmentsToday, upcomingAppointments, pendingPayments } = useMemo(() => {
     if (!Array.isArray(appointments)) return { appointmentsToday: [], upcomingAppointments: [], pendingPayments: [] };
