@@ -4,7 +4,7 @@ import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstra
 import { FaCalendar, FaComments, FaGamepad, FaHeartbeat, FaStore, FaUserMd } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import logohori from '../assets/logohoriz.jpg'; // Ajuste o caminho
-import '../app.css';
+import '../App.css';
 
 function PresentationParentDashboard() {
     const navigate = useNavigate();
