@@ -136,29 +136,29 @@ const SecretaryDashboard = () => {
         }
     };
 //ok
-  const handlePatientRowClick = async (patient) => {
-      // 1. Validação inicial para garantir que um paciente válido foi clicado.
-      if (!patient || !patient.id) {
-          setError('Ocorreu um erro ao selecionar o paciente.');
-          console.error('Tentativa de clique em paciente inválido:', patient);
-          setSelectedPatient(null);
-          return;
-      }
+    const handlePatientRowClick = async (patient) => {
+        // 1. Validação inicial para garantir que um paciente válido foi clicado.
+        if (!patient || !patient.id) {
+            setError('Ocorreu um erro ao selecionar o paciente.');
+            console.error('Tentativa de clique em paciente inválido:', patient);
+            setSelectedPatient(null);
+            return;
+        }
 
-      try {
-          // 2. "Limpa" o painel de detalhes e mostra o nome do paciente imediatamente.
-          //    Isso dá um feedback visual rápido para o usuário.
-          setSelectedPatient({ ...patient, notes: [] }); 
-          
-          // 3. Busca as notas do paciente. A função fetchPatientNotes já tem seu próprio try/catch.
-          await fetchPatientNotes(patient.id);
+        try {
+            // 2. "Limpa" o painel de detalhes e mostra o nome do paciente imediatamente.
+            //    Isso dá um feedback visual rápido para o usuário.
+            setSelectedPatient({ ...patient, notes: [] }); 
+            
+            // 3. Busca as notas do paciente. A função fetchPatientNotes já tem seu próprio try/catch.
+            await fetchPatientNotes(patient.id);
 
-      } catch (err) {
-          // 4. Este catch agora serve como uma segurança extra, caso algo inesperado aconteça.
-          handleApiError(err, 'carregar os detalhes do paciente');
-          setSelectedPatient(null); // Limpa o painel de detalhes em caso de erro.
-      }
-  };
+        } catch (err) {
+            // 4. Este catch agora serve como uma segurança extra, caso algo inesperado aconteça.
+            handleApiError(err, 'carregar os detalhes do paciente');
+            setSelectedPatient(null); // Limpa o painel de detalhes em caso de erro.
+        }
+    };
 //ok
     const handleUpdatePatient = async (e) => {
         e.preventDefault();
@@ -239,13 +239,13 @@ const SecretaryDashboard = () => {
     }, [patients, searchTerm, statusFilter]);
 
 
-  const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
-  const formatTime = (timeString) => timeString ? timeString.substring(0, 5) : 'N/A';
+    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
+    const formatTime = (timeString) => timeString ? timeString.substring(0, 5) : 'N/A';
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
-  };
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
 //ok
     const filteredAppointments = useMemo(() => {
         if (!Array.isArray(appointments)) return [];
@@ -258,29 +258,29 @@ const SecretaryDashboard = () => {
         });
     }, [appointments, filters]);
 
-  const { appointmentsToday, upcomingAppointments, pendingPayments } = useMemo(() => {
-    if (!Array.isArray(appointments)) return { appointmentsToday: [], upcomingAppointments: [], pendingPayments: [] };
-    const today = new Date().toISOString().slice(0, 10);
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
+    const { appointmentsToday, upcomingAppointments, pendingPayments } = useMemo(() => {
+        if (!Array.isArray(appointments)) return { appointmentsToday: [], upcomingAppointments: [], pendingPayments: [] };
+        const today = new Date().toISOString().slice(0, 10);
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
 
-    const todayList = appointments.filter(a => a.appointment_date?.slice(0, 10) === today);
-    const upcomingList = appointments.filter(a => {
-        const appDate = new Date(a.appointment_date);
-        return appDate > new Date() && appDate <= nextWeek;
-    }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
-    const pendingList = appointments.filter(a => a.payment_status === 'Pendente' && a.status === 'Realizada');
+        const todayList = appointments.filter(a => a.appointment_date?.slice(0, 10) === today);
+        const upcomingList = appointments.filter(a => {
+            const appDate = new Date(a.appointment_date);
+            return appDate > new Date() && appDate <= nextWeek;
+        }).sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date));
+        const pendingList = appointments.filter(a => a.payment_status === 'Pendente' && a.status === 'Realizada');
 
-    return { appointmentsToday: todayList, upcomingAppointments: upcomingList, pendingPayments: pendingList };
-  }, [appointments]);
+        return { appointmentsToday: todayList, upcomingAppointments: upcomingList, pendingPayments: pendingList };
+    }, [appointments]);
 
-  const chartData = useMemo(() => {
-    if (!Array.isArray(appointments)) return { statusDistribution: { labels: [], datasets: [] }, dailyPerformance: { labels: [], datasets: [] } };
-    
-    const statusCounts = appointments.reduce((acc, app) => {
-      acc[app.status] = (acc[app.status] || 0) + 1;
-      return acc;
-    }, {});
+    const chartData = useMemo(() => {
+        if (!Array.isArray(appointments)) return { statusDistribution: { labels: [], datasets: [] }, dailyPerformance: { labels: [], datasets: [] } };
+        
+        const statusCounts = appointments.reduce((acc, app) => {
+        acc[app.status] = (acc[app.status] || 0) + 1;
+        return acc;
+        }, {});
 
     const dailyCounts = appointments.reduce((acc, app) => {
         if (app.status === 'Realizada') {
@@ -297,26 +297,26 @@ const SecretaryDashboard = () => {
     }).reverse();
 
     return {
-      statusDistribution: {
-        labels: Object.keys(statusCounts),
-        datasets: [{
-          data: Object.values(statusCounts),
-          backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d'],
-          hoverOffset: 4,
-        }],
-      },
-      dailyPerformance: {
-        labels: last7Days,
-        datasets: [{
-          label: 'Consultas Realizadas',
-          data: last7Days.map(day => dailyCounts[day] || 0),
-          backgroundColor: 'rgba(0, 123, 255, 0.5)',
-          borderColor: 'rgba(0, 123, 255, 1)',
-          borderWidth: 1,
-        }],
-      },
-    };
-  }, [appointments]);
+        statusDistribution: {
+            labels: Object.keys(statusCounts),
+            datasets: [{
+            data: Object.values(statusCounts),
+            backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d'],
+            hoverOffset: 4,
+            }],
+        },
+        dailyPerformance: {
+            labels: last7Days,
+            datasets: [{
+            label: 'Consultas Realizadas',
+            data: last7Days.map(day => dailyCounts[day] || 0),
+            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1,
+            }],
+        },
+        };
+    }, [appointments]);
 //ok
     useEffect(() => {
         if (!user) { navigate('/login'); return; }
@@ -338,20 +338,20 @@ const SecretaryDashboard = () => {
         );
     }
 
-  return (
-    <Container fluid className="py-4 secretary-dashboard">
-      <Row className="professional-header-row mb-4 align-items-center">
-          <Col xs="auto">
-              <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-          </Col>
-          <Col>
-              <h1 className="professional-name mb-0">Dashboard da Secretária</h1>
-              <p className="professional-specialty text-muted mb-0">Organizando a clínica de {professional?.name || '...'}</p>
-          </Col>
-          <Col xs="auto">
-              <Button variant="danger" onClick={() => { logout(); navigate('/'); }}>Sair</Button>
-          </Col>
-      </Row>
+    return (
+        <Container fluid className="py-4 secretary-dashboard">
+        <Row className="professional-header-row mb-4 align-items-center">
+            <Col xs="auto">
+                <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
+            </Col>
+            <Col>
+                <h1 className="professional-name mb-0">Dashboard da Secretária</h1>
+                <p className="professional-specialty text-muted mb-0">Organizando a clínica de {professional?.name || '...'}</p>
+            </Col>
+            <Col xs="auto">
+                <Button variant="danger" onClick={() => { logout(); navigate('/'); }}>Sair</Button>
+            </Col>
+        </Row>
 
       <Container fluid>
         {successMessage && <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>{successMessage}</Alert>}
@@ -376,7 +376,7 @@ const SecretaryDashboard = () => {
             <Tab.Pane eventKey="overview">
               <Row>
                 <Col lg={8}>
-                  <DashboardCard title="Consultas de Hoje" isLoading={loadingData}>
+                  <DashboardCard title="Consultas de Hoje" isLoading={loading}>
                     <Table striped hover responsive size="sm">
                       <thead><tr><th>Horário</th><th>Paciente</th><th>Tipo</th><th>Status</th></tr></thead>
                       <tbody>
@@ -392,7 +392,7 @@ const SecretaryDashboard = () => {
                     </Table>
                   </DashboardCard>
                   <div className="mt-4">
-                    <DashboardCard title="Próximos Agendamentos (7 dias)" isLoading={loadingData}>
+                    <DashboardCard title="Próximos Agendamentos (7 dias)" isLoading={loading}>
                       <Table striped hover responsive size="sm">
                         <thead><tr><th>Data</th><th>Horário</th><th>Paciente</th><th>Status</th></tr></thead>
                         <tbody>
@@ -410,7 +410,7 @@ const SecretaryDashboard = () => {
                   </div>
                 </Col>
                 <Col lg={4}>
-                  <DashboardCard title="Pagamentos Pendentes" isLoading={loadingData}>
+                  <DashboardCard title="Pagamentos Pendentes" isLoading={loading}>
                     <Table striped hover responsive size="sm">
                       <thead><tr><th>Paciente</th><th>Valor</th></tr></thead>
                       <tbody>
@@ -431,12 +431,12 @@ const SecretaryDashboard = () => {
             <Tab.Pane eventKey="analytics">
               <Row>
                 <Col lg={8} className="mb-4">
-                  <DashboardCard title="Atendimentos por Dia (Últimos 7 dias)" isLoading={loadingData}>
+                  <DashboardCard title="Atendimentos por Dia (Últimos 7 dias)" isLoading={loading}>
                     <Bar data={chartData.dailyPerformance} options={{ responsive: true, plugins: { legend: { display: false } } }} />
                   </DashboardCard>
                 </Col>
                 <Col lg={4} className="mb-4">
-                  <DashboardCard title="Status das Consultas" isLoading={loadingData}>
+                  <DashboardCard title="Status das Consultas" isLoading={loading}>
                     <Doughnut data={chartData.statusDistribution} options={{ responsive: true, plugins: { legend: { position: 'top' } } }} />
                   </DashboardCard>
                 </Col>
@@ -513,7 +513,7 @@ const SecretaryDashboard = () => {
                         <Card>
                             <Card.Header><h5>Lista de Pacientes</h5></Card.Header>
                             <Card.Body>
-                                {loadingData ? (
+                                {loading ? (
                                     <div className="text-center"><Spinner animation="border" /></div>
                                 ) : filteredPatients.length > 0 ? (
                                     <Table responsive hover>
@@ -622,7 +622,7 @@ const SecretaryDashboard = () => {
                     </Col>
                 </Row>
                 <Card.Body>
-                  {loadingData ? <Spinner animation="border" size="sm" /> :
+                  {loading ? <Spinner animation="border" size="sm" /> :
                     Array.isArray(messages) && messages.length > 0 ? messages.map((message) => (
                       <div key={message.id} className="d-flex align-items-start mb-3">
                         <Bell className={`me-2 mt-1 ${message.read ? 'text-muted' : 'text-primary'}`} />
