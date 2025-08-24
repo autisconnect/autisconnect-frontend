@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Navbar, Form, Card, Button, Alert, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
-import apiClient from '../services/api.js';
+import apiClient from '@/services/api.js';
 import logohori from './assets/logohoriz.jpg';
 import './App.css';
 

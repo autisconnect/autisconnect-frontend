@@ -1,6 +1,7 @@
 // C:\autisconnect\frontend\vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path'; 
 
 export default defineConfig({
   plugins: [react()],
@@ -36,6 +37,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'face-api.js': 'face-api.js/dist/face-api.js',
+      '@': path.resolve(__dirname, './src'),
     },
   },
 });
