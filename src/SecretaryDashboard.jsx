@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Spinner, Alert } from 'react-bootstrap';
-import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, PieChart, ArrowLeft, People } from 'react-bootstrap-icons'; // Importar ArrowLeft
+import { Calendar2Check, ChatDots, Bell, PlusCircle, BarChartLine, People } from 'react-bootstrap-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
-import io from 'socket.io-client';
+import apiClient from './services/api.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import logohori from './assets/logo.png';
@@ -11,22 +11,17 @@ import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-const socket = io('http://localhost:5000', {
+{/* const socket = io('http://localhost:5000', {
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
-} );
-
+} ); */}
+//ok
 const DashboardCard = ({ title, children, isLoading }) => (
-  <Card className="h-100 shadow-sm">
-    {/* O cabeçalho do card será estilizado pelo CSS global */}
-    <Card.Header>
-      <h5 className="mb-0">{title}</h5>
-    </Card.Header>
-    <Card.Body>
-      {isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}
-    </Card.Body>
-  </Card>
+    <Card className="h-100 shadow-sm">
+        <Card.Header><h5 className="mb-0">{title}</h5></Card.Header>
+        <Card.Body>{isLoading ? <div className="text-center"><Spinner animation="border" size="sm" /></div> : children}</Card.Body>
+    </Card>
 );
 
 const SecretaryDashboard = () => {
@@ -71,326 +66,229 @@ const SecretaryDashboard = () => {
   });
   const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
 
+//ok
   // --- FUNÇÕES DE API ---
-  const getAuthHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json',
-  });
+    // Função genérica para tratar erros de API, mantendo o código limpo.
+    const handleApiError = (err, context) => {
+        console.error(`Erro ao ${context}:`, err);
+        const message = err.response?.data?.error || err.response?.data?.message || `Erro ao ${context}. Tente novamente.`;
+        setError(message);
+    };
 
-  const fetchWithToken = useCallback(async (url, setData, errorMsg) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Token ausente.');
-      const response = await fetch(url, { headers: getAuthHeaders() });
-      if (response.status === 401) throw new Error('Sessão expirada.');
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({ error: `Falha na requisição para ${url}` }));
-        throw new Error(errData.error || errorMsg);
-      }
-      const data = await response.json();
-      setData(data);
-    } catch (err) {
-      console.error(`Error fetching ${url}:`, err.message);
-      setError(err.message);
-    }
-  }, []);
+    // Função única para buscar todos os dados iniciais do dashboard.
+    // Usa 'useCallback' para evitar recriações desnecessárias.
+    const fetchAllData = useCallback(async () => {
+        if (!user) return; // Não faz nada se o usuário não estiver logado.
 
-  const fetchAllData = useCallback(async () => {
-    setLoadingData(true);
-    setError('');
-    await Promise.all([
-      fetchWithToken(`http://localhost:5000/api/secretary/patients`, setPatients, 'Erro ao buscar pacientes'  ),
-      fetchWithToken(`http://localhost:5000/api/secretary/professionals`, (data  ) => setProfessional(data[0] || null), 'Erro ao buscar profissional'),
-      fetchWithToken(`http://localhost:5000/api/secretary/appointments`, setAppointments, 'Erro ao buscar consultas'  ),
-      fetchWithToken(`http://localhost:5000/api/secretary/messages`, setMessages, 'Erro ao buscar mensagens'  ),
-    ]);
-    setLoadingData(false);
-  }, [fetchWithToken]);
+        setLoadingData(true); // Ativa o spinner principal.
+        setError('');
 
-  useEffect(() => {
-    if (!user) { navigate('/login'); return; }
-    if (user.tipo_usuario !== 'secretaria' || (secretaryId && parseInt(secretaryId, 10) !== user.id)) {
-      logout(); navigate('/login'); return;
-    }
-    setAuthValidated(true);
-  }, [user, secretaryId, navigate, logout]);
+        try {
+            // Executa todas as chamadas de API em paralelo para máxima performance.
+            const [patientsRes, profRes, appointmentsRes, messagesRes] = await Promise.all([
+                apiClient.get('/secretary/patients'),
+                apiClient.get('/secretary/professionals'),
+                apiClient.get('/secretary/appointments'),
+                apiClient.get('/secretary/messages')
+            ]);
+
+            // Atualiza os estados com os dados recebidos.
+            // A verificação 'Array.isArray' previne erros se a API retornar algo inesperado.
+            setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+            setProfessional(profRes.data[0] || null);
+            setAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
+            setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
+
+        } catch (err) {
+            // Se qualquer uma das chamadas falhar, o erro é capturado aqui.
+            handleApiError(err, 'carregar os dados do dashboard');
+        } finally {
+            // Garante que o spinner principal seja desativado, mesmo se ocorrer um erro.
+            setLoadingData(false);
+        }
+    }, [user]); // A função só será recriada se o objeto 'user' mudar.
+//ok
+    useEffect(() => {
+        if (!user) { navigate('/login'); return; }
+        if (user.tipo_usuario !== 'secretaria' || (secretaryId && parseInt(secretaryId, 10) !== user.id)) {
+            logout();
+            navigate('/login');
+            return;
+        }
+        fetchAllData();
+    }, [user, navigate, secretaryId, logout, fetchAllData]);
 
   useEffect(() => {
     if (authValidated) { fetchAllData(); }
   }, [authValidated, fetchAllData]);
-
+//ok
     const handleAddAppointment = async (e) => {
-    e.preventDefault();
-    if (!professional?.id) { setError('Profissional não identificado.'); return; }
-    if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
-      setError('Paciente, data, hora e valor são obrigatórios.'); return;
-    }
-    try {
-      const response = await fetch(`http://localhost:5000/api/secretary/appointments`, {
-        method: 'POST', headers: getAuthHeaders(  ), body: JSON.stringify({ ...newAppointment, professional_id: professional.id }),
-      });
-      if (!response.ok) throw new Error((await response.json()).error || 'Falha ao registrar consulta.');
-      setShowAppointmentModal(false);
-      setNewAppointment({
-        patientId: '', appointment_date: '', appointment_time: '', appointment_type: 'Consulta Regular',
-        status: 'Agendada', payment_method: 'Pix', payment_details: '', payment_status: 'Pendente', value: '', notes: '',
-      });
-      setSuccessMessage('Consulta registrada com sucesso!');
-      await fetchAllData();
-      socket.emit('newAppointment', { professionalId: professional.id });
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err) { setError(err.message); }
-  };
-  
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.recipientId || !newMessage.content) {
-      setError('Destinatário e conteúdo da mensagem são obrigatórios.');
-      return;
-    }
-    try {
-      const response = await fetch(`http://localhost:5000/api/secretary/messages`, {
-        method: 'POST',
-        headers: getAuthHeaders(  ),
-        body: JSON.stringify(newMessage),
-      });
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Falha ao enviar mensagem.');
-      }
-      setNewMessage({ recipientId: '', content: '' });
-      setShowCommunicationModal(false);
-      setSuccessMessage('Mensagem enviada com sucesso!');
-      await fetchWithToken(`http://localhost:5000/api/secretary/messages`, setMessages, 'Erro ao buscar mensagens'  );
-      socket.emit('newMessage', { ...newMessage, senderId: user.id });
-      setTimeout(() => setSuccessMessage(''), 2000);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-    // Histórico de consultas  --- HANDLERS ---
-  const handleFieldUpdate = async (appointmentId, field, value) => {
-      // Optimistic UI update
-      setAppointments(prevAppointments => 
-          prevAppointments.map(c =>
-              c.id === appointmentId ? { ...c, [field]: value } : c
-          )
-      );
-
-      try {
-          const response = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`, { // <-- A ROTA PRECISA SER AJUSTADA
-              method: 'PUT',
-              headers: getAuthHeaders( ),
-              body: JSON.stringify({ field, value }),
-          });
-
-          if (!response.ok) {
-              const errorData = await response.json().catch(() => ({}));
-              throw new Error(errorData.error || 'Falha ao atualizar o campo.');
-          }
-
-          setSuccessMessage('Campo atualizado com sucesso!');
-          setTimeout(() => setSuccessMessage(''), 2000);
-      } catch (err) {
-          setError(`Erro ao atualizar: ${err.message}`);
-          fetchAllData(); // Revert to server state on error
-      }
-  };
-
-  // Menu Pacientes
-  const handleAddPatient = async (e) => {
-      e.preventDefault();
-      if (!professional?.id) {
-          setError('Profissional associado não encontrado.');
-          return;
-      }
-      try {
-          // Usa a nova rota da secretária
-          const response = await fetch(`http://localhost:5000/api/secretary/patients`, {
-              method: 'POST',
-              headers: getAuthHeaders( ),
-              // Adiciona o ID do profissional ao payload
-              body: JSON.stringify({ ...newPatient, professional_id: professional.id })
-          });
-
-          if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Falha ao adicionar paciente.');
-          }
-
-          setNewPatient({
-              name: '',
-              birthDate: '',
-              phone: '',
-              email: '',
-              diagnosis: '',
-              notes: ''
-          });
-          setShowPatientModal(false);
-          // Atualiza a lista de pacientes na tela
-          await fetchWithToken(`http://localhost:5000/api/secretary/patients`, setPatients, 'Erro ao buscar pacientes' );
-          setSuccessMessage('Paciente cadastrado com sucesso!');
-      } catch (err) {
-          console.error('Erro ao adicionar paciente:', err);
-          setError(err.message);
-      }
-  };
-
+        e.preventDefault();
+        if (!user) { setError('Usuário não autenticado.'); return; }
+        if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
+            setError('Paciente, data, hora e valor são obrigatórios.');
+            return;
+        }
+        try {
+            await apiClient.post('/secretary/appointments', newAppointment);
+            setSuccessMessage('Consulta registrada com sucesso!');
+            setShowAppointmentModal(false);
+            setNewAppointment({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
+            fetchAllData();
+        } catch (err) {
+            handleApiError(err, 'registrar a consulta');
+        }
+    };
+//ok
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.recipientId || !newMessage.content) { setError('Destinatário e conteúdo são obrigatórios.'); return; }
+        try {
+            await apiClient.post('/secretary/messages', newMessage);
+            setSuccessMessage('Mensagem enviada com sucesso!');
+            setShowCommunicationModal(false);
+            setNewMessage({ recipientId: '', content: '' });
+            const messagesRes = await apiClient.get('/secretary/messages');
+            setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
+        } catch (err) {
+            handleApiError(err, 'enviar mensagem');
+        }
+    };
+//ok
+    const handleFieldUpdate = async (appointmentId, field, value) => {
+        setAppointments(prev => prev.map(c => c.id === appointmentId ? { ...c, [field]: value } : c));
+        try {
+            await apiClient.put(`/secretary/appointments/${appointmentId}`, { field, value });
+            setSuccessMessage('Campo atualizado com sucesso!');
+        } catch (err) {
+            handleApiError(err, 'atualizar o campo');
+            fetchAllData();
+        }
+    };
+//ok
+    const handleAddPatient = async (e) => {
+        e.preventDefault();
+        if (!professional?.id) { setError('Profissional associado não encontrado.'); return; }
+        try {
+            await apiClient.post('/secretary/patients', newPatient);
+            setSuccessMessage('Paciente cadastrado com sucesso!');
+            setShowPatientModal(false);
+            setNewPatient({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
+            const patientsRes = await apiClient.get('/secretary/patients');
+            setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+        } catch (err) {
+            handleApiError(err, 'adicionar paciente');
+        }
+    };
+//ok
   const handlePatientRowClick = async (patient) => {
-      try {
-          if (!patient || !patient.id) {
-              console.error('Paciente inválido:', patient);
-              setError('Paciente inválido selecionado.');
-              setSelectedPatient(null);
-              return;
-          }
-          // Define o paciente selecionado e busca as notas dele
-          setSelectedPatient({ ...patient, notes: [] }); 
-          await fetchPatientNotes(patient.id);
-      } catch (err) {
-          console.error('Erro ao selecionar paciente:', err);
-          setError('Erro ao carregar detalhes do paciente: ' + err.message);
+      // 1. Validação inicial para garantir que um paciente válido foi clicado.
+      if (!patient || !patient.id) {
+          setError('Ocorreu um erro ao selecionar o paciente.');
+          console.error('Tentativa de clique em paciente inválido:', patient);
           setSelectedPatient(null);
-      }
-  };
-
-  const handleUpdatePatient = async (e) => {
-      e.preventDefault();
-      if (!editingPatient || !editingPatient.id) {
-          setError('Nenhum paciente selecionado para edição.');
           return;
       }
 
-      let formattedBirthDate = null;
-      if (editingPatient.birthDate) {
-          formattedBirthDate = new Date(editingPatient.birthDate).toISOString().split('T')[0];
-      }
-
-      const payload = {
-          name: editingPatient.name,
-          birthDate: formattedBirthDate,
-          phone: editingPatient.phone,
-          email: editingPatient.email,
-          diagnosis: editingPatient.diagnosis,
-          notes: editingPatient.observacoes // Mapeamento correto para o backend
-      };
-
       try {
-          // Usa a rota de atualização do profissional, pois a secretária atua em nome dele
-          const response = await fetch(`http://localhost:5000/api/secretary/patients/${editingPatient.id}`, {
-              method: 'PUT',
-              headers: getAuthHeaders( ),
-              body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Falha ao atualizar dados do paciente.');
-          }
-
-          setSuccessMessage('Dados do paciente atualizados com sucesso!');
-          setShowEditPatientModal(false);
+          // 2. "Limpa" o painel de detalhes e mostra o nome do paciente imediatamente.
+          //    Isso dá um feedback visual rápido para o usuário.
+          setSelectedPatient({ ...patient, notes: [] }); 
           
-          await fetchWithToken(`http://localhost:5000/api/secretary/patients`, setPatients, 'Erro ao buscar pacientes' );
-          setSelectedPatient(prev => ({...prev, ...editingPatient, observacoes: payload.notes}));
-          setEditingPatient(null);
+          // 3. Busca as notas do paciente. A função fetchPatientNotes já tem seu próprio try/catch.
+          await fetchPatientNotes(patient.id);
 
       } catch (err) {
-          console.error('Erro ao atualizar paciente:', err);
-          setError(err.message);
+          // 4. Este catch agora serve como uma segurança extra, caso algo inesperado aconteça.
+          handleApiError(err, 'carregar os detalhes do paciente');
+          setSelectedPatient(null); // Limpa o painel de detalhes em caso de erro.
       }
   };
+//ok
+    const handleUpdatePatient = async (e) => {
+        e.preventDefault();
+        if (!editingPatient?.id) { setError('Nenhum paciente selecionado para edição.'); return; }
+        try {
+            const payload = {
+                name: editingPatient.name,
+                birthDate: editingPatient.birthDate ? new Date(editingPatient.birthDate).toISOString().split('T')[0] : null,
+                phone: editingPatient.phone,
+                email: editingPatient.email,
+                diagnosis: editingPatient.diagnosis,
+                notes: editingPatient.observacoes
+            };
+            await apiClient.put(`/secretary/patients/${editingPatient.id}`, payload);
+            setSuccessMessage('Dados do paciente atualizados com sucesso!');
+            setShowEditPatientModal(false);
+            const patientsRes = await apiClient.get('/secretary/patients');
+            setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+            setSelectedPatient(prev => ({ ...prev, ...editingPatient, observacoes: payload.notes }));
+            setEditingPatient(null);
+        } catch (err) {
+            handleApiError(err, 'atualizar paciente');
+        }
+    };
+//ok
+    const handleUpdateStatus = async (patientId, newStatus) => {
+        try {
+            await apiClient.put(`/secretary/patients/${patientId}/status`, { status: newStatus });
+            setSuccessMessage('Status do paciente atualizado!');
+            const patientsRes = await apiClient.get('/secretary/patients');
+            setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
+            if (selectedPatient?.id === patientId) {
+                setSelectedPatient({ ...selectedPatient, status: newStatus });
+            }
+        } catch (err) {
+            handleApiError(err, 'atualizar status do paciente');
+        }
+    };
+//ok
+    const handleAddNote = async (e) => {
+        e.preventDefault();
+        if (!selectedPatient) return;
+        try {
+            await apiClient.post(`/secretary/patients/${selectedPatient.id}/notes`, newNote);
+            setSuccessMessage('Nota adicionada com sucesso!');
+            setNewNote({ title: '', content: '' });
+            setShowNoteModal(false);
+            fetchPatientNotes(selectedPatient.id);
+        } catch (err) {
+            handleApiError(err, 'adicionar nota');
+        }
+    };
+//ok
+    const fetchPatientNotes = async (patientId) => {
+        if (!patientId) return;
+        try {
+            const response = await apiClient.get(`/secretary/patients/${patientId}/notes`);
+            setSelectedPatient(prev => ({ ...prev, notes: Array.isArray(response.data) ? response.data : [] }));
+        } catch (err) {
+            handleApiError(err, 'carregar notas do paciente');
+            setSelectedPatient(prev => ({ ...prev, notes: [] }));
+        }
+    };
+//ok
+  const filteredPatients = useMemo(() => {
+      // 1. Garante que 'patients' seja sempre um array.
+      if (!Array.isArray(patients)) return [];
 
-  const handleUpdateStatus = async (patientId, newStatus) => {
-      try {
-          const response = await fetch(`http://localhost:5000/api/secretary/patients/${patientId}/status`, {
-              method: 'PUT',
-              headers: getAuthHeaders( ),
-              body: JSON.stringify({ status: newStatus })
-          });
+      return patients.filter(patient => {
+          const searchTermLower = searchTerm.toLowerCase();
 
-          if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Falha ao atualizar status.');
-          }
+          // 2. Verifica o nome do paciente. O '?.' protege contra nomes nulos.
+          const nameMatch = patient.name?.toLowerCase().includes(searchTermLower);
 
-          await fetchWithToken(`http://localhost:5000/api/secretary/patients`, setPatients, 'Erro ao buscar pacientes' );
-          if (selectedPatient && selectedPatient.id === patientId) {
-              setSelectedPatient({ ...selectedPatient, status: newStatus });
-          }
-          setSuccessMessage('Status do paciente atualizado!');
-      } catch (err) {
-          console.error('Erro ao atualizar status:', err);
-          setError('Erro ao atualizar status do paciente: ' + err.message);
-      }
-  };
+          // 3. CORREÇÃO: Verifica o diagnóstico apenas se ele existir.
+          //    Se 'patient.diagnosis' for nulo, a expressão inteira se torna 'false' com segurança.
+          const diagnosisMatch = patient.diagnosis ? patient.diagnosis.toLowerCase().includes(searchTermLower) : false;
+          
+          // 4. Verifica o status.
+          const statusMatch = !statusFilter || patient.status === statusFilter;
 
-  const handleAddNote = async (e) => {
-      e.preventDefault();
-      if (!selectedPatient) return;
-
-      try {
-          const response = await fetch(`http://localhost:5000/api/secretary/patients/${selectedPatient.id}/notes`, {
-              method: 'POST',
-              headers: getAuthHeaders( ),
-              body: JSON.stringify(newNote)
-          });
-
-          if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Falha ao adicionar nota.');
-          }
-
-          setNewNote({ title: '', content: '' });
-          setShowNoteModal(false);
-          await fetchPatientNotes(selectedPatient.id);
-          setSuccessMessage('Nota adicionada com sucesso!');
-      } catch (err) {
-          console.error('Erro ao adicionar nota:', err);
-          setError(err.message);
-      }
-  };
-
-  const fetchPatientNotes = async (patientId) => {
-      try {
-          if (!patientId) throw new Error('ID do paciente inválido.');
-          const response = await fetch(`http://localhost:5000/api/secretary/patients/${patientId}/notes`, {
-                headers: getAuthHeaders( )
-          });
-
-          if (!response.ok) {
-              const errorText = await response.text();
-              throw new Error(`Falha ao buscar notas: ${errorText}`);
-          }
-
-          const notes = await response.json();
-          setSelectedPatient(prev => ({
-              ...prev,
-              notes: Array.isArray(notes) ? notes : []
-          }));
-      } catch (err) {
-          console.error('Erro ao buscar notas:', err);
-          setError('Erro ao carregar notas do paciente: ' + err.message);
-          setSelectedPatient(prev => ({ ...prev, notes: [] }));
-      }
-  };
-
-    const filteredPatients = useMemo(() => {
-        if (!Array.isArray(patients)) return [];
-        return patients.filter(patient => {
-            const searchTermLower = searchTerm.toLowerCase();
-            const nameMatch = patient.name?.toLowerCase().includes(searchTermLower);
-            const diagnosisMatch = patient.diagnosis?.toLowerCase().includes(searchTermLower);
-            
-            const statusMatch = !statusFilter || patient.status === statusFilter;
-
-            return (nameMatch || diagnosisMatch) && statusMatch;
-        });
-    }, [patients, searchTerm, statusFilter]);
-
-
-
-
+          // Retorna true se a busca corresponder ao nome OU ao diagnóstico, E também ao filtro de status.
+          return (nameMatch || diagnosisMatch) && statusMatch;
+      });
+  }, [patients, searchTerm, statusFilter]);
 
 
   const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
@@ -475,11 +373,7 @@ const SecretaryDashboard = () => {
   if (!authValidated) return <Container className="text-center mt-5"><Spinner animation="border" /><p>Validando...</p></Container>;
 
   return (
-    // >>>>> CLASSE ADICIONADA AQUI <<<<<
     <Container fluid className="py-4 secretary-dashboard">
-      {/* ================================================================== */}
-      {/* >>>>> CABEÇALHO ANTIGO SUBSTITUÍDO POR ESTA ROW <<<<< */}
-      {/* ================================================================== */}
       <Row className="professional-header-row mb-4 align-items-center">
           <Col xs="auto">
               <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
