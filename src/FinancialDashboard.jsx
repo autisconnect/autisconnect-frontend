@@ -3,10 +3,10 @@ import { Container, Row, Col, Card, Button, Table, Form, Alert, Spinner, Badge }
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext';
-import logohori from './assets/logo.png';
-import { ArrowLeft } from 'react-bootstrap-icons';
-import './App.css';
+import { AuthContext } from '../context/AuthContext';
+import apiClient from '../services/api'; // <-- USA O apiClient PADRONIZADO
+import logohori from '../assets/logo.png';
+import '../App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -27,49 +27,25 @@ const FinancialDashboard = () => {
 
     useEffect(() => {
         if (!user) {
-            console.warn('Usuário não autenticado. Redirecionando para login.');
             navigate('/login');
             return;
         }
-
         if (user.tipo_usuario !== 'medicos_terapeutas' || professionalId !== user.id.toString()) {
-            console.warn(`Acesso não autorizado: professionalId ${professionalId}, user.id ${user.id}`);
-            navigate(`/financial-dashboard/${user.id}`);
+            navigate(`/professional-dashboard/${user.id}`);
             return;
         }
 
         const fetchFinancialData = async () => {
             setLoading(true);
+            setError('');
             try {
-                const token = localStorage.getItem('token');
-                console.log('Fetching financial data for professionalId:', professionalId, 'Token:', token);
-                if (!token) {
-                    throw new Error('Token de autenticação não encontrado.');
-                }
-
-                const response = await fetch(`http://localhost:5000/api/financials/professional/${professionalId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                } );
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    if (response.status === 404) {
-                        throw new Error(
-                            'A rota da API para dados financeiros não foi encontrada no servidor (404). ' +
-                            'Verifique se o endpoint `/api/financials/professional/:id` está configurado no backend ' +
-                            'ou se o ID do profissional é válido.'
-                        );
-                    }
-                    throw new Error(errData.error || 'Falha ao carregar dados financeiros.');
-                }
-
-                const data = await response.json();
-                console.log('Financial data received:', data);
-                setFinancialData(data);
-                setProfessionalName(data.professionalName || 'Profissional');
+                // A CHAMADA DE API AGORA É SIMPLES E SEGURA
+                const response = await apiClient.get(`/financials/professional/${professionalId}`);
+                setFinancialData(response.data);
             } catch (err) {
-                setError(err.message);
                 console.error('Erro ao buscar dados financeiros:', err);
+                const message = err.response?.data?.error || 'Falha ao carregar dados financeiros.';
+                setError(message);
                 setFinancialData(null);
             } finally {
                 setLoading(false);
@@ -94,38 +70,13 @@ const FinancialDashboard = () => {
     };
 
     if (loading) {
-        return (
-            <Container className="text-center mt-5">
-                <Spinner animation="border" />
-                <p>Carregando dados financeiros...</p>
-            </Container>
-        );
+        return <Container className="text-center mt-5"><Spinner animation="border" /><p>Carregando dados financeiros...</p></Container>;
     }
-
     if (error) {
-        return (
-            <Container className="mt-5">
-                <Alert variant="danger">
-                    {error}
-                    <Button variant="link" onClick={() => navigate(`/professional-dashboard/${user.id}`)}>
-                        Voltar ao Dashboard Principal
-                    </Button>
-                </Alert>
-            </Container>
-        );
+        return <Container className="mt-5"><Alert variant="danger">{error}</Alert></Container>;
     }
-
     if (!financialData) {
-        return (
-            <Container className="mt-5">
-                <Alert variant="info">
-                    Nenhum dado financeiro encontrado.
-                    <Button variant="link" onClick={() => navigate(`/professional-dashboard/${user.id}`)}>
-                        Voltar ao Dashboard Principal
-                    </Button>
-                </Alert>
-            </Container>
-        );
+        return <Container className="mt-5"><Alert variant="info">Nenhum dado financeiro encontrado.</Alert></Container>;
     }
 
     const pieChartData = {
