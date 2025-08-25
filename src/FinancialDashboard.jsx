@@ -3,10 +3,10 @@ import { Container, Row, Col, Card, Button, Table, Form, Alert, Spinner, Badge }
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import apiClient from '../services/api'; // <-- USA O apiClient PADRONIZADO
-import logohori from '../assets/logo.png';
-import '../App.css';
+import { AuthContext } from './context/AuthContext';
+import apiClient from './services/api'; // <-- USA O apiClient PADRONIZADO
+import logohori from './assets/logo.png';
+import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
