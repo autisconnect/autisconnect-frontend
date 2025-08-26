@@ -38,6 +38,7 @@ const FinancialDashboard = () => {
         const fetchFinancialData = async () => {
             setLoading(true);
             setError('');
+            console.log('professionalId:', professionalId);
             const url = `/financials/professional/${professionalId}`;
             console.log('Requisição enviada para:', `${apiClient.defaults.baseURL}${url}`);
             try {
