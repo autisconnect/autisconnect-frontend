@@ -38,10 +38,13 @@ const FinancialDashboard = () => {
         const fetchFinancialData = async () => {
             setLoading(true);
             setError('');
+            const url = `/financials/professional/${professionalId}`;
+            console.log('Requisição enviada para:', `${apiClient.defaults.baseURL}${url}`);
             try {
-                // A CHAMADA DE API AGORA É SIMPLES E SEGURA
-                const response = await apiClient.get(`/financials/professional/${professionalId}`);
+                const response = await apiClient.get(url);
+                console.log('Dados financeiros recebidos:', response.data);
                 setFinancialData(response.data);
+                setProfessionalName(response.data.professionalName || user.name || '');
             } catch (err) {
                 console.error('Erro ao buscar dados financeiros:', err);
                 const message = err.response?.data?.error || 'Falha ao carregar dados financeiros.';
