@@ -40,7 +40,7 @@ const FinancialDashboard = () => {
             setLoading(true);
             setError('');
             console.log('professionalId:', professionalId);
-            const url = `/financials/professional/${professionalId}`;
+            const url = `/api/financials/professional/${professionalId}`;
             console.log('Requisição enviada para:', `${apiClient.defaults.baseURL}${url}`);
             try {
                 const response = await apiClient.get(url);
