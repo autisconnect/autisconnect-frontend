@@ -79,7 +79,7 @@ function App() {
           <Route path="/presentation-dashboard/PresentationTriggerRecorder" element={<PresentationTriggerRecorder />} />
           <Route path="/presentation-dashboard/PresentationStereotypyMonitor" element={<PresentationStereotypyMonitor />} />
           <Route path="/presentation-dashboard/PresentationSecretaryDashboard" element={<PresentationSecretaryDashboard />} />
-         
+        
           {/* Rotas protegidas para dashboards */}
           <Route
             path="/parent-dashboard/:id"

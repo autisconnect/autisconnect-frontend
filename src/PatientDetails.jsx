@@ -4,6 +4,8 @@ import { ArrowLeft, GraphUp, Calendar3, ExclamationTriangle, Heart, Wallet, Plus
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import { Line, Bar, Pie, Radar } from 'react-chartjs-2';
+import apiClient from './services/api';
+
 import logohori from './assets/logo.png';
 import sloganProfissional from './assets/18.jpg';
 import {
