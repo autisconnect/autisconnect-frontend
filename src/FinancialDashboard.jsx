@@ -5,7 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
-//import logohori from './assets/logo.png';
+import logohori from './assets/logo.png';
 import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -120,9 +120,9 @@ const FinancialDashboard = () => {
         <Container fluid className="py-4 financial-dashboard">
             <Row className="professional-header-row mb-4 align-items-center">
                 {/* Coluna da Logo */}
-                {/* <Col xs="auto">
+                <Col xs="auto">
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-                </Col>*/}
+                </Col>
                 <Col>
                     <h1 className="professional-name mb-0 mt-2">Dashboard Financeiro</h1>
                     <p className="professional-specialty text-muted mb-0">{professionalName}</p>
