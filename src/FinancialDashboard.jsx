@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
-import { Calendar2Check, People, GraphUp, Wallet2, PlusCircle, FileEarmarkText, Bell } from 'react-bootstrap-icons'; // Ícones adicionados
+//import { Calendar2Check, People, GraphUp, Wallet2, PlusCircle, FileEarmarkText, Bell } from 'react-bootstrap-icons'; // Ícones adicionados
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
-//import logohori from './assets/logo.png';
+import logohori from './assets/logo.png';
 import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
