@@ -33,6 +33,8 @@ import PresentationCommunitySupport from './presentation-dashboard/PresentationC
 import PresentationTriggerRecorder from './presentation-dashboard/PresentationTriggerRecorder';
 import PresentationStereotypyMonitor from './presentation-dashboard/PresentationStereotypyMonitor';
 import PresentationSecretaryDashboard from './presentation-dashboard/PresentationSecretaryDashboard';
+import PaymentSuccess from './PaymentSuccess';
+import PaymentFailure from './PaymentFailure';
 
 
 import './App.css';
@@ -150,6 +152,9 @@ function App() {
           <Route path="/service_dashboard/ServiceDashboard01" element={<ServiceDashboard01 />} />
           <Route path="/service_dashboard/ServiceDashboard17" element={<ServiceDashboard17 />} />
           <Route path="/service_dashboard/ServiceDashboard18" element={<ServiceDashboard18 />} />
+
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-failure" element={<PaymentFailure />} />
         </Routes>
       </Router>
     </AuthProvider>
