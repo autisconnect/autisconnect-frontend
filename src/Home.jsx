@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Carousel, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext';
 import { ArrowRight, Star, Award, People, Heart, Calendar, ChatDots, CheckCircle, PersonVideo, Mic, Sliders } from 'react-bootstrap-icons';
 import logohori from './assets/logo.png';
 import pais from './assets/pais.png';
@@ -9,6 +10,7 @@ import servicos from './assets/servicos.png';
 import './App.css';
 
 const Home = () => {
+    const { user, loading } = useContext(AuthContext);
     const [showWelcome, setShowWelcome] = useState(false);
     const [isVisible, setIsVisible] = useState({});
 
@@ -126,7 +128,6 @@ const Home = () => {
         }
     ]);
 
-    // Animação de contadores
     useEffect(() => {
         const timer = setTimeout(() => setShowWelcome(true), 1000);
 
@@ -139,14 +140,12 @@ const Home = () => {
             }));
         }, 50);
 
-        // Cleanup
         return () => {
             clearTimeout(timer);
             clearInterval(statsInterval);
         };
     }, []);
 
-    // Intersection Observer para animações
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -168,9 +167,24 @@ const Home = () => {
         return () => observer.disconnect();
     }, []);
 
+    if (loading) {
+        return <div>Carregando...</div>;
+    }
+
+    if (user) {
+        if (user.tipo_usuario === 'medicos_terapeutas') {
+            return <Navigate to={`/professional-dashboard/${user.id}`} />;
+        } else if (user.tipo_usuario === 'pais_responsavel') {
+            return <Navigate to={`/parent-dashboard/${user.id}`} />;
+        } else if (user.tipo_usuario === 'secretaria') {
+            return <Navigate to={`/secretary-dashboard/${user.id}`} />;
+        } else if (user.tipo_usuario === 'servicos_locais') {
+            return <Navigate to={`/service-dashboard/${user.id}`} />;
+        }
+    }
+
     return (
         <div className="home-page">
-            {/* Hero Section */}
             <section className="hero-section" id="section-hero">
                 <Container>
                     <Row className="align-items-center min-vh-100">
@@ -182,7 +196,6 @@ const Home = () => {
                                 <p className="lead mb-4">
                                     A plataforma mais completa para conectar famílias de pessoas autistas a profissionais especializados e serviços inclusivos, promovendo suporte, inclusão e desenvolvimento em um ambiente seguro e acolhedor.
                                 </p>
-
                                 <div className="d-flex flex-wrap gap-3 mt-4">
                                     <Link to="/signup" className="text-decoration-none">
                                         <Button variant="light" size="lg" className="px-4 py-3">
@@ -197,8 +210,6 @@ const Home = () => {
                                         </Button>
                                     </Link>
                                 </div>
-
-                                {/* Benefícios rápidos */}
                                 <Row className="mt-5">
                                     {benefits.map(benefit => (
                                         <Col md={4} key={benefit.id} className="mb-3">
@@ -228,8 +239,6 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
-
-            {/* Seção de Estatísticas */}
             <section className="stats-section py-5" id="section-stats">
                 <Container>
                     <div className="text-center mb-5">
@@ -268,8 +277,6 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
-
-            {/* Seção de Recursos */}
             <section className="features-section py-5" id="section-features">
                 <Container>
                     <div className="text-center mb-5">
@@ -300,9 +307,6 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
-
-
-            {/* Seção de Serviços */}
             <section className="services-section py-5" id="section-services">
                 <Container>
                     <div className="text-center mb-5">
@@ -376,8 +380,6 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
-
-            {/* Seção de Depoimentos */}
             <section className="testimonials-section py-5" id="section-testimonials">
                 <Container>
                     <div className="text-center mb-5">
@@ -417,8 +419,6 @@ const Home = () => {
                     </Carousel>
                 </Container>
             </section>
-
-            {/* Call to Action */}
             <section className="cta-section py-5" id="section-cta">
                 <Container className="text-center">
                     <Row className="justify-content-center">
@@ -452,4 +452,3 @@ const Home = () => {
 };
 
 export default Home;
-
