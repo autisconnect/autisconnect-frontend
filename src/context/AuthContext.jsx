@@ -1,87 +1,75 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Adicione useNavigate
 import axios from 'axios';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Adicione navigate
 
-    // Verificar token ao iniciar
-    useEffect(() => {
-        const checkAuth = async () => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-            // Verificar validade do token no backend
-            const response = await axios.get('http://localhost:5000/api/auth/verify', {
-                headers: { Authorization: `Bearer ${token}` }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get('http://localhost:5000/api/auth/verify', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.data.valid) {
+            setUser({
+              id: response.data.userId,
+              username: response.data.username,
+              tipo_usuario: response.data.tipo_usuario,
+              token
             });
-            
-            // Se o token for válido, definir o usuário
-            if (response.data.valid) {
-                setUser({
-                id: response.data.userId,
-                username: response.data.username,
-                tipo_usuario: response.data.tipo_usuario,
-                token
-                });
-            } else {
-                // Se o token for inválido, limpar localStorage
-                localStorage.removeItem('token');
-            }
-            } catch (error) {
-            console.error('Erro ao verificar autenticação:', error);
+          } else {
             localStorage.removeItem('token');
-            }
+            navigate('/login'); // Redireciona para /login
+          }
+        } catch (error) {
+          console.error('Erro ao verificar autenticação:', error);
+          localStorage.removeItem('token');
+          navigate('/login'); // Redireciona para /login
         }
-        setLoading(false);
-        };
-
-        checkAuth();
-    }, []);
-
-    // Função de login
-    const login = (userData) => {
-        // Garantir que temos todos os dados necessários
-        if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
-        console.error('Dados de usuário incompletos para login');
-        return false;
-        }
-        
-        // Definir usuário no contexto
-        setUser(userData);
-        return true;
+      } else {
+        navigate('/login'); // Redireciona para /login se não houver token
+      }
+      setLoading(false);
     };
+    checkAuth();
+  }, [navigate]);
 
-    // Função de logout
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
-    };
+  const login = (userData) => {
+    if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
+      console.error('Dados de usuário incompletos para login');
+      return false;
+    }
+    setUser(userData);
+    localStorage.setItem('token', userData.token);
+    navigate(`/professional-dashboard/${userData.id}`); // Redireciona após login
+    return true;
+  };
 
-    // Verificar se o usuário está autenticado
-    const isAuthenticated = () => {
-        return !!user;
-    };
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    navigate('/login');
+  };
 
-    // Verificar se o usuário tem permissão para acessar um recurso específico
-    const hasPermission = (requiredType, resourceId = null) => {
-        if (!user) return false;
-        
-        // Verificar tipo de usuário
-        const hasType = user.tipo_usuario === requiredType;
-        
-        // Se não precisar verificar ID do recurso, apenas verificar tipo
-        if (!resourceId) return hasType;
-        
-        // Verificar se o ID do recurso corresponde ao ID do usuário
-        return hasType && user.id === resourceId;
-    };
+  const isAuthenticated = () => !!user;
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout, isAuthenticated, hasPermission, loading }}>
-        {children}
-        </AuthContext.Provider>
-    );
+  const hasPermission = (requiredType, resourceId = null) => {
+    if (!user) return false;
+    const hasType = user.tipo_usuario === requiredType;
+    if (!resourceId) return hasType;
+    return hasType && user.id === resourceId;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, hasPermission, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
