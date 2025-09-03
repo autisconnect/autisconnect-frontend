@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
-import ProfessionalDashboard from './components/ProfessionalDashboard';
-import FinancialDashboard from './components/FinancialDashboard'; // Crie este componente se não existir
-import Signup from './components/Signup';
-import Login from './components/Login';
+import ProfessionalDashboard from './ProfessionalDashboard';
+import FinancialDashboard from './FinancialDashboard'; // Crie este componente se não existir
+import Signup from './Signup';
+import Login from './Login';
 import { AuthProvider } from './context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
