@@ -8,7 +8,7 @@ import apiClient from './services/api.js';
 import logohori from './assets/logo.png';
 import './App.css';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 const FinancialDashboard = () => {
     const { user, logout } = useContext(AuthContext);
