@@ -51,7 +51,7 @@
     "globals": "^13.23.0",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "vite": "^6.3.5"
+    "vite": "^6.4.0"
   },
   "resolutions": {
     "node-fetch": "^3.0.0"
