@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+// Remova o 'axios' daqui, pois o apiClient já o gerencia.
+import apiClient from '../services/api'; // 1. Importe o apiClient
 
 export const AuthContext = createContext();
 
@@ -12,9 +13,10 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://localhost:5000/api/auth/verify', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          // 2. Use o apiClient. A URL completa ('/auth/verify') é montada por ele.
+          // O token também já é adicionado pelo interceptor do apiClient.
+          const response = await apiClient.get('/auth/verify');
+          
           if (response.data.valid) {
             setUser({
               id: response.data.userId,
@@ -41,7 +43,8 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
     setUser(userData);
-    localStorage.setItem('token', userData.token);
+    // O token já foi salvo no localStorage pelo componente de Login.
+    // localStorage.setItem('token', userData.token);
     return true;
   };
 

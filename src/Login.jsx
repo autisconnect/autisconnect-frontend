@@ -43,10 +43,7 @@ function Login() {
 
         try {
             console.log(`Tentando login para usuário: ${username}`);
-            
-            // --- LINHA CORRIGIDA ---
-            // A URL completa é gerenciada pelo apiClient
-            const response = await apiClient.post('/login', { username, password });
+            const response = await apiClient.post('/api/auth/login', { username, password });
             
             console.log('Resposta do servidor:', response.data);
             const { token, userId, tipo_usuario } = response.data;
@@ -61,6 +58,7 @@ function Login() {
             }
 
             localStorage.setItem('token', token);
+            // Passando o username para o contexto, caso seja útil
             const loginSuccess = login({ id, token, username, tipo_usuario });
 
             if (loginSuccess) {
