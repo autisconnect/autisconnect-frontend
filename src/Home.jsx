@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Carousel, Alert } from 'react-bootstrap';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import { ArrowRight, Star, Award, People, Heart, Calendar, ChatDots, CheckCircle, PersonVideo, Mic, Sliders } from 'react-bootstrap-icons';
 import logohori from './assets/logo.png';

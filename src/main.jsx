@@ -1,26 +1,29 @@
+// src/main.jsx - VERSÃO CORRETA E FINAL
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import App from './App';
-import ProfessionalDashboard from './ProfessionalDashboard';
-import FinancialDashboard from './FinancialDashboard'; // Crie este componente se não existir
-import Signup from './Signup';
-import Login from './Login';
+// 1. Importa o BrowserRouter e o renomeia para 'Router' para clareza.
+import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import App from './App';
+
+// 2. Importa seus arquivos de estilo globais.
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
+// 3. Pega o elemento 'root' do seu HTML.
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// 4. Renderiza a aplicação com a hierarquia CORRETA.
 root.render(
-  <AuthProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/professional-dashboard/:id" element={<ProfessionalDashboard />} />
-        <Route path="/financial-dashboard/:id" element={<FinancialDashboard />} />
-      </Routes>
-    </BrowserRouter>
-  </AuthProvider>
+  <React.StrictMode>
+    {/* 5. Usa <Router>, o nome que definimos no import. */}
+    <Router>
+      {/* 6. O AuthProvider vem DENTRO do Router. */}
+      <AuthProvider>
+        {/* 7. O App é o único filho, ele cuidará de todas as rotas. */}
+        <App />
+      </AuthProvider>
+    </Router>
+  </React.StrictMode>
 );
