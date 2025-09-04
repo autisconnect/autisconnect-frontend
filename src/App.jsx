@@ -21,6 +21,7 @@ import StereotypyMonitor from './StereotypyMonitor';
 import TriggerRecorder from './TriggerRecorder';
 import PatientDetails from './PatientDetails';
 import { AuthProvider } from './context/AuthContext';
+import AuthNavigation from './context/AuthNavigation';
 import PresentationServiceDashboard from './presentation-dashboard/PresentationServiceDashboard';
 import PresentationProfessionalDashboard from './presentation-dashboard/PresentationProfessionalDashboard';
 import PresentationParentDashboard from './presentation-dashboard/PresentationParentDashboard';
@@ -89,6 +90,7 @@ function App() {
     <ErrorBoundary>
       <AuthProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AuthNavigation />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />

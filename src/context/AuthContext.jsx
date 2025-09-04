@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Adicione useNavigate
 import axios from 'axios';
 
 export const AuthContext = createContext();
@@ -7,7 +6,6 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Adicione navigate
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,20 +24,16 @@ export const AuthProvider = ({ children }) => {
             });
           } else {
             localStorage.removeItem('token');
-            navigate('/login'); // Redireciona para /login
           }
         } catch (error) {
           console.error('Erro ao verificar autenticação:', error);
           localStorage.removeItem('token');
-          navigate('/login'); // Redireciona para /login
         }
-      } else {
-        navigate('/login'); // Redireciona para /login se não houver token
       }
       setLoading(false);
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   const login = (userData) => {
     if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
@@ -48,14 +42,12 @@ export const AuthProvider = ({ children }) => {
     }
     setUser(userData);
     localStorage.setItem('token', userData.token);
-    navigate(`/professional-dashboard/${userData.id}`); // Redireciona após login
     return true;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    navigate('/login');
   };
 
   const isAuthenticated = () => !!user;
