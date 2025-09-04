@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: autisconnect-frontend
+    env: static
+    plan: free
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: "dist"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        value: https://autisconnect-backend.onrender.com/api
