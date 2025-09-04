@@ -1,22 +1,18 @@
-import axios from 'axios';
+import apiClient from '../services/api';
 
 const login = async (username, password) => {
   try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/login`, // Use a variável de ambiente
-      {
-        username,
-        password,
-      }
-    );
+    const response = await apiClient.post('/login', {
+      username,
+      password,
+    });
     const token = response.data.token;
     localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     return token;
   } catch (error) {
-  console.error('Erro ao fazer login:', error.message, error.response?.data);
-  throw new Error(`Erro ao fazer login: ${error.response?.data?.error || error.message}`);
-}
+    console.error('Erro ao fazer login:', error.response?.data, error.message);
+    throw error;
+  }
 };
 
 const getToken = () => {
