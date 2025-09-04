@@ -39,4 +39,9 @@ api.interceptors.response.use(
   }
 );
 
+api.post("/login", { username, password })
+   .then(res => console.log(res.data))
+   .catch(err => console.error("Erro ao fazer login:", err.response?.data || err.message));
+
+
 export default api;
