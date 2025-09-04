@@ -72,11 +72,11 @@ function Login() {
         } catch (err) {
             console.error('Erro ao fazer login:', err.response?.data, err.message);
             if (err.response && err.response.status === 401) {
-                setError('Credenciais inválidas. Tente novamente.');
-            } else if (err.response && err.response.status === 404) {
-                setError('Rota de login não encontrada. Verifique a configuração da API.');
+                setError('Credenciais inválidas. Verifique seu usuário e senha.');
+            } else if (err.response && err.response.status === 500) {
+                setError(`Erro interno no servidor: ${err.response.data.error || 'Desconhecido'} - ${err.response.data.details || 'Sem detalhes'}`);
             } else {
-                setError(`Erro ao conectar com o servidor: ${err.response?.data?.error || err.message}`);
+                setError(`Erro ao conectar com o servidor: ${err.message}`);
             }
         } finally {
             setLoading(false);
