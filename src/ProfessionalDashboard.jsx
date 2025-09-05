@@ -148,10 +148,12 @@ const ProfessionalDashboard = () => {
         'Content-Type': 'application/json'
     });
 //ok
-        // Função genérica para tratar erros de API
+    // Função genérica para tratar erros de API
     const handleApiError = (err, context) => {
-        console.error(`Erro ao ${context}:`, err);
-        const message = err.response?.data?.error || err.response?.data?.message || `Erro ao ${context}. Tente novamente.`;
+        console.error(`Erro ao ${context}:`, err.response?.data, err.message);
+        const message = err.response?.data?.details
+            ? `Erro ao ${context}: ${err.response.data.details}`
+            : err.response?.data?.error || err.response?.data?.message || `Erro ao ${context}. Tente novamente.`;
         setError(message);
     };
 //ok
@@ -203,18 +205,18 @@ const ProfessionalDashboard = () => {
 //ok
     const fetchDashboardData = async () => {
         try {
-        const response = await apiClient.get(`/professional/dashboard/${user.id}`);
-        const data = response.data; // Com Axios, os dados já vêm em .data
+            const response = await apiClient.get(`/professional/dashboard/${user.id}`);
+            const data = response.data;
             setProfessionalInfo({
-                name: data.professional.name,
-                specialty: data.professional.specialty,
-                totalPatients: data.stats.totalPatients,
-                todayAppointments: data.stats.todayAppointments,
-                weekAppointments: data.stats.weekAppointments
+            name: data.professional.name,
+            specialty: data.professional.specialty,
+            totalPatients: data.stats.totalPatients,
+            todayAppointments: data.stats.todayAppointments,
+            weekAppointments: data.stats.weekAppointments
             });
         } catch (err) {
-            console.error('Erro ao buscar dados do dashboard:', err);
-            setError(err.message);
+            console.error('Erro ao buscar dados do dashboard:', err.response?.data, err.message);
+            handleApiError(err, 'buscar dados do dashboard');
         }
     };
 //ok
@@ -304,45 +306,38 @@ const ProfessionalDashboard = () => {
     };
 //ok
     const fetchDiagnosisDistribution = async () => {
-        if (!user) return; // Verificação de segurança
-
+        if (!user) return;
         setLoadingCharts(true);
         try {
-            // URL relativa, o apiClient cuida do resto.
             const response = await apiClient.get(`/professional/${user.id}/diagnosis-distribution`);
-            
-            const data = response.data; // Dados já vêm em .data com Axios
-
-            // Atualiza o estado do gráfico com os dados recebidos.
+            const data = response.data;
             setDiagnosisDistribution({
-                labels: data.labels,
-                datasets: [
-                    {
-                        data: data.data,
-                        backgroundColor: [
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                        ],
-                        borderColor: [
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(255, 206, 86, 1)',
-                        ],
-                        borderWidth: 1,
-                    },
+            labels: data.labels,
+            datasets: [
+                {
+                data: data.data,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
                 ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                ],
+                borderWidth: 1,
+                },
+            ],
             });
         } catch (err) {
-            // O tratamento de erro do Axios já lida com status 404 e outros.
+            console.error('Erro ao buscar a distribuição de diagnósticos:', err.response?.data, err.message);
             handleApiError(err, 'buscar a distribuição de diagnósticos');
-            
-            // Em caso de erro, zera os dados do gráfico.
             setDiagnosisDistribution({
-                labels: [],
-                datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+            labels: [],
+            datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
             });
         } finally {
             setLoadingCharts(false);
@@ -350,46 +345,39 @@ const ProfessionalDashboard = () => {
     };
 //ok
     const fetchAppointmentTypes = async () => {
-        if (!user) return; // Verificação de segurança
-
+        if (!user) return;
         setLoadingCharts(true);
         try {
-            // URL relativa, o apiClient cuida do resto.
             const response = await apiClient.get(`/professional/${user.id}/appointment-types`);
-            
-            const data = response.data; // Dados já vêm em .data com Axios
-
-            // Atualiza o estado do gráfico com os dados recebidos.
+            const data = response.data;
             setAppointmentTypeData({
-                labels: data.labels,
-                datasets: [
-                    {
-                        label: 'Tipos de Consulta',
-                        data: data.data,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                        ],
-                        borderWidth: 1,
-                    },
+            labels: data.labels,
+            datasets: [
+                {
+                label: 'Tipos de Consulta',
+                data: data.data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
                 ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                ],
+                borderWidth: 1,
+                },
+            ],
             });
         } catch (err) {
-            // O tratamento de erro do Axios já lida com status 404 e outros.
+            console.error('Erro ao buscar tipos de consulta:', err.response?.data, err.message);
             handleApiError(err, 'buscar tipos de consulta');
-            
-            // Em caso de erro, zera os dados do gráfico para não exibir informação antiga.
             setAppointmentTypeData({
-                labels: [],
-                datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+            labels: [],
+            datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
             });
         } finally {
             setLoadingCharts(false);
