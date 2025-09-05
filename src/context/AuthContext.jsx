@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
         try {
           // 2. Use o apiClient. A URL completa ('/auth/verify') é montada por ele.
           // O token também já é adicionado pelo interceptor do apiClient.
-          const response = await apiClient.get('/auth/verify');
+          const response = await apiClient.get('/api/auth/verify');
           
           if (response.data.valid) {
             setUser({
