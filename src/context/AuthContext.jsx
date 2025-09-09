@@ -16,7 +16,9 @@ export const AuthProvider = ({ children }) => {
       console.log('VITE_API_URL:', import.meta.env.VITE_API_URL); // Depuração
       console.log('Token:', token); // Depuração
       console.log('Current path:', location.pathname); // Depuração
-      if (token && location.pathname !== '/login') {
+      // Lista de rotas públicas que não requerem autenticação
+      const publicRoutes = ['/', '/login', '/register'];
+      if (token && !publicRoutes.includes(location.pathname)) {
         try {
           const response = await apiClient.get('/auth/verify');
           console.log('Verify response:', response.data); // Depuração
@@ -25,13 +27,12 @@ export const AuthProvider = ({ children }) => {
           console.error('Erro ao verificar autenticação:', error.message, error.response?.status);
           localStorage.removeItem('token');
           setUser(null);
-          if (location.pathname !== '/login') {
-            navigate('/login');
-          }
+          navigate('/login');
         }
       } else {
         setUser(null);
-        if (location.pathname !== '/login') {
+        // Não redireciona se estiver em uma rota pública
+        if (!publicRoutes.includes(location.pathname)) {
           navigate('/login');
         }
       }

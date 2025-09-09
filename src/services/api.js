@@ -5,7 +5,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false, // Desativa withCredentials, já que usamos JWT
+  withCredentials: false, // Desativado, já que usamos JWT
 });
 
 api.interceptors.request.use(
