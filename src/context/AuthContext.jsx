@@ -9,32 +9,28 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const verifyToken = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          // 2. Use o apiClient. A URL completa ('/auth/verify') é montada por ele.
-          // O token também já é adicionado pelo interceptor do apiClient.
-          const response = await apiClient.get('/api/auth/verify');
-          
-          if (response.data.valid) {
-            setUser({
-              id: response.data.userId,
-              username: response.data.username,
-              tipo_usuario: response.data.tipo_usuario,
-              token
-            });
-          } else {
-            localStorage.removeItem('token');
-          }
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/verify`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
+          const data = await response.json();
+          setUser({ id: data.userId, tipo_usuario: data.tipo_usuario });
         } catch (error) {
           console.error('Erro ao verificar autenticação:', error);
           localStorage.removeItem('token');
+          setUser(null);
+          window.location.href = '/login';
         }
+      } else {
+        setUser(null);
+        window.location.href = '/login';
       }
-      setLoading(false);
     };
-    checkAuth();
+    verifyToken();
   }, []);
 
   const login = (userData) => {
