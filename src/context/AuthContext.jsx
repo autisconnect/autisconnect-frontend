@@ -1,37 +1,44 @@
 import React, { createContext, useState, useEffect } from 'react';
-// Remova o 'axios' daqui, pois o apiClient já o gerencia.
-import apiClient from '../services/api'; // 1. Importe o apiClient
+import { useNavigate, useLocation } from 'react-router-dom';
+import apiClient from '../services/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem('token');
-      if (token) {
+      console.log('VITE_API_URL:', import.meta.env.VITE_API_URL); // Depuração
+      console.log('Token:', token); // Depuração
+      console.log('Current path:', location.pathname); // Depuração
+      if (token && location.pathname !== '/login') {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/verify`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
-          const data = await response.json();
-          setUser({ id: data.userId, tipo_usuario: data.tipo_usuario });
+          const response = await apiClient.get('/auth/verify');
+          console.log('Verify response:', response.data); // Depuração
+          setUser({ id: response.data.userId, tipo_usuario: response.data.tipo_usuario });
         } catch (error) {
-          console.error('Erro ao verificar autenticação:', error);
+          console.error('Erro ao verificar autenticação:', error.message, error.response?.status);
           localStorage.removeItem('token');
           setUser(null);
-          window.location.href = '/login';
+          if (location.pathname !== '/login') {
+            navigate('/login');
+          }
         }
       } else {
         setUser(null);
-        window.location.href = '/login';
+        if (location.pathname !== '/login') {
+          navigate('/login');
+        }
       }
+      setLoading(false);
     };
     verifyToken();
-  }, []);
+  }, [navigate, location.pathname]);
 
   const login = (userData) => {
     if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
@@ -39,14 +46,13 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
     setUser(userData);
-    // O token já foi salvo no localStorage pelo componente de Login.
-    // localStorage.setItem('token', userData.token);
     return true;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    navigate('/login');
   };
 
   const isAuthenticated = () => !!user;
@@ -60,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated, hasPermission, loading }}>
-      {children}
+      {loading ? <div>Carregando...</div> : children}
     </AuthContext.Provider>
   );
 };
