@@ -39,7 +39,8 @@ const FinancialDashboard = () => {
             setLoading(true);
             setError('');
             console.log('professionalId:', professionalId);
-            const url = `/api/financials/professional/${professionalId}`;
+            // Corrigido: Remove o prefixo /api
+            const url = `/financials/professional/${professionalId}`;
             console.log('Requisição enviada para:', `${apiClient.defaults.baseURL}${url}`);
             try {
                 const response = await apiClient.get(url);
@@ -47,7 +48,7 @@ const FinancialDashboard = () => {
                 setFinancialData(response.data);
                 setProfessionalName(response.data.professionalName || user.name || '');
             } catch (err) {
-                console.error('Erro ao buscar dados financeiros:', err);
+                console.error('Erro ao buscar dados financeiros:', err.message, err.response?.status, err.response?.data);
                 const message = err.response?.data?.error || 'Falha ao carregar dados financeiros.';
                 setError(message);
                 setFinancialData(null);
@@ -119,7 +120,6 @@ const FinancialDashboard = () => {
     return (
         <Container fluid className="py-4 financial-dashboard">
             <Row className="professional-header-row mb-4 align-items-center">
-                {/* Coluna da Logo */}
                 <Col xs="auto">
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
                 </Col>
@@ -131,152 +131,145 @@ const FinancialDashboard = () => {
                     <Button variant="danger" onClick={handleLogout}>Sair</Button>
                 </Col>
             </Row>
-            
-                <Row className="mb-4">
-                    <Col md={4}>
-                        <Card body className="text-center shadow-sm">
-                            <h5>Faturamento do Mês</h5>
-                            {/* CORREÇÃO AQUI: Apenas exiba o valor */}
-                            <h3>R$ {financialData.summary?.monthlyRevenue || '0.00'}</h3>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card body className="text-center shadow-sm">
-                            <h5>Ticket Médio</h5>
-                            {/* CORREÇÃO AQUI: Apenas exiba o valor */}
-                            <h3>R$ {financialData.summary?.averageTicket || '0.00'}</h3>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card body className="text-center shadow-sm">
-                            <h5>Consultas Pagas (Mês)</h5>
-                            <h3>{financialData.summary?.paidAppointments || 0}</h3>
-                        </Card>
-                    </Col>
-                </Row>
-
-                <Row className="mb-4">
-                    <Col md={7}>
-                        <Card className="shadow-sm">
-                            <Card.Header>
-                                <h6>Evolução do Faturamento (Últimos 6 Meses)</h6>
-                            </Card.Header>
-                            <Card.Body>
-                                {barChartData.labels.length > 0 ? (
-                                    <Bar data={barChartData} options={{ responsive: true }} />
-                                ) : (
-                                    <p className="text-muted">Nenhum dado disponível para o gráfico.</p>
-                                )}
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={5}>
-                        <Card className="shadow-sm">
-                            <Card.Header>
-                                <h6>Distribuição por Forma de Pagamento</h6>
-                            </Card.Header>
-                            <Card.Body>
-                                {pieChartData.labels.length > 0 ? (
-                                    <Pie data={pieChartData} options={{ responsive: true, plugins: { legend: { position: 'right' } } }} />
-                                ) : (
-                                    <p className="text-muted">Nenhum dado disponível para o gráfico.</p>
-                                )}
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-
-                <Card className="shadow-sm">
-                    <Card.Header>
-                        <h5>Relatório Detalhado de Consultas</h5>
-                    </Card.Header>
-                    <Card.Body>
-                        <Form className="mb-3 border-bottom pb-3">
-                            <Row className="align-items-end g-3">
-                                <Col md={3}>
-                                    <Form.Group>
-                                        <Form.Label>Data Início</Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            name="startDate"
-                                            value={filters.startDate}
-                                            onChange={handleFilterChange}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col md={3}>
-                                    <Form.Group>
-                                        <Form.Label>Data Fim</Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            name="endDate"
-                                            value={filters.endDate}
-                                            onChange={handleFilterChange}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col md={3}>
-                                    <Form.Group>
-                                        <Form.Label>Forma de Pagamento</Form.Label>
-                                        <Form.Select
-                                            name="paymentMethod"
-                                            value={filters.paymentMethod}
-                                            onChange={handleFilterChange}
-                                        >
-                                            <option value="todos">Todas</option>
-                                            <option value="Pix">Pix</option>
-                                            <option value="Crédito">Crédito</option>
-                                            <option value="Débito">Débito</option>
-                                            <option value="Plano de Saúde">Plano de Saúde</option>
-                                            <option value="Dinheiro">Dinheiro</option>
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
-                                <Col md={3}>
-                                    <Button onClick={handleApplyFilters} className="w-100">
-                                        Aplicar Filtros
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Form>
-                        <Table striped bordered hover responsive>
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Paciente</th>
-                                    <th>Valor (R$)</th>
-                                    <th>Forma de Pagamento</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredReport.length > 0 ? (
-                                    filteredReport.map((item) => (
-                                        <tr key={item.id}>
-                                            <td>{new Date(item.date).toLocaleDateString('pt-BR')}</td>
-                                            <td>{item.patientName || 'N/A'}</td>
-                                            {/* CORREÇÃO AQUI: Apenas exiba o valor */}
-                                            <td>{item.value || '0.00'}</td>
-                                            <td>{item.paymentMethod || 'N/A'}</td>
-                                            <td>
-                                                <Badge bg={item.status === 'Pago' ? 'success' : 'warning'}>
-                                                    {item.status || 'N/A'}
-                                                </Badge>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="5" className="text-center">
-                                            Nenhum registro encontrado para os filtros selecionados.
+            <Row className="mb-4">
+                <Col md={4}>
+                    <Card body className="text-center shadow-sm">
+                        <h5>Faturamento do Mês</h5>
+                        <h3>R$ {financialData.summary?.monthlyRevenue || '0.00'}</h3>
+                    </Card>
+                </Col>
+                <Col md={4}>
+                    <Card body className="text-center shadow-sm">
+                        <h5>Ticket Médio</h5>
+                        <h3>R$ {financialData.summary?.averageTicket || '0.00'}</h3>
+                    </Card>
+                </Col>
+                <Col md={4}>
+                    <Card body className="text-center shadow-sm">
+                        <h5>Consultas Pagas (Mês)</h5>
+                        <h3>{financialData.summary?.paidAppointments || 0}</h3>
+                    </Card>
+                </Col>
+            </Row>
+            <Row className="mb-4">
+                <Col md={7}>
+                    <Card className="shadow-sm">
+                        <Card.Header>
+                            <h6>Evolução do Faturamento (Últimos 6 Meses)</h6>
+                        </Card.Header>
+                        <Card.Body>
+                            {barChartData.labels.length > 0 ? (
+                                <Bar data={barChartData} options={{ responsive: true }} />
+                            ) : (
+                                <p className="text-muted">Nenhum dado disponível para o gráfico.</p>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={5}>
+                    <Card className="shadow-sm">
+                        <Card.Header>
+                            <h6>Distribuição por Forma de Pagamento</h6>
+                        </Card.Header>
+                        <Card.Body>
+                            {pieChartData.labels.length > 0 ? (
+                                <Pie data={pieChartData} options={{ responsive: true, plugins: { legend: { position: 'right' } } }} />
+                            ) : (
+                                <p className="text-muted">Nenhum dado disponível para o gráfico.</p>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+            <Card className="shadow-sm">
+                <Card.Header>
+                    <h5>Relatório Detalhado de Consultas</h5>
+                </Card.Header>
+                <Card.Body>
+                    <Form className="mb-3 border-bottom pb-3">
+                        <Row className="align-items-end g-3">
+                            <Col md={3}>
+                                <Form.Group>
+                                    <Form.Label>Data Início</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="startDate"
+                                        value={filters.startDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Group>
+                                    <Form.Label>Data Fim</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="endDate"
+                                        value={filters.endDate}
+                                        onChange={handleFilterChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Form.Group>
+                                    <Form.Label>Forma de Pagamento</Form.Label>
+                                    <Form.Select
+                                        name="paymentMethod"
+                                        value={filters.paymentMethod}
+                                        onChange={handleFilterChange}
+                                    >
+                                        <option value="todos">Todas</option>
+                                        <option value="Pix">Pix</option>
+                                        <option value="Crédito">Crédito</option>
+                                        <option value="Débito">Débito</option>
+                                        <option value="Plano de Saúde">Plano de Saúde</option>
+                                        <option value="Dinheiro">Dinheiro</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                            <Col md={3}>
+                                <Button onClick={handleApplyFilters} className="w-100">
+                                    Aplicar Filtros
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Paciente</th>
+                                <th>Valor (R$)</th>
+                                <th>Forma de Pagamento</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredReport.length > 0 ? (
+                                filteredReport.map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{new Date(item.date).toLocaleDateString('pt-BR')}</td>
+                                        <td>{item.patientName || 'N/A'}</td>
+                                        <td>{item.value || '0.00'}</td>
+                                        <td>{item.paymentMethod || 'N/A'}</td>
+                                        <td>
+                                            <Badge bg={item.status === 'Pago' ? 'success' : 'warning'}>
+                                                {item.status || 'N/A'}
+                                            </Badge>
                                         </td>
                                     </tr>
-                                )}
-                            </tbody>
-                        </Table>
-                    </Card.Body>
-                </Card>
-           
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center">
+                                        Nenhum registro encontrado para os filtros selecionados.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </Table>
+                </Card.Body>
+            </Card>
         </Container>
     );
 };
