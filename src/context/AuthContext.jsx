@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
       console.log('VITE_API_URL:', import.meta.env.VITE_API_URL); // Depuração
       console.log('Token:', token); // Depuração
       console.log('Current path:', location.pathname); // Depuração
-      // Lista de rotas públicas que não requerem autenticação
       const publicRoutes = ['/', '/login', '/register'];
       if (token && !publicRoutes.includes(location.pathname)) {
         try {
@@ -24,14 +23,14 @@ export const AuthProvider = ({ children }) => {
           console.log('Verify response:', response.data); // Depuração
           setUser({ id: response.data.userId, tipo_usuario: response.data.tipo_usuario });
         } catch (error) {
-          console.error('Erro ao verificar autenticação:', error.message, error.response?.status);
-          localStorage.removeItem('token');
-          setUser(null);
-          navigate('/login');
+          console.error('Erro ao verificar autenticação:', error.message, error.response?.status, error.response?.data);
+          // Não remove o token imediatamente, apenas redireciona
+          if (!publicRoutes.includes(location.pathname)) {
+            navigate('/login');
+          }
         }
       } else {
         setUser(null);
-        // Não redireciona se estiver em uma rota pública
         if (!publicRoutes.includes(location.pathname)) {
           navigate('/login');
         }
@@ -46,7 +45,9 @@ export const AuthProvider = ({ children }) => {
       console.error('Dados de usuário incompletos para login');
       return false;
     }
+    localStorage.setItem('token', userData.token); // Garante que o token seja salvo
     setUser(userData);
+    console.log('Usuário logado:', userData); // Depuração
     return true;
   };
 

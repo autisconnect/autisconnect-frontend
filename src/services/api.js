@@ -5,7 +5,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false, // Desativado, já que usamos JWT
+  withCredentials: false,
 });
 
 api.interceptors.request.use(
@@ -13,6 +13,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     console.log('API Base URL:', import.meta.env.VITE_API_URL); // Depuração
     console.log('Token enviado:', token); // Depuração
+    console.log('Requisição para:', config.url); // Depuração
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,12 +29,15 @@ api.interceptors.response.use(
       console.error('Erro de conexão com a API:', error.message);
     } else {
       console.error('Erro na requisição:', error.response.status, error.response.data);
-      if (error.response.status === 401 || error.response.status === 404) {
-        console.log('Erro 401/404 detectado, redirecionando para /login');
+      if (error.response.status === 401) { // Apenas 401 remove o token
+        console.log('Erro 401 detectado, redirecionando para /login');
         localStorage.removeItem('token');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+      } else if (error.response.status === 404) {
+        console.log('Erro 404 detectado:', error.response.config.url);
+        // Não remove o token para permitir depuração
       }
     }
     return Promise.reject(error);

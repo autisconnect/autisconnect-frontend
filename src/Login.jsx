@@ -17,11 +17,8 @@ function Login() {
 
     const handleBackToHome = () => navigate('/');
 
-    // Função para redirecionar com base no tipo de usuário e ID
     const redirectToDashboard = (tipoUsuario, userId) => {
         console.log(`Redirecionando para dashboard: tipo=${tipoUsuario}, id=${userId}`);
-        
-        // Garantir que userId seja um número
         const id = parseInt(userId, 10);
         if (isNaN(id) || id <= 0) {
             setError('Erro ao determinar o ID do usuário.');
@@ -43,12 +40,7 @@ function Login() {
 
         try {
             console.log(`Tentando login para usuário: ${username}`);
-            
-            // --- LINHA CORRIGIDA ---
-            // A baseURL do apiClient já é 'https://autisconnect.onrender.com/api'.
-            // O roteador de autenticação espera apenas '/login'.
-            const response = await apiClient.post('/login', { username, password } );
-            
+            const response = await apiClient.post('/login', { username, password });
             console.log('Resposta do servidor:', response.data);
             const { token, userId, tipo_usuario } = response.data;
 
@@ -62,6 +54,7 @@ function Login() {
             }
 
             localStorage.setItem('token', token);
+            console.log('Token salvo no localStorage:', token); // Depuração
             const loginSuccess = login({ id, token, username, tipo_usuario });
 
             if (loginSuccess) {
@@ -110,7 +103,7 @@ function Login() {
 
             <section className="login-section py-5" style={{ marginTop: '70px' }}>
                 <Container>
-                    <h2 className="display-3 fw-bold mb-4 text-white" >Bem-vindo de volta!</h2>
+                    <h2 className="display-3 fw-bold mb-4 text-white">Bem-vindo de volta!</h2>
                     <p className="text-center lead mb-5">
                         Faça login para acessar sua conta e conectar-se à família AutisConnect.
                     </p>
@@ -166,4 +159,3 @@ function Login() {
 }
 
 export default Login;
-
