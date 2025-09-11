@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Form, Button } from 'react-bootstrap'; // Adicionado Button
-//import * as faceapi from 'face-api.js';
-import apiClient from './services/api'; // <<<< USANDO apiClient
+import apiClient from './services/api';
 import { Line, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -80,9 +79,9 @@ const StrokeRiskMonitor = () => {
 
     // Função para carregar os modelos
     const loadModels = async () => {
-        const faceapi = window.faceapi; // Usa a versão carregada pela CDN
+        const faceapi = window.faceapi; // Use a versão da CDN
         if (!faceapi) {
-            setError("Biblioteca de IA (face-api.js) não foi carregada. Verifique os scripts no index.html.");
+            setError("face-api.js não carregada.");
             return;
         }
 

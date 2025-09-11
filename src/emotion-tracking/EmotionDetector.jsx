@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Button, Form } from 'react-bootstrap';
-//import * as tf from '@tensorflow/tfjs'; // <-- 1. IMPORTADO O TENSORFLOW
-//import * as faceapi from 'face-api.js';
 import apiClient from '../services/api'; // <-- 2. USANDO apiClient EM VEZ DE AXIOS
 import { Line, Bar } from 'react-chartjs-2';
 import {
@@ -78,13 +76,14 @@ const EmotionDetector = () => {
         const faceapi = window.faceapi;
 
         if (!tf || !faceapi) {
-            setError("Bibliotecas de IA não foram carregadas. Verifique os scripts no index.html.");
-            setIsLoading(false);
+            setError("Bibliotecas de IA não foram carregadas.");
             return;
         }
 
+        await import('@tensorflow/tfjs-backend-webgl/dist/kernels/Fill');
+
         try {
-            setError(null);
+            await tf.ready();
             console.log("Aguardando o backend do TensorFlow.js ficar pronto...");
             await tf.ready();
             console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
