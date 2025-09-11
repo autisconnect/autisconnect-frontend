@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Button, Form } from 'react-bootstrap';
+import * as tf from '@tensorflow/tfjs'; // <-- 1. IMPORTADO O TENSORFLOW
 import * as faceapi from 'face-api.js';
-import axios from 'axios';
+import apiClient from '../services/api'; // <-- 2. USANDO apiClient EM VEZ DE AXIOS
 import { Line, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -20,17 +21,9 @@ import { X } from 'react-bootstrap-icons';
 import logohori from '../assets/logo.png';
 import '../App.css';
 
-// Registrar os componentes do Chart.js
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
+    CategoryScale, LinearScale, PointElement, LineElement, BarElement,
+    Title, Tooltip, Legend, Filler
 );
 
 const EmotionDetector = () => {
@@ -44,13 +37,7 @@ const EmotionDetector = () => {
     const [emotionFilter, setEmotionFilter] = useState('all');
     const [error, setError] = useState(null);
     const [emotionCounts, setEmotionCounts] = useState({
-        neutral: 0,
-        happy: 0,
-        sad: 0,
-        angry: 0,
-        fearful: 0,
-        disgusted: 0,
-        surprised: 0
+        neutral: 0, happy: 0, sad: 0, angry: 0, fearful: 0, disgusted: 0, surprised: 0
     });
     const [sessionData, setSessionData] = useState([]);
     const [isDetecting, setIsDetecting] = useState(true);
@@ -71,7 +58,6 @@ const EmotionDetector = () => {
         }
     }, [location]);
 
-    // Função para iniciar o vídeo
     const startVideo = () => {
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
@@ -89,7 +75,11 @@ const EmotionDetector = () => {
     const loadModels = async () => {
         try {
             setError(null);
-            console.log("Iniciando carregamento dos modelos...");
+            console.log("Aguardando o backend do TensorFlow.js ficar pronto...");
+            await tf.ready(); // Garante que o backend de IA esteja pronto
+            console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
+
+            console.log("Iniciando carregamento dos modelos da face-api...");
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
                 faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
@@ -100,7 +90,7 @@ const EmotionDetector = () => {
             setIsModelsLoaded(true);
         } catch (err) {
             console.error('Erro ao carregar modelos:', err);
-            setError('Falha ao carregar modelos de detecção facial.');
+            setError(`Falha ao carregar modelos de detecção facial. Erro: ${err.message}`);
         }
     };
 
@@ -110,38 +100,16 @@ const EmotionDetector = () => {
             console.warn("Não é possível salvar a emoção: ID do paciente não definido.");
             return;
         }
-
-        // 1. Pega o token do localStorage
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            setError("Token de autenticação não encontrado. Faça o login novamente.");
-            return;
-        }
-
         try {
-            // 2. Configura os cabeçalhos da requisição
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Envia o token
-                }
-            };
-
-            // 3. Envia a requisição com os dados E os cabeçalhos
-            await axios.post('http://localhost:5000/api/emotions', {
+            await apiClient.post('/emotions', {
                 user_id: patientId,
                 emotion_type: dominantEmotion,
-                timestamp: new Date( ).toISOString()
-            }, config); // Passa a configuração para o axios
-
+                timestamp: new Date().toISOString()
+            });
         } catch (err) {
             console.error('Erro ao salvar emoção no banco de dados:', err);
-            if (err.response && err.response.status === 401) {
-                setError('Sua sessão expirou. Por favor, faça o login novamente.');
-            } else {
-                setError('Erro ao salvar emoção no servidor.');
-            }
+            const errorMessage = err.response?.data?.error || 'Erro ao salvar emoção no servidor.';
+            setError(errorMessage);
         }
     };
 
@@ -225,35 +193,26 @@ const EmotionDetector = () => {
     useEffect(() => {
         const videoElement = videoRef.current;
 
-        // Condição para INICIAR ou REINICIAR a detecção
         if (isDetecting && patientId && videoElement && isModelsLoaded) {
-            
-            // Verificamos se o vídeo já tem dados carregados (readyState > 0)
-            // Isso substitui a necessidade de um listener de evento.
-            if (videoElement.readyState >= 1) { // 1 = HAVE_METADATA
-                console.log("Condições satisfeitas, iniciando/reiniciando detecção.");
+            const handleCanPlay = () => {
+                console.log("Vídeo pronto, iniciando detecção.");
                 runDetection();
-            } else {
-                // Se o vídeo ainda não carregou pela primeira vez, usamos o listener.
-                const handleDataLoaded = () => {
-                    console.log("Vídeo pronto pela primeira vez, iniciando detecção.");
-                    runDetection();
-                };
-                videoElement.addEventListener('loadeddata', handleDataLoaded);
+            };
+            videoElement.addEventListener('canplay', handleCanPlay);
 
-                // Função de limpeza para o listener
-                return () => {
-                    videoElement.removeEventListener('loadeddata', handleDataLoaded);
-                };
-            }
+            return () => {
+                videoElement.removeEventListener('canplay', handleCanPlay);
+                if (detectionIntervalRef.current) {
+                    clearInterval(detectionIntervalRef.current);
+                }
+            };
         } else {
-            // Condição para PARAR a detecção
             if (detectionIntervalRef.current) {
                 console.log("Parando detecção.");
                 clearInterval(detectionIntervalRef.current);
             }
         }
-    }, [isDetecting, patientId, isModelsLoaded]); 
+    }, [isDetecting, patientId, isModelsLoaded]);
 
     // Função para alternar a detecção
     const toggleDetection = () => {
@@ -516,21 +475,14 @@ const EmotionDetector = () => {
     return (
         <Container fluid className="py-4 emotion-detector-page">
             <Row className="professional-header-row mb-4 align-items-center">
-                {/* <Col xs="auto" style={{ minWidth: '135px' }}>
-                    {patientId && <Alert variant="info" className="mb-0 py-2 px-3">Paciente ID: <strong>{patientId}</strong></Alert>}
-                </Col>*/}
                 <Col className="text-center">
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
                     <h1 className="professional-name mb-0 mt-2">Monitoramento Emocional</h1>
                 </Col>
                 <Col xs="auto">
-                <Button
-                    variant="outline-primary"
-                    onClick={() => window.close()}
-                    className="back-button-standalone"
-                >
-                    <X /> Sair
-                </Button>
+                    <Button variant="outline-primary" onClick={() => window.close()} className="back-button-standalone">
+                        <X /> Sair
+                    </Button>
                 </Col>
             </Row>
 
@@ -541,29 +493,14 @@ const EmotionDetector = () => {
                     <Card className="mb-4">
                         <Card.Header className="d-flex justify-content-between align-items-center">
                             <span>Detecção de Emoções em Tempo Real</span>
-                            <Button
-                                variant={isDetecting ? 'danger' : 'success'}
-                                onClick={toggleDetection}
-                                disabled={!isModelsLoaded}
-                            >
+                            <Button variant={isDetecting ? 'danger' : 'success'} onClick={toggleDetection} disabled={!isModelsLoaded}>
                                 {isDetecting ? 'Parar Detecção' : 'Iniciar Detecção'}
                             </Button>
                         </Card.Header>
                         <Card.Body className="text-center">
                             <div style={{ position: 'relative', width: '100%', maxWidth: '500px', margin: '0 auto' }}>
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    muted
-                                    playsInline
-                                    width="100%"
-                                    height="auto"
-                                    style={{ borderRadius: '8px' }}
-                                />
-                                <canvas
-                                    ref={canvasRef}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                />
+                                <video ref={videoRef} autoPlay muted playsInline width="100%" height="auto" style={{ borderRadius: '8px' }} />
+                                <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
                             </div>
                             <p className="mt-3">
                                 {!isModelsLoaded ? 'Carregando modelos...' : (isDetecting ? `Emoção Atual: ${emotion}` : 'Detecção Pausada')}
