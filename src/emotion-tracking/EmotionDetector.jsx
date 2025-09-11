@@ -70,36 +70,43 @@ const EmotionDetector = () => {
     };
 
     // Função para carregar os modelos
-    const loadModels = async () => {
-        // As bibliotecas tf e faceapi agora vêm do window
-        const tf = window.tf;
-        const faceapi = window.faceapi;
+const loadModels = async () => {
+    const tf = window.tf;
+    const faceapi = window.faceapi;
 
-        if (!tf || !faceapi) {
-            setError("Bibliotecas de IA não foram carregadas.");
-            return;
-        }
+    if (!tf || !faceapi) {
+        setError("Bibliotecas de IA não foram carregadas.");
+        return;
+    }
 
-        try {
-            await tf.ready();
-            console.log("Aguardando o backend do TensorFlow.js ficar pronto...");
-            await tf.ready();
-            console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
+    try {
+        setError(null);
+        console.log("Configurando backend e aguardando TensorFlow.js...");
 
-            console.log("Iniciando carregamento dos modelos da face-api...");
-            await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-                faceapi.nets.faceExpressionNet.loadFromUri('/models')
-            ]);
-            console.log("Modelos carregados com sucesso");
-            setIsModelsLoaded(true);
-        } catch (err) {
-            console.error('Erro ao carregar modelos:', err);
-            setError(`Falha ao carregar modelos de detecção facial. Erro: ${err.message}`);
-        }
-    };
+        // ===================================================
+        // >>>>> CORREÇÃO FINAL E DEFINITIVA AQUI <<<<<
+        // ===================================================
+        // Força o uso do backend WebGL e garante que todos os seus kernels,
+        // incluindo o 'fill', sejam registrados corretamente.
+        await tf.setBackend('webgl');
+        await tf.ready();
+        
+        console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
+
+        console.log("Iniciando carregamento dos modelos da face-api...");
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+            faceapi.nets.faceExpressionNet.loadFromUri('/models')
+        ]);
+        console.log("Modelos carregados com sucesso");
+        setIsModelsLoaded(true);
+    } catch (err) {
+        console.error('Erro ao carregar modelos:', err);
+        setError(`Falha ao carregar modelos de detecção facial. Erro: ${err.message}`);
+    }
+};
 
     // Função para salvar a emoção no banco de dados
     const saveEmotionToDB = async (dominantEmotion) => {
