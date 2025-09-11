@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Form, Button } from 'react-bootstrap'; // Adicionado Button
-import * as faceapi from 'face-api.js';
-import axios from 'axios'; // Importar axios para chamadas de API
+//import * as faceapi from 'face-api.js';
+import apiClient from './services/api'; // <<<< USANDO apiClient
 import { Line, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -51,7 +51,6 @@ const StrokeRiskMonitor = () => {
     const [dateFilter, setDateFilter] = useState('');
 
     const location = useLocation();
-    const navigate = useNavigate();
 
     // Efeito para ler o ID do paciente da URL
     useEffect(() => {
@@ -81,6 +80,12 @@ const StrokeRiskMonitor = () => {
 
     // Função para carregar os modelos
     const loadModels = async () => {
+        const faceapi = window.faceapi; // Usa a versão carregada pela CDN
+        if (!faceapi) {
+            setError("Biblioteca de IA (face-api.js) não foi carregada. Verifique os scripts no index.html.");
+            return;
+        }
+
         try {
             setError(null);
             await Promise.all([
@@ -99,25 +104,17 @@ const StrokeRiskMonitor = () => {
     // Função para salvar os dados no backend
     const saveStrokeRiskToDB = async (asymmetry, risk) => {
         if (!patientId) return;
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setError("Token não encontrado. Faça login novamente.");
-            setIsDetecting(false);
-            return;
-        }
-
         try {
-            const config = { headers: { 'Authorization': `Bearer ${token}` } };
-            await axios.post('http://localhost:5000/api/stroke-risk', {
+            // Usa apiClient, que já lida com o token e a URL base
+            await apiClient.post('/stroke-risk', {
                 patient_id: patientId,
                 asymmetry_index: asymmetry,
                 risk_level: risk,
                 observations: 'Detecção automática via monitor'
-            }, config);
+            });
         } catch (err) {
             console.error("Erro ao salvar risco de AVC:", err);
-            setError("Falha ao comunicar com o servidor para salvar os dados.");
+            setError(err.response?.data?.error || "Falha ao comunicar com o servidor para salvar os dados.");
         }
     };
 
@@ -156,13 +153,13 @@ const StrokeRiskMonitor = () => {
 
     // Função para processar o vídeo e detectar assimetria facial
     const runDetection = () => {
+        const faceapi = window.faceapi;
+        if (!faceapi) return;
         if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
 
         detectionIntervalRef.current = setInterval(async () => {
             if (!videoRef.current || videoRef.current.paused || !isDetecting) return;
-
             const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-
             if (canvasRef.current) {
                 const canvas = canvasRef.current;
                 const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
@@ -174,33 +171,26 @@ const StrokeRiskMonitor = () => {
                     faceapi.draw.drawFaceLandmarks(canvas, detections);
                 }
             }
-
             if (detections && detections.length > 0) {
                 const landmarks = detections[0].landmarks;
                 const leftEye = landmarks.getLeftEye();
                 const rightEye = landmarks.getRightEye();
                 const nose = landmarks.getNose();
                 const mouth = landmarks.getMouth();
-
                 const leftSide = calculateSideFeatures(leftEye, nose, mouth.slice(0, Math.floor(mouth.length / 2)));
                 const rightSide = calculateSideFeatures(rightEye, nose, mouth.slice(Math.ceil(mouth.length / 2)));
-
                 const asymmetry = Math.abs(leftSide - rightSide) / Math.max(leftSide, rightSide);
                 const currentRisk = asymmetry > 0.3 ? 'Alto' : asymmetry > 0.15 ? 'Médio' : 'Baixo';
-
                 setAsymmetryScore(asymmetry.toFixed(2));
                 setRiskLevel(currentRisk);
-
                 const newData = { timestamp: new Date().toISOString(), asymmetryScore: asymmetry, riskLevel: currentRisk };
                 setFacialAsymmetryData(prev => [...prev, newData].slice(-20));
                 updateRiskDistribution(currentRisk);
-
-                // Salvar no banco de dados
                 saveStrokeRiskToDB(asymmetry, currentRisk);
             } else {
                 console.log("Nenhuma face detectada");
             }
-        }, 2000); // Intervalo de 2 segundos
+        }, 2000);
     };
 
     // Lógica de controle para iniciar e parar a detecção
@@ -453,158 +443,75 @@ const StrokeRiskMonitor = () => {
     return (
         <Container fluid className="py-4 stroke-risk-monitor-page">
             <Row className="professional-header-row mb-4 align-items-center">
-
                 <Col className="text-center">
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
                     <h1 className="professional-name mb-0 mt-2">Monitor de Risco de AVC</h1>
                 </Col>
                 <Col xs="auto">
-                    <Button
-                        variant="outline-primary"
-                        onClick={() => window.close()}
-                        className="back-button-standalone"
-                    >
+                    <Button variant="outline-primary" onClick={() => window.close()} className="back-button-standalone">
                         <X /> Sair
                     </Button>
                 </Col>
             </Row>
-
             {error && <Alert variant="danger">{error}</Alert>}
-
             <Row>
                 <Col md={6}>
                     <Card className="mb-4">
                         <Card.Header className="d-flex justify-content-between align-items-center">
                             <span>Detecção Facial em Tempo Real</span>
-                            <Button
-                                variant={isDetecting ? 'danger' : 'success'}
-                                onClick={toggleDetection}
-                                disabled={!isModelsLoaded}
-                            >
+                            <Button variant={isDetecting ? 'danger' : 'success'} onClick={toggleDetection} disabled={!isModelsLoaded}>
                                 {isDetecting ? 'Parar Detecção' : 'Iniciar Detecção'}
                             </Button>
                         </Card.Header>
                         <Card.Body className="text-center">
                             <div style={{ position: 'relative', width: '100%', maxWidth: '500px', margin: '0 auto' }}>
-                                <video
-                                    ref={videoRef}
-                                    autoPlay
-                                    muted
-                                    playsInline
-                                    width="100%"
-                                    height="auto"
-                                    style={{ borderRadius: '8px' }}
-                                />
-                                <canvas
-                                    ref={canvasRef}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%'
-                                    }}
-                                />
+                                <video ref={videoRef} autoPlay muted playsInline width="100%" height="auto" style={{ borderRadius: '8px' }} />
+                                <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
                             </div>
-                            <p className="mt-3">
-                                {!isModelsLoaded ? 'Carregando modelos...' : (isDetecting ? 'Detecção ativa...' : 'Detecção Pausada')}
-                            </p>
+                            <p className="mt-3">{!isModelsLoaded ? 'Carregando modelos...' : (isDetecting ? 'Detecção ativa...' : 'Detecção Pausada')}</p>
                         </Card.Body>
                     </Card>
-
                     <Card className="mb-4">
                         <Card.Header>Resultados da Análise</Card.Header>
                         <Card.Body>
                             <p><strong>Escore de Assimetria:</strong> {asymmetryScore}</p>
-                            <p>
-                                <strong>Nível de Risco:</strong>{' '}
-                                <span className={`text-${
-                                    riskLevel === 'Alto' ? 'danger' :
-                                    riskLevel === 'Médio' ? 'warning' :
-                                    riskLevel === 'Baixo' ? 'success' : 'secondary'
-                                }`}>
-                                    {riskLevel}
-                                </span>
-                            </p>
-
-                            {riskLevel === 'Alto' && (
-                                <Alert variant="danger">
-                                    <strong>Atenção!</strong> Alto nível de assimetria facial detectado.
-                                    Considere consultar um médico para avaliação.
-                                </Alert>
-                            )}
-
-                            {riskLevel === 'Médio' && (
-                                <Alert variant="warning">
-                                    <strong>Atenção!</strong> Nível médio de assimetria facial detectado.
-                                    Monitore seus sintomas e considere uma avaliação médica.
-                                </Alert>
-                            )}
+                            <p><strong>Nível de Risco:</strong>{' '}<span className={`text-${riskLevel === 'Alto' ? 'danger' : riskLevel === 'Médio' ? 'warning' : riskLevel === 'Baixo' ? 'success' : 'secondary'}`}>{riskLevel}</span></p>
+                            {riskLevel === 'Alto' && (<Alert variant="danger"><strong>Atenção!</strong> Alto nível de assimetria facial detectado. Considere consultar um médico para avaliação.</Alert>)}
+                            {riskLevel === 'Médio' && (<Alert variant="warning"><strong>Atenção!</strong> Nível médio de assimetria facial detectado. Monitore seus sintomas e considere uma avaliação médica.</Alert>)}
                         </Card.Body>
                     </Card>
                 </Col>
-
                 <Col md={6}>
                     <Card className="mb-4">
                         <Card.Header>
                             <div className="d-flex justify-content-between align-items-center">
                                 <span>Assimetria Facial ao Longo do Tempo</span>
                                 <div className="d-flex">
-                                    <Form.Select
-                                        size="sm"
-                                        value={periodFilter}
-                                        onChange={handlePeriodChange}
-                                        className="me-2"
-                                        style={{ width: 'auto' }}
-                                    >
+                                    <Form.Select size="sm" value={periodFilter} onChange={handlePeriodChange} className="me-2" style={{ width: 'auto' }}>
                                         <option value="today">Hoje</option>
                                         <option value="week">Última Semana</option>
                                         <option value="month">Último Mês</option>
                                         <option value="custom">Data Específica</option>
                                     </Form.Select>
-
-                                    {periodFilter === 'custom' && (
-                                        <Form.Control
-                                            type="date"
-                                            size="sm"
-                                            value={dateFilter}
-                                            onChange={handleDateChange}
-                                            style={{ width: 'auto' }}
-                                        />
-                                    )}
+                                    {periodFilter === 'custom' && (<Form.Control type="date" size="sm" value={dateFilter} onChange={handleDateChange} style={{ width: 'auto' }} />)}
                                 </div>
                             </div>
                         </Card.Header>
                         <Card.Body>
-                            {formatChartData().labels.length === 0 ? (
-                                <Alert variant="info">
-                                    Nenhum dado disponível para o período selecionado.
-                                </Alert>
-                            ) : (
-                                <Line data={formatChartData()} options={lineOptions} />
-                            )}
+                            {formatChartData().labels.length === 0 ? (<Alert variant="info">Nenhum dado disponível para o período selecionado.</Alert>) : (<Line data={formatChartData()} options={lineOptions} />)}
                         </Card.Body>
                     </Card>
-
                     <Card className="mb-4">
                         <Card.Header>Distribuição de Níveis de Risco</Card.Header>
-                        <Card.Body>
-                            <Bar data={formatBarChartData()} options={barOptions} />
-                        </Card.Body>
+                        <Card.Body><Bar data={formatBarChartData()} options={barOptions} /></Card.Body>
                     </Card>
                 </Col>
             </Row>
-
             <Card className="mb-4">
                 <Card.Header>Informações sobre AVC e Assimetria Facial</Card.Header>
                 <Card.Body>
                     <h5>O que é assimetria facial?</h5>
-                    <p>
-                        A assimetria facial é uma diferença na aparência entre os lados direito e esquerdo do rosto.
-                        Embora um certo grau de assimetria seja normal, uma assimetria súbita ou acentuada pode ser
-                        um sinal de AVC.
-                    </p>
-
+                    <p>A assimetria facial é uma diferença na aparência entre os lados direito e esquerdo do rosto. Embora um certo grau de assimetria seja normal, uma assimetria súbita ou acentuada pode ser um sinal de AVC.</p>
                     <h5>Sinais de alerta para AVC:</h5>
                     <ul>
                         <li>Fraqueza súbita ou dormência no rosto, braço ou perna, especialmente em um lado do corpo</li>
@@ -613,11 +520,7 @@ const StrokeRiskMonitor = () => {
                         <li>Dificuldade súbita para andar, tontura, perda de equilíbrio ou coordenação</li>
                         <li>Dor de cabeça súbita e intensa sem causa conhecida</li>
                     </ul>
-
-                    <Alert variant="info">
-                        <strong>Lembre-se:</strong> Se você ou alguém próximo apresentar sinais de AVC,
-                        ligue imediatamente para o serviço de emergência (SAMU 192). O tempo é crucial no tratamento do AVC.
-                    </Alert>
+                    <Alert variant="info"><strong>Lembre-se:</strong> Se você ou alguém próximo apresentar sinais de AVC, ligue imediatamente para o serviço de emergência (SAMU 192). O tempo é crucial no tratamento do AVC.</Alert>
                 </Card.Body>
             </Card>
         </Container>
