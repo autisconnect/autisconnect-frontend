@@ -5,10 +5,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge } from 'react-bootstrap';
 import logohori from './assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
-import axios from 'axios';
-import * as tf from '@tensorflow/tfjs';
-import * as poseDetection from '@tensorflow-models/pose-detection';
-import { v4 as uuidv4 } from 'uuid';
+//import axios from 'axios';
+//import * as tf from '@tensorflow/tfjs';
+//import * as poseDetection from '@tensorflow-models/pose-detection';
+//import { v4 as uuidv4 } from 'uuid';
 
 const StereotypyMonitor = () => {
     const videoRef = useRef(null);
@@ -18,7 +18,7 @@ const StereotypyMonitor = () => {
 
     const [patientId, setPatientId] = useState(null);
     const [detector, setDetector] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isDetecting, setIsDetecting] = useState(false);
     
@@ -197,62 +197,42 @@ const StereotypyMonitor = () => {
                 </Col>
             </Row>
 
-            {error && <Alert variant="danger">{error}</Alert>}
+            <Alert variant="warning">{error || "Esta funcionalidade está em manutenção."}</Alert>
 
             {isLoading ? (
                 <div className="text-center"><Spinner animation="border" /> <p>Carregando...</p></div>
             ) : (
-                <Row>
-                    <Col md={8}>
-                        <Card className="mb-4">
-                            <Card.Header className="d-flex justify-content-between align-items-center">
-                                Detecção em Tempo Real
-                                <Button variant={isDetecting ? "danger" : "success"} onClick={isDetecting ? stopDetection : startDetection} disabled={!detector}>
-                                    {isDetecting ? "Parar Detecção" : "Iniciar Detecção"}
-                                </Button>
-                            </Card.Header>
-                            <Card.Body className="text-center">
-                                <div style={{ position: 'relative', width: '100%', maxWidth: '640px', margin: '0 auto' }}>
-                                    <video ref={videoRef} autoPlay muted playsInline width="640" height="480" style={{ borderRadius: '8px', backgroundColor: '#000' }} />
-                                    <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={4}>
-                        <Card className="mb-4">
-                            <Card.Header>Status da Detecção</Card.Header>
-                            <Card.Body className="text-center">
-                                <h4>Estereotipia Atual</h4>
-                                <p className="h3">
-                                    <Badge bg={detectedStereotypy !== 'Nenhuma' ? 'warning' : 'secondary'}>
-                                        {detectedStereotypy}
-                                    </Badge>
-                                </p>
-                            </Card.Body>
-                        </Card>
-                        <Card className="mb-4">
-                            <Card.Header>Log da Sessão</Card.Header>
-                            <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                {stereotypyLog.length > 0 ? (
-                                    <Table striped bordered size="sm">
-                                        <thead><tr><th>Tipo</th><th>Duração (s)</th></tr></thead>
-                                        <tbody>
-                                            {stereotypyLog.map(log => (
-                                                <tr key={log.id}>
-                                                    <td>{log.type}</td>
-                                                    <td>{log.duration}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </Table>
-                                ) : (
-                                    <p className="text-muted">Nenhuma detecção registrada nesta sessão.</p>
-                                )}
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
+            <Row>
+                <Col md={8}>
+                    <Card className="mb-4">
+                        <Card.Header className="d-flex justify-content-between align-items-center">
+                            Detecção em Tempo Real
+                            <Button variant="secondary" disabled>
+                                Iniciar Detecção
+                            </Button>
+                        </Card.Header>
+                        <Card.Body className="text-center">
+                            <div style={{ position: 'relative', width: '100%', maxWidth: '640px', margin: '0 auto', backgroundColor: '#f0f0f0', border: '1px dashed #ccc', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
+                                <p className="text-muted">Câmera desativada</p>
+                            </div>
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={4}>
+                    <Card className="mb-4">
+                        <Card.Header>Status da Detecção</Card.Header>
+                        <Card.Body className="text-center">
+                            <p className="text-muted">Aguardando ativação...</p>
+                        </Card.Body>
+                    </Card>
+                    <Card className="mb-4">
+                        <Card.Header>Log da Sessão</Card.Header>
+                        <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            <p className="text-muted">Nenhuma detecção registrada.</p>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
             )}
         </Container>
     );
