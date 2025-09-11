@@ -48,10 +48,10 @@ const ROUTES = {
 };
 
 // Utility function for auth headers
-const getAuthHeaders = () => ({
+{/* const getAuthHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json',
-});
+}); */}
 
 const PatientDetails = () => {
     const { user } = useContext(AuthContext);
@@ -176,54 +176,31 @@ const PatientDetails = () => {
     const fetchConsultations = async () => {
         if (!user || !patientId) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, {
-                headers: getAuthHeaders()
-            });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Falha ao buscar histórico de consultas.');
-            }
-            const data = await response.json();
-            setConsultations(data);
+            const response = await apiClient.get(`/appointments/patient/${patientId}`);
+            setConsultations(response.data);
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.error || 'Falha ao buscar histórico de consultas.');
         }
     };
 
     // Handler for inline field updates
     const handleFieldUpdate = async (appointmentId, field, value) => {
-        // Optimistic UI update
-        setConsultations(prevConsultations =>
-            prevConsultations.map(c =>
-                c.id === appointmentId ? { ...c, [field]: value } : c
-            )
-        );
-
+        setConsultations(prev => prev.map(c => c.id === appointmentId ? { ...c, [field]: value } : c));
         try {
-            const response = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ field, value }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Falha ao atualizar o campo.');
-            }
-
+            await apiClient.put(`/appointments/${appointmentId}`, { field, value });
             setSuccessMessage('Campo atualizado com sucesso!');
             setTimeout(() => setSuccessMessage(''), 2000);
         } catch (err) {
-            setError(`Erro ao atualizar: ${err.message}`);
-            fetchConsultations(); // Revert to server state on error
+            setError(`Erro ao atualizar: ${err.response?.data?.error || err.message}`);
+            fetchConsultations();
         }
     };
 
     // Handler for consultation input changes
-    const handleConsultationInputChange = (e) => {
+    {/* const handleConsultationInputChange = (e) => {
         const { name, value } = e.target;
         setNewConsultation(prev => ({ ...prev, [name]: value }));
-    };
+    }; */}
 
     // Handler for saving consultations
     const handleSaveConsultation = async (e) => {
@@ -232,46 +209,24 @@ const PatientDetails = () => {
             setError('Data, hora e valor são campos obrigatórios.');
             return;
         }
-
         try {
             const consultationToSave = {
                 ...newConsultation,
                 patient_id: patientId,
                 professional_id: user.id,
-                payment_method: newConsultation.payment_method === 'Outros' || newConsultation.payment_method === 'Plano de Saúde'
+                payment_method: ['Outros', 'Plano de Saúde'].includes(newConsultation.payment_method)
                     ? newConsultation.payment_details
                     : newConsultation.payment_method
             };
-
-            const response = await fetch(`http://localhost:5000/api/appointments`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(consultationToSave),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Falha ao registrar consulta.');
-            }
-
+            await apiClient.post('/appointments', consultationToSave);
             await fetchConsultations();
             setSuccessMessage('Consulta registrada com sucesso!');
             setShowConsultationModal(false);
-            setNewConsultation({
-                appointment_date: '',
-                appointment_time: '',
-                appointment_type: 'Regular',
-                status: 'Realizada',
-                payment_method: 'Pix',
-                payment_details: '',
-                payment_status: 'Pago',
-                value: '',
-                notes: ''
-            });
+            setNewConsultation({ appointment_date: '', appointment_time: '', appointment_type: 'Regular', status: 'Realizada', payment_method: 'Pix', payment_details: '', payment_status: 'Pago', value: '', notes: '' });
             setError('');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.error || 'Falha ao registrar consulta.');
         }
     };
 
@@ -281,33 +236,16 @@ const PatientDetails = () => {
             setError('Por favor, preencha o título e o conteúdo da nota.');
             return;
         }
-
         try {
-            const newNote = {
-                title: newNoteData.title,
-                content: newNoteData.content,
-                createdAt: new Date().toISOString(),
-            };
-            const response = await fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/notes`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(newNote),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Falha ao salvar nota.');
-            }
-
-            const savedNote = await response.json();
-            setNotes([...notes, savedNote]);
+            const response = await apiClient.post(`/professional/${user.id}/patients/${patientId}/notes`, newNoteData);
+            setNotes([...notes, response.data]);
             setShowNoteModal(false);
             setNewNoteData({ title: '', content: '' });
             setError('');
             setSuccessMessage('Nota gravada com sucesso!');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.error || 'Falha ao salvar nota.');
         }
     };
 
@@ -645,160 +583,108 @@ const PatientDetails = () => {
     };
 
 
-
-
-
-useEffect(() => {
-    const fetchPatientData = async () => {
-        if (!user || !patientId) {
-            navigate('/login');
-            return;
-        }
-
-        setLoading(true);
-        setError('');
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setError('Token de autenticação não encontrado.');
+    useEffect(() => {
+        const fetchPatientData = async () => {
+            if (!user || !patientId) {
                 navigate('/login');
                 return;
             }
 
-            // Busca de todos os dados em paralelo para mais performance
-            const [
-                patientRes, notesRes, consultationsRes, vocalizationsRes, 
-                strokeRes, emotionsRes, stereotypiesRes
-            ] = await Promise.all([
-                fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}`, { headers: getAuthHeaders( ) }),
-                fetch(`http://localhost:5000/api/professional/${user.id}/patients/${patientId}/notes`, { headers: getAuthHeaders( ) }),
-                fetch(`http://localhost:5000/api/appointments/patient/${patientId}`, { headers: getAuthHeaders( ) }),
-                fetch(`http://localhost:5000/api/vocalizations/${patientId}`, { headers: getAuthHeaders( ) }),
-                fetch(`http://localhost:5000/api/stroke-risk/${patientId}`, { headers: getAuthHeaders( ) }),
-                fetch(`http://localhost:5000/api/emotions/${patientId}`, { headers: getAuthHeaders( ) }),
-                fetch(`http://localhost:5000/api/stereotypies/${patientId}`, { headers: getAuthHeaders( ) })
-            ]);
+            setLoading(true);
+            setError('');
+            try {
+                const [
+                    patientRes, notesRes, consultationsRes, vocalizationsRes,
+                    strokeRes, emotionsRes, stereotypiesRes
+                ] = await Promise.all([
+                    apiClient.get(`/professional/${user.id}/patients/${patientId}`),
+                    apiClient.get(`/professional/${user.id}/patients/${patientId}/notes`),
+                    apiClient.get(`/appointments/patient/${patientId}`),
+                    apiClient.get(`/vocalizations/${patientId}`),
+                    apiClient.get(`/stroke-risk/${patientId}`),
+                    apiClient.get(`/emotions/${patientId}`),
+                    apiClient.get(`/stereotypies/${patientId}`)
+                ]);
 
-            // Validação das respostas
-            if (!patientRes.ok) throw new Error('Falha ao buscar dados do paciente.');
-            if (!notesRes.ok) throw new Error('Falha ao buscar notas.');
-            if (!consultationsRes.ok) throw new Error('Falha ao buscar consultas.');
-            if (!vocalizationsRes.ok) throw new Error('Falha ao buscar vocalizações.');
-            if (!strokeRes.ok) throw new Error('Falha ao buscar risco de AVC.');
-            if (!emotionsRes.ok) throw new Error('Falha ao buscar emoções.');
-            if (!stereotypiesRes.ok) throw new Error('Falha ao buscar estereotipias.');
+                const patientData = patientRes.data;
+                const notesData = notesRes.data;
+                const consultationsData = consultationsRes.data;
+                const vocalizationsData = vocalizationsRes.data;
+                const strokeDataFromDB = strokeRes.data;
+                const emotionsDataFromDB = emotionsRes.data;
+                const stereotypiesData = stereotypiesRes.data;
 
-            // Extração dos dados JSON
-            const patientData = await patientRes.json();
-            const notesData = await notesRes.json();
-            const consultationsData = await consultationsRes.json();
-            const vocalizationsData = await vocalizationsRes.json();
-            const strokeDataFromDB = await strokeRes.json();
-            const emotionsDataFromDB = await emotionsRes.json();
-            const stereotypiesData = await stereotypiesRes.json();
+                const validVocalizations = (Array.isArray(vocalizationsData) ? vocalizationsData : []).map(v => {
+                    let parsedAnalysis = {};
+                    try {
+                        if (v.analysis_data && typeof v.analysis_data === 'string' && v.analysis_data.startsWith('{')) {
+                            parsedAnalysis = JSON.parse(v.analysis_data);
+                        } else if (typeof v.analysis_data === 'object' && v.analysis_data !== null) {
+                            parsedAnalysis = v.analysis_data;
+                        }
+                    } catch (e) { console.error("Falha ao fazer parse do JSON da vocalização:", v.analysis_data, e); }
+                    return { ...v, analysis: parsedAnalysis };
+                });
 
-            // ===================================================
-            // >>>>> CORREÇÃO DE ROBUSTEZ AQUI <<<<<
-            // ===================================================
-            const validVocalizations = (Array.isArray(vocalizationsData) ? vocalizationsData : []).map(v => {
-                let parsedAnalysis = {};
-                try {
-                    // Verifica se analysis_data é uma string e não a string literal "[object Object]"
-                    if (v.analysis_data && typeof v.analysis_data === 'string' && v.analysis_data.startsWith('{')) {
-                        parsedAnalysis = JSON.parse(v.analysis_data);
-                    } else if (typeof v.analysis_data === 'object' && v.analysis_data !== null) {
-                        // Se já for um objeto (improvável, mas seguro)
-                        parsedAnalysis = v.analysis_data;
-                    }
-                } catch (e) {
-                    console.error("Falha ao fazer parse do JSON da vocalização:", v.analysis_data, e);
-                }
-                return { ...v, analysis: parsedAnalysis };
-            });
+                const validStrokeRisks = Array.isArray(strokeDataFromDB) ? strokeDataFromDB : [];
+                const validEmotions = Array.isArray(emotionsDataFromDB) ? emotionsDataFromDB : [];
+                const validStereotypies = Array.isArray(stereotypiesData) ? stereotypiesData : [];
 
-            const validStrokeRisks = Array.isArray(strokeDataFromDB) ? strokeDataFromDB : [];
-            const validEmotions = Array.isArray(emotionsDataFromDB) ? emotionsDataFromDB : [];
-            const validStereotypies = Array.isArray(stereotypiesData) ? stereotypiesData : [];
-            
-            // Atualização de todos os estados
-            setPatient(patientData);
-            setNotes(Array.isArray(notesData) ? notesData : []);
-            setConsultations(Array.isArray(consultationsData) ? consultationsData : []);
-            setVocalizations(validVocalizations);
-            setStrokeRisks(validStrokeRisks);
-            setEmotions(validEmotions);
-            setStereotypies(validStereotypies);
+                setPatient(patientData);
+                setNotes(Array.isArray(notesData) ? notesData : []);
+                setConsultations(Array.isArray(consultationsData) ? consultationsData : []);
+                setVocalizations(validVocalizations);
+                setStrokeRisks(validStrokeRisks);
+                setEmotions(validEmotions);
+                setStereotypies(validStereotypies);
 
-            // Análises de IA
-            setVocalizationAnalysis(analyzeVocalizationPatterns(validVocalizations));
-            setStrokeRiskAnalysis(analyzeStrokeRiskPatterns(validStrokeRisks));
-            setEmotionAnalysis(analyzeEmotionPatterns(validEmotions));
-            setStereotypyAnalysis(analyzeStereotypyPatterns(validStereotypies));
+                setVocalizationAnalysis(analyzeVocalizationPatterns(validVocalizations));
+                setStrokeRiskAnalysis(analyzeStrokeRiskPatterns(validStrokeRisks));
+                setEmotionAnalysis(analyzeEmotionPatterns(validEmotions));
+                setStereotypyAnalysis(analyzeStereotypyPatterns(validStereotypies));
 
+                processChartData(null, validStrokeRisks, validStereotypies, validEmotions, validVocalizations);
 
-            // Processamento para gráficos
-            processChartData(null, validStrokeRisks, validStereotypies, validEmotions, validVocalizations);
+            } catch (err) {
+                console.error('Erro ao carregar dados do paciente:', err);
+                const errorMessage = err.response?.data?.error || err.message || 'Ocorreu um erro desconhecido.';
+                setError(errorMessage);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        } catch (err) {
-            console.error('Erro ao carregar dados do paciente:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    fetchPatientData();
-}, [user, patientId, periodFilter, navigate]);
-
-
-
+        fetchPatientData();
+    }, [user, patientId, periodFilter, navigate]);
 
 
     // Adicione este novo useEffect logo após o useEffect acima
     useEffect(() => {
-        // Só executa se tivermos o ID do paciente e os dados de emoções já carregados
         if (patientId && emotions.length > 0) {
             const fetchAIAnalysis = async () => {
-            try {
-                const aiResponse = await fetch(`http://localhost:5000/api/iaemotions/analysis/${patientId}?type=emotion`, {
-                    headers: getAuthHeaders( )
-                });
-
-                if (aiResponse.ok) {
-                    const aiData = await aiResponse.json();
-                    setPrediction(aiData.predictionText || "Previsão gerada com sucesso.");
-                    setAnomaly(aiData.anomaly || null);
-                } else {
-                    setPrediction("Serviço de análise de emoções indisponível.");
+                try {
+                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}?type=emotion`);
+                    setPrediction(aiResponse.data.predictionText || "Previsão gerada com sucesso.");
+                    setAnomaly(aiResponse.data.anomaly || null);
+                } catch (aiError) {
+                    console.error("Erro ao buscar análise de IA de emoções:", aiError);
+                    setPrediction("Não foi possível conectar ao serviço de análise de emoções.");
                 }
-            } catch (aiError) {
-                console.error("Erro ao buscar análise de IA de emoções:", aiError);
-                setPrediction("Não foi possível conectar ao serviço de análise de emoções.");
-            }
-        };
+            };
             fetchAIAnalysis();
         }
-    }, [emotions, patientId]); // A dependência 'emotions' garante que ele rode após os dados serem carregados
+    }, [emotions, patientId]);
 
     // ===================================================
     // >>>>> NOVO useEffect PARA IA DE RISCO DE AVC <<<<<
     // ===================================================
     useEffect(() => {
-        // Só executa se tivermos o ID do paciente e os dados de risco já carregados
         if (patientId && strokeRisks.length > 0) {
             const fetchStrokeAIAnalysis = async () => {
                 try {
-                    const aiResponse = await fetch(`http://localhost:5000/api/iaemotions/analysis/${patientId}?type=stroke`, {
-                        headers: getAuthHeaders( )
-                    });
-
-                    if (aiResponse.ok) {
-                        const aiData = await aiResponse.json();
-                        setStrokePrediction(aiData.predictionText || "Previsão de risco gerada.");
-                        setStrokeAnomaly(aiData.anomaly || null);
-                    } else {
-                        setStrokePrediction("Serviço de análise de risco indisponível.");
-                    }
+                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}?type=stroke`);
+                    setStrokePrediction(aiResponse.data.predictionText || "Previsão de risco gerada.");
+                    setStrokeAnomaly(aiResponse.data.anomaly || null);
                 } catch (aiError) {
                     console.error("Erro ao buscar análise de IA para Risco de AVC:", aiError);
                     setStrokePrediction("Não foi possível conectar ao serviço de análise de risco.");
@@ -812,16 +698,9 @@ useEffect(() => {
         if (patientId && vocalizations.length > 0) {
             const fetchVocalizationAI = async () => {
                 try {
-                    const response = await fetch(`http://localhost:5000/api/iavocalizations/analysis/${patientId}`, {
-                        headers: getAuthHeaders( )
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setVocalizationPrediction(data.predictionText);
-                        setVocalizationAnomaly(data.anomaly);
-                    } else {
-                        setVocalizationPrediction("Serviço de análise de vocalizações indisponível.");
-                    }
+                    const response = await apiClient.get(`/iavocalizations/analysis/${patientId}`);
+                    setVocalizationPrediction(response.data.predictionText);
+                    setVocalizationAnomaly(response.data.anomaly);
                 } catch (err) {
                     console.error("Erro ao buscar IA de vocalizações:", err);
                     setVocalizationPrediction("Não foi possível conectar ao serviço de análise de vocalizações.");
@@ -830,6 +709,22 @@ useEffect(() => {
             fetchVocalizationAI();
         }
     }, [vocalizations, patientId]);
+
+    useEffect(() => {
+        if (patientId && stereotypies.length > 0) {
+            const fetchStereotypyAI = async () => {
+                try {
+                    const response = await apiClient.get(`/ia-analysis/${patientId}?type=stereotypy`);
+                    setStereotypyPrediction(response.data.predictionText);
+                    setStereotypyAnomaly(response.data.anomaly);
+                } catch (err) {
+                    console.error("Erro ao buscar IA de estereotipias:", err);
+                    setStereotypyPrediction("Não foi possível conectar ao serviço de análise.");
+                }
+            };
+            fetchStereotypyAI();
+        }
+    }, [stereotypies, patientId]);
 
     const processChartData = (triggers, strokeRisks, stereotypies, emotions, vocalizations) => {
         const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
