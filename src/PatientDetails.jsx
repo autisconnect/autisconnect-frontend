@@ -24,22 +24,11 @@ import {
 } from 'chart.js';
 import './App.css';
 
-// Register Chart.js components
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    ArcElement,
-    RadialLinearScale,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
+    CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement,
+    RadialLinearScale, Title, Tooltip, Legend, Filler
 );
 
-// Route constants for monitoring tools
 const ROUTES = {
     EMOTION_DETECTOR: '/emotion-detector',
     STROKE_RISK_MONITOR: '/stroke-risk-monitor',
@@ -47,13 +36,10 @@ const ROUTES = {
     TRIGGER_RECORDER: '/trigger-recorder',
 };
 
-// Utility function for auth headers
-{/* const getAuthHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-    'Content-Type': 'application/json',
-}); */}
-
 const PatientDetails = () => {
+    // ===================================================
+    // 1. HOOKS (useState, useContext, etc.)
+    // ===================================================
     const { user } = useContext(AuthContext);
     const { patientId } = useParams();
     const navigate = useNavigate();
@@ -63,7 +49,7 @@ const PatientDetails = () => {
     const [strokeData, setStrokeData] = useState(null);
     const [stereotypyData, setStereotypyData] = useState(null);
     const [emotionData, setEmotionData] = useState(null);
-    const [emotionDistributionData, setEmotionDistributionData] = useState(null); // Novo estado para o gráfico de pizza
+    const [emotionDistributionData, setEmotionDistributionData] = useState(null);
     const [triggers, setTriggers] = useState([]);
     const [strokeRisks, setStrokeRisks] = useState([]);
     const [stereotypies, setStereotypies] = useState([]);
@@ -99,8 +85,6 @@ const PatientDetails = () => {
     const [stereotypyAnalysis, setStereotypyAnalysis] = useState(null);
     const [stereotypyPrediction, setStereotypyPrediction] = useState("Calculando previsão...");
     const [stereotypyAnomaly, setStereotypyAnomaly] = useState(null);
-
-    // States for Consultation tab
     const [consultations, setConsultations] = useState([]);
     const [showConsultationModal, setShowConsultationModal] = useState(false);
     const [newConsultation, setNewConsultation] = useState({
@@ -115,64 +99,16 @@ const PatientDetails = () => {
         notes: ''
     });
 
-    const lineOptions = {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Evolução ao Longo do Tempo' }
-        },
-        scales: {
-            y: { beginAtZero: true, title: { display: true, text: 'Valor' } }
-        }
-    };
+    // ===================================================
+    // 2. FUNÇÕES AUXILIARES (handlers, formatters, etc.)
+    // ===================================================
+    const lineOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Evolução ao Longo do Tempo' } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Valor' } } } };
+    const pieOptions = { responsive: true, plugins: { legend: { position: 'right' }, title: { display: true, text: 'Distribuição' } } };
+    const barOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Comparação entre Sessões' } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentagem (%)' } } } };
+    const radarOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Perfil Emocional' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 1 } } };
+    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
+    const formatAge = (birthDate) => { if (!birthDate) return 'N/A'; const today = new Date(); const birth = new Date(birthDate); let age = today.getFullYear() - birth.getFullYear(); const monthDiff = today.getMonth() - birth.getMonth(); if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) { age--; } return `${age} anos`; };
 
-    const pieOptions = {
-        responsive: true,
-        plugins: {
-            legend: { position: 'right' },
-            title: { display: true, text: 'Distribuição' }
-        }
-    };
-
-    const barOptions = {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Comparação entre Sessões' }
-        },
-        scales: {
-            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentagem (%)' } }
-        }
-    };
-
-    const radarOptions = {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Perfil Emocional' }
-        },
-        scales: {
-            r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 1 }
-        }
-    };
-
-    const formatDate = (dateString) => {
-        return dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
-    };
-
-    const formatAge = (birthDate) => {
-        if (!birthDate) return 'N/A';
-        const today = new Date();
-        const birth = new Date(birthDate);
-        let age = today.getFullYear() - birth.getFullYear();
-        const monthDiff = today.getMonth() - birth.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-            age--;
-        }
-        return `${age} anos`;
-    };
-
-    // Fetch consultations
     const fetchConsultations = async () => {
         if (!user || !patientId) return;
         try {
@@ -183,7 +119,6 @@ const PatientDetails = () => {
         }
     };
 
-    // Handler for inline field updates
     const handleFieldUpdate = async (appointmentId, field, value) => {
         setConsultations(prev => prev.map(c => c.id === appointmentId ? { ...c, [field]: value } : c));
         try {
@@ -196,13 +131,11 @@ const PatientDetails = () => {
         }
     };
 
-    // Handler for consultation input changes
-    {/* const handleConsultationInputChange = (e) => {
+    const handleConsultationInputChange = (e) => {
         const { name, value } = e.target;
         setNewConsultation(prev => ({ ...prev, [name]: value }));
-    }; */}
+    };
 
-    // Handler for saving consultations
     const handleSaveConsultation = async (e) => {
         e.preventDefault();
         if (!newConsultation.appointment_date || !newConsultation.appointment_time || !newConsultation.value) {
@@ -230,7 +163,6 @@ const PatientDetails = () => {
         }
     };
 
-    // Handler for saving notes
     const handleSaveNote = async () => {
         if (!newNoteData.title || !newNoteData.content) {
             setError('Por favor, preencha o título e o conteúdo da nota.');
