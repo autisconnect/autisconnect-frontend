@@ -80,8 +80,6 @@ const EmotionDetector = () => {
             return;
         }
 
-        await import('@tensorflow/tfjs-backend-webgl/dist/kernels/Fill');
-
         try {
             await tf.ready();
             console.log("Aguardando o backend do TensorFlow.js ficar pronto...");
