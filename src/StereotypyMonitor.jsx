@@ -93,46 +93,39 @@ const StereotypyMonitor = () => {
         };
     }, [location]);
 
-    const loadModels = useCallback(async () => { // Envolvido em useCallback para estabilidade
+    const loadModels = useCallback(async () => {
         try {
-            setError(null);
-            console.log("Configurando backend do TensorFlow.js...");
+        setError(null);
+        console.log("Configurando backend do TensorFlow.js...");
+        await tf.setBackend('webgl');
+        await tf.ready();
+        console.log(`Backend pronto: ${tf.getBackend()}`);
 
-            // O backend é registrado pelo import, mas setá-lo explicitamente é uma boa prática.
-            await tf.setBackend('webgl');
+        // **Correção aqui** – uso de string em vez de constante possivelmente inexistente
+        const poseDetector = await poseDetection.createDetector(
+            poseDetection.SupportedModels.MoveNet,
+            { modelType: 'SinglePose.Lightning' }
+        );
+        detectorRef.current = poseDetector;
+        setIsModelsLoaded(true);
+        console.log("Modelo de pose carregado com sucesso.");
+        } catch (err) {
+        console.error('Erro ao carregar modelos:', err);
+        try {
+            console.log("Tentando fallback para o backend CPU...");
+            await tf.setBackend('cpu');
             await tf.ready();
-            console.log(`Backend pronto: ${tf.getBackend()}`);
-
-            const model = poseDetection.SupportedModels.MoveNet;
-            const detectorConfig = {
-                modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
-            };
-            
-            // Usando a variável 'poseDetection' importada
-            const poseDetector = await poseDetection.createDetector(model, detectorConfig);
+            console.log(`Backend fallback ativado: ${tf.getBackend()}`);
+            const poseDetector = await poseDetection.createDetector(
+            poseDetection.SupportedModels.MoveNet,
+            { modelType: 'SinglePose.Lightning' }
+            );
             detectorRef.current = poseDetector;
             setIsModelsLoaded(true);
-            console.log("Modelo de pose carregado com sucesso.");
-
-        } catch (err) {
-            console.error('Erro ao carregar modelos:', err);
-            // O fallback para CPU também funcionará
-            try {
-                console.log("Tentando fallback para o backend CPU...");
-                await tf.setBackend('cpu');
-                await tf.ready();
-                console.log(`Backend fallback ativado: ${tf.getBackend()}`);
-
-                const model = poseDetection.SupportedModels.MoveNet;
-                const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-                const poseDetector = await poseDetection.createDetector(model, detectorConfig);
-                detectorRef.current = poseDetector; // Armazena no ref
-
-                setIsModelsLoaded(true);
-                console.log("Modelo de pose carregado com sucesso no backend CPU.");
-            } catch (fallbackErr) {
-                setError(`Falha ao carregar os modelos de IA. Erro: ${err.message}`);
-            }
+            console.log("Modelo de pose carregado com sucesso no backend CPU.");
+        } catch (fallbackErr) {
+            setError(`Falha ao carregar os modelos de IA. Erro: ${err.message}`);
+        }
         }
     }, []);
 
@@ -151,81 +144,68 @@ const StereotypyMonitor = () => {
 
     const toggleDetection = () => {
         setIsDetecting(prevState => {
-            const newState = !prevState;
-            if (!newState) {
-                if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
-                if (videoRef.current && videoRef.current.srcObject) {
-                    videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-                }
-                setDetectedStereotypy('Nenhuma');
-                setStereotypyStartTime(null);
-            } else {
-                startVideo();
+        const newState = !prevState;
+        if (!newState) {
+            if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
+            if (videoRef.current && videoRef.current.srcObject) {
+            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
             }
-            return newState;
+            setDetectedStereotypy('Nenhuma');
+            setStereotypyStartTime(null);
+        } else {
+            startVideo();
+        }
+        return newState;
         });
     };
 
     useEffect(() => {
         if (isModelsLoaded && isDetecting) {
-            startVideo(); // Inicia a webcam
-            const videoElement = videoRef.current;
+        startVideo();
+        const videoElement = videoRef.current;
 
-            const handlePlay = () => {
-                if (videoElement.videoWidth === 0) return; // Garante que o vídeo tem dimensões
+        const handlePlay = () => {
+            if (videoElement.videoWidth === 0) return;
+            console.log("Vídeo pronto, iniciando detecção de estereotipias.");
+            if (canvasRef.current) {
+            canvasRef.current.width = videoElement.videoWidth;
+            canvasRef.current.height = videoElement.videoHeight;
+            }
+            lastPoseRef.current = null;
+            if (detectionIntervalRef.current) {
+            clearInterval(detectionIntervalRef.current);
+            }
+            detectionIntervalRef.current = setInterval(runDetection, 200);
+        };
 
-                console.log("Vídeo pronto, iniciando detecção de estereotipias.");
-                if (canvasRef.current) {
-                    canvasRef.current.width = videoElement.videoWidth;
-                    canvasRef.current.height = videoElement.videoHeight;
-                }
-                lastPoseRef.current = null; // Reseta a última pose
-
-                // Limpa qualquer intervalo anterior para evitar múltiplos loops
-                if (detectionIntervalRef.current) {
-                    clearInterval(detectionIntervalRef.current);
-                }
-                
-                // Inicia o loop de detecção
-                detectionIntervalRef.current = setInterval(runDetection, 200); // 5 detecções por segundo
-            };
-
-            // O evento 'loadeddata' é mais confiável que 'play' para garantir que o vídeo tem dimensões
-            videoElement.addEventListener('loadeddata', handlePlay);
-
-            // Cleanup: remove o listener e o intervalo quando o componente desmontar ou as dependências mudarem
-            return () => {
-                videoElement.removeEventListener('loadeddata', handlePlay);
-                if (detectionIntervalRef.current) {
-                    clearInterval(detectionIntervalRef.current);
-                }
-            };
+        videoElement.addEventListener('loadeddata', handlePlay);
+        return () => {
+            videoElement.removeEventListener('loadeddata', handlePlay);
+            if (detectionIntervalRef.current) {
+            clearInterval(detectionIntervalRef.current);
+            }
+        };
         }
-    }, [isModelsLoaded, isDetecting, startVideo]); // startVideo foi adicionado como d
-
+    }, [isModelsLoaded, isDetecting, startVideo]);
+    
     const runDetection = async () => {
         const detector = detectorRef.current;
-        if (!detector || !videoRef.current || videoRef.current.paused || videoRef.current.videoWidth === 0) {
-            // Adicionada verificação videoWidth === 0 para garantir que o vídeo está realmente carregado
-            return;
+        const video = videoRef.current;
+        if (!detector || !video || video.paused || video.videoWidth === 0 || video.readyState < 2) {
+        return;
         }
-
         try {
-            // Esta linha estava causando o erro, mas o problema era o contexto, não a linha em si.
-            const poses = await detector.estimatePoses(videoRef.current);
-            
-            const ctx = canvasRef.current?.getContext('2d');
-            if (ctx) {
-                ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                if (poses && poses.length > 0) {
-                    // A análise de movimento precisa dos valores de state mais recentes,
-                    // por isso o useCallback era problemático.
-                    analyzeMovement(poses[0].keypoints); 
-                    drawKeypoints(poses[0].keypoints, ctx);
-                }
+        const poses = await detector.estimatePoses(video);
+        const ctx = canvasRef.current?.getContext('2d');
+        if (ctx) {
+            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            if (poses && poses.length > 0) {
+            analyzeMovement(poses[0].keypoints);
+            drawKeypoints(poses[0].keypoints, ctx);
             }
+        }
         } catch (err) {
-            console.error('Erro na detecção:', err);
+        console.error('Erro na detecção:', err);
         }
     };
 
