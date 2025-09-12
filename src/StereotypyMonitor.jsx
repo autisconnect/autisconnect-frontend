@@ -1,7 +1,7 @@
 // Ficheiro: src/StereotypyMonitor.jsx
 // VERSÃO CORRIGIDA E COMPLETA
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge, Form } from 'react-bootstrap';
 import { Line, Bar } from 'react-chartjs-2';
@@ -63,10 +63,12 @@ const StereotypyMonitor = () => {
         }
         setPatientId(id);
 
+        // Mock data dinâmico baseado na data atual (12/09/2025)
+        const now = new Date('2025-09-12T00:00:00Z');
         const mockLogData = [
-            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: '2025-09-12T10:00:00Z' },
-            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: '2025-09-12T11:30:00Z' },
-            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: '2025-09-12T14:20:00Z' },
+            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: new Date(now.getTime() - 6 * 3600000).toISOString() }, // 6h atrás
+            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: new Date(now.getTime() - 2 * 3600000).toISOString() }, // 2h atrás
+            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: new Date(now.getTime() + 1 * 3600000).toISOString() }, // 1h à frente (para teste)
         ];
         setStereotypyLog(mockLogData);
 
@@ -144,7 +146,7 @@ const StereotypyMonitor = () => {
         } else {
             cancelAnimationFrame(animationFrameId);
         }
-    }, [isDetecting, isModelsLoaded, startVideo]); // Adicionado startVideo nas dependências
+    }, [isDetecting, isModelsLoaded, startVideo]); // Adicionado startVideo nas dependências para evitar warnings e issues de init
 
     // ====================================================================
     // RESTO DO CÓDIGO (FUNÇÕES AUXILIARES E JSX)
@@ -279,7 +281,7 @@ const StereotypyMonitor = () => {
         if (periodFilter === 'today') filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === now.toDateString());
         else if (periodFilter === 'week') { const oneWeekAgo = new Date(now.getTime() - 7 * 86400000); filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneWeekAgo); }
         else if (periodFilter === 'month') { 
-            // Correção: Subtrair 30 dias para um filtro mais consistente, evitando problemas com dias do mês
+            // Correção: Subtrair 30 dias para filtro consistente
             const oneMonthAgo = new Date(now.getTime() - 30 * 86400000); 
             filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneMonthAgo); 
         }
@@ -335,7 +337,8 @@ const StereotypyMonitor = () => {
     const handleDateChange = (e) => setDateFilter(e.target.value);
     const handleStereotypyFilterChange = (e) => setStereotypyFilter(e.target.value);
 
-    const filteredLogs = formatStereotypyLogData();
+    // Movido para useMemo para evitar re-computações desnecessárias e potenciais issues de init
+    const filteredLogs = useMemo(() => formatStereotypyLogData(), [stereotypyLog, periodFilter, dateFilter, stereotypyFilter]);
 
     return (
         <Container fluid className="py-4 stereotypy-monitor-page">
