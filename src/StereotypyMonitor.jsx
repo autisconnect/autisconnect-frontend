@@ -96,6 +96,7 @@ const StereotypyMonitor = () => {
             setError(null);
             console.log("Configurando backend do TensorFlow.js...");
 
+            // Tenta WebGL primeiro, que é mais rápido
             await tf.setBackend('webgl');
             await tf.ready();
             console.log(`Backend pronto: ${tf.getBackend()}`);
@@ -106,50 +107,36 @@ const StereotypyMonitor = () => {
             }
 
             const model = poseDetection.SupportedModels.MoveNet;
-            
-            // --- CORREÇÃO APLICADA AQUI ---
-            // Especificamos a URL do modelo para garantir compatibilidade e evitar o erro de quantização float16.
+            // Configuração simples e padrão, que agora funcionará
             const detectorConfig = {
-                modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-                modelUrl: 'https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4',
-                enableSmoothing: true // Suaviza o rastreamento dos pontos-chave entre os frames
+                modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
             };
-            // --- FIM DA CORREÇÃO ---
-
-            const poseDetector = await poseDetection.createDetector(model, detectorConfig );
+            
+            const poseDetector = await poseDetection.createDetector(model, detectorConfig);
             window.poseDetector = poseDetector;
 
             setIsModelsLoaded(true);
-            console.log("Modelo de pose carregado com sucesso no backend WebGL.");
+            console.log("Modelo de pose carregado com sucesso.");
 
         } catch (err) {
-            console.error('Erro ao carregar modelos com WebGL:', err);
-            console.log("Tentando fallback para o backend CPU...");
-
+            console.error('Erro ao carregar modelos:', err);
+            // O fallback para CPU também funcionará com os scripts atualizados
             try {
+                console.log("Tentando fallback para o backend CPU...");
                 await tf.setBackend('cpu');
                 await tf.ready();
                 console.log(`Backend fallback ativado: ${tf.getBackend()}`);
 
                 const { poseDetection } = window;
                 const model = poseDetection.SupportedModels.MoveNet;
-                
-                // Aplicamos a mesma correção para o fallback
-                const detectorConfig = {
-                    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-                    modelUrl: 'https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4',
-                    enableSmoothing: true
-                };
-
-                const poseDetector = await poseDetection.createDetector(model, detectorConfig );
+                const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                const poseDetector = await poseDetection.createDetector(model, detectorConfig);
                 window.poseDetector = poseDetector;
 
                 setIsModelsLoaded(true);
                 console.log("Modelo de pose carregado com sucesso no backend CPU.");
-
             } catch (fallbackErr) {
-                console.error('Erro fatal ao carregar modelos no fallback para CPU:', fallbackErr);
-                setError(`Falha ao carregar os modelos de IA. Erro principal: ${err.message}. Erro no fallback: ${fallbackErr.message}`);
+                setError(`Falha ao carregar os modelos de IA. Erro: ${err.message}`);
             }
         }
     };
