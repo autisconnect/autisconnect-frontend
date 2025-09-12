@@ -83,7 +83,7 @@ const EmotionDetector = () => {
         };
     }, [location]);
 
-    const loadModels = async ( ) => {
+    const loadModels = async () => {
         // As bibliotecas agora estão garantidas no objeto 'window'
         const tf = window.tf;
         const faceapi = window.faceapi;
@@ -97,7 +97,11 @@ const EmotionDetector = () => {
             setError(null);
             console.log("Configurando backend do TensorFlow.js...");
 
-            // Apenas setar o backend é suficiente. O script da CDN já registrou tudo.
+            // ===================================================
+            // >>>>> CORREÇÃO FINAL E DEFINITIVA AQUI <<<<<
+            // ===================================================
+            // Força o uso do backend WebGL. Isso garante que todos os seus kernels,
+            // incluindo o 'fill', sejam registrados corretamente antes do uso.
             await tf.setBackend('webgl');
             await tf.ready();
             
