@@ -159,13 +159,17 @@ const EmotionDetector = () => {
     }, []);
 
     const saveEmotionToDB = async (dominantEmotion) => {
-        if (!patientId) return;
+        if (!patientId || !dominantEmotion) {
+            console.warn('Não salvando emoção: patientId ou dominantEmotion ausente', { patientId, dominantEmotion });
+            return;
+        }
         try {
             await apiClient.post('/emotions', {
                 patient_id: patientId,
                 emotion: dominantEmotion,
                 timestamp: new Date().toISOString()
             });
+            console.log('Emoção salva no DB:', dominantEmotion);
         } catch (err) {
             console.error('Erro ao salvar emoção no banco de dados:', err);
             setError(err.response?.data?.error || 'Erro ao salvar emoção no servidor.');
@@ -182,11 +186,13 @@ const EmotionDetector = () => {
             if (!videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
 
             try {
-                console.log('Executando detecção... (backend atual:', tf?.getBackend(), ')');
+                console.log('Executando detecção... (backend atual:', window.tf?.getBackend(), ')');
                 const detections = await faceapi
                     .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
                     .withFaceLandmarks()
                     .withFaceExpressions();
+
+                console.log('Detections length:', detections?.length || 0); // Debug: Número de faces detectadas
 
                 if (canvasRef.current) {
                     const canvas = canvasRef.current;
@@ -204,16 +210,37 @@ const EmotionDetector = () => {
                 }
 
                 if (detections && detections.length > 0) {
-                    const expressions = detections[0].expressions;
-                    const dominantEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                    
-                    setEmotion(emotionTranslations[dominantEmotion] || dominantEmotion);
+                    const firstDetection = detections[0];
+                    const expressions = firstDetection.expressions;
+                    console.log('Expressions disponíveis:', !!expressions, expressions); // Debug: Verifica se expressions existe
 
-                    const newData = { timestamp: new Date().toISOString(), emotions: expressions, dominantEmotion };
+                    let dominantEmotion = 'neutral'; // Fallback padrão
+                    if (expressions && typeof expressions === 'object') {
+                        dominantEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                    } else {
+                        console.warn('Expressions undefined ou inválido, usando fallback "neutral"');
+                    }
+
+                    console.log('Dominant emotion:', dominantEmotion); // Debug: Emoção dominante
+
+                    const translatedEmotion = emotionTranslations[dominantEmotion] || dominantEmotion;
+                    setEmotion(translatedEmotion);
+
+                    const newData = { 
+                        timestamp: new Date().toISOString(), 
+                        emotions: expressions || {}, 
+                        dominantEmotion 
+                    };
                     setEmotionsData(prev => [...prev, newData].slice(-50));
-                    setEmotionCounts(prev => ({ ...prev, [dominantEmotion]: prev[dominantEmotion] + 1 }));
-                    saveEmotionToDB(dominantEmotion);
-                    console.log('Emoção detectada:', dominantEmotion);
+                    
+                    // Incrementa contagem (usa fallback se necessário)
+                    setEmotionCounts(prev => ({ 
+                        ...prev, 
+                        [dominantEmotion]: (prev[dominantEmotion] || 0) + 1 
+                    }));
+                    
+                    // Salva apenas se válido
+                    await saveEmotionToDB(dominantEmotion);
                 } else {
                     setEmotion('Nenhuma face detectada');
                 }
@@ -272,7 +299,7 @@ const EmotionDetector = () => {
             labels,
             datasets: emotionKeys.map((key, index) => ({
                 label: emotionTranslations[key],
-                data: filteredData.map(item => item.emotions[key]),
+                data: filteredData.map(item => item.emotions[key] || 0), // Fallback para 0 se undefined
                 borderColor: colors[index],
                 backgroundColor: colors[index] + '33',
                 fill: true,
@@ -285,7 +312,7 @@ const EmotionDetector = () => {
         labels: Object.values(emotionTranslations),
         datasets: [{
             label: 'Distribuição de Emoções',
-            data: Object.keys(emotionTranslations).map(key => emotionCounts[key]),
+            data: Object.keys(emotionTranslations).map(key => emotionCounts[key] || 0),
             backgroundColor: ['#C9CBCF', '#4BC0C0', '#36A2EB', '#FF6384', '#FF9F40', '#9966FF', '#FFCD56'],
         }]
     });
