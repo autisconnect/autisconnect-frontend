@@ -1,13 +1,35 @@
-// Ficheiro: src/StereotypyMonitor.jsx (VERSÃO FINAL E CORRIGIDA - Sem ChartJS desnecessário)
+// Ficheiro: src/StereotypyMonitor.jsx (VERSÃO COMPLETA COM GRÁFICOS)
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge, Form } from 'react-bootstrap';
+import { Line, Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
 import apiClient from '@/services/api'; // Usa alias @ do vite.config.js
 import logohori from '@/assets/logohoriz.jpg'; // Ajuste path se necessário
 import { X } from 'react-bootstrap-icons';
 
-// Removido: ChartJS.register - Não usado aqui (adicione se precisar de gráficos)
+// Registra os componentes do ChartJS (uma vez, fora do componente)
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const StereotypyMonitor = () => {
     const videoRef = useRef(null);
@@ -25,7 +47,7 @@ const StereotypyMonitor = () => {
     const [stereotypyLog, setStereotypyLog] = useState([]);
     const [stereotypyStartTime, setStereotypyStartTime] = useState(null);
 
-    // Estados dos filtros (similar ao EmotionDetector)
+    // Estados dos filtros
     const [periodFilter, setPeriodFilter] = useState('today');
     const [dateFilter, setDateFilter] = useState('');
     const [stereotypyFilter, setStereotypyFilter] = useState('all');
@@ -44,12 +66,13 @@ const StereotypyMonitor = () => {
             setError("ID do paciente não encontrado na URL. A detecção não pode iniciar.");
         }
 
-        // Carrega dados mockados para log de sessões (similar ao original)
+        // Carrega dados mockados para log de sessões (substitua por fetch do DB se quiser)
         const mockLogData = [
             { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: '2025-09-12T10:00:00Z' },
             { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: '2025-09-12T11:30:00Z' },
             { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: '2025-09-12T14:20:00Z' },
-            { id: 4, type: 'Movimento de mãos', duration: 10.1, score: 0.89, date: '2025-09-12T09:45:00Z' }
+            { id: 4, type: 'Movimento de mãos', duration: 10.1, score: 0.89, date: '2025-09-12T09:45:00Z' },
+            { id: 5, type: 'Balançar cabeça', duration: 5.3, score: 0.91, date: '2025-09-12T15:10:00Z' }
         ];
         setStereotypyLog(mockLogData);
 
@@ -274,7 +297,7 @@ const StereotypyMonitor = () => {
         });
     };
 
-    // Funções para formatar dados para tabela e filtros (similar ao EmotionDetector)
+    // Funções para formatar dados para tabela e gráficos
     const formatStereotypyLogData = () => {
         let filteredData = stereotypyLog;
         const now = new Date();
@@ -285,6 +308,64 @@ const StereotypyMonitor = () => {
         if (stereotypyFilter !== 'all') filteredData = filteredData.filter(item => item.type === stereotypyFilter);
 
         return filteredData;
+    };
+
+    // Formatação para Gráfico de Linha (Score ao Longo do Tempo)
+    const formatLineChartData = () => {
+        const filteredData = formatStereotypyLogData();
+        const labels = filteredData.map(item => new Date(item.date).toLocaleTimeString('pt-BR'));
+        const data = filteredData.map(item => parseFloat(item.score));
+
+        return {
+            labels,
+            datasets: [{
+                label: 'Score de Confiança',
+                data,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.4,
+                fill: true
+            }]
+        };
+    };
+
+    const lineOptions = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'Score ao Longo do Tempo' }
+        },
+        scales: {
+            y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } },
+            x: { title: { display: true, text: 'Tempo' } }
+        }
+    };
+
+    // Formatação para Gráfico de Barras (Distribuição por Tipo)
+    const formatBarChartData = () => {
+        const filteredData = formatStereotypyLogData();
+        const types = ['Balançar corpo', 'Movimento de mãos', 'Balançar cabeça'];
+        const counts = types.map(type => filteredData.filter(item => item.type === type).length);
+
+        return {
+            labels: types,
+            datasets: [{
+                label: 'Frequência',
+                data: counts,
+                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
+            }]
+        };
+    };
+
+    const barOptions = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Distribuição de Estereotipias' }
+        },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Frequência' } }
+        }
     };
 
     const handlePeriodChange = (e) => setPeriodFilter(e.target.value);
@@ -361,7 +442,7 @@ const StereotypyMonitor = () => {
                                     </div>
                                 </div>
                             </Card.Header>
-                            <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            <Card.Body style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                 <Table striped bordered hover size="sm">
                                     <thead>
                                         <tr>
@@ -396,6 +477,20 @@ const StereotypyMonitor = () => {
                                 </div>
                             </Card.Body>
                         </Card>
+                        {/* Novo: Gráfico de Linha */}
+                        <Card className="mb-4">
+                            <Card.Header>Estereotipias ao Longo do Tempo</Card.Header>
+                            <Card.Body>
+                                <Line data={formatLineChartData()} options={lineOptions} />
+                            </Card.Body>
+                        </Card>
+                        {/* Novo: Gráfico de Barras */}
+                        <Card className="mb-4">
+                            <Card.Header>Distribuição de Estereotipias</Card.Header>
+                            <Card.Body>
+                                <Bar data={formatBarChartData()} options={barOptions} />
+                            </Card.Body>
+                        </Card>
                         <Card className="mb-4">
                             <Card.Header>Insights e Recomendações</Card.Header>
                             <Card.Body>
@@ -420,7 +515,7 @@ const StereotypyMonitor = () => {
                 <Card.Header>Sobre o Monitor de Estereotipias</Card.Header>
                 <Card.Body>
                     <p>Utiliza IA (TensorFlow.js com MoveNet) para detectar movimentos repetitivos como balançar corpo ou mãos, comuns em TEA.</p>
-                    <p>Os dados são salvos por paciente para análise de tendências e suporte terapêutico.</p>
+                    <p>Os dados são salvos por paciente para análise de tendências e suporte terapêutico, com gráficos para visualização.</p>
                 </Card.Body>
             </Card>
         </Container>
