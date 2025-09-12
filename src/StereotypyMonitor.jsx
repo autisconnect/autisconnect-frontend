@@ -42,7 +42,8 @@ const StereotypyMonitor = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const detectionIntervalRef = useRef(null);
-    const lastPoseRef = useRef(null); // Usando ref para última pose
+    const lastPoseRef = useRef(null);
+    const detectorRef = useRef(null);
 
     const [patientId, setPatientId] = useState(null);
     const [error, setError] = useState(null);
@@ -109,16 +110,7 @@ const StereotypyMonitor = () => {
             
             // Usando a variável 'poseDetection' importada
             const poseDetector = await poseDetection.createDetector(model, detectorConfig);
-            
-            // Não precisamos mais do window. Armazenamos o detector em um ref.
-            // (Vamos criar esse ref)
-
-            // **IMPORTANTE**: Precisamos de um lugar para armazenar o detector.
-            // Um ref é perfeito para isso, pois persiste entre as renderizações.
-            // Adicione este ref no topo do seu componente:
-            // const detectorRef = useRef(null);
-            detectorRef.current = poseDetector; // Supondo que você criou o ref
-
+            detectorRef.current = poseDetector;
             setIsModelsLoaded(true);
             console.log("Modelo de pose carregado com sucesso.");
 
@@ -195,8 +187,7 @@ const StereotypyMonitor = () => {
     }, [isModelsLoaded, isDetecting, startVideo]);
 
     const runDetection = useCallback(async () => {
-        const { poseDetection } = window;
-        const detector = window.poseDetector;  // Acessa o detector armazenado
+        const detector = detectorRef.current;
         if (!detector || !videoRef.current || videoRef.current.paused) return;
 
         try {
