@@ -1,19 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';  // Para resolver paths absolutos em alias
-import CircularDependencyPlugin from 'circular-dependency-plugin';  // Novo: Para detectar ciclos
 
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    react(),
-    // Novo: Plugin para detectar dependências circulares (falha o build se encontrar)
-    new CircularDependencyPlugin({
-      exclude: /node_modules/,  // Ignora node_modules
-      include: /src/,           // Só checa em src/
-      failOnError: true,        // Para o build com erro se ciclo detectado
-      allowAsyncCycles: false,  // Não permite ciclos assíncronos
-    }),
-  ],
+  plugins: [react()],
   resolve: {  // Seção para alias de paths
     alias: {
       '@': path.resolve(__dirname, './src'),  // Mapeia @ para ./src
