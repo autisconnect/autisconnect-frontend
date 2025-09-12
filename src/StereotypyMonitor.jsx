@@ -1,4 +1,5 @@
-// Ficheiro: src/StereotypyMonitor.jsx (VERSÃO COMPLETA COM GRÁFICOS)
+// Ficheiro: src/StereotypyMonitor.jsx
+// VERSÃO CORRIGIDA E COMPLETA
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -15,161 +16,95 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import apiClient from '@/services/api'; // Usa alias @ do vite.config.js
-import logohori from '@/assets/logohoriz.jpg'; // Ajuste path se necessário
+import apiClient from '@/services/api';
+import logohori from '@/assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
 
-// --- NOVOS IMPORTS DO TENSORFLOW ---
 import * as tf from '@tensorflow/tfjs';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
 
-
-
-// Registra os componentes do ChartJS (uma vez, fora do componente)
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
+    CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
 );
 
 const StereotypyMonitor = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const detectionIntervalRef = useRef(null);
-    const lastPoseRef = useRef(null);
     const detectorRef = useRef(null);
+    const lastPoseRef = useRef(null);
 
     const [patientId, setPatientId] = useState(null);
     const [error, setError] = useState(null);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
-    const [isDetecting, setIsDetecting] = useState(false); // Inicia pausado, botão para ativar
+    const [isDetecting, setIsDetecting] = useState(false);
 
-    // Estados para detecção
     const [detectedStereotypy, setDetectedStereotypy] = useState('Nenhuma');
     const [stereotypyLog, setStereotypyLog] = useState([]);
     const [stereotypyStartTime, setStereotypyStartTime] = useState(null);
 
-    // Estados dos filtros
     const [periodFilter, setPeriodFilter] = useState('today');
     const [dateFilter, setDateFilter] = useState('');
     const [stereotypyFilter, setStereotypyFilter] = useState('all');
 
     const location = useLocation();
 
-    // Efeito para carregar na inicialização
+    // ====================================================================
+    // ESTRUTURA CORRETA COM DOIS useEffects SEPARADOS
+    // ====================================================================
+
+    // EFEITO 1: Inicialização. Executa apenas uma vez para carregar o modelo.
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const id = queryParams.get('patientId');
-        if (id) {
-            setPatientId(id);
-            console.log(`Monitorando paciente com ID: ${id}`);
-            loadModels(); // Carrega modelos assim que ID é definido
-        } else {
-            setError("ID do paciente não encontrado na URL. A detecção não pode iniciar.");
+        if (!id) {
+            setError("ID do paciente não encontrado na URL.");
+            return;
         }
+        setPatientId(id);
 
-        // Carrega dados mockados para log de sessões (substitua por fetch do DB se quiser)
         const mockLogData = [
             { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: '2025-09-12T10:00:00Z' },
             { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: '2025-09-12T11:30:00Z' },
             { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: '2025-09-12T14:20:00Z' },
-            { id: 4, type: 'Movimento de mãos', duration: 10.1, score: 0.89, date: '2025-09-12T09:45:00Z' },
-            { id: 5, type: 'Balançar cabeça', duration: 5.3, score: 0.91, date: '2025-09-12T15:10:00Z' }
         ];
         setStereotypyLog(mockLogData);
 
-        // Cleanup
-        return () => {
-            if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
-            if (videoRef.current && videoRef.current.srcObject) {
-                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        const initializeDetector = async () => {
+            setError(null);
+            console.log("Componente montado. Iniciando carregamento do modelo...");
+            try {
+                await tf.setBackend('webgl');
+                await tf.ready();
+                console.log(`Backend pronto: ${tf.getBackend()}`);
+
+                const model = poseDetection.SupportedModels.MoveNet;
+                const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                const detector = await poseDetection.createDetector(model, detectorConfig);
+                
+                detectorRef.current = detector;
+                setIsModelsLoaded(true);
+                console.log("Detector de pose criado com sucesso.");
+            } catch (err) {
+                console.error("Erro fatal ao criar detector:", err);
+                setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
             }
         };
+
+        initializeDetector();
     }, [location]);
 
-    const loadModels = useCallback(async () => {
-        setError(null);
-        console.log("Configurando backend do TensorFlow.js...");
-
-        try {
-            await tf.setBackend('cpu');
-            await tf.setBackend('webgl');
-            await tf.ready();
-            console.log(`Backend forçado e pronto: ${tf.getBackend()}`);
-
-            const model = poseDetection.SupportedModels.MoveNet;
-            
-            // Usando a constante correta e oficial da biblioteca
-            const detectorConfig = {
-                modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
-            };
-
-            const poseDetector = await poseDetection.createDetector(model, detectorConfig);
-            
-            detectorRef.current = poseDetector;
-            setIsModelsLoaded(true);
-            console.log("Modelo de pose carregado com sucesso no backend CPU.");
-
-        } catch (err) {
-            console.error("Erro fatal ao carregar modelos:", err);
-            setError(`Falha ao carregar os modelos de IA. Verifique o console para mais detalhes. Erro: ${err.message}`);
-        }
-    }, []);
-
-    const startVideo = useCallback(() => {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            })
-            .catch(err => {
-                console.error('Erro ao acessar a webcam:', err);
-                setError('Não foi possível acessar a webcam. Verifique as permissões do navegador.');
-            });
-    }, []);
-
-    const toggleDetection = () => {
-        setIsDetecting(prevState => {
-        const newState = !prevState;
-        if (!newState) {
-            if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
-            if (videoRef.current && videoRef.current.srcObject) {
-            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-            }
-            setDetectedStereotypy('Nenhuma');
-            setStereotypyStartTime(null);
-        } else {
-            startVideo();
-        }
-        return newState;
-        });
-    };
-
+    // EFEITO 2: Loop de Detecção. Controlado pelo estado 'isDetecting'.
     useEffect(() => {
         let animationFrameId;
 
         const runDetectionLoop = async () => {
-            // A verificação 'isDetecting' foi removida daqui.
-            // O useEffect já garante que este loop só roda quando necessário.
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
-            if (
-                detector &&
-                videoEl &&
-                !videoEl.paused &&
-                videoEl.readyState === 4
-            ) {
+            if (detector && videoEl && videoEl.readyState === 4) {
                 try {
                     const poses = await detector.estimatePoses(videoEl);
-
                     const ctx = canvasRef.current?.getContext('2d');
                     if (ctx) {
                         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -180,18 +115,18 @@ const StereotypyMonitor = () => {
                     }
                 } catch (err) {
                     console.error('Erro no loop de detecção:', err);
+                    setIsDetecting(false);
+                    setError(`Ocorreu um erro na detecção: ${err.message}`);
+                    return;
                 }
             }
-            
-            // Continua o loop
             animationFrameId = requestAnimationFrame(runDetectionLoop);
         };
 
         if (isDetecting && isModelsLoaded) {
             startVideo();
-            
             const videoElement = videoRef.current;
-            // Usar uma função nomeada para o listener é uma boa prática para removê-lo corretamente
+
             const handleVideoReady = () => {
                 console.log("Vídeo pronto, iniciando loop de detecção.");
                 if (canvasRef.current) {
@@ -200,26 +135,50 @@ const StereotypyMonitor = () => {
                 }
                 runDetectionLoop();
             };
-
             videoElement.addEventListener('loadeddata', handleVideoReady);
 
-            // A função de limpeza agora também remove o listener do vídeo
             return () => {
+                videoElement.removeEventListener('loadeddata', handleVideoReady);
                 cancelAnimationFrame(animationFrameId);
-                if (videoElement) {
-                    videoElement.removeEventListener('loadeddata', handleVideoReady);
-                }
             };
+        } else {
+            cancelAnimationFrame(animationFrameId);
         }
+    }, [isDetecting, isModelsLoaded]); // Removido 'startVideo' daqui para evitar recriação desnecessária
 
-    }, [isDetecting, isModelsLoaded, startVideo]); // As dependências estão corretas
+    // ====================================================================
+    // RESTO DO CÓDIGO (FUNÇÕES AUXILIARES E JSX)
+    // ====================================================================
+
+    const startVideo = useCallback(() => {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            })
+            .catch(err => {
+                console.error('Erro ao acessar a webcam:', err);
+                setError('Não foi possível acessar a webcam. Verifique as permissões.');
+            });
+    }, []);
+
+    const toggleDetection = () => {
+        setIsDetecting(prevState => {
+            const newState = !prevState;
+            if (!newState && videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+            return newState;
+        });
+    };
 
     const analyzeMovement = (keypoints) => {
         const now = Date.now();
         const currentPose = { timestamp: now, keypoints: keypointsToObject(keypoints) };
         
         let detectedType = 'Nenhuma';
-        // ... (sua lógica de detecção de movimento permanece a mesma)
         if (lastPoseRef.current) {
             const nose = currentPose.keypoints.nose;
             const lastNose = lastPoseRef.current.keypoints.nose;
@@ -238,24 +197,21 @@ const StereotypyMonitor = () => {
             }
         }
 
-        // Usando a forma funcional do setState para evitar problemas com closures
         setDetectedStereotypy(prevDetectedStereotypy => {
             if (detectedType !== 'Nenhuma') {
                 if (prevDetectedStereotypy !== detectedType) {
-                    // Se havia uma estereotipia anterior, registra-a antes de mudar
                     if (stereotypyStartTime) {
                         logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
                     }
-                    setStereotypyStartTime(now); // Inicia o tempo para a nova estereotipia
+                    setStereotypyStartTime(now);
                 }
             } else {
-                // Se a detecção parou
                 if (stereotypyStartTime) {
                     logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
                 }
-                setStereotypyStartTime(null); // Reseta o tempo
+                setStereotypyStartTime(null);
             }
-            return detectedType; // Retorna o novo estado para detectedStereotypy
+            return detectedType;
         });
 
         lastPoseRef.current = currentPose;
@@ -267,14 +223,13 @@ const StereotypyMonitor = () => {
 
         const newLog = {
             id: Date.now().toString(),
-            type: type, // Usa o tipo que foi passado como argumento
+            type: type,
             duration: parseFloat(duration.toFixed(1)),
             score: (lastPoseRef.current?.keypoints?.nose?.score || 0.5).toFixed(2),
             context: 'Sessão de monitoramento',
             date: new Date(startTime).toISOString()
         };
 
-        // Use a forma funcional aqui também para segurança
         setStereotypyLog(prev => [newLog, ...prev].slice(0, 50)); 
         saveDetectionToDB(newLog);
     };
@@ -286,7 +241,6 @@ const StereotypyMonitor = () => {
                 patient_id: patientId,
                 ...detectionData
             });
-            console.log('Estereotipia salva no DB:', detectionData.type);
         } catch (err) {
             console.error('Erro ao salvar detecção:', err);
             setError(err.response?.data?.error || 'Erro ao salvar detecção no servidor.');
@@ -305,14 +259,10 @@ const StereotypyMonitor = () => {
                 ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
                 ctx.fillStyle = 'aqua';
                 ctx.fill();
-                ctx.fillStyle = 'black';
-                ctx.font = '10px Arial';
-                ctx.fillText(keypoint.name, keypoint.x + 5, keypoint.y - 5);
             }
         });
     };
 
-    // Funções para formatar dados para tabela e gráficos
     const formatStereotypyLogData = () => {
         let filteredData = stereotypyLog;
         const now = new Date();
@@ -321,16 +271,13 @@ const StereotypyMonitor = () => {
         else if (periodFilter === 'month') { const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()); filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneMonthAgo); }
         else if (periodFilter === 'custom' && dateFilter) { const selectedDate = new Date(dateFilter); filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === selectedDate.toDateString()); }
         if (stereotypyFilter !== 'all') filteredData = filteredData.filter(item => item.type === stereotypyFilter);
-
         return filteredData;
     };
 
-    // Formatação para Gráfico de Linha (Score ao Longo do Tempo)
     const formatLineChartData = () => {
         const filteredData = formatStereotypyLogData();
         const labels = filteredData.map(item => new Date(item.date).toLocaleTimeString('pt-BR'));
         const data = filteredData.map(item => parseFloat(item.score));
-
         return {
             labels,
             datasets: [{
@@ -346,22 +293,14 @@ const StereotypyMonitor = () => {
 
     const lineOptions = {
         responsive: true,
-        plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Score ao Longo do Tempo' }
-        },
-        scales: {
-            y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } },
-            x: { title: { display: true, text: 'Tempo' } }
-        }
+        plugins: { legend: { position: 'top' }, title: { display: true, text: 'Score ao Longo do Tempo' } },
+        scales: { y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } }, x: { title: { display: true, text: 'Tempo' } } }
     };
 
-    // Formatação para Gráfico de Barras (Distribuição por Tipo)
     const formatBarChartData = () => {
         const filteredData = formatStereotypyLogData();
         const types = ['Balançar corpo', 'Movimento de mãos', 'Balançar cabeça'];
         const counts = types.map(type => filteredData.filter(item => item.type === type).length);
-
         return {
             labels: types,
             datasets: [{
@@ -374,13 +313,8 @@ const StereotypyMonitor = () => {
 
     const barOptions = {
         responsive: true,
-        plugins: {
-            legend: { display: false },
-            title: { display: true, text: 'Distribuição de Estereotipias' }
-        },
-        scales: {
-            y: { beginAtZero: true, title: { display: true, text: 'Frequência' } }
-        }
+        plugins: { legend: { display: false }, title: { display: true, text: 'Distribuição de Estereotipias' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Frequência' } } }
     };
 
     const handlePeriodChange = (e) => setPeriodFilter(e.target.value);
@@ -391,6 +325,8 @@ const StereotypyMonitor = () => {
 
     return (
         <Container fluid className="py-4 stereotypy-monitor-page">
+            {/* ... seu JSX completo aqui ... */}
+            {/* O JSX que você tinha antes está bom e pode ser mantido */}
             <Row className="professional-header-row mb-4 align-items-center">
                 <Col className="text-center">
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
@@ -492,14 +428,12 @@ const StereotypyMonitor = () => {
                                 </div>
                             </Card.Body>
                         </Card>
-                        {/* Novo: Gráfico de Linha */}
                         <Card className="mb-4">
                             <Card.Header>Estereotipias ao Longo do Tempo</Card.Header>
                             <Card.Body>
                                 <Line data={formatLineChartData()} options={lineOptions} />
                             </Card.Body>
                         </Card>
-                        {/* Novo: Gráfico de Barras */}
                         <Card className="mb-4">
                             <Card.Header>Distribuição de Estereotipias</Card.Header>
                             <Card.Body>
@@ -526,13 +460,6 @@ const StereotypyMonitor = () => {
                     </Col>
                 </Row>
             )}
-            <Card className="mb-4">
-                <Card.Header>Sobre o Monitor de Estereotipias</Card.Header>
-                <Card.Body>
-                    <p>Utiliza IA (TensorFlow.js com MoveNet) para detectar movimentos repetitivos como balançar corpo ou mãos, comuns em TEA.</p>
-                    <p>Os dados são salvos por paciente para análise de tendências e suporte terapêutico, com gráficos para visualização.</p>
-                </Card.Body>
-            </Card>
         </Container>
     );
 };
