@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import '@tensorflow/tfjs-backend-webgl';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Button, Form } from 'react-bootstrap';
 import apiClient from '../services/api';
@@ -84,12 +83,12 @@ const EmotionDetector = () => {
         };
     }, [location]);
 
-    const loadModels = async () => {
+    const loadModels = async ( ) => {
         const tf = window.tf;
         const faceapi = window.faceapi;
 
         if (!tf || !faceapi) {
-            setError("Bibliotecas de IA não foram carregadas.");
+            setError("Bibliotecas de IA não foram carregadas. Verifique os scripts no index.html.");
             return;
         }
 
@@ -97,7 +96,8 @@ const EmotionDetector = () => {
             setError(null);
             console.log("Aguardando TensorFlow.js...");
             
-            await tf.ready(); // Apenas o ready é suficiente agora
+            // Apenas o ready é suficiente. O backend webgl já foi carregado e registrado pelo script da CDN.
+            await tf.ready(); 
             
             console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
 
