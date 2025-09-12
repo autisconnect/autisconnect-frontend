@@ -168,62 +168,84 @@ const StereotypyMonitor = () => {
 
     useEffect(() => {
         if (isModelsLoaded && isDetecting) {
-            startVideo();
+            startVideo(); // Inicia a webcam
             const videoElement = videoRef.current;
-            if (videoElement) {
-                const handlePlay = () => {
-                    console.log("Vídeo pronto, iniciando detecção de estereotipias.");
-                    if (canvasRef.current) {
-                        canvasRef.current.width = videoElement.videoWidth;
-                        canvasRef.current.height = videoElement.videoHeight;
-                    }
-                    lastPoseRef.current = null;
-                    detectionIntervalRef.current = setInterval(runDetection, 200);
-                };
-                videoElement.addEventListener('play', handlePlay);
-                return () => videoElement.removeEventListener('play', handlePlay);
-            }
-        }
-    }, [isModelsLoaded, isDetecting, startVideo]);
 
-    const runDetection = useCallback(async () => {
+            const handlePlay = () => {
+                if (videoElement.videoWidth === 0) return; // Garante que o vídeo tem dimensões
+
+                console.log("Vídeo pronto, iniciando detecção de estereotipias.");
+                if (canvasRef.current) {
+                    canvasRef.current.width = videoElement.videoWidth;
+                    canvasRef.current.height = videoElement.videoHeight;
+                }
+                lastPoseRef.current = null; // Reseta a última pose
+
+                // Limpa qualquer intervalo anterior para evitar múltiplos loops
+                if (detectionIntervalRef.current) {
+                    clearInterval(detectionIntervalRef.current);
+                }
+                
+                // Inicia o loop de detecção
+                detectionIntervalRef.current = setInterval(runDetection, 200); // 5 detecções por segundo
+            };
+
+            // O evento 'loadeddata' é mais confiável que 'play' para garantir que o vídeo tem dimensões
+            videoElement.addEventListener('loadeddata', handlePlay);
+
+            // Cleanup: remove o listener e o intervalo quando o componente desmontar ou as dependências mudarem
+            return () => {
+                videoElement.removeEventListener('loadeddata', handlePlay);
+                if (detectionIntervalRef.current) {
+                    clearInterval(detectionIntervalRef.current);
+                }
+            };
+        }
+    }, [isModelsLoaded, isDetecting, startVideo]); // startVideo foi adicionado como d
+
+    const runDetection = async () => {
         const detector = detectorRef.current;
-        if (!detector || !videoRef.current || videoRef.current.paused) return;
+        if (!detector || !videoRef.current || videoRef.current.paused || videoRef.current.videoWidth === 0) {
+            // Adicionada verificação videoWidth === 0 para garantir que o vídeo está realmente carregado
+            return;
+        }
 
         try {
+            // Esta linha estava causando o erro, mas o problema era o contexto, não a linha em si.
             const poses = await detector.estimatePoses(videoRef.current);
+            
             const ctx = canvasRef.current?.getContext('2d');
             if (ctx) {
                 ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
                 if (poses && poses.length > 0) {
+                    // A análise de movimento precisa dos valores de state mais recentes,
+                    // por isso o useCallback era problemático.
+                    analyzeMovement(poses[0].keypoints); 
                     drawKeypoints(poses[0].keypoints, ctx);
-                    analyzeMovement(poses[0].keypoints);
                 }
             }
         } catch (err) {
             console.error('Erro na detecção:', err);
         }
-    }, [patientId]);
+    };
 
     const analyzeMovement = (keypoints) => {
         const now = Date.now();
         const currentPose = { timestamp: now, keypoints: keypointsToObject(keypoints) };
         
         let detectedType = 'Nenhuma';
+        // ... (sua lógica de detecção de movimento permanece a mesma)
         if (lastPoseRef.current) {
-            // Detecção de balançar corpo: Movimento vertical da cabeça (nose y varia > 5 pixels)
             const nose = currentPose.keypoints.nose;
             const lastNose = lastPoseRef.current.keypoints.nose;
             if (nose && lastNose && Math.abs(nose.y - lastNose.y) > 5) {
                 detectedType = 'Balançar corpo';
             }
-            // Detecção de movimento de mãos: Movimento vertical do punho esquerdo (hand flapping)
             const leftWrist = currentPose.keypoints.left_wrist;
             const lastLeftWrist = lastPoseRef.current.keypoints.left_wrist;
             if (leftWrist && lastLeftWrist && Math.abs(leftWrist.y - lastLeftWrist.y) > 10) {
                 detectedType = 'Movimento de mãos';
             }
-            // Adicional: Balançar cabeça (usando left_ear e right_ear)
             const leftEar = currentPose.keypoints.left_ear;
             const lastLeftEar = lastPoseRef.current.keypoints.left_ear;
             if (leftEar && lastLeftEar && Math.abs(leftEar.x - lastLeftEar.x) > 8) {
@@ -231,34 +253,45 @@ const StereotypyMonitor = () => {
             }
         }
 
-        if (detectedType !== 'Nenhuma') {
-            if (detectedStereotypy !== detectedType) {
-                if (stereotypyStartTime) logStereotypy(now);
-                setStereotypyStartTime(now);
-                setDetectedStereotypy(detectedType);
+        // Usando a forma funcional do setState para evitar problemas com closures
+        setDetectedStereotypy(prevDetectedStereotypy => {
+            if (detectedType !== 'Nenhuma') {
+                if (prevDetectedStereotypy !== detectedType) {
+                    // Se havia uma estereotipia anterior, registra-a antes de mudar
+                    if (stereotypyStartTime) {
+                        logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
+                    }
+                    setStereotypyStartTime(now); // Inicia o tempo para a nova estereotipia
+                }
+            } else {
+                // Se a detecção parou
+                if (stereotypyStartTime) {
+                    logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
+                }
+                setStereotypyStartTime(null); // Reseta o tempo
             }
-        } else {
-            if (stereotypyStartTime) logStereotypy(now);
-            setStereotypyStartTime(null);
-            setDetectedStereotypy('Nenhuma');
-        }
+            return detectedType; // Retorna o novo estado para detectedStereotypy
+        });
+
         lastPoseRef.current = currentPose;
     };
 
-    const logStereotypy = (endTime) => {
-        const duration = (endTime - stereotypyStartTime) / 1000;
-        if (duration < 0.5) return; // Ignora detecções muito curtas
+    const logStereotypy = (endTime, type, startTime) => {
+        const duration = (endTime - startTime) / 1000;
+        if (duration < 0.5) return; 
+
         const newLog = {
-            id: Date.now().toString(), // Simple ID (substitui uuidv4)
-            type: detectedStereotypy,
+            id: Date.now().toString(),
+            type: type, // Usa o tipo que foi passado como argumento
             duration: parseFloat(duration.toFixed(1)),
             score: (lastPoseRef.current?.keypoints?.nose?.score || 0.5).toFixed(2),
             context: 'Sessão de monitoramento',
-            date: new Date(stereotypyStartTime).toISOString()
+            date: new Date(startTime).toISOString()
         };
-        setStereotypyLog(prev => [newLog, ...prev].slice(-50)); // Limita a 50 entradas
+
+        // Use a forma funcional aqui também para segurança
+        setStereotypyLog(prev => [newLog, ...prev].slice(0, 50)); 
         saveDetectionToDB(newLog);
-        setStereotypyStartTime(null);
     };
 
     const saveDetectionToDB = async (detectionData) => {
