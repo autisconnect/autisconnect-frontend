@@ -22,7 +22,7 @@ import { X } from 'react-bootstrap-icons';
 // --- NOVOS IMPORTS DO TENSORFLOW ---
 import * as tf from '@tensorflow/tfjs';
 import * as poseDetection from '@tensorflow-models/pose-detection';
-import '@tensorflow/tfjs-backend-webgl'; // Importa o backend para registrá-lo
+import '@tensorflow/tfjs-backend-webgl';
 
 
 
@@ -94,38 +94,35 @@ const StereotypyMonitor = () => {
     }, [location]);
 
     const loadModels = useCallback(async () => {
-        try {
         setError(null);
         console.log("Configurando backend do TensorFlow.js...");
-        await tf.setBackend('webgl');
-        await tf.ready();
-        console.log(`Backend pronto: ${tf.getBackend()}`);
 
-        // **Correção aqui** – uso de string em vez de constante possivelmente inexistente
-        const poseDetector = await poseDetection.createDetector(
-            poseDetection.SupportedModels.MoveNet,
-            { modelType: 'SinglePose.Lightning' }
-        );
-        detectorRef.current = poseDetector;
-        setIsModelsLoaded(true);
-        console.log("Modelo de pose carregado com sucesso.");
-        } catch (err) {
-        console.error('Erro ao carregar modelos:', err);
         try {
-            console.log("Tentando fallback para o backend CPU...");
-            await tf.setBackend('cpu');
+            // ======================= CORREÇÃO PRINCIPAL =======================
+            // Forçamos o backend de CPU. É mais lento, mas universalmente compatível.
+            // Se isso funcionar, o problema é uma incompatibilidade com o WebGL no seu sistema.
+            await tf.setBackend('cpu'); 
+            // ==================================================================
+            
             await tf.ready();
-            console.log(`Backend fallback ativado: ${tf.getBackend()}`);
-            const poseDetector = await poseDetection.createDetector(
-            poseDetection.SupportedModels.MoveNet,
-            { modelType: 'SinglePose.Lightning' }
-            );
+            console.log(`Backend forçado e pronto: ${tf.getBackend()}`);
+
+            const model = poseDetection.SupportedModels.MoveNet;
+            
+            // Usando a constante correta e oficial da biblioteca
+            const detectorConfig = {
+                modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+            };
+
+            const poseDetector = await poseDetection.createDetector(model, detectorConfig);
+            
             detectorRef.current = poseDetector;
             setIsModelsLoaded(true);
             console.log("Modelo de pose carregado com sucesso no backend CPU.");
-        } catch (fallbackErr) {
-            setError(`Falha ao carregar os modelos de IA. Erro: ${err.message}`);
-        }
+
+        } catch (err) {
+            console.error("Erro fatal ao carregar modelos:", err);
+            setError(`Falha ao carregar os modelos de IA. Verifique o console para mais detalhes. Erro: ${err.message}`);
         }
     }, []);
 
@@ -190,22 +187,33 @@ const StereotypyMonitor = () => {
     
     const runDetection = async () => {
         const detector = detectorRef.current;
-        const video = videoRef.current;
-        if (!detector || !video || video.paused || video.videoWidth === 0 || video.readyState < 2) {
-        return;
+        const videoEl = videoRef.current;
+        // só roda se o detector existe e o vídeo está carregado
+        if (
+            !detector ||
+            !videoEl ||
+            videoEl.paused ||
+            videoEl.videoWidth === 0 ||
+            videoEl.readyState < 2
+        ) {
+            return;
         }
+
         try {
-        const poses = await detector.estimatePoses(video);
-        const ctx = canvasRef.current?.getContext('2d');
-        if (ctx) {
+            const poses = await detector.estimatePoses(videoEl, {
+            maxPoses: 1,
+            flipHorizontal: false
+            });
+            const ctx = canvasRef.current?.getContext('2d');
+            if (ctx) {
             ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
             if (poses && poses.length > 0) {
-            analyzeMovement(poses[0].keypoints);
-            drawKeypoints(poses[0].keypoints, ctx);
+                analyzeMovement(poses[0].keypoints);
+                drawKeypoints(poses[0].keypoints, ctx);
             }
-        }
+            }
         } catch (err) {
-        console.error('Erro na detecção:', err);
+            console.error('Erro na detecção:', err);
         }
     };
 
