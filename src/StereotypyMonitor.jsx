@@ -153,74 +153,66 @@ const StereotypyMonitor = () => {
     };
 
     useEffect(() => {
-        if (isModelsLoaded && isDetecting) {
-        startVideo();
-        const videoElement = videoRef.current;
+        let animationFrameId;
 
-        const handlePlay = () => {
-            if (videoElement.videoWidth === 0) return;
-            console.log("Vídeo pronto, iniciando detecção de estereotipias.");
-            if (canvasRef.current) {
-            canvasRef.current.width = videoElement.videoWidth;
-            canvasRef.current.height = videoElement.videoHeight;
-            }
-            lastPoseRef.current = null;
-            if (detectionIntervalRef.current) {
-            clearInterval(detectionIntervalRef.current);
-            }
-            detectionIntervalRef.current = setInterval(runDetection, 200);
-        };
+        const runDetectionLoop = async () => {
+            // A verificação 'isDetecting' foi removida daqui.
+            // O useEffect já garante que este loop só roda quando necessário.
+            const detector = detectorRef.current;
+            const videoEl = videoRef.current;
 
-        videoElement.addEventListener('loadeddata', handlePlay);
-        return () => {
-            videoElement.removeEventListener('loadeddata', handlePlay);
-            if (detectionIntervalRef.current) {
-            clearInterval(detectionIntervalRef.current);
-            }
-        };
-        }
-    }, [isModelsLoaded, isDetecting, startVideo]);
-    
-    const runDetection = async () => {
-        const detector = detectorRef.current;
-        const videoEl = videoRef.current;
+            if (
+                detector &&
+                videoEl &&
+                !videoEl.paused &&
+                videoEl.readyState === 4
+            ) {
+                try {
+                    const poses = await detector.estimatePoses(videoEl);
 
-        if (
-            !detector ||
-            !videoEl ||
-            videoEl.paused ||
-            videoEl.videoWidth === 0 ||
-            videoEl.readyState < 3
-        ) {
-            return;
-        }
-
-        try {
-            // ======================= CORREÇÃO PRINCIPAL =======================
-            // Envolvemos a lógica de detecção com tf.tidy() para prevenir vazamentos de memória.
-            // tf.tidy() limpa automaticamente todos os tensores criados dentro desta função.
-            const poses = await tf.tidy(() => {
-                // A chamada para estimatePoses é executada dentro do tidy.
-                return detector.estimatePoses(videoEl, {
-                    maxPoses: 1,
-                    flipHorizontal: false
-                });
-            });
-            // ==================================================================
-
-            const ctx = canvasRef.current?.getContext('2d');
-            if (ctx) {
-                ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                if (poses && poses.length > 0) {
-                    // A análise e o desenho ocorrem fora do tidy, pois não criam tensores.
-                    analyzeMovement(poses[0].keypoints);
-                    drawKeypoints(poses[0].keypoints, ctx);
+                    const ctx = canvasRef.current?.getContext('2d');
+                    if (ctx) {
+                        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                        if (poses && poses.length > 0) {
+                            analyzeMovement(poses[0].keypoints);
+                            drawKeypoints(poses[0].keypoints, ctx);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Erro no loop de detecção:', err);
                 }
             }
-        } catch (err) {
-            console.error('Erro na detecção:', err);
+            
+            // Continua o loop
+            animationFrameId = requestAnimationFrame(runDetectionLoop);
+        };
+
+        if (isDetecting && isModelsLoaded) {
+            startVideo();
+            
+            const videoElement = videoRef.current;
+            // Usar uma função nomeada para o listener é uma boa prática para removê-lo corretamente
+            const handleVideoReady = () => {
+                console.log("Vídeo pronto, iniciando loop de detecção.");
+                if (canvasRef.current) {
+                    canvasRef.current.width = videoElement.videoWidth;
+                    canvasRef.current.height = videoElement.videoHeight;
+                }
+                runDetectionLoop();
+            };
+
+            videoElement.addEventListener('loadeddata', handleVideoReady);
+
+            // A função de limpeza agora também remove o listener do vídeo
+            return () => {
+                cancelAnimationFrame(animationFrameId);
+                if (videoElement) {
+                    videoElement.removeEventListener('loadeddata', handleVideoReady);
+                }
+            };
         }
-    };
+
+    }, [isDetecting, isModelsLoaded, startVideo]); // As dependências estão corretas
 
     const analyzeMovement = (keypoints) => {
         const now = Date.now();
