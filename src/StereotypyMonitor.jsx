@@ -182,33 +182,45 @@ const StereotypyMonitor = () => {
     }, [isModelsLoaded, isDetecting, startVideo]);
     
     const runDetection = async () => {
-        try {
-            const detector = detectorRef.current; // já criado antes
-            const videoEl = videoRef.current;
-            if (
+        const detector = detectorRef.current;
+        const videoEl = videoRef.current;
+
+        if (
             !detector ||
             !videoEl ||
             videoEl.paused ||
             videoEl.videoWidth === 0 ||
-            videoEl.readyState < 2
-            ) return;
+            videoEl.readyState < 3
+        ) {
+            return;
+        }
 
-            const poses = await detector.estimatePoses(videoEl, { maxPoses: 1 });
+        try {
+            // ======================= CORREÇÃO PRINCIPAL =======================
+            // Envolvemos a lógica de detecção com tf.tidy() para prevenir vazamentos de memória.
+            // tf.tidy() limpa automaticamente todos os tensores criados dentro desta função.
+            const poses = await tf.tidy(() => {
+                // A chamada para estimatePoses é executada dentro do tidy.
+                return detector.estimatePoses(videoEl, {
+                    maxPoses: 1,
+                    flipHorizontal: false
+                });
+            });
+            // ==================================================================
 
             const ctx = canvasRef.current?.getContext('2d');
             if (ctx) {
-            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-            if (poses && poses.length > 0) {
-                analyzeMovement(poses[0].keypoints);
-                drawKeypoints(poses[0].keypoints, ctx);
-            }
+                ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                if (poses && poses.length > 0) {
+                    // A análise e o desenho ocorrem fora do tidy, pois não criam tensores.
+                    analyzeMovement(poses[0].keypoints);
+                    drawKeypoints(poses[0].keypoints, ctx);
+                }
             }
         } catch (err) {
             console.error('Erro na detecção:', err);
         }
     };
-
-
 
     const analyzeMovement = (keypoints) => {
         const now = Date.now();
