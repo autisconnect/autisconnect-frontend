@@ -19,6 +19,13 @@ import apiClient from '@/services/api'; // Usa alias @ do vite.config.js
 import logohori from '@/assets/logohoriz.jpg'; // Ajuste path se necessário
 import { X } from 'react-bootstrap-icons';
 
+// --- NOVOS IMPORTS DO TENSORFLOW ---
+import * as tf from '@tensorflow/tfjs';
+import * as poseDetection from '@tensorflow-models/pose-detection';
+import '@tensorflow/tfjs-backend-webgl'; // Importa o backend para registrá-lo
+
+
+
 // Registra os componentes do ChartJS (uma vez, fora do componente)
 ChartJS.register(
     CategoryScale,
@@ -85,53 +92,49 @@ const StereotypyMonitor = () => {
         };
     }, [location]);
 
-    const loadModels = async () => {
-        const tf = window.tf;
-        if (!tf) {
-            setError("TensorFlow.js não foi carregado. Verifique os scripts no index.html.");
-            return;
-        }
-
+    const loadModels = useCallback(async () => { // Envolvido em useCallback para estabilidade
         try {
             setError(null);
             console.log("Configurando backend do TensorFlow.js...");
 
-            // Tenta WebGL primeiro, que é mais rápido
+            // O backend é registrado pelo import, mas setá-lo explicitamente é uma boa prática.
             await tf.setBackend('webgl');
             await tf.ready();
             console.log(`Backend pronto: ${tf.getBackend()}`);
 
-            const { poseDetection } = window;
-            if (!poseDetection) {
-                throw new Error("Biblioteca de pose detection não carregada.");
-            }
-
             const model = poseDetection.SupportedModels.MoveNet;
-            // Configuração simples e padrão, que agora funcionará
             const detectorConfig = {
                 modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
             };
             
+            // Usando a variável 'poseDetection' importada
             const poseDetector = await poseDetection.createDetector(model, detectorConfig);
-            window.poseDetector = poseDetector;
+            
+            // Não precisamos mais do window. Armazenamos o detector em um ref.
+            // (Vamos criar esse ref)
+
+            // **IMPORTANTE**: Precisamos de um lugar para armazenar o detector.
+            // Um ref é perfeito para isso, pois persiste entre as renderizações.
+            // Adicione este ref no topo do seu componente:
+            // const detectorRef = useRef(null);
+            detectorRef.current = poseDetector; // Supondo que você criou o ref
 
             setIsModelsLoaded(true);
             console.log("Modelo de pose carregado com sucesso.");
 
         } catch (err) {
             console.error('Erro ao carregar modelos:', err);
-            // O fallback para CPU também funcionará com os scripts atualizados
+            // O fallback para CPU também funcionará
             try {
                 console.log("Tentando fallback para o backend CPU...");
                 await tf.setBackend('cpu');
                 await tf.ready();
                 console.log(`Backend fallback ativado: ${tf.getBackend()}`);
 
-                const { poseDetection } = window;
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
                 const poseDetector = await poseDetection.createDetector(model, detectorConfig);
-                window.poseDetector = poseDetector;
+                detectorRef.current = poseDetector; // Armazena no ref
 
                 setIsModelsLoaded(true);
                 console.log("Modelo de pose carregado com sucesso no backend CPU.");
@@ -139,7 +142,7 @@ const StereotypyMonitor = () => {
                 setError(`Falha ao carregar os modelos de IA. Erro: ${err.message}`);
             }
         }
-    };
+    }, []);
 
     const startVideo = useCallback(() => {
         navigator.mediaDevices.getUserMedia({ video: true })
