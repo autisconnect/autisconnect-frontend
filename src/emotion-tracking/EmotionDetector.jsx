@@ -37,6 +37,7 @@ const EmotionDetector = () => {
     const [error, setError] = useState(null);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
     const [isDetecting, setIsDetecting] = useState(true); // Inicia a detecção automaticamente
+    const [backendUsed, setBackendUsed] = useState(''); // Novo estado para rastrear o backend
 
     // Estados de dados
     const [emotion, setEmotion] = useState('Detectando...');
@@ -97,15 +98,20 @@ const EmotionDetector = () => {
             setError(null);
             console.log("Configurando backend do TensorFlow.js...");
 
-            // ===================================================
-            // >>>>> CORREÇÃO FINAL E DEFINITIVA AQUI <<<<<
-            // ===================================================
-            // Força o uso do backend WebGL. Isso garante que todos os seus kernels,
-            // incluindo o 'fill', sejam registrados corretamente antes do uso.
-            await tf.setBackend('webgl');
-            await tf.ready();
-            
-            console.log(`Backend pronto: ${tf.getBackend()}`);
+            // Check se WebGL é suportado
+            const webglVersion = tf.ENV.get('WEBGL_VERSION');
+            console.log(`Versão WebGL suportada: ${webglVersion || 'N/A'}`);
+            if (!webglVersion) {
+                console.warn("WebGL não suportado. Usando CPU por padrão.");
+                await tf.setBackend('cpu');
+                setBackendUsed('CPU (WebGL não suportado)');
+            } else {
+                // Tenta WebGL primeiro
+                await tf.setBackend('webgl');
+                await tf.ready();
+                console.log(`Backend inicial: ${tf.getBackend()}`);
+                setBackendUsed('WebGL');
+            }
 
             console.log("Iniciando carregamento dos modelos da face-api...");
             await Promise.all([
@@ -116,8 +122,26 @@ const EmotionDetector = () => {
             console.log("Modelos carregados com sucesso");
             setIsModelsLoaded(true);
         } catch (err) {
-            console.error('Erro ao carregar modelos:', err);
-            setError(`Falha ao carregar modelos. Erro: ${err.message}`);
+            console.error('Erro ao carregar modelos ou configurar backend:', err);
+            // Fallback para CPU se WebGL falhar
+            try {
+                await tf.setBackend('cpu');
+                await tf.ready();
+                console.log(`Backend fallback: ${tf.getBackend()}`);
+                setBackendUsed('CPU');
+                
+                // Re-tenta carregar modelos no CPU (raramente necessário, mas garante)
+                console.log("Re-carregando modelos no backend CPU...");
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    faceapi.nets.faceExpressionNet.loadFromUri('/models')
+                ]);
+                setIsModelsLoaded(true);
+            } catch (fallbackErr) {
+                console.error('Fallback para CPU falhou:', fallbackErr);
+                setError(`Falha ao carregar modelos. Erro: ${err.message}. Verifique o console e tente recarregar a página.`);
+            }
         }
     };
 
@@ -157,33 +181,45 @@ const EmotionDetector = () => {
         detectionIntervalRef.current = setInterval(async () => {
             if (!videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
 
-            const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+            try {
+                console.log('Executando detecção... (backend atual:', tf?.getBackend(), ')');
+                const detections = await faceapi
+                    .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+                    .withFaceLandmarks()
+                    .withFaceExpressions();
 
-            if (canvasRef.current) {
-                const canvas = canvasRef.current;
-                const displaySize = { width: videoRef.current.videoWidth, height: videoRef.current.videoHeight };
-                if (canvas.width !== displaySize.width || canvas.height !== displaySize.height) {
-                    faceapi.matchDimensions(canvas, displaySize);
+                if (canvasRef.current) {
+                    const canvas = canvasRef.current;
+                    const displaySize = { width: videoRef.current.videoWidth, height: videoRef.current.videoHeight };
+                    if (canvas.width !== displaySize.width || canvas.height !== displaySize.height) {
+                        faceapi.matchDimensions(canvas, displaySize);
+                    }
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    if (detections && detections.length > 0) {
+                        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                        faceapi.draw.drawDetections(canvas, resizedDetections);
+                        faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+                    }
                 }
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
                 if (detections && detections.length > 0) {
-                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                    faceapi.draw.drawDetections(canvas, resizedDetections);
-                    faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
+                    const expressions = detections[0].expressions;
+                    const dominantEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                    
+                    setEmotion(emotionTranslations[dominantEmotion] || dominantEmotion);
+
+                    const newData = { timestamp: new Date().toISOString(), emotions: expressions, dominantEmotion };
+                    setEmotionsData(prev => [...prev, newData].slice(-50));
+                    setEmotionCounts(prev => ({ ...prev, [dominantEmotion]: prev[dominantEmotion] + 1 }));
+                    saveEmotionToDB(dominantEmotion);
+                    console.log('Emoção detectada:', dominantEmotion);
+                } else {
+                    setEmotion('Nenhuma face detectada');
                 }
-            }
-
-            if (detections && detections.length > 0) {
-                const expressions = detections[0].expressions;
-                const dominantEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                
-                setEmotion(emotionTranslations[dominantEmotion] || dominantEmotion);
-
-                const newData = { timestamp: new Date().toISOString(), emotions: expressions, dominantEmotion };
-                setEmotionsData(prev => [...prev, newData].slice(-50));
-                setEmotionCounts(prev => ({ ...prev, [dominantEmotion]: prev[dominantEmotion] + 1 }));
-                saveEmotionToDB(dominantEmotion);
+            } catch (detectionErr) {
+                console.error('Erro durante detecção:', detectionErr);
+                setEmotion('Erro na detecção (ver console para detalhes)');
             }
         }, 1000);
     }, [patientId]);
@@ -209,16 +245,16 @@ const EmotionDetector = () => {
             const videoElement = videoRef.current;
             if (videoElement) {
                 const handlePlay = () => {
-                    console.log("Vídeo pronto, iniciando detecção.");
+                    console.log(`Vídeo pronto, iniciando detecção com backend: ${backendUsed}.`);
                     runDetection();
                 };
                 videoElement.addEventListener('play', handlePlay);
                 return () => videoElement.removeEventListener('play', handlePlay);
             }
         }
-    }, [isModelsLoaded, isDetecting, startVideo, runDetection]);
+    }, [isModelsLoaded, isDetecting, startVideo, runDetection, backendUsed]);
 
-    // Funções para formatar dados para os gráficos
+    // Funções para formatar dados para os gráficos (mantidas iguais)
     const formatEmotionChartData = () => {
         let filteredData = emotionsData;
         const now = new Date();
@@ -281,6 +317,7 @@ const EmotionDetector = () => {
                 <Col className="text-center">
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
                     <h1 className="professional-name mb-0 mt-2">Monitoramento Emocional</h1>
+                    {backendUsed && <p className="small text-muted mb-0">Backend usado: {backendUsed}</p>}
                 </Col>
                 <Col xs="auto">
                     <Button variant="outline-primary" onClick={() => window.close()} className="back-button-standalone"><X /> Sair</Button>
