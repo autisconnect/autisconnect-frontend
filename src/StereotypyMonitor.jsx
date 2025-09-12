@@ -1,5 +1,5 @@
 // Ficheiro: src/StereotypyMonitor.jsx
-// VERSÃO CORRIGIDA E COMPLETA
+// VERSÃO CORRIGIDA E COMPLETA - Reordenado para evitar TDZ
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -29,11 +29,13 @@ ChartJS.register(
 );
 
 const StereotypyMonitor = () => {
+    // Refs primeiro
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const detectorRef = useRef(null);
     const lastPoseRef = useRef(null);
 
+    // Estados
     const [patientId, setPatientId] = useState(null);
     const [error, setError] = useState(null);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
@@ -49,12 +51,183 @@ const StereotypyMonitor = () => {
 
     const location = useLocation();
 
-    // ====================================================================
-    // ESTRUTURA CORRETA COM DOIS useEffects SEPARADOS
-    // ====================================================================
+    // Funções movidas para o TOPO para evitar TDZ - definidas antes dos useEffects
+    const startVideo = useCallback(() => {
+        console.log('startVideo called'); // Debug para rastrear init
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            })
+            .catch(err => {
+                console.error('Erro ao acessar a webcam:', err);
+                setError('Não foi possível acessar a webcam. Verifique as permissões.');
+            });
+    }, [setError]); // Deps explícitas para evitar recriações
 
-    // EFEITO 1: Inicialização. Executa apenas uma vez para carregar o modelo.
+    const toggleDetection = useCallback(() => {
+        setIsDetecting(prevState => {
+            const newState = !prevState;
+            if (!newState && videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+            return newState;
+        });
+    }, []);
+
+    const keypointsToObject = useCallback((keypoints) => keypoints.reduce((acc, kp) => {
+        if (kp.name) acc[kp.name.replace(/\s+/g, '_').toLowerCase()] = { x: kp.x, y: kp.y, score: kp.score };
+        return acc;
+    }, {}), []);
+
+    const drawKeypoints = useCallback((keypoints, ctx) => {
+        keypoints.forEach(keypoint => {
+            if (keypoint.score > 0.3) {
+                ctx.beginPath();
+                ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = 'aqua';
+                ctx.fill();
+            }
+        });
+    }, []);
+
+    const analyzeMovement = useCallback((keypoints) => {
+        const now = Date.now();
+        const currentPose = { timestamp: now, keypoints: keypointsToObject(keypoints) };
+        
+        let detectedType = 'Nenhuma';
+        if (lastPoseRef.current) {
+            const nose = currentPose.keypoints.nose;
+            const lastNose = lastPoseRef.current.keypoints.nose;
+            if (nose && lastNose && Math.abs(nose.y - lastNose.y) > 5) {
+                detectedType = 'Balançar corpo';
+            }
+            const leftWrist = currentPose.keypoints.left_wrist;
+            const lastLeftWrist = lastPoseRef.current.keypoints.left_wrist;
+            if (leftWrist && lastLeftWrist && Math.abs(leftWrist.y - lastLeftWrist.y) > 10) {
+                detectedType = 'Movimento de mãos';
+            }
+            const leftEar = currentPose.keypoints.left_ear;
+            const lastLeftEar = lastPoseRef.current.keypoints.left_ear;
+            if (leftEar && lastLeftEar && Math.abs(leftEar.x - lastLeftEar.x) > 8) {
+                detectedType = 'Balançar cabeça';
+            }
+        }
+
+        setDetectedStereotypy(prevDetectedStereotypy => {
+            if (detectedType !== 'Nenhuma') {
+                if (prevDetectedStereotypy !== detectedType && prevDetectedStereotypy !== 'Nenhuma') { // Check extra para evitar chamadas prematuras
+                    if (stereotypyStartTime) {
+                        logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
+                    }
+                    setStereotypyStartTime(now);
+                }
+            } else {
+                if (stereotypyStartTime && prevDetectedStereotypy !== 'Nenhuma') {
+                    logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
+                }
+                setStereotypyStartTime(null);
+            }
+            return detectedType;
+        });
+
+        lastPoseRef.current = currentPose;
+    }, [stereotypyStartTime]); // Deps para updater
+
+    const logStereotypy = useCallback((endTime, type, startTime) => {
+        const duration = (endTime - startTime) / 1000;
+        if (duration < 0.5) return; 
+
+        const currentKeypoints = lastPoseRef.current?.keypoints;
+        const relevantScores = [
+            currentKeypoints?.nose?.score || 0,
+            currentKeypoints?.left_wrist?.score || 0,
+            currentKeypoints?.right_wrist?.score || 0,
+            currentKeypoints?.left_ear?.score || 0
+        ].filter(s => s > 0);
+        const avgScore = relevantScores.length > 0 ? relevantScores.reduce((a, b) => a + b, 0) / relevantScores.length : 0.5;
+
+        const newLog = {
+            id: Date.now().toString(),
+            type: type,
+            duration: parseFloat(duration.toFixed(1)),
+            score: parseFloat(avgScore.toFixed(2)),
+            context: 'Sessão de monitoramento',
+            date: new Date(startTime).toISOString()
+        };
+
+        setStereotypyLog(prev => [newLog, ...prev].slice(0, 50)); 
+        saveDetectionToDB(newLog);
+    }, [patientId]); // Deps incluindo patientId
+
+    const saveDetectionToDB = useCallback(async (detectionData) => {
+        if (!patientId) return;
+        try {
+            await apiClient.post('/stereotypies', {
+                patient_id: patientId,
+                ...detectionData
+            });
+        } catch (err) {
+            console.error('Erro ao salvar detecção:', err);
+            setError(err.response?.data?.error || 'Erro ao salvar detecção no servidor.');
+        }
+    }, [patientId, setError]);
+
+    const formatStereotypyLogData = useCallback(() => {
+        let filteredData = stereotypyLog;
+        const now = new Date();
+        if (periodFilter === 'today') filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === now.toDateString());
+        else if (periodFilter === 'week') { const oneWeekAgo = new Date(now.getTime() - 7 * 86400000); filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneWeekAgo); }
+        else if (periodFilter === 'month') { 
+            const oneMonthAgo = new Date(now.getTime() - 30 * 86400000); 
+            filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneMonthAgo); 
+        }
+        else if (periodFilter === 'custom' && dateFilter) { const selectedDate = new Date(dateFilter); filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === selectedDate.toDateString()); }
+        if (stereotypyFilter !== 'all') filteredData = filteredData.filter(item => item.type === stereotypyFilter);
+        return filteredData;
+    }, [stereotypyLog, periodFilter, dateFilter, stereotypyFilter]);
+
+    const formatLineChartData = useCallback(() => {
+        const filteredData = formatStereotypyLogData();
+        const labels = filteredData.map(item => new Date(item.date).toLocaleTimeString('pt-BR'));
+        const data = filteredData.map(item => parseFloat(item.score));
+        return {
+            labels,
+            datasets: [{
+                label: 'Score de Confiança',
+                data,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.4,
+                fill: true
+            }]
+        };
+    }, [formatStereotypyLogData]);
+
+    const formatBarChartData = useCallback(() => {
+        const filteredData = formatStereotypyLogData();
+        const types = ['Balançar corpo', 'Movimento de mãos', 'Balançar cabeça'];
+        const counts = types.map(type => filteredData.filter(item => item.type === type).length);
+        return {
+            labels: types,
+            datasets: [{
+                label: 'Frequência',
+                data: counts,
+                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
+            }]
+        };
+    }, [formatStereotypyLogData]);
+
+    const handlePeriodChange = useCallback((e) => setPeriodFilter(e.target.value), []);
+    const handleDateChange = useCallback((e) => setDateFilter(e.target.value), []);
+    const handleStereotypyFilterChange = useCallback((e) => setStereotypyFilter(e.target.value), []);
+
+    // useEffects agora, após funções estarem definidas
+    // EFEITO 1: Inicialização
     useEffect(() => {
+        console.log('useEffect 1: Inicialização'); // Debug
         const queryParams = new URLSearchParams(location.search);
         const id = queryParams.get('patientId');
         if (!id) {
@@ -63,18 +236,18 @@ const StereotypyMonitor = () => {
         }
         setPatientId(id);
 
-        // Mock data dinâmico baseado na data atual (12/09/2025)
+        // Mock data compatível com 12/09/2025
         const now = new Date('2025-09-12T00:00:00Z');
         const mockLogData = [
-            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: new Date(now.getTime() - 6 * 3600000).toISOString() }, // 6h atrás
-            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: new Date(now.getTime() - 2 * 3600000).toISOString() }, // 2h atrás
-            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: new Date(now.getTime() + 1 * 3600000).toISOString() }, // 1h à frente (para teste)
+            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: new Date(now.getTime() - 6 * 3600000).toISOString() },
+            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: new Date(now.getTime() - 2 * 3600000).toISOString() },
+            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: new Date(now.getTime() - 1 * 3600000).toISOString() },
         ];
         setStereotypyLog(mockLogData);
 
         const initializeDetector = async () => {
             setError(null);
-            console.log("Componente montado. Iniciando carregamento do modelo...");
+            console.log("Iniciando carregamento do modelo...");
             try {
                 await tf.setBackend('webgl');
                 await tf.ready();
@@ -96,8 +269,9 @@ const StereotypyMonitor = () => {
         initializeDetector();
     }, [location]);
 
-    // EFEITO 2: Loop de Detecção. Controlado pelo estado 'isDetecting'.
+    // EFEITO 2: Loop de Detecção
     useEffect(() => {
+        console.log('useEffect 2: Loop de detecção, isDetecting:', isDetecting, 'isModelsLoaded:', isModelsLoaded); // Debug
         let animationFrameId;
 
         const runDetectionLoop = async () => {
@@ -126,7 +300,7 @@ const StereotypyMonitor = () => {
         };
 
         if (isDetecting && isModelsLoaded) {
-            startVideo();
+            startVideo(); // Agora startVideo está definida antes
             const videoElement = videoRef.current;
 
             const handleVideoReady = () => {
@@ -146,185 +320,12 @@ const StereotypyMonitor = () => {
         } else {
             cancelAnimationFrame(animationFrameId);
         }
-    }, [isDetecting, isModelsLoaded, startVideo]); // Adicionado startVideo nas dependências para evitar warnings e issues de init
-
-    // ====================================================================
-    // RESTO DO CÓDIGO (FUNÇÕES AUXILIARES E JSX)
-    // ====================================================================
-
-    const startVideo = useCallback(() => {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            })
-            .catch(err => {
-                console.error('Erro ao acessar a webcam:', err);
-                setError('Não foi possível acessar a webcam. Verifique as permissões.');
-            });
-    }, []);
-
-    const toggleDetection = () => {
-        setIsDetecting(prevState => {
-            const newState = !prevState;
-            if (!newState && videoRef.current && videoRef.current.srcObject) {
-                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-                videoRef.current.srcObject = null;
-            }
-            return newState;
-        });
-    };
-
-    const analyzeMovement = (keypoints) => {
-        const now = Date.now();
-        const currentPose = { timestamp: now, keypoints: keypointsToObject(keypoints) };
-        
-        let detectedType = 'Nenhuma';
-        if (lastPoseRef.current) {
-            const nose = currentPose.keypoints.nose;
-            const lastNose = lastPoseRef.current.keypoints.nose;
-            if (nose && lastNose && Math.abs(nose.y - lastNose.y) > 5) {
-                detectedType = 'Balançar corpo';
-            }
-            const leftWrist = currentPose.keypoints.left_wrist;
-            const lastLeftWrist = lastPoseRef.current.keypoints.left_wrist;
-            if (leftWrist && lastLeftWrist && Math.abs(leftWrist.y - lastLeftWrist.y) > 10) {
-                detectedType = 'Movimento de mãos';
-            }
-            const leftEar = currentPose.keypoints.left_ear;
-            const lastLeftEar = lastPoseRef.current.keypoints.left_ear;
-            if (leftEar && lastLeftEar && Math.abs(leftEar.x - lastLeftEar.x) > 8) {
-                detectedType = 'Balançar cabeça';
-            }
-        }
-
-        setDetectedStereotypy(prevDetectedStereotypy => {
-            if (detectedType !== 'Nenhuma') {
-                if (prevDetectedStereotypy !== detectedType) {
-                    if (stereotypyStartTime) {
-                        logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
-                    }
-                    setStereotypyStartTime(now);
-                }
-            } else {
-                if (stereotypyStartTime) {
-                    logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
-                }
-                setStereotypyStartTime(null);
-            }
-            return detectedType;
-        });
-
-        lastPoseRef.current = currentPose;
-    };
-
-    const logStereotypy = (endTime, type, startTime) => {
-        const duration = (endTime - startTime) / 1000;
-        if (duration < 0.5) return; 
-
-        // Melhoria: Média de scores de keypoints relevantes para maior precisão
-        const currentKeypoints = lastPoseRef.current?.keypoints;
-        const relevantScores = [
-            currentKeypoints?.nose?.score || 0,
-            currentKeypoints?.left_wrist?.score || 0,
-            currentKeypoints?.right_wrist?.score || 0,
-            currentKeypoints?.left_ear?.score || 0
-        ].filter(s => s > 0);
-        const avgScore = relevantScores.length > 0 ? relevantScores.reduce((a, b) => a + b, 0) / relevantScores.length : 0.5;
-
-        const newLog = {
-            id: Date.now().toString(),
-            type: type,
-            duration: parseFloat(duration.toFixed(1)),
-            score: parseFloat(avgScore.toFixed(2)),
-            context: 'Sessão de monitoramento',
-            date: new Date(startTime).toISOString()
-        };
-
-        setStereotypyLog(prev => [newLog, ...prev].slice(0, 50)); 
-        saveDetectionToDB(newLog);
-    };
-
-    const saveDetectionToDB = async (detectionData) => {
-        if (!patientId) return;
-        try {
-            await apiClient.post('/stereotypies', {
-                patient_id: patientId,
-                ...detectionData
-            });
-        } catch (err) {
-            console.error('Erro ao salvar detecção:', err);
-            setError(err.response?.data?.error || 'Erro ao salvar detecção no servidor.');
-        }
-    };
-
-    const keypointsToObject = (keypoints) => keypoints.reduce((acc, kp) => {
-        if (kp.name) acc[kp.name.replace(/\s+/g, '_').toLowerCase()] = { x: kp.x, y: kp.y, score: kp.score };
-        return acc;
-    }, {});
-
-    const drawKeypoints = (keypoints, ctx) => {
-        keypoints.forEach(keypoint => {
-            if (keypoint.score > 0.3) {
-                ctx.beginPath();
-                ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
-                ctx.fillStyle = 'aqua';
-                ctx.fill();
-            }
-        });
-    };
-
-    const formatStereotypyLogData = () => {
-        let filteredData = stereotypyLog;
-        const now = new Date();
-        if (periodFilter === 'today') filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === now.toDateString());
-        else if (periodFilter === 'week') { const oneWeekAgo = new Date(now.getTime() - 7 * 86400000); filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneWeekAgo); }
-        else if (periodFilter === 'month') { 
-            // Correção: Subtrair 30 dias para filtro consistente
-            const oneMonthAgo = new Date(now.getTime() - 30 * 86400000); 
-            filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneMonthAgo); 
-        }
-        else if (periodFilter === 'custom' && dateFilter) { const selectedDate = new Date(dateFilter); filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === selectedDate.toDateString()); }
-        if (stereotypyFilter !== 'all') filteredData = filteredData.filter(item => item.type === stereotypyFilter);
-        return filteredData;
-    };
-
-    const formatLineChartData = () => {
-        const filteredData = formatStereotypyLogData();
-        const labels = filteredData.map(item => new Date(item.date).toLocaleTimeString('pt-BR'));
-        const data = filteredData.map(item => parseFloat(item.score));
-        return {
-            labels,
-            datasets: [{
-                label: 'Score de Confiança',
-                data,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.4,
-                fill: true
-            }]
-        };
-    };
+    }, [isDetecting, isModelsLoaded, startVideo, analyzeMovement, drawKeypoints]); // Deps completas
 
     const lineOptions = {
         responsive: true,
         plugins: { legend: { position: 'top' }, title: { display: true, text: 'Score ao Longo do Tempo' } },
         scales: { y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } }, x: { title: { display: true, text: 'Tempo' } } }
-    };
-
-    const formatBarChartData = () => {
-        const filteredData = formatStereotypyLogData();
-        const types = ['Balançar corpo', 'Movimento de mãos', 'Balançar cabeça'];
-        const counts = types.map(type => filteredData.filter(item => item.type === type).length);
-        return {
-            labels: types,
-            datasets: [{
-                label: 'Frequência',
-                data: counts,
-                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
-            }]
-        };
     };
 
     const barOptions = {
@@ -333,12 +334,7 @@ const StereotypyMonitor = () => {
         scales: { y: { beginAtZero: true, title: { display: true, text: 'Frequência' } } }
     };
 
-    const handlePeriodChange = (e) => setPeriodFilter(e.target.value);
-    const handleDateChange = (e) => setDateFilter(e.target.value);
-    const handleStereotypyFilterChange = (e) => setStereotypyFilter(e.target.value);
-
-    // Movido para useMemo para evitar re-computações desnecessárias e potenciais issues de init
-    const filteredLogs = useMemo(() => formatStereotypyLogData(), [stereotypyLog, periodFilter, dateFilter, stereotypyFilter]);
+    const filteredLogs = useMemo(() => formatStereotypyLogData(), [formatStereotypyLogData]);
 
     return (
         <Container fluid className="py-4 stereotypy-monitor-page">
