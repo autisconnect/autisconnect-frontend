@@ -185,37 +185,47 @@ const StereotypyMonitor = () => {
         }
     }, [isModelsLoaded, isDetecting, startVideo]);
     
-    const runDetection = async () => {
-        const detector = detectorRef.current;
-        /** @type {HTMLVideoElement|null} */
-        const videoEl = videoRef.current;
-        if (
-            !detector ||
-            !videoEl ||
-            videoEl.paused ||
-            videoEl.videoWidth === 0 ||
-            videoEl.readyState < 2
-        ) {
-            return;
-        }
+const runDetection = async () => {
+    const detector = detectorRef.current;
+    
+    /** @type {HTMLVideoElement|null} */ // Dica de tipo para o linter e compilador
+    const videoEl = videoRef.current;
 
-        try {
-            const poses = await detector.estimatePoses(videoEl, {
-            maxPoses: 1,
-            flipHorizontal: false
-            });
-            const ctx = canvasRef.current?.getContext('2d');
-            if (ctx) {
+    // Condição de guarda robusta, sem alterações aqui
+    if (
+        !detector ||
+        !videoEl ||
+        videoEl.paused ||
+        videoEl.videoWidth === 0 ||
+        videoEl.readyState < 3 // readyState < 3 significa que o frame atual não está pronto
+    ) {
+        return;
+    }
+
+    try {
+        // ======================= CORREÇÃO PRINCIPAL =======================
+        // Chamando estimatePoses com um objeto de configuração explícito.
+        // Isso garante que o motor interno do TF.js receba os parâmetros
+        // que ele espera, evitando a falha na criação do tensor.
+        const poses = await detector.estimatePoses(videoEl, {
+            maxPoses: 1,          // Estamos procurando apenas uma pessoa
+            flipHorizontal: false // O vídeo da webcam não precisa ser espelhado
+        });
+        // ==================================================================
+
+        const ctx = canvasRef.current?.getContext('2d');
+        if (ctx) {
             ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
             if (poses && poses.length > 0) {
+                // Se chegou aqui, a detecção funcionou!
                 analyzeMovement(poses[0].keypoints);
                 drawKeypoints(poses[0].keypoints, ctx);
             }
-            }
-        } catch (err) {
-            console.error('Erro na detecção:', err);
         }
-    };
+    } catch (err) {
+        console.error('Erro na detecção:', err);
+    }
+};
 
 
     const analyzeMovement = (keypoints) => {
