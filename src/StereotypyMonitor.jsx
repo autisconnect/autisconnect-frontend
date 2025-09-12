@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge } from 'react-bootstrap';
-import apiClient from '../services/api'; // Assumindo que é o mesmo axios configurado do EmotionDetector
+import apiClient from '@/services/api';
 import logohori from './assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
 
