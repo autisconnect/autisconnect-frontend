@@ -1,14 +1,13 @@
+// Ficheiro: src/StereotypyMonitor.jsx (VERSÃO FINAL E CORRIGIDA - Sem ChartJS desnecessário)
+
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge } from 'react-bootstrap';
-import apiClient from '@/services/api';
-import logohori from './assets/logohoriz.jpg';
+import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge, Form } from 'react-bootstrap';
+import apiClient from '@/services/api'; // Usa alias @ do vite.config.js
+import logohori from '@/assets/logohoriz.jpg'; // Ajuste path se necessário
 import { X } from 'react-bootstrap-icons';
 
-ChartJS.register(
-    CategoryScale, LinearScale, PointElement, LineElement, BarElement,
-    Title, Tooltip, Legend, Filler
-);
+// Removido: ChartJS.register - Não usado aqui (adicione se precisar de gráficos)
 
 const StereotypyMonitor = () => {
     const videoRef = useRef(null);
@@ -47,10 +46,10 @@ const StereotypyMonitor = () => {
 
         // Carrega dados mockados para log de sessões (similar ao original)
         const mockLogData = [
-            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: '2023-01-15T10:00:00Z' },
-            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: '2023-01-22T11:30:00Z' },
-            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: '2023-01-29T14:20:00Z' },
-            { id: 4, type: 'Movimento de mãos', duration: 10.1, score: 0.89, date: '2023-02-05T09:45:00Z' }
+            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: '2025-09-12T10:00:00Z' },
+            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: '2025-09-12T11:30:00Z' },
+            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: '2025-09-12T14:20:00Z' },
+            { id: 4, type: 'Movimento de mãos', duration: 10.1, score: 0.89, date: '2025-09-12T09:45:00Z' }
         ];
         setStereotypyLog(mockLogData);
 
@@ -90,6 +89,9 @@ const StereotypyMonitor = () => {
             const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
             const poseDetector = await poseDetection.createDetector(model, detectorConfig);
 
+            // Armazena o detector globalmente ou em state (aqui, assumimos window para simplicidade)
+            window.poseDetector = poseDetector;  // Armazena no window para acesso em runDetection
+
             setIsModelsLoaded(true);
             console.log("Modelo de pose carregado com sucesso");
         } catch (err) {
@@ -104,6 +106,7 @@ const StereotypyMonitor = () => {
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
                 const poseDetector = await poseDetection.createDetector(model, detectorConfig);
+                window.poseDetector = poseDetector;
 
                 setIsModelsLoaded(true);
             } catch (fallbackErr) {
@@ -164,7 +167,7 @@ const StereotypyMonitor = () => {
 
     const runDetection = useCallback(async () => {
         const { poseDetection } = window;
-        const detector = poseDetection.getDetector(); // Assumindo que o detector é global ou armazenado
+        const detector = window.poseDetector;  // Acessa o detector armazenado
         if (!detector || !videoRef.current || videoRef.current.paused) return;
 
         try {
@@ -348,15 +351,13 @@ const StereotypyMonitor = () => {
                                 <div className="d-flex justify-content-between align-items-center">
                                     <span>Log de Detecções</span>
                                     <div className="d-flex">
-                                        <select value={periodFilter} onChange={handlePeriodChange} className="form-select form-select-sm me-2" style={{ width: 'auto' }}>
+                                        <Form.Select size="sm" value={periodFilter} onChange={handlePeriodChange} className="me-2" style={{ width: 'auto' }}>
                                             <option value="today">Hoje</option>
                                             <option value="week">Semana</option>
                                             <option value="month">Mês</option>
                                             <option value="custom">Data Específica</option>
-                                        </select>
-                                        {periodFilter === 'custom' && (
-                                            <input type="date" value={dateFilter} onChange={handleDateChange} className="form-control form-control-sm" style={{ width: 'auto' }} />
-                                        )}
+                                        </Form.Select>
+                                        {periodFilter === 'custom' && (<Form.Control type="date" size="sm" value={dateFilter} onChange={handleDateChange} style={{ width: 'auto' }} />)}
                                     </div>
                                 </div>
                             </Card.Header>
@@ -385,13 +386,13 @@ const StereotypyMonitor = () => {
                                         )}
                                     </tbody>
                                 </Table>
-                                <div className="mt-2">
-                                    <select value={stereotypyFilter} onChange={handleStereotypyFilterChange} className="form-select form-select-sm" style={{ width: 'auto' }}>
+                                <div className="mt-3">
+                                    <Form.Select size="sm" value={stereotypyFilter} onChange={handleStereotypyFilterChange} style={{ width: 'auto' }}>
                                         <option value="all">Todas</option>
                                         <option value="Balançar corpo">Balançar Corpo</option>
                                         <option value="Movimento de mãos">Mãos</option>
                                         <option value="Balançar cabeça">Cabeça</option>
-                                    </select>
+                                    </Form.Select>
                                 </div>
                             </Card.Body>
                         </Card>
