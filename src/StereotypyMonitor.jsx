@@ -86,7 +86,6 @@ const StereotypyMonitor = () => {
     }, [location]);
 
     const loadModels = async () => {
-        // As bibliotecas estão no window (garantido no index.html)
         const tf = window.tf;
         if (!tf) {
             setError("TensorFlow.js não foi carregado. Verifique os scripts no index.html.");
@@ -97,43 +96,60 @@ const StereotypyMonitor = () => {
             setError(null);
             console.log("Configurando backend do TensorFlow.js...");
 
-            // Tenta WebGL primeiro, fallback para CPU
             await tf.setBackend('webgl');
             await tf.ready();
             console.log(`Backend pronto: ${tf.getBackend()}`);
 
-            // Carrega o modelo de pose detection (MoveNet)
-            const { poseDetection } = window; // Assumindo que pose-detection está no window via CDN
+            const { poseDetection } = window;
             if (!poseDetection) {
                 throw new Error("Biblioteca de pose detection não carregada.");
             }
 
             const model = poseDetection.SupportedModels.MoveNet;
-            const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-            const poseDetector = await poseDetection.createDetector(model, detectorConfig);
+            
+            // --- CORREÇÃO APLICADA AQUI ---
+            // Especificamos a URL do modelo para garantir compatibilidade e evitar o erro de quantização float16.
+            const detectorConfig = {
+                modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+                modelUrl: 'https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4',
+                enableSmoothing: true // Suaviza o rastreamento dos pontos-chave entre os frames
+            };
+            // --- FIM DA CORREÇÃO ---
 
-            // Armazena o detector globalmente ou em state (aqui, assumimos window para simplicidade)
-            window.poseDetector = poseDetector;  // Armazena no window para acesso em runDetection
+            const poseDetector = await poseDetection.createDetector(model, detectorConfig );
+            window.poseDetector = poseDetector;
 
             setIsModelsLoaded(true);
-            console.log("Modelo de pose carregado com sucesso");
+            console.log("Modelo de pose carregado com sucesso no backend WebGL.");
+
         } catch (err) {
-            console.error('Erro ao carregar modelos:', err);
-            // Fallback para CPU
+            console.error('Erro ao carregar modelos com WebGL:', err);
+            console.log("Tentando fallback para o backend CPU...");
+
             try {
                 await tf.setBackend('cpu');
                 await tf.ready();
-                console.log(`Backend fallback: ${tf.getBackend()}`);
+                console.log(`Backend fallback ativado: ${tf.getBackend()}`);
 
                 const { poseDetection } = window;
                 const model = poseDetection.SupportedModels.MoveNet;
-                const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-                const poseDetector = await poseDetection.createDetector(model, detectorConfig);
+                
+                // Aplicamos a mesma correção para o fallback
+                const detectorConfig = {
+                    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+                    modelUrl: 'https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4',
+                    enableSmoothing: true
+                };
+
+                const poseDetector = await poseDetection.createDetector(model, detectorConfig );
                 window.poseDetector = poseDetector;
 
                 setIsModelsLoaded(true);
+                console.log("Modelo de pose carregado com sucesso no backend CPU.");
+
             } catch (fallbackErr) {
-                setError(`Falha ao carregar modelos. Erro: ${err.message}`);
+                console.error('Erro fatal ao carregar modelos no fallback para CPU:', fallbackErr);
+                setError(`Falha ao carregar os modelos de IA. Erro principal: ${err.message}. Erro no fallback: ${fallbackErr.message}`);
             }
         }
     };
