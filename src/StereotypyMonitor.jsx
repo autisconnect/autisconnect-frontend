@@ -1,122 +1,210 @@
-// Ficheiro: src/StereotypyMonitor.jsx (VERSÃO FINAL E CORRIGIDA)
-
-import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge } from 'react-bootstrap';
+import apiClient from '../services/api'; // Assumindo que é o mesmo axios configurado do EmotionDetector
 import logohori from './assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
-//import axios from 'axios';
-//import * as tf from '@tensorflow/tfjs';
-//import * as poseDetection from '@tensorflow-models/pose-detection';
-//import { v4 as uuidv4 } from 'uuid';
+
+ChartJS.register(
+    CategoryScale, LinearScale, PointElement, LineElement, BarElement,
+    Title, Tooltip, Legend, Filler
+);
 
 const StereotypyMonitor = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const detectionIntervalRef = useRef(null);
-    const lastPoseRef = useRef(null); // <<<< MUDANÇA IMPORTANTE: Usando ref em vez de state
+    const lastPoseRef = useRef(null); // Usando ref para última pose
 
     const [patientId, setPatientId] = useState(null);
-    const [detector, setDetector] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [isDetecting, setIsDetecting] = useState(false);
-    
+    const [isModelsLoaded, setIsModelsLoaded] = useState(false);
+    const [isDetecting, setIsDetecting] = useState(false); // Inicia pausado, botão para ativar
+
+    // Estados para detecção
     const [detectedStereotypy, setDetectedStereotypy] = useState('Nenhuma');
     const [stereotypyLog, setStereotypyLog] = useState([]);
     const [stereotypyStartTime, setStereotypyStartTime] = useState(null);
 
+    // Estados dos filtros (similar ao EmotionDetector)
+    const [periodFilter, setPeriodFilter] = useState('today');
+    const [dateFilter, setDateFilter] = useState('');
+    const [stereotypyFilter, setStereotypyFilter] = useState('all');
+
     const location = useLocation();
-    const navigate = useNavigate();
 
+    // Efeito para carregar na inicialização
     useEffect(() => {
-        const setup = async () => {
-            const queryParams = new URLSearchParams(location.search);
-            const id = queryParams.get('patientId');
-            if (!id) {
-                setError("ID do paciente não encontrado na URL.");
-                setIsLoading(false);
-                return;
-            }
+        const queryParams = new URLSearchParams(location.search);
+        const id = queryParams.get('patientId');
+        if (id) {
             setPatientId(id);
+            console.log(`Monitorando paciente com ID: ${id}`);
+            loadModels(); // Carrega modelos assim que ID é definido
+        } else {
+            setError("ID do paciente não encontrado na URL. A detecção não pode iniciar.");
+        }
 
+        // Carrega dados mockados para log de sessões (similar ao original)
+        const mockLogData = [
+            { id: 1, type: 'Balançar corpo', duration: 12.5, score: 0.85, date: '2023-01-15T10:00:00Z' },
+            { id: 2, type: 'Movimento de mãos', duration: 8.2, score: 0.92, date: '2023-01-22T11:30:00Z' },
+            { id: 3, type: 'Balançar corpo', duration: 15.0, score: 0.78, date: '2023-01-29T14:20:00Z' },
+            { id: 4, type: 'Movimento de mãos', duration: 10.1, score: 0.89, date: '2023-02-05T09:45:00Z' }
+        ];
+        setStereotypyLog(mockLogData);
+
+        // Cleanup
+        return () => {
+            if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
+            if (videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [location]);
+
+    const loadModels = async () => {
+        // As bibliotecas estão no window (garantido no index.html)
+        const tf = window.tf;
+        if (!tf) {
+            setError("TensorFlow.js não foi carregado. Verifique os scripts no index.html.");
+            return;
+        }
+
+        try {
+            setError(null);
+            console.log("Configurando backend do TensorFlow.js...");
+
+            // Tenta WebGL primeiro, fallback para CPU
+            await tf.setBackend('webgl');
+            await tf.ready();
+            console.log(`Backend pronto: ${tf.getBackend()}`);
+
+            // Carrega o modelo de pose detection (MoveNet)
+            const { poseDetection } = window; // Assumindo que pose-detection está no window via CDN
+            if (!poseDetection) {
+                throw new Error("Biblioteca de pose detection não carregada.");
+            }
+
+            const model = poseDetection.SupportedModels.MoveNet;
+            const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+            const poseDetector = await poseDetection.createDetector(model, detectorConfig);
+
+            setIsModelsLoaded(true);
+            console.log("Modelo de pose carregado com sucesso");
+        } catch (err) {
+            console.error('Erro ao carregar modelos:', err);
+            // Fallback para CPU
             try {
-                await tf.setBackend('webgl');
+                await tf.setBackend('cpu');
+                await tf.ready();
+                console.log(`Backend fallback: ${tf.getBackend()}`);
+
+                const { poseDetection } = window;
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
                 const poseDetector = await poseDetection.createDetector(model, detectorConfig);
-                setDetector(poseDetector);
-            } catch (err) {
-                setError("Falha ao carregar modelo de IA.");
-                console.error(err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        setup();
-    }, [location]);
 
-    const startDetection = async () => {
-        if (!detector) {
-            setError("Modelo de IA não carregado.");
-            return;
+                setIsModelsLoaded(true);
+            } catch (fallbackErr) {
+                setError(`Falha ao carregar modelos. Erro: ${err.message}`);
+            }
         }
-        setIsDetecting(true);
-        setError(null);
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.onloadeddata = () => {
+    };
+
+    const startVideo = useCallback(() => {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            })
+            .catch(err => {
+                console.error('Erro ao acessar a webcam:', err);
+                setError('Não foi possível acessar a webcam. Verifique as permissões do navegador.');
+            });
+    }, []);
+
+    const toggleDetection = () => {
+        setIsDetecting(prevState => {
+            const newState = !prevState;
+            if (!newState) {
+                if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
+                if (videoRef.current && videoRef.current.srcObject) {
+                    videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                }
+                setDetectedStereotypy('Nenhuma');
+                setStereotypyStartTime(null);
+            } else {
+                startVideo();
+            }
+            return newState;
+        });
+    };
+
+    useEffect(() => {
+        if (isModelsLoaded && isDetecting) {
+            startVideo();
+            const videoElement = videoRef.current;
+            if (videoElement) {
+                const handlePlay = () => {
+                    console.log("Vídeo pronto, iniciando detecção de estereotipias.");
                     if (canvasRef.current) {
-                        canvasRef.current.width = videoRef.current.videoWidth;
-                        canvasRef.current.height = videoRef.current.videoHeight;
+                        canvasRef.current.width = videoElement.videoWidth;
+                        canvasRef.current.height = videoElement.videoHeight;
                     }
-                    lastPoseRef.current = null; // Reseta a última pose
-                    detectionIntervalRef.current = setInterval(detectStereotypies, 200);
+                    lastPoseRef.current = null;
+                    detectionIntervalRef.current = setInterval(runDetection, 200);
                 };
+                videoElement.addEventListener('play', handlePlay);
+                return () => videoElement.removeEventListener('play', handlePlay);
+            }
+        }
+    }, [isModelsLoaded, isDetecting, startVideo]);
+
+    const runDetection = useCallback(async () => {
+        const { poseDetection } = window;
+        const detector = poseDetection.getDetector(); // Assumindo que o detector é global ou armazenado
+        if (!detector || !videoRef.current || videoRef.current.paused) return;
+
+        try {
+            const poses = await detector.estimatePoses(videoRef.current);
+            const ctx = canvasRef.current?.getContext('2d');
+            if (ctx) {
+                ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                if (poses && poses.length > 0) {
+                    drawKeypoints(poses[0].keypoints, ctx);
+                    analyzeMovement(poses[0].keypoints);
+                }
             }
         } catch (err) {
-            setError("Não foi possível acessar a webcam.");
-            setIsDetecting(false);
+            console.error('Erro na detecção:', err);
         }
-    };
-
-    const stopDetection = () => {
-        if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
-        setIsDetecting(false);
-        if (videoRef.current && videoRef.current.srcObject) {
-            videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-            videoRef.current.srcObject = null;
-        }
-    };
-
-    const detectStereotypies = async () => {
-        if (!detector || !videoRef.current || videoRef.current.paused) return;
-        const poses = await detector.estimatePoses(videoRef.current);
-        const ctx = canvasRef.current.getContext('2d');
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-        if (poses && poses.length > 0) {
-            drawKeypoints(poses[0].keypoints, ctx);
-            analyzeMovement(poses[0].keypoints);
-        }
-    };
+    }, [patientId]);
 
     const analyzeMovement = (keypoints) => {
         const now = Date.now();
         const currentPose = { timestamp: now, keypoints: keypointsToObject(keypoints) };
         
         let detectedType = 'Nenhuma';
-        if (lastPoseRef.current) { // <<<< MUDANÇA IMPORTANTE: Lendo da ref
+        if (lastPoseRef.current) {
+            // Detecção de balançar corpo: Movimento vertical da cabeça (nose y varia > 5 pixels)
             const nose = currentPose.keypoints.nose;
             const lastNose = lastPoseRef.current.keypoints.nose;
             if (nose && lastNose && Math.abs(nose.y - lastNose.y) > 5) {
                 detectedType = 'Balançar corpo';
             }
+            // Detecção de movimento de mãos: Movimento vertical do punho esquerdo (hand flapping)
             const leftWrist = currentPose.keypoints.left_wrist;
             const lastLeftWrist = lastPoseRef.current.keypoints.left_wrist;
             if (leftWrist && lastLeftWrist && Math.abs(leftWrist.y - lastLeftWrist.y) > 10) {
                 detectedType = 'Movimento de mãos';
+            }
+            // Adicional: Balançar cabeça (usando left_ear e right_ear)
+            const leftEar = currentPose.keypoints.left_ear;
+            const lastLeftEar = lastPoseRef.current.keypoints.left_ear;
+            if (leftEar && lastLeftEar && Math.abs(leftEar.x - lastLeftEar.x) > 8) {
+                detectedType = 'Balançar cabeça';
             }
         }
 
@@ -131,40 +219,41 @@ const StereotypyMonitor = () => {
             setStereotypyStartTime(null);
             setDetectedStereotypy('Nenhuma');
         }
-        lastPoseRef.current = currentPose; // <<<< MUDANÇA IMPORTANTE: Atualizando a ref
+        lastPoseRef.current = currentPose;
     };
 
     const logStereotypy = (endTime) => {
         const duration = (endTime - stereotypyStartTime) / 1000;
-        if (duration < 0.5) return;
+        if (duration < 0.5) return; // Ignora detecções muito curtas
         const newLog = {
-            id: uuidv4(),
+            id: Date.now().toString(), // Simple ID (substitui uuidv4)
             type: detectedStereotypy,
             duration: parseFloat(duration.toFixed(1)),
             score: (lastPoseRef.current?.keypoints?.nose?.score || 0.5).toFixed(2),
             context: 'Sessão de monitoramento',
             date: new Date(stereotypyStartTime).toISOString()
         };
-        setStereotypyLog(prev => [newLog, ...prev]);
+        setStereotypyLog(prev => [newLog, ...prev].slice(-50)); // Limita a 50 entradas
         saveDetectionToDB(newLog);
+        setStereotypyStartTime(null);
     };
 
     const saveDetectionToDB = async (detectionData) => {
-        const token = localStorage.getItem('token');
-        if (!token || !patientId) return;
+        if (!patientId) return;
         try {
-            await axios.post('http://localhost:5000/api/stereotypies', {
+            await apiClient.post('/stereotypies', {
                 patient_id: patientId,
                 ...detectionData
-            }, { headers: { 'Authorization': `Bearer ${token}` } } );
+            });
+            console.log('Estereotipia salva no DB:', detectionData.type);
         } catch (err) {
-            console.error("Erro ao salvar detecção:", err);
-            setError("Falha ao salvar detecção no servidor.");
+            console.error('Erro ao salvar detecção:', err);
+            setError(err.response?.data?.error || 'Erro ao salvar detecção no servidor.');
         }
     };
 
     const keypointsToObject = (keypoints) => keypoints.reduce((acc, kp) => {
-        if (kp.name) acc[kp.name] = { x: kp.x, y: kp.y, score: kp.score };
+        if (kp.name) acc[kp.name.replace(/\s+/g, '_').toLowerCase()] = { x: kp.x, y: kp.y, score: kp.score };
         return acc;
     }, {});
 
@@ -175,9 +264,31 @@ const StereotypyMonitor = () => {
                 ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
                 ctx.fillStyle = 'aqua';
                 ctx.fill();
+                ctx.fillStyle = 'black';
+                ctx.font = '10px Arial';
+                ctx.fillText(keypoint.name, keypoint.x + 5, keypoint.y - 5);
             }
         });
     };
+
+    // Funções para formatar dados para tabela e filtros (similar ao EmotionDetector)
+    const formatStereotypyLogData = () => {
+        let filteredData = stereotypyLog;
+        const now = new Date();
+        if (periodFilter === 'today') filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === now.toDateString());
+        else if (periodFilter === 'week') { const oneWeekAgo = new Date(now.getTime() - 7 * 86400000); filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneWeekAgo); }
+        else if (periodFilter === 'month') { const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()); filteredData = stereotypyLog.filter(item => new Date(item.date) >= oneMonthAgo); }
+        else if (periodFilter === 'custom' && dateFilter) { const selectedDate = new Date(dateFilter); filteredData = stereotypyLog.filter(item => new Date(item.date).toDateString() === selectedDate.toDateString()); }
+        if (stereotypyFilter !== 'all') filteredData = filteredData.filter(item => item.type === stereotypyFilter);
+
+        return filteredData;
+    };
+
+    const handlePeriodChange = (e) => setPeriodFilter(e.target.value);
+    const handleDateChange = (e) => setDateFilter(e.target.value);
+    const handleStereotypyFilterChange = (e) => setStereotypyFilter(e.target.value);
+
+    const filteredLogs = formatStereotypyLogData();
 
     return (
         <Container fluid className="py-4 stereotypy-monitor-page">
@@ -187,53 +298,130 @@ const StereotypyMonitor = () => {
                     <h1 className="professional-name mb-0 mt-2">Monitor de Estereotipias</h1>
                 </Col>
                 <Col xs="auto">
-                    <Button 
-                        variant="outline-primary" 
-                        onClick={() => window.close()} 
-                        className="back-button-standalone"
-                    >
+                    <Button variant="outline-primary" onClick={() => window.close()} className="back-button-standalone">
                         <X /> Sair
                     </Button>
                 </Col>
             </Row>
 
-            <Alert variant="warning">{error || "Esta funcionalidade está em manutenção."}</Alert>
+            {error && <Alert variant="danger">{error}</Alert>}
 
-            {isLoading ? (
-                <div className="text-center"><Spinner animation="border" /> <p>Carregando...</p></div>
+            {!isModelsLoaded ? (
+                <div className="text-center py-4">
+                    <Spinner animation="border" />
+                    <p>Carregando modelos de IA...</p>
+                </div>
             ) : (
-            <Row>
-                <Col md={8}>
-                    <Card className="mb-4">
-                        <Card.Header className="d-flex justify-content-between align-items-center">
-                            Detecção em Tempo Real
-                            <Button variant="secondary" disabled>
-                                Iniciar Detecção
-                            </Button>
-                        </Card.Header>
-                        <Card.Body className="text-center">
-                            <div style={{ position: 'relative', width: '100%', maxWidth: '640px', margin: '0 auto', backgroundColor: '#f0f0f0', border: '1px dashed #ccc', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
-                                <p className="text-muted">Câmera desativada</p>
-                            </div>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={4}>
-                    <Card className="mb-4">
-                        <Card.Header>Status da Detecção</Card.Header>
-                        <Card.Body className="text-center">
-                            <p className="text-muted">Aguardando ativação...</p>
-                        </Card.Body>
-                    </Card>
-                    <Card className="mb-4">
-                        <Card.Header>Log da Sessão</Card.Header>
-                        <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                            <p className="text-muted">Nenhuma detecção registrada.</p>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
+                <Row>
+                    <Col md={6}>
+                        <Card className="mb-4">
+                            <Card.Header className="d-flex justify-content-between align-items-center">
+                                <span>Detecção de Estereotipias em Tempo Real</span>
+                                <Button variant={isDetecting ? 'danger' : 'success'} onClick={toggleDetection}>
+                                    {isDetecting ? 'Parar Detecção' : 'Iniciar Detecção'}
+                                </Button>
+                            </Card.Header>
+                            <Card.Body className="text-center">
+                                <div style={{ position: 'relative', width: '100%', maxWidth: '500px', margin: '0 auto' }}>
+                                    <video ref={videoRef} autoPlay muted playsInline width="100%" height="auto" style={{ borderRadius: '8px' }} />
+                                    <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
+                                </div>
+                                <p className="mt-3">
+                                    {isDetecting ? `Estereotipia Atual: ${detectedStereotypy}` : 'Detecção Pausada'}
+                                </p>
+                            </Card.Body>
+                        </Card>
+                        <Card className="mb-4">
+                            <Card.Header>Indicadores de Estereotipias</Card.Header>
+                            <Card.Body>
+                                <div className="d-flex justify-content-around">
+                                    <Badge bg="warning" className={detectedStereotypy === 'Balançar corpo' ? 'fs-5' : ''}>Balançar Corpo</Badge>
+                                    <Badge bg="info" className={detectedStereotypy === 'Movimento de mãos' ? 'fs-5' : ''}>Mãos (Flapping)</Badge>
+                                    <Badge bg="secondary" className={detectedStereotypy === 'Balançar cabeça' ? 'fs-5' : ''}>Balançar Cabeça</Badge>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col md={6}>
+                        <Card className="mb-4">
+                            <Card.Header>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <span>Log de Detecções</span>
+                                    <div className="d-flex">
+                                        <select value={periodFilter} onChange={handlePeriodChange} className="form-select form-select-sm me-2" style={{ width: 'auto' }}>
+                                            <option value="today">Hoje</option>
+                                            <option value="week">Semana</option>
+                                            <option value="month">Mês</option>
+                                            <option value="custom">Data Específica</option>
+                                        </select>
+                                        {periodFilter === 'custom' && (
+                                            <input type="date" value={dateFilter} onChange={handleDateChange} className="form-control form-control-sm" style={{ width: 'auto' }} />
+                                        )}
+                                    </div>
+                                </div>
+                            </Card.Header>
+                            <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                <Table striped bordered hover size="sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Duração (s)</th>
+                                            <th>Score</th>
+                                            <th>Data</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredLogs.length > 0 ? (
+                                            filteredLogs.map(log => (
+                                                <tr key={log.id}>
+                                                    <td><Badge bg="primary">{log.type}</Badge></td>
+                                                    <td>{log.duration}</td>
+                                                    <td>{log.score}</td>
+                                                    <td>{new Date(log.date).toLocaleString('pt-BR')}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr><td colSpan={4} className="text-center">Nenhuma detecção registrada.</td></tr>
+                                        )}
+                                    </tbody>
+                                </Table>
+                                <div className="mt-2">
+                                    <select value={stereotypyFilter} onChange={handleStereotypyFilterChange} className="form-select form-select-sm" style={{ width: 'auto' }}>
+                                        <option value="all">Todas</option>
+                                        <option value="Balançar corpo">Balançar Corpo</option>
+                                        <option value="Movimento de mãos">Mãos</option>
+                                        <option value="Balançar cabeça">Cabeça</option>
+                                    </select>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                        <Card className="mb-4">
+                            <Card.Header>Insights e Recomendações</Card.Header>
+                            <Card.Body>
+                                <h5>Padrões Detectados</h5>
+                                <p>A estereotipia predominante é <strong>{detectedStereotypy}</strong>. Monitore a duração para intervenções.</p>
+                                <h5>Recomendações</h5>
+                                <ul>
+                                    {detectedStereotypy === 'Balançar corpo' && <li>Sugira atividades sensoriais alternativas como balanço controlado.</li>}
+                                    {detectedStereotypy === 'Movimento de mãos' && <li>Ofereça objetos de fidget para redirecionar o movimento.</li>}
+                                    {detectedStereotypy === 'Balançar cabeça' && <li>Explore estímulos visuais para reduzir o balanço.</li>}
+                                    <li>Registre sessões regulares para rastrear progresso.</li>
+                                </ul>
+                                <Alert variant="info">
+                                    <strong>Lembrete:</strong> Esta é uma ferramenta de apoio. Consulte profissionais para avaliações clínicas.
+                                </Alert>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
             )}
+            <Card className="mb-4">
+                <Card.Header>Sobre o Monitor de Estereotipias</Card.Header>
+                <Card.Body>
+                    <p>Utiliza IA (TensorFlow.js com MoveNet) para detectar movimentos repetitivos como balançar corpo ou mãos, comuns em TEA.</p>
+                    <p>Os dados são salvos por paciente para análise de tendências e suporte terapêutico.</p>
+                </Card.Body>
+            </Card>
         </Container>
     );
 };
