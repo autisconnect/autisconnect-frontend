@@ -98,12 +98,8 @@ const StereotypyMonitor = () => {
         console.log("Configurando backend do TensorFlow.js...");
 
         try {
-            // ======================= CORREÇÃO PRINCIPAL =======================
-            // Forçamos o backend de CPU. É mais lento, mas universalmente compatível.
-            // Se isso funcionar, o problema é uma incompatibilidade com o WebGL no seu sistema.
-            await tf.setBackend('cpu'); 
-            // ==================================================================
-            
+            await tf.setBackend('cpu');
+            await tf.setBackend('webgl');
             await tf.ready();
             console.log(`Backend forçado e pronto: ${tf.getBackend()}`);
 
@@ -185,47 +181,33 @@ const StereotypyMonitor = () => {
         }
     }, [isModelsLoaded, isDetecting, startVideo]);
     
-const runDetection = async () => {
-    const detector = detectorRef.current;
-    
-    /** @type {HTMLVideoElement|null} */ // Dica de tipo para o linter e compilador
-    const videoEl = videoRef.current;
+    const runDetection = async () => {
+        try {
+            const detector = detectorRef.current; // já criado antes
+            const videoEl = videoRef.current;
+            if (
+            !detector ||
+            !videoEl ||
+            videoEl.paused ||
+            videoEl.videoWidth === 0 ||
+            videoEl.readyState < 2
+            ) return;
 
-    // Condição de guarda robusta, sem alterações aqui
-    if (
-        !detector ||
-        !videoEl ||
-        videoEl.paused ||
-        videoEl.videoWidth === 0 ||
-        videoEl.readyState < 3 // readyState < 3 significa que o frame atual não está pronto
-    ) {
-        return;
-    }
+            const poses = await detector.estimatePoses(videoEl, { maxPoses: 1 });
 
-    try {
-        // ======================= CORREÇÃO PRINCIPAL =======================
-        // Chamando estimatePoses com um objeto de configuração explícito.
-        // Isso garante que o motor interno do TF.js receba os parâmetros
-        // que ele espera, evitando a falha na criação do tensor.
-        const poses = await detector.estimatePoses(videoEl, {
-            maxPoses: 1,          // Estamos procurando apenas uma pessoa
-            flipHorizontal: false // O vídeo da webcam não precisa ser espelhado
-        });
-        // ==================================================================
-
-        const ctx = canvasRef.current?.getContext('2d');
-        if (ctx) {
+            const ctx = canvasRef.current?.getContext('2d');
+            if (ctx) {
             ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
             if (poses && poses.length > 0) {
-                // Se chegou aqui, a detecção funcionou!
                 analyzeMovement(poses[0].keypoints);
                 drawKeypoints(poses[0].keypoints, ctx);
             }
+            }
+        } catch (err) {
+            console.error('Erro na detecção:', err);
         }
-    } catch (err) {
-        console.error('Erro na detecção:', err);
-    }
-};
+    };
+
 
 
     const analyzeMovement = (keypoints) => {
