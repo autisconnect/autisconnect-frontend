@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import '@tensorflow/tfjs-backend-webgl';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Button, Form } from 'react-bootstrap';
 import apiClient from '../services/api';
@@ -85,22 +84,24 @@ const EmotionDetector = () => {
     }, [location]);
 
     const loadModels = async ( ) => {
+        // As bibliotecas agora estão garantidas no objeto 'window'
         const tf = window.tf;
         const faceapi = window.faceapi;
 
         if (!tf || !faceapi) {
-            setError("Bibliotecas de IA não foram carregadas. Verifique os scripts no index.html.");
+            setError("As bibliotecas de IA não foram carregadas. Verifique os scripts no index.html.");
             return;
         }
 
         try {
             setError(null);
-            console.log("Aguardando TensorFlow.js...");
+            console.log("Configurando backend do TensorFlow.js...");
+
+            // Apenas setar o backend é suficiente. O script da CDN já registrou tudo.
+            await tf.setBackend('webgl');
+            await tf.ready();
             
-            // Apenas o ready é suficiente. O backend webgl já foi carregado e registrado pelo script da CDN.
-            await tf.ready(); 
-            
-            console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
+            console.log(`Backend pronto: ${tf.getBackend()}`);
 
             console.log("Iniciando carregamento dos modelos da face-api...");
             await Promise.all([
@@ -112,7 +113,7 @@ const EmotionDetector = () => {
             setIsModelsLoaded(true);
         } catch (err) {
             console.error('Erro ao carregar modelos:', err);
-            setError(`Falha ao carregar modelos de detecção facial. Erro: ${err.message}`);
+            setError(`Falha ao carregar modelos. Erro: ${err.message}`);
         }
     };
 
