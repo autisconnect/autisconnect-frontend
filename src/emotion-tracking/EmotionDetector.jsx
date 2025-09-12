@@ -27,6 +27,8 @@ const emotionTranslations = {
     surprised: 'Surpresa'
 };
 
+const validEmotions = Object.keys(emotionTranslations);
+
 const EmotionDetector = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -36,16 +38,16 @@ const EmotionDetector = () => {
     const [patientId, setPatientId] = useState(null);
     const [error, setError] = useState(null);
     const [isModelsLoaded, setIsModelsLoaded] = useState(false);
-    const [isDetecting, setIsDetecting] = useState(true); // Inicia a detecção automaticamente
-    const [backendUsed, setBackendUsed] = useState(''); // Novo estado para rastrear o backend
+    const [isDetecting, setIsDetecting] = useState(true);
+    const [backendUsed, setBackendUsed] = useState('');
 
     // Estados de dados
     const [emotion, setEmotion] = useState('Detectando...');
-    const [emotionsData, setEmotionsData] = useState([]); // Histórico para o gráfico de linha
+    const [emotionsData, setEmotionsData] = useState([]);
     const [emotionCounts, setEmotionCounts] = useState({
         neutral: 0, happy: 0, sad: 0, angry: 0, fearful: 0, disgusted: 0, surprised: 0
     });
-    const [sessionData, setSessionData] = useState([]); // Mantido para o gráfico de comparação
+    const [sessionData, setSessionData] = useState([]);
 
     // Estados dos filtros
     const [periodFilter, setPeriodFilter] = useState('today');
@@ -54,19 +56,17 @@ const EmotionDetector = () => {
 
     const location = useLocation();
 
-    // Efeito para carregar tudo na inicialização
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const id = queryParams.get('patientId');
         if (id) {
             setPatientId(id);
             console.log(`Monitorando paciente com ID: ${id}`);
-            loadModels(); // Carrega os modelos assim que o ID é definido
+            loadModels();
         } else {
             setError("ID do paciente não encontrado na URL. A detecção não pode iniciar.");
         }
 
-        // Carrega dados mockados para o gráfico de sessões (como no original)
         const mockSessionData = [
             { id: 1, name: 'Sessão 1', date: '2023-01-15', metrics: { happy: 0.65, engaged: 0.70 } },
             { id: 2, name: 'Sessão 2', date: '2023-01-22', metrics: { happy: 0.75, engaged: 0.72 } },
@@ -75,7 +75,6 @@ const EmotionDetector = () => {
         ];
         setSessionData(mockSessionData);
 
-        // Função de limpeza ao desmontar o componente
         return () => {
             if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
             if (videoRef.current && videoRef.current.srcObject) {
@@ -85,7 +84,6 @@ const EmotionDetector = () => {
     }, [location]);
 
     const loadModels = async () => {
-        // As bibliotecas agora estão garantidas no objeto 'window'
         const tf = window.tf;
         const faceapi = window.faceapi;
 
@@ -98,7 +96,6 @@ const EmotionDetector = () => {
             setError(null);
             console.log("Configurando backend do TensorFlow.js...");
 
-            // Check se WebGL é suportado
             const webglVersion = tf.ENV.get('WEBGL_VERSION');
             console.log(`Versão WebGL suportada: ${webglVersion || 'N/A'}`);
             if (!webglVersion) {
@@ -106,7 +103,6 @@ const EmotionDetector = () => {
                 await tf.setBackend('cpu');
                 setBackendUsed('CPU (WebGL não suportado)');
             } else {
-                // Tenta WebGL primeiro
                 await tf.setBackend('webgl');
                 await tf.ready();
                 console.log(`Backend inicial: ${tf.getBackend()}`);
@@ -123,14 +119,12 @@ const EmotionDetector = () => {
             setIsModelsLoaded(true);
         } catch (err) {
             console.error('Erro ao carregar modelos ou configurar backend:', err);
-            // Fallback para CPU se WebGL falhar
             try {
                 await tf.setBackend('cpu');
                 await tf.ready();
                 console.log(`Backend fallback: ${tf.getBackend()}`);
                 setBackendUsed('CPU');
                 
-                // Re-tenta carregar modelos no CPU (raramente necessário, mas garante)
                 console.log("Re-carregando modelos no backend CPU...");
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
@@ -159,20 +153,24 @@ const EmotionDetector = () => {
     }, []);
 
     const saveEmotionToDB = async (dominantEmotion) => {
-        if (!patientId || !dominantEmotion) {
-            console.warn('Não salvando emoção: patientId ou dominantEmotion ausente', { patientId, dominantEmotion });
+        if (!patientId || !dominantEmotion || !validEmotions.includes(dominantEmotion)) {
+            console.warn('Não salvando emoção: patientId ou dominantEmotion inválido', { patientId, dominantEmotion });
             return;
         }
         try {
-            await apiClient.post('/emotions', {
-                patient_id: patientId,
+            const payload = {
+                patient_id: parseInt(patientId),  // Garante int para o schema
                 emotion: dominantEmotion,
                 timestamp: new Date().toISOString()
-            });
-            console.log('Emoção salva no DB:', dominantEmotion);
+            };
+            console.log('Enviando payload para /emotions:', payload);
+            await apiClient.post('/emotions', payload);
+            console.log('Emoção salva no DB com sucesso:', dominantEmotion);
         } catch (err) {
             console.error('Erro ao salvar emoção no banco de dados:', err);
-            setError(err.response?.data?.error || 'Erro ao salvar emoção no servidor.');
+            if (!err.response?.data?.error.includes('obrigatórios')) {
+                setError(err.response?.data?.error || 'Erro ao salvar emoção no servidor.');
+            }
         }
     };
 
@@ -187,12 +185,12 @@ const EmotionDetector = () => {
 
             try {
                 console.log('Executando detecção... (backend atual:', window.tf?.getBackend(), ')');
+                // Versão simplificada: Sem landmarks para maior estabilidade
                 const detections = await faceapi
                     .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-                    .withFaceLandmarks()
                     .withFaceExpressions();
 
-                console.log('Detections length:', detections?.length || 0); // Debug: Número de faces detectadas
+                console.log('Detections length:', detections?.length || 0);
 
                 if (canvasRef.current) {
                     const canvas = canvasRef.current;
@@ -211,17 +209,20 @@ const EmotionDetector = () => {
 
                 if (detections && detections.length > 0) {
                     const firstDetection = detections[0];
+                    console.log('First detection object:', firstDetection);
                     const expressions = firstDetection.expressions;
-                    console.log('Expressions disponíveis:', !!expressions, expressions); // Debug: Verifica se expressions existe
+                    console.log('Expressions disponíveis:', !!expressions, expressions);
 
-                    let dominantEmotion = 'neutral'; // Fallback padrão
-                    if (expressions && typeof expressions === 'object') {
-                        dominantEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                    let dominantEmotion = 'neutral';
+                    if (expressions && typeof expressions === 'object' && Object.keys(expressions).length > 0) {
+                        const reduceResult = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                        console.log('Reduce result:', reduceResult);
+                        dominantEmotion = validEmotions.includes(reduceResult) ? reduceResult : 'neutral';
                     } else {
-                        console.warn('Expressions undefined ou inválido, usando fallback "neutral"');
+                        console.warn('Expressions undefined ou vazio, usando fallback "neutral"');
                     }
 
-                    console.log('Dominant emotion:', dominantEmotion); // Debug: Emoção dominante
+                    console.log('Dominant emotion final:', dominantEmotion);
 
                     const translatedEmotion = emotionTranslations[dominantEmotion] || dominantEmotion;
                     setEmotion(translatedEmotion);
@@ -233,13 +234,11 @@ const EmotionDetector = () => {
                     };
                     setEmotionsData(prev => [...prev, newData].slice(-50));
                     
-                    // Incrementa contagem (usa fallback se necessário)
                     setEmotionCounts(prev => ({ 
                         ...prev, 
                         [dominantEmotion]: (prev[dominantEmotion] || 0) + 1 
                     }));
                     
-                    // Salva apenas se válido
                     await saveEmotionToDB(dominantEmotion);
                 } else {
                     setEmotion('Nenhuma face detectada');
@@ -248,7 +247,7 @@ const EmotionDetector = () => {
                 console.error('Erro durante detecção:', detectionErr);
                 setEmotion('Erro na detecção (ver console para detalhes)');
             }
-        }, 1000);
+        }, 2000);  // 2s para estabilidade e menos spam no DB
     }, [patientId]);
 
     const toggleDetection = () => {
@@ -281,7 +280,7 @@ const EmotionDetector = () => {
         }
     }, [isModelsLoaded, isDetecting, startVideo, runDetection, backendUsed]);
 
-    // Funções para formatar dados para os gráficos (mantidas iguais)
+    // Funções para gráficos (mantidas com fallbacks)
     const formatEmotionChartData = () => {
         let filteredData = emotionsData;
         const now = new Date();
@@ -299,7 +298,7 @@ const EmotionDetector = () => {
             labels,
             datasets: emotionKeys.map((key, index) => ({
                 label: emotionTranslations[key],
-                data: filteredData.map(item => item.emotions[key] || 0), // Fallback para 0 se undefined
+                data: filteredData.map(item => (item.emotions && item.emotions[key]) || 0),
                 borderColor: colors[index],
                 backgroundColor: colors[index] + '33',
                 fill: true,
