@@ -1,6 +1,5 @@
-// Arquivo: src/emotion-tracking/EmotionDetector.jsx (VERSÃO FINAL, CORRIGIDA E COMPLETA)
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import '@tensorflow/tfjs-backend-webgl';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Button, Form } from 'react-bootstrap';
 import apiClient from '../services/api';
@@ -90,15 +89,16 @@ const EmotionDetector = () => {
         const faceapi = window.faceapi;
 
         if (!tf || !faceapi) {
-            setError("Bibliotecas de IA não foram carregadas. Verifique os scripts no index.html.");
+            setError("Bibliotecas de IA não foram carregadas.");
             return;
         }
 
         try {
             setError(null);
-            console.log("Configurando backend e aguardando TensorFlow.js...");
-            await tf.setBackend('webgl');
-            await tf.ready();
+            console.log("Aguardando TensorFlow.js...");
+            
+            await tf.ready(); // Apenas o ready é suficiente agora
+            
             console.log(`Backend do TensorFlow.js pronto: ${tf.getBackend()}`);
 
             console.log("Iniciando carregamento dos modelos da face-api...");
