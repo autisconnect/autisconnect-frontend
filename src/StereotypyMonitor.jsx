@@ -187,8 +187,8 @@ const StereotypyMonitor = () => {
     
     const runDetection = async () => {
         const detector = detectorRef.current;
+        /** @type {HTMLVideoElement|null} */
         const videoEl = videoRef.current;
-        // só roda se o detector existe e o vídeo está carregado
         if (
             !detector ||
             !videoEl ||
@@ -216,6 +216,7 @@ const StereotypyMonitor = () => {
             console.error('Erro na detecção:', err);
         }
     };
+
 
     const analyzeMovement = (keypoints) => {
         const now = Date.now();
