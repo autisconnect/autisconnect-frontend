@@ -1,5 +1,5 @@
 // Ficheiro: src/StereotypyMonitor.jsx
-// VERSÃO CORRIGIDA E COMPLETA - Reordenado para evitar TDZ
+// VERSÃO CORRIGIDA E COMPLETA - Fix para TypeError em expand_dims / WebGL
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -51,9 +51,9 @@ const StereotypyMonitor = () => {
 
     const location = useLocation();
 
-    // Funções movidas para o TOPO para evitar TDZ - definidas antes dos useEffects
+    // Funções movidas para o TOPO para evitar TDZ
     const startVideo = useCallback(() => {
-        console.log('startVideo called'); // Debug para rastrear init
+        console.log('startVideo called');
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 if (videoRef.current) {
@@ -64,7 +64,7 @@ const StereotypyMonitor = () => {
                 console.error('Erro ao acessar a webcam:', err);
                 setError('Não foi possível acessar a webcam. Verifique as permissões.');
             });
-    }, [setError]); // Deps explícitas para evitar recriações
+    }, [setError]);
 
     const toggleDetection = useCallback(() => {
         setIsDetecting(prevState => {
@@ -118,7 +118,7 @@ const StereotypyMonitor = () => {
 
         setDetectedStereotypy(prevDetectedStereotypy => {
             if (detectedType !== 'Nenhuma') {
-                if (prevDetectedStereotypy !== detectedType && prevDetectedStereotypy !== 'Nenhuma') { // Check extra para evitar chamadas prematuras
+                if (prevDetectedStereotypy !== detectedType && prevDetectedStereotypy !== 'Nenhuma') {
                     if (stereotypyStartTime) {
                         logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
                     }
@@ -134,7 +134,7 @@ const StereotypyMonitor = () => {
         });
 
         lastPoseRef.current = currentPose;
-    }, [stereotypyStartTime]); // Deps para updater
+    }, [stereotypyStartTime, keypointsToObject, logStereotypy]);
 
     const logStereotypy = useCallback((endTime, type, startTime) => {
         const duration = (endTime - startTime) / 1000;
@@ -160,7 +160,7 @@ const StereotypyMonitor = () => {
 
         setStereotypyLog(prev => [newLog, ...prev].slice(0, 50)); 
         saveDetectionToDB(newLog);
-    }, [patientId]); // Deps incluindo patientId
+    }, [patientId, saveDetectionToDB]);
 
     const saveDetectionToDB = useCallback(async (detectionData) => {
         if (!patientId) return;
@@ -225,9 +225,9 @@ const StereotypyMonitor = () => {
     const handleStereotypyFilterChange = useCallback((e) => setStereotypyFilter(e.target.value), []);
 
     // useEffects agora, após funções estarem definidas
-    // EFEITO 1: Inicialização
+    // EFEITO 1: Inicialização com fallback para CPU
     useEffect(() => {
-        console.log('useEffect 1: Inicialização'); // Debug
+        console.log('useEffect 1: Inicialização');
         const queryParams = new URLSearchParams(location.search);
         const id = queryParams.get('patientId');
         if (!id) {
@@ -253,54 +253,81 @@ const StereotypyMonitor = () => {
                 await tf.ready();
                 console.log(`Backend pronto: ${tf.getBackend()}`);
 
-                const model = poseDetection.SupportedModels.MoveNet;
-                const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-                const detector = await poseDetection.createDetector(model, detectorConfig);
-                
-                detectorRef.current = detector;
-                setIsModelsLoaded(true);
-                console.log("Detector de pose criado com sucesso.");
+                // Tenta WebGL; fallback para CPU se falhar
+                try {
+                    const model = poseDetection.SupportedModels.MoveNet;
+                    const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                    const detector = await poseDetection.createDetector(model, detectorConfig);
+                    detectorRef.current = detector;
+                    setIsModelsLoaded(true);
+                    console.log("Detector de pose criado com sucesso (WebGL).");
+                } catch (webglErr) {
+                    console.warn("WebGL falhou, fallback para CPU:", webglErr.message);
+                    await tf.setBackend('cpu');
+                    await tf.ready();
+                    const model = poseDetection.SupportedModels.MoveNet;
+                    const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                    const detector = await poseDetection.createDetector(model, detectorConfig);
+                    detectorRef.current = detector;
+                    setIsModelsLoaded(true);
+                    console.log("Detector de pose criado com sucesso (CPU fallback).");
+                }
             } catch (err) {
                 console.error("Erro fatal ao criar detector:", err);
-                setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
+                setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}. Tente recarregar.`);
             }
         };
 
         initializeDetector();
     }, [location]);
 
-    // EFEITO 2: Loop de Detecção
+    // EFEITO 2: Loop de Detecção com cast explícito e retry
     useEffect(() => {
-        console.log('useEffect 2: Loop de detecção, isDetecting:', isDetecting, 'isModelsLoaded:', isModelsLoaded); // Debug
+        console.log('useEffect 2: Loop de detecção, isDetecting:', isDetecting, 'isModelsLoaded:', isModelsLoaded);
         let animationFrameId;
+        let retryCount = 0;
+        const maxRetries = 3;
 
         const runDetectionLoop = async () => {
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
-            if (detector && videoEl && videoEl.readyState === 4) {
+            if (detector && videoEl && videoEl.readyState === 4 && isDetecting) {
                 try {
-                    const poses = await detector.estimatePoses(videoEl);
+                    // FIX: Cast explícito para float32 normalizado + expandDims para batch
+                    const imageTensor = tf.browser.fromPixels(videoEl).div(255.0).expandDims(0).toFloat();
+                    const poses = await detector.estimatePoses(imageTensor);
+                    tf.dispose([imageTensor]); // Limpa memória
+
                     const ctx = canvasRef.current?.getContext('2d');
                     if (ctx) {
                         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                        if (poses && poses.length > 0) {
+                        if (poses && Array.isArray(poses) && poses.length > 0) {
                             analyzeMovement(poses[0].keypoints);
                             drawKeypoints(poses[0].keypoints, ctx);
                         }
                     }
+                    retryCount = 0; // Reset retry em sucesso
                 } catch (err) {
                     console.error('Erro no loop de detecção:', err);
+                    retryCount++;
+                    if (retryCount <= maxRetries) {
+                        console.log(`Retry ${retryCount}/${maxRetries} em 500ms...`);
+                        setTimeout(runDetectionLoop, 500);
+                        return;
+                    }
                     setIsDetecting(false);
-                    setError(`Ocorreu um erro na detecção: ${err.message}`);
+                    setError(`Ocorreu um erro na detecção após ${maxRetries} tentativas: ${err.message}. Backend: ${tf.getBackend()}. Tente pausar/iniciar.`);
                     return;
                 }
             }
-            animationFrameId = requestAnimationFrame(runDetectionLoop);
+            if (isDetecting) {
+                animationFrameId = requestAnimationFrame(runDetectionLoop);
+            }
         };
 
         if (isDetecting && isModelsLoaded) {
-            startVideo(); // Agora startVideo está definida antes
+            startVideo();
             const videoElement = videoRef.current;
 
             const handleVideoReady = () => {
@@ -320,7 +347,7 @@ const StereotypyMonitor = () => {
         } else {
             cancelAnimationFrame(animationFrameId);
         }
-    }, [isDetecting, isModelsLoaded, startVideo, analyzeMovement, drawKeypoints]); // Deps completas
+    }, [isDetecting, isModelsLoaded, startVideo, analyzeMovement, drawKeypoints]);
 
     const lineOptions = {
         responsive: true,
