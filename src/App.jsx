@@ -93,14 +93,14 @@ function App() {
       {/* O AuthProvider e o Router foram movidos para o arquivo de entrada (main.jsx ou index.jsx) */}
       {/* AuthNavigation />*/}
       <Routes>
-        {/* A rota Home agora usa 'index' para ser mais explícita */}
+        {/* Rota Home Pública */}
         <Route index element={<Home />} /> 
-        <Route path="/Signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        {/* Rotas de Autenticação (protegidas pelo AuthRoute) */}
+        
+        {/* Rotas de Autenticação (Login e Signup) protegidas pelo AuthRoute */}
+        {/* Se o usuário estiver logado, ele não pode acessar estas rotas */}
         <Route element={<AuthRoute />}>
-          
-
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Route>
         
         {/* Rotas de Apresentação */}

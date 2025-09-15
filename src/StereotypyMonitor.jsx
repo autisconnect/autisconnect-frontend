@@ -147,9 +147,9 @@ const StereotypyMonitor = () => {
         const initializeDetector = async () => {
             try {
                 // Verificar se o TensorFlow.js está inicializado corretamente
-                if (!tf || !tf.tidy || !tf.browser || !tf.browser.fromPixels) {
-                    console.error("TensorFlow.js não está inicializado corretamente");
-                    setError("Falha ao inicializar o TensorFlow.js. Verifique as importações.");
+                if (!tf || !tf.tidy || !tf.browser || !tf.browser.fromPixels || !poseDetection.createDetector) {
+                    console.error("TensorFlow.js ou pose-detection não está inicializado corretamente");
+                    setError("Falha ao inicializar o TensorFlow.js ou modelo de pose. Verifique as importações.");
                     return;
                 }
 
@@ -269,8 +269,19 @@ const StereotypyMonitor = () => {
                         return;
                     }
 
+                    // Verificar o formato do tensor
+                    console.log("Verificando formato do tensor:", tensor.shape);
+                    if (!tensor.shape || tensor.shape.length !== 3 || tensor.shape[2] !== 3) {
+                        console.error("Formato do tensor inválido:", tensor.shape);
+                        setError("O tensor criado tem um formato inválido para a detecção de pose.");
+                        tf.engine().endScope();
+                        animationFrameId = requestAnimationFrame(runDetectionLoop);
+                        return;
+                    }
+
                     console.log("Executando estimatePoses...");
                     const poses = await detector.estimatePoses(tensor);
+                    console.log("Poses detectadas:", poses);
                     console.log("Tensores ativos após estimatePoses:", tf.memory().numTensors);
 
                     const ctx = canvasRef.current?.getContext('2d');

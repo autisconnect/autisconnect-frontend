@@ -1,6 +1,6 @@
 // frontend/src/pages/Signup.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Navbar, Form, Card, Button, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
@@ -1168,7 +1168,7 @@ function Signup() {
             <Navbar bg="light" expand="lg" fixed="top" className="mb-4">
                 <Container>
                     <Navbar.Brand href="/"><img src={logohori} alt="Logo" className="logo" /></Navbar.Brand>
-                    <div className="ms-auto"><ArrowLeft size={30} onClick={() => navigate(-1)} style={{ cursor: 'pointer' }} /></div>
+                    <div className="ms-auto"><ArrowLeft size={30} onClick={() => navigate('/')} style={{ cursor: 'pointer' }} /></div>
                 </Container>
             </Navbar>
             <section className="signup-section py-5" style={{ marginTop: '70px' }}>
