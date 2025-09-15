@@ -1,6 +1,3 @@
-// Ficheiro: src/StereotypyMonitor.jsx
-// VERSÃO FINAL CORRIGIDA - Adicionados os handlers de filtro
-
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge, Form } from 'react-bootstrap';
