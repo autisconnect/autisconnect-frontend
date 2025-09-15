@@ -170,63 +170,84 @@ const StereotypyMonitor = () => {
     // EFEITO 3: Loop de Detecção
     useEffect(() => {
         let animationFrameId;
+        let tf; // Variável para manter a instância do tf
 
-        const startVideo = () => {
+        const runDetectionLoop = async () => {
+            const detector = detectorRef.current;
+            const videoEl = videoRef.current;
+
+            if (detector && videoEl && videoEl.readyState === 4 && analyzeMovementRef.current) {
+                // tf.tidy() é a chave para prevenir vazamentos de memória.
+                // Ele automaticamente limpa todos os tensores criados dentro desta função.
+                const tensor = tf.tidy(() => {
+                    // Converte o quadro do vídeo em um tensor
+                    const videoTensor = tf.browser.fromPixels(videoEl);
+                    // Opcional: redimensionar ou processar o tensor se necessário
+                    return videoTensor;
+                });
+
+                try {
+                    // Passa o tensor para o detector, em vez do elemento de vídeo
+                    const poses = await detector.estimatePoses(tensor);
+
+                    // Libera a memória do tensor de vídeo que criamos
+                    tensor.dispose();
+
+                    const ctx = canvasRef.current?.getContext('2d');
+                    if (ctx) {
+                        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                        if (poses && poses.length > 0) {
+                            analyzeMovementRef.current(poses[0].keypoints);
+                            drawKeypoints(poses[0].keypoints, ctx);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Erro durante a estimativa de pose:", err);
+                    // Se um erro ocorrer, ainda precisamos liberar o tensor
+                    if (tensor) {
+                        tensor.dispose();
+                    }
+                }
+            }
+            
+            // Chama o próximo quadro
+            animationFrameId = requestAnimationFrame(runDetectionLoop);
+        };
+
+        const startDetection = async () => {
+            // Importa o TensorFlow dinamicamente apenas uma vez
+            tf = await import('@tensorflow/tfjs');
+
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
-                    if (videoRef.current) videoRef.current.srcObject = stream;
+                    if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                        videoRef.current.addEventListener('loadeddata', () => {
+                            if (canvasRef.current) {
+                                canvasRef.current.width = videoRef.current.videoWidth;
+                                canvasRef.current.height = videoRef.current.videoHeight;
+                            }
+                            // Inicia o loop somente depois que o vídeo estiver pronto
+                            runDetectionLoop();
+                        });
+                    }
                 })
                 .catch(err => setError('Não foi possível acessar a webcam. Verifique as permissões.'));
         };
 
-    const runDetectionLoop = async () => {
-        const detector = detectorRef.current;
-        const videoEl = videoRef.current;
-
-        if (detector && videoEl && videoEl.readyState === 4 && analyzeMovementRef.current) {
-            try {
-                // A função estimatePoses é projetada para limpar seus próprios tensores.
-                // O problema pode ser a forma como o loop é chamado.
-                const poses = await detector.estimatePoses(videoEl);
-
-                const ctx = canvasRef.current?.getContext('2d');
-                if (ctx) {
-                    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                    if (poses && poses.length > 0) {
-                        analyzeMovementRef.current(poses[0].keypoints);
-                        drawKeypoints(poses[0].keypoints, ctx);
-                    }
-                }
-            } catch (err) {
-                console.error("Erro durante a estimativa de pose:", err);
-            }
-        }
-        // Chame o próximo quadro APENAS depois que o atual terminar.
-        animationFrameId = requestAnimationFrame(runDetectionLoop);
-    };
-
         if (isDetecting && isModelsLoaded) {
-            startVideo();
-            const videoElement = videoRef.current;
-            const handleVideoReady = () => {
-                if (canvasRef.current) {
-                    canvasRef.current.width = videoElement.videoWidth;
-                    canvasRef.current.height = videoElement.videoHeight;
-                }
-                runDetectionLoop();
-            };
-            videoElement.addEventListener('loadeddata', handleVideoReady);
+            startDetection();
 
             return () => {
-                videoElement.removeEventListener('loadeddata', handleVideoReady);
+                // Função de limpeza
                 cancelAnimationFrame(animationFrameId);
-                if (videoElement.srcObject) {
-                    videoElement.srcObject.getTracks().forEach(track => track.stop());
-                    videoElement.srcObject = null;
+                if (videoRef.current && videoRef.current.srcObject) {
+                    videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+                    videoRef.current.srcObject = null;
                 }
             };
         }
-    }, [isDetecting, isModelsLoaded, drawKeypoints]);
+    }, [isDetecting, isModelsLoaded, drawKeypoints]); // Dependências corretas e estáveis
 
     const toggleDetection = useCallback(() => setIsDetecting(p => !p), []);
 
