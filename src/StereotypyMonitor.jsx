@@ -146,6 +146,13 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
+                // Verificar se o TensorFlow.js está inicializado corretamente
+                if (!tf || !tf.tidy || !tf.browser || !tf.browser.fromPixels) {
+                    console.error("TensorFlow.js não está inicializado corretamente");
+                    setError("Falha ao inicializar o TensorFlow.js. Verifique as importações.");
+                    return;
+                }
+
                 // Forçar backend CPU e verificar inicialização
                 await tf.setBackend('cpu');
                 await tf.ready();
@@ -213,6 +220,16 @@ const StereotypyMonitor = () => {
             if (detector && analyzeMovementRef.current) {
                 try {
                     tf.engine().startScope(); // Iniciar novo escopo
+
+                    // Verificar se tf.tidy e tf.browser.fromPixels estão definidos
+                    if (!tf.tidy || !tf.browser || !tf.browser.fromPixels) {
+                        console.error("Funções do TensorFlow.js não estão disponíveis");
+                        setError("TensorFlow.js não inicializado corretamente.");
+                        tf.engine().endScope();
+                        animationFrameId = requestAnimationFrame(runDetectionLoop);
+                        return;
+                    }
+
                     const tensor = tf.tidy(() => {
                         try {
                             return tf.browser.fromPixels(videoEl);
