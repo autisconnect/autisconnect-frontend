@@ -119,7 +119,7 @@ const StereotypyMonitor = () => {
         });
 
         lastPoseRef.current = currentPose;
-    }, [keypointsToObject, saveDetectionToDB, stereotypyStartTime]);
+    }, [keypointsToObject, saveDetectionToDB]); // Removida dependência de stereotypyStartTime para evitar loops desnecessários
 
     // EFEITO 1: Atualiza o ref com a versão mais recente da função
     useEffect(() => {
@@ -138,26 +138,33 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
-                // PASSO 1: Importar as bibliotecas dinamicamente
+                // Importações corrigidas: Adicionar core e converter explicitamente para evitar erros internos no tfjs
+                await import('@tensorflow/tfjs-core');
+                await import('@tensorflow/tfjs-converter');
                 const tf = await import('@tensorflow/tfjs');
                 const poseDetection = await import('@tensorflow-models/pose-detection');
-                await import('@tensorflow/tfjs-backend-webgl'); // Importa para registrar o backend
+                await import('@tensorflow/tfjs-backend-webgl');
 
-                // PASSO 2: Usar as bibliotecas importadas
                 await tf.setBackend('webgl');
                 await tf.ready();
-                console.log(`Backend do TF.js pronto: ${tf.getBackend()}`);
+                
+                // Verificação de backend corrigida
+                const backend = tf.getBackend();
+                console.log(`Backend do TF.js pronto: ${backend}`);
+                if (backend !== 'webgl') {
+                    console.warn('Backend WebGL não disponível, tentando CPU como fallback');
+                    await tf.setBackend('cpu');
+                    await tf.ready();
+                    console.log(`Backend fallback: ${tf.getBackend()}`);
+                }
 
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-                
-                // A chamada que provavelmente estava falhando
                 const detector = await poseDetection.createDetector(model, detectorConfig);
-                
+
                 detectorRef.current = detector;
                 setIsModelsLoaded(true);
                 console.log("Detector de pose criado com sucesso.");
-
             } catch (err) {
                 console.error("Erro fatal ao inicializar o detector:", err);
                 setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
@@ -170,20 +177,40 @@ const StereotypyMonitor = () => {
     // EFEITO 3: Loop de Detecção
     useEffect(() => {
         let animationFrameId;
+        let videoTimeout;
 
         // A função do loop agora ACEITA `tf` como argumento
         const runDetectionLoop = async (tf) => {
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
-            if (detector && videoEl && videoEl.readyState === 4 && analyzeMovementRef.current) {
-                const tensor = tf.tidy(() => {
-                    return tf.browser.fromPixels(videoEl);
-                });
+            if (!videoEl) {
+                console.warn("Elemento de vídeo não encontrado");
+                animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+                return;
+            }
 
+            if (videoEl.readyState !== 4) {
+                console.warn("Vídeo ainda não está pronto (readyState !== 4)");
+                // Adicionado timeout para evitar loop infinito
+                videoTimeout = setTimeout(() => {
+                    console.error("Timeout: Vídeo não atingiu readyState 4");
+                    setError("Não foi possível carregar o vídeo corretamente.");
+                }, 10000); // 10 segundos
+                animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+                return;
+            }
+            clearTimeout(videoTimeout);
+
+            if (detector && analyzeMovementRef.current) {
                 try {
-                    const poses = await detector.estimatePoses(tensor);
-                    tensor.dispose(); // Libera a memória
+                    const poses = await tf.tidy(async () => {
+                        const tensor = tf.browser.fromPixels(videoEl);
+                        console.log("Tensores ativos antes de estimatePoses:", tf.memory().numTensors); // Log para debug
+                        const poses = await detector.estimatePoses(tensor);
+                        console.log("Tensores ativos após estimatePoses:", tf.memory().numTensors); // Log para debug
+                        return poses;
+                    });
 
                     const ctx = canvasRef.current?.getContext('2d');
                     if (ctx) {
@@ -195,11 +222,9 @@ const StereotypyMonitor = () => {
                     }
                 } catch (err) {
                     console.error("Erro durante a estimativa de pose:", err);
-                    if (tensor) tensor.dispose();
                 }
             }
-            
-            // O loop se chama recursivamente, passando `tf` para o próximo quadro
+
             animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
         };
 
@@ -229,10 +254,12 @@ const StereotypyMonitor = () => {
 
             return () => {
                 cancelAnimationFrame(animationFrameId);
+                clearTimeout(videoTimeout);
                 if (videoRef.current && videoRef.current.srcObject) {
                     videoRef.current.srcObject.getTracks().forEach(track => track.stop());
                     videoRef.current.srcObject = null;
                 }
+                console.log("Cleanup do loop de detecção executado");
             };
         }
     }, [isDetecting, isModelsLoaded, drawKeypoints]);
@@ -264,7 +291,7 @@ const StereotypyMonitor = () => {
         };
     }, [filteredLogs]);
 
-    // Handlers para os filtros (ADICIONADOS DE VOLTA)
+    // Handlers para os filtros
     const handlePeriodChange = useCallback((e) => setPeriodFilter(e.target.value), []);
     const handleDateChange = useCallback((e) => setDateFilter(e.target.value), []);
     const handleStereotypyFilterChange = useCallback((e) => setStereotypyFilter(e.target.value), []);
