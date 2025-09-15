@@ -158,7 +158,7 @@ const StereotypyMonitor = () => {
                 await tf.ready();
                 
                 // Aumentar atraso para garantir inicialização completa do backend
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 3000));
 
                 const backend = tf.getBackend();
                 console.log(`Backend do TF.js pronto: ${backend}`);
@@ -194,7 +194,7 @@ const StereotypyMonitor = () => {
 
         const runDetectionLoop = async () => {
             const now = performance.now();
-            if (now - lastFrameTimeRef.current < 500) { // Throttle: máximo 2 FPS
+            if (now - lastFrameTimeRef.current < 1000) { // Throttle: máximo 1 FPS
                 animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
@@ -238,6 +238,7 @@ const StereotypyMonitor = () => {
                     }
 
                     // Validar o elemento de vídeo
+                    console.log("Dimensões do vídeo:", { width: videoEl.videoWidth, height: videoEl.videoHeight });
                     if (!videoEl.videoWidth || !videoEl.videoHeight) {
                         console.error("Elemento de vídeo inválido: dimensões não definidas");
                         setError("O elemento de vídeo não está carregado corretamente.");
@@ -249,7 +250,9 @@ const StereotypyMonitor = () => {
                     console.log("Criando tensor a partir do vídeo...");
                     const tensor = tf.tidy(() => {
                         try {
-                            return tf.browser.fromPixels(videoEl);
+                            const tensorResult = tf.browser.fromPixels(videoEl);
+                            console.log("Tensor criado:", { shape: tensorResult.shape, dtype: tensorResult.dtype });
+                            return tensorResult;
                         } catch (err) {
                             console.error("Erro ao criar tensor com tf.browser.fromPixels:", err);
                             return null;
@@ -260,8 +263,8 @@ const StereotypyMonitor = () => {
                     // Verificar se o tensor é válido
                     if (!tensor || !tf.isTensor(tensor)) {
                         console.error("Tensor inválido retornado por tf.browser.fromPixels");
-                        tf.engine().endScope();
                         setError("Falha ao criar tensor a partir do vídeo.");
+                        tf.engine().endScope();
                         animationFrameId = requestAnimationFrame(runDetectionLoop);
                         return;
                     }
@@ -278,12 +281,12 @@ const StereotypyMonitor = () => {
                             drawKeypoints(poses[0].keypoints, ctx);
                         }
                     }
-                    tf.engine().endScope(); // Finalizar escopo
-                    console.log("Tensores ativos após fim do escopo:", tf.memory().numTensors);
                 } catch (err) {
                     console.error("Erro durante a estimativa de pose:", err);
-                    tf.engine().endScope(); // Garantir fim do escopo em caso de erro
                     setError(`Erro na detecção de pose: ${err.message}`);
+                } finally {
+                    tf.engine().endScope(); // Garantir fim do escopo em caso de erro
+                    console.log("Tensores ativos após fim do escopo:", tf.memory().numTensors);
                 }
             }
 
