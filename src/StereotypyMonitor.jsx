@@ -191,7 +191,7 @@ const StereotypyMonitor = () => {
 
         const runDetectionLoop = async () => {
             const now = performance.now();
-            if (now - lastFrameTimeRef.current < 100) { // Throttle: máximo 10 FPS
+            if (now - lastFrameTimeRef.current < 200) { // Throttle: máximo 5 FPS
                 animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
@@ -230,8 +230,18 @@ const StereotypyMonitor = () => {
                         return;
                     }
 
+                    // Validar o elemento de vídeo
+                    if (!videoEl.videoWidth || !videoEl.videoHeight) {
+                        console.error("Elemento de vídeo inválido: dimensões não definidas");
+                        setError("O elemento de vídeo não está carregado corretamente.");
+                        tf.engine().endScope();
+                        animationFrameId = requestAnimationFrame(runDetectionLoop);
+                        return;
+                    }
+
                     const tensor = tf.tidy(() => {
                         try {
+                            console.log("Criando tensor a partir do vídeo...");
                             return tf.browser.fromPixels(videoEl);
                         } catch (err) {
                             console.error("Erro ao criar tensor com tf.browser.fromPixels:", err);
@@ -249,6 +259,7 @@ const StereotypyMonitor = () => {
                         return;
                     }
 
+                    console.log("Executando estimatePoses...");
                     const poses = await detector.estimatePoses(tensor);
                     console.log("Tensores ativos após estimatePoses:", tf.memory().numTensors);
 
@@ -273,21 +284,24 @@ const StereotypyMonitor = () => {
         };
 
         const startDetection = async () => {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    if (videoRef.current) {
-                        videoRef.current.srcObject = stream;
-                        videoRef.current.addEventListener('loadeddata', () => {
-                            if (canvasRef.current) {
-                                canvasRef.current.width = videoRef.current.videoWidth;
-                                canvasRef.current.height = videoRef.current.videoHeight;
-                            }
-                            lastFrameTimeRef.current = performance.now();
-                            runDetectionLoop();
-                        });
-                    }
-                })
-                .catch(err => setError('Não foi possível acessar a webcam. Verifique as permissões.'));
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    videoRef.current.addEventListener('loadeddata', () => {
+                        if (canvasRef.current) {
+                            canvasRef.current.width = videoRef.current.videoWidth;
+                            canvasRef.current.height = videoRef.current.videoHeight;
+                        }
+                        lastFrameTimeRef.current = performance.now();
+                        console.log("Vídeo carregado, iniciando loop de detecção...");
+                        runDetectionLoop();
+                    }, { once: true });
+                }
+            } catch (err) {
+                console.error("Erro ao acessar a webcam:", err);
+                setError('Não foi possível acessar a webcam. Verifique as permissões.');
+            }
         };
 
         if (isDetecting && isModelsLoaded) {
