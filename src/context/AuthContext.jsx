@@ -1,91 +1,74 @@
-// src/context/AuthContext.jsx (VERSÃO FINAL CORRIGIDA)
-
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../services/api';
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Começa como true para indicar que a verificação inicial está pendente
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Função de logout centralizada
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    apiClient.defaults.headers.common['Authorization'] = null; // Limpa o header do apiClient
-    setUser(null);
-    navigate('/login');
-  }, [navigate]);
-
-  // useEffect para verificação inicial de autenticação
-  // Este useEffect roda APENAS UMA VEZ, quando o AuthProvider é montado.
   useEffect(() => {
-    const verifyInitialAuth = async () => {
+    const verifyToken = async () => {
       const token = localStorage.getItem('token');
-      
-      console.log("AuthContext: Verificando autenticação inicial...");
-
-      if (token) {
-        // Se um token existe, configura o apiClient para usá-lo em todas as requisições futuras
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      console.log('VITE_API_URL:', import.meta.env.VITE_API_URL); // Depuração
+      console.log('Token:', token); // Depuração
+      console.log('Current path:', location.pathname); // Depuração
+      const publicRoutes = ['/', '/login', '/register'];
+      if (token && !publicRoutes.includes(location.pathname)) {
         try {
-          // Tenta verificar a validade do token com o backend
           const response = await apiClient.get('/auth/verify');
-          if (response.data && response.data.valid) {
-            // Se o token for válido, define o estado do usuário
-            console.log("AuthContext: Token válido. Usuário definido:", response.data);
-            setUser(response.data);
-          } else {
-            // Se a resposta indicar que não é válido (caso raro)
-            logout();
-          }
+          console.log('Verify response:', response.data); // Depuração
+          setUser({ id: response.data.userId, tipo_usuario: response.data.tipo_usuario });
         } catch (error) {
-          // Se a verificação falhar (ex: token expirado, erro de rede), faz o logout
-          console.error("AuthContext: Falha ao verificar token. Fazendo logout.", error.message);
-          logout();
+          console.error('Erro ao verificar autenticação:', error.message, error.response?.status, error.response?.data);
+          // Não remove o token imediatamente, apenas redireciona
+          if (!publicRoutes.includes(location.pathname)) {
+            navigate('/login');
+          }
+        }
+      } else {
+        setUser(null);
+        if (!publicRoutes.includes(location.pathname)) {
+          navigate('/login');
         }
       }
-      
-      // Marca a verificação inicial como concluída
       setLoading(false);
     };
+    verifyToken();
+  }, [navigate, location.pathname]);
 
-    verifyInitialAuth();
-  }, [logout]); // Depende de 'logout', que é estável devido ao useCallback
-
-  // Função de login
-  const login = (token, userData) => {
-    if (!token || !userData) {
-      console.error('Dados de token ou usuário ausentes para login');
-      return;
+  const login = (userData) => {
+    if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
+      console.error('Dados de usuário incompletos para login');
+      return false;
     }
-    // 1. Salva o token no localStorage
-    localStorage.setItem('token', token);
-    // 2. Configura o apiClient para usar o novo token
-    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    // 3. Atualiza o estado do usuário na aplicação
+    localStorage.setItem('token', userData.token); // Garante que o token seja salvo
     setUser(userData);
-    console.log('AuthContext: Usuário logado com sucesso:', userData);
-    
-    // 4. Redireciona para a página inicial, que cuidará do redirecionamento para o dashboard correto
-    navigate('/');
+    console.log('Usuário logado:', userData); // Depuração
+    return true;
   };
 
-  // O valor fornecido pelo contexto
-  const contextValue = {
-    user,
-    loading,
-    login,
-    logout,
-    isAuthenticated: !!user, // Converte o objeto 'user' para um booleano
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    navigate('/login');
   };
 
-  // Não renderiza nada até que a verificação inicial esteja completa
+  const isAuthenticated = () => !!user;
+
+  const hasPermission = (requiredType, resourceId = null) => {
+    if (!user) return false;
+    const hasType = user.tipo_usuario === requiredType;
+    if (!resourceId) return hasType;
+    return hasType && user.id === resourceId;
+  };
+
   return (
-    <AuthContext.Provider value={contextValue}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, hasPermission, loading }}>
+      {loading ? <div>Carregando...</div> : children}
     </AuthContext.Provider>
   );
 };
