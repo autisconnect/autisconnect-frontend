@@ -17,12 +17,12 @@ import apiClient from '@/services/api';
 import logohori from '@/assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
 
-// Importações do TensorFlow.js no topo para evitar múltiplas instâncias
+// Importações do TensorFlow.js no topo
 import * as tf from '@tensorflow/tfjs';
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-converter';
-import '@tensorflow/tfjs-backend-webgl';
+import '@tensorflow/tfjs-backend-cpu'; // Usar CPU explicitamente
 
 ChartJS.register(
     CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
@@ -146,7 +146,7 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
-                // Forçar backend CPU para evitar problemas com WebGL
+                // Forçar backend CPU
                 await tf.setBackend('cpu');
                 await tf.ready();
                 
@@ -154,6 +154,8 @@ const StereotypyMonitor = () => {
                 console.log(`Backend do TF.js pronto: ${backend}`);
                 if (backend !== 'cpu') {
                     console.warn('Backend CPU não foi definido corretamente');
+                    setError('Falha ao configurar o backend CPU.');
+                    return;
                 }
 
                 const model = poseDetection.SupportedModels.MoveNet;
@@ -210,9 +212,16 @@ const StereotypyMonitor = () => {
                     tf.engine().startScope(); // Iniciar novo escopo
                     const tensor = tf.tidy(() => tf.browser.fromPixels(videoEl));
                     console.log("Tensores ativos antes de estimatePoses:", tf.memory().numTensors);
-                    
+
+                    // Verificar se o tensor é válido
+                    if (!tensor || typeof tensor.dispose !== 'function') {
+                        console.error("Tensor inválido retornado por tf.browser.fromPixels");
+                        tf.engine().endScope();
+                        setError("Falha ao criar tensor a partir do vídeo.");
+                        return;
+                    }
+
                     const poses = await detector.estimatePoses(tensor);
-                    tensor.dispose(); // Liberar tensor explicitamente
                     console.log("Tensores ativos após estimatePoses:", tf.memory().numTensors);
 
                     const ctx = canvasRef.current?.getContext('2d');

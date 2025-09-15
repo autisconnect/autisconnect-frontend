@@ -171,18 +171,6 @@ const Home = () => {
         return <div>Carregando...</div>;
     }
 
-    if (user) {
-        if (user.tipo_usuario === 'medicos_terapeutas') {
-            return <Navigate to={`/professional-dashboard/${user.id}`} />;
-        } else if (user.tipo_usuario === 'pais_responsavel') {
-            return <Navigate to={`/parent-dashboard/${user.id}`} />;
-        } else if (user.tipo_usuario === 'secretaria') {
-            return <Navigate to={`/secretary-dashboard/${user.id}`} />;
-        } else if (user.tipo_usuario === 'servicos_locais') {
-            return <Navigate to={`/service-dashboard/${user.id}`} />;
-        }
-    }
-
     return (
         <div className="home-page">
             <section className="hero-section" id="section-hero">
