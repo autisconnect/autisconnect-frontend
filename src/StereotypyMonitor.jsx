@@ -174,10 +174,10 @@ const StereotypyMonitor = () => {
 
                 const backend = tf.getBackend();
                 console.log(`Backend do TF.js pronto: ${backend}`);
-                if (backend !== 'cpu') {
-                    console.error('Backend CPU não foi definido corretamente');
-                    setError('Falha ao configurar o backend CPU.');
-                    return;
+                if (!['cpu','webgl','webgpu'].includes(backend)) {
+                console.error('Backend inesperado:', backend);
+                setError(`Backend TF.js inesperado: ${backend}`);
+                return;
                 }
 
                 // Verificar estado inicial do TensorFlow.js

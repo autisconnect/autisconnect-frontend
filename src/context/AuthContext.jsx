@@ -11,51 +11,60 @@ export const AuthProvider = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const verifyToken = async () => {
+    const verifyInitialAuth = async () => {
       const token = localStorage.getItem('token');
-      console.log('VITE_API_URL:', import.meta.env.VITE_API_URL); // Depuração
-      console.log('Token:', token); // Depuração
-      console.log('Current path:', location.pathname); // Depuração
-      const publicRoutes = ['/', '/login', '/register'];
-      if (token && !publicRoutes.includes(location.pathname)) {
+      console.log("AuthContext: Verificando autenticação inicial...");
+
+      if (token) {
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         try {
           const response = await apiClient.get('/auth/verify');
-          console.log('Verify response:', response.data); // Depuração
-          setUser({ id: response.data.userId, tipo_usuario: response.data.tipo_usuario });
-        } catch (error) {
-          console.error('Erro ao verificar autenticação:', error.message, error.response?.status, error.response?.data);
-          // Não remove o token imediatamente, apenas redireciona
-          if (!publicRoutes.includes(location.pathname)) {
-            navigate('/login');
+          if (response.data && response.data.valid) {
+            // Mapeia 'userId' para 'id' para compatibilidade
+            const userData = {
+              id: response.data.userId,
+              username: response.data.username,
+              tipo_usuario: response.data.tipo_usuario,
+              nome_completo: response.data.nome_completo
+            };
+            setUser(userData);
+          } else {
+            logout();
           }
-        }
-      } else {
-        setUser(null);
-        if (!publicRoutes.includes(location.pathname)) {
-          navigate('/login');
+        } catch (error) {
+          console.error("AuthContext: Falha ao verificar token.", error.message);
+          logout();
         }
       }
+      
       setLoading(false);
     };
-    verifyToken();
-  }, [navigate, location.pathname]);
 
-  const login = (userData) => {
-    if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
-      console.error('Dados de usuário incompletos para login');
-      return false;
-    }
-    localStorage.setItem('token', userData.token); // Garante que o token seja salvo
-    setUser(userData);
-    console.log('Usuário logado:', userData); // Depuração
-    return true;
+    verifyInitialAuth();
+  }, [logout]); 
+
+  const login = (token, apiUserData) => {
+    if (!token || !apiUserData) return;
+    
+    localStorage.setItem('token', token);
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
+    const appUserData = {
+        id: apiUserData.userId,
+        username: apiUserData.username,
+        tipo_usuario: apiUserData.tipo_usuario,
+        nome_completo: apiUserData.nome_completo
+    };
+    setUser(appUserData);
+    navigate('/');
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
+    apiClient.defaults.headers.common['Authorization'] = null;
     setUser(null);
     navigate('/login');
-  };
+  }, [navigate]);
 
   const isAuthenticated = () => !!user;
 

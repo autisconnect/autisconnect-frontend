@@ -660,26 +660,45 @@ const ProfessionalDashboard = () => {
     };
 
     useEffect(() => {
-        if (!user) { navigate('/login'); return; }
-        if (user.tipo_usuario !== 'medicos_terapeutas' || dashboardId !== user.id.toString()) {
-            navigate(`/professional-dashboard/${user.id}`);
-            return;
+        // --- CLÁUSULA DE GUARDA ---
+        // Se o 'user' do AuthContext ainda não foi carregado, não faça nada.
+        if (!user) {
+            console.log("ProfessionalDashboard: Aguardando dados do usuário...");
+            return; // Sai do useEffect e espera a próxima renderização.
         }
+
+        // A partir daqui, 'user' existe e é seguro usá-lo.
+        
+        // --- LÓGICA DE VALIDAÇÃO (AGORA SEGURA) ---
+        if (user.tipo_usuario !== 'medicos_terapeutas' || (dashboardId && dashboardId !== user.id.toString())) {
+            console.warn(`Acesso negado ou ID da URL incorreto. Redirecionando...`);
+            navigate(`/professional-dashboard/${user.id}`);
+            return; // Para a execução para evitar chamadas de API desnecessárias
+        }
+
+        // --- LÓGICA PARA BUSCAR DADOS ---
         const fetchAllData = async () => {
             setLoading(true);
             setError('');
-            await Promise.all([
-                fetchDashboardData(),
-                fetchPatients(),
-                fetchConsultations(),
-                fetchAssistants(),
-                fetchPatientProgress(),
-                fetchDiagnosisDistribution(),
-                fetchAppointmentTypes()
-            ]);
-            setLoading(false);
+            try {
+                await Promise.all([
+                    fetchDashboardData(),
+                    fetchPatients(),
+                    fetchConsultations(),
+                    fetchAssistants(),
+                    fetchPatientProgress(),
+                    fetchDiagnosisDistribution(),
+                    fetchAppointmentTypes()
+                ]);
+            } catch (err) {
+                setError("Ocorreu um erro ao carregar os dados do dashboard.");
+            } finally {
+                setLoading(false);
+            }
         };
+
         fetchAllData();
+
     }, [user, navigate, dashboardId]);
 
     useEffect(() => {
