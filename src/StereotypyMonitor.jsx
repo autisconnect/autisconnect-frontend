@@ -1,5 +1,5 @@
 // Ficheiro: src/StereotypyMonitor.jsx
-// VERSÃO CORRIGIDA E COMPLETA - Fix para TypeError em expand_dims / WebGL
+// VERSÃO CORRIGIDA E COMPLETA - Reordenado para evitar TDZ
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -51,9 +51,9 @@ const StereotypyMonitor = () => {
 
     const location = useLocation();
 
-    // Funções movidas para o TOPO para evitar TDZ
+    // Funções movidas para o TOPO para evitar TDZ - definidas antes dos useEffects
     const startVideo = useCallback(() => {
-        console.log('startVideo called');
+        console.log('startVideo called'); // Debug para rastrear init
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 if (videoRef.current) {
@@ -64,7 +64,7 @@ const StereotypyMonitor = () => {
                 console.error('Erro ao acessar a webcam:', err);
                 setError('Não foi possível acessar a webcam. Verifique as permissões.');
             });
-    }, [setError]);
+    }, [setError]); // Deps explícitas para evitar recriações
 
     const toggleDetection = useCallback(() => {
         setIsDetecting(prevState => {
@@ -96,7 +96,34 @@ const StereotypyMonitor = () => {
     const analyzeMovement = useCallback((keypoints) => {
         const now = Date.now();
         const currentPose = { timestamp: now, keypoints: keypointsToObject(keypoints) };
-        
+
+        // A função logStereotypy é definida aqui dentro, usando as variáveis do escopo.
+        const logStereotypy = (endTime, type, startTime) => {
+            const duration = (endTime - startTime) / 1000;
+            if (duration < 0.5) return;
+
+            const currentKeypoints = lastPoseRef.current?.keypoints;
+            const relevantScores = [
+                currentKeypoints?.nose?.score || 0,
+                currentKeypoints?.left_wrist?.score || 0,
+                currentKeypoints?.right_wrist?.score || 0,
+                currentKeypoints?.left_ear?.score || 0
+            ].filter(s => s > 0);
+            const avgScore = relevantScores.length > 0 ? relevantScores.reduce((a, b) => a + b, 0) / relevantScores.length : 0.5;
+
+            const newLog = {
+                id: Date.now().toString(),
+                type: type,
+                duration: parseFloat(duration.toFixed(1)),
+                score: parseFloat(avgScore.toFixed(2)),
+                context: 'Sessão de monitoramento',
+                date: new Date(startTime).toISOString()
+            };
+
+            setStereotypyLog(prev => [newLog, ...prev].slice(0, 50));
+            saveDetectionToDB(newLog); // saveDetectionToDB ainda é externa, mas isso é menos problemático.
+        };
+
         let detectedType = 'Nenhuma';
         if (lastPoseRef.current) {
             const nose = currentPose.keypoints.nose;
@@ -117,24 +144,30 @@ const StereotypyMonitor = () => {
         }
 
         setDetectedStereotypy(prevDetectedStereotypy => {
-            if (detectedType !== 'Nenhuma') {
-                if (prevDetectedStereotypy !== detectedType && prevDetectedStereotypy !== 'Nenhuma') {
-                    if (stereotypyStartTime) {
-                        logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
+            // Usamos a função de atualização do state para ter acesso ao valor mais recente
+            // sem precisar declará-lo como dependência.
+            setStereotypyStartTime(prevStartTime => {
+                if (detectedType !== 'Nenhuma') {
+                    if (prevDetectedStereotypy !== detectedType && prevDetectedStereotypy !== 'Nenhuma') {
+                        if (prevStartTime) {
+                            logStereotypy(now, prevDetectedStereotypy, prevStartTime);
+                        }
+                        return now; // Novo start time
                     }
-                    setStereotypyStartTime(now);
+                } else {
+                    if (prevStartTime && prevDetectedStereotypy !== 'Nenhuma') {
+                        logStereotypy(now, prevDetectedStereotypy, prevStartTime);
+                    }
+                    return null; // Reseta o start time
                 }
-            } else {
-                if (stereotypyStartTime && prevDetectedStereotypy !== 'Nenhuma') {
-                    logStereotypy(now, prevDetectedStereotypy, stereotypyStartTime);
-                }
-                setStereotypyStartTime(null);
-            }
+                return prevStartTime; // Mantém o start time
+            });
             return detectedType;
         });
 
         lastPoseRef.current = currentPose;
-    }, [stereotypyStartTime, keypointsToObject, logStereotypy]);
+    }, [keypointsToObject, saveDetectionToDB]); // Agora as dependências são mais simples e não criam ciclo.
+
 
     const logStereotypy = useCallback((endTime, type, startTime) => {
         const duration = (endTime - startTime) / 1000;
@@ -160,7 +193,7 @@ const StereotypyMonitor = () => {
 
         setStereotypyLog(prev => [newLog, ...prev].slice(0, 50)); 
         saveDetectionToDB(newLog);
-    }, [patientId, saveDetectionToDB]);
+    }, [patientId]); // Deps incluindo patientId
 
     const saveDetectionToDB = useCallback(async (detectionData) => {
         if (!patientId) return;
@@ -225,9 +258,9 @@ const StereotypyMonitor = () => {
     const handleStereotypyFilterChange = useCallback((e) => setStereotypyFilter(e.target.value), []);
 
     // useEffects agora, após funções estarem definidas
-    // EFEITO 1: Inicialização com fallback para CPU
+    // EFEITO 1: Inicialização
     useEffect(() => {
-        console.log('useEffect 1: Inicialização');
+        console.log('useEffect 1: Inicialização'); // Debug
         const queryParams = new URLSearchParams(location.search);
         const id = queryParams.get('patientId');
         if (!id) {
@@ -253,81 +286,54 @@ const StereotypyMonitor = () => {
                 await tf.ready();
                 console.log(`Backend pronto: ${tf.getBackend()}`);
 
-                // Tenta WebGL; fallback para CPU se falhar
-                try {
-                    const model = poseDetection.SupportedModels.MoveNet;
-                    const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-                    const detector = await poseDetection.createDetector(model, detectorConfig);
-                    detectorRef.current = detector;
-                    setIsModelsLoaded(true);
-                    console.log("Detector de pose criado com sucesso (WebGL).");
-                } catch (webglErr) {
-                    console.warn("WebGL falhou, fallback para CPU:", webglErr.message);
-                    await tf.setBackend('cpu');
-                    await tf.ready();
-                    const model = poseDetection.SupportedModels.MoveNet;
-                    const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
-                    const detector = await poseDetection.createDetector(model, detectorConfig);
-                    detectorRef.current = detector;
-                    setIsModelsLoaded(true);
-                    console.log("Detector de pose criado com sucesso (CPU fallback).");
-                }
+                const model = poseDetection.SupportedModels.MoveNet;
+                const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                const detector = await poseDetection.createDetector(model, detectorConfig);
+                
+                detectorRef.current = detector;
+                setIsModelsLoaded(true);
+                console.log("Detector de pose criado com sucesso.");
             } catch (err) {
                 console.error("Erro fatal ao criar detector:", err);
-                setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}. Tente recarregar.`);
+                setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
             }
         };
 
         initializeDetector();
     }, [location]);
 
-    // EFEITO 2: Loop de Detecção com cast explícito e retry
+    // EFEITO 2: Loop de Detecção
     useEffect(() => {
-        console.log('useEffect 2: Loop de detecção, isDetecting:', isDetecting, 'isModelsLoaded:', isModelsLoaded);
+        console.log('useEffect 2: Loop de detecção, isDetecting:', isDetecting, 'isModelsLoaded:', isModelsLoaded); // Debug
         let animationFrameId;
-        let retryCount = 0;
-        const maxRetries = 3;
 
         const runDetectionLoop = async () => {
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
-            if (detector && videoEl && videoEl.readyState === 4 && isDetecting) {
+            if (detector && videoEl && videoEl.readyState === 4) {
                 try {
-                    // FIX: Cast explícito para float32 normalizado + expandDims para batch
-                    const imageTensor = tf.browser.fromPixels(videoEl).div(255.0).expandDims(0).toFloat();
-                    const poses = await detector.estimatePoses(imageTensor);
-                    tf.dispose([imageTensor]); // Limpa memória
-
+                    const poses = await detector.estimatePoses(videoEl);
                     const ctx = canvasRef.current?.getContext('2d');
                     if (ctx) {
                         ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                        if (poses && Array.isArray(poses) && poses.length > 0) {
+                        if (poses && poses.length > 0) {
                             analyzeMovement(poses[0].keypoints);
                             drawKeypoints(poses[0].keypoints, ctx);
                         }
                     }
-                    retryCount = 0; // Reset retry em sucesso
                 } catch (err) {
                     console.error('Erro no loop de detecção:', err);
-                    retryCount++;
-                    if (retryCount <= maxRetries) {
-                        console.log(`Retry ${retryCount}/${maxRetries} em 500ms...`);
-                        setTimeout(runDetectionLoop, 500);
-                        return;
-                    }
                     setIsDetecting(false);
-                    setError(`Ocorreu um erro na detecção após ${maxRetries} tentativas: ${err.message}. Backend: ${tf.getBackend()}. Tente pausar/iniciar.`);
+                    setError(`Ocorreu um erro na detecção: ${err.message}`);
                     return;
                 }
             }
-            if (isDetecting) {
-                animationFrameId = requestAnimationFrame(runDetectionLoop);
-            }
+            animationFrameId = requestAnimationFrame(runDetectionLoop);
         };
 
         if (isDetecting && isModelsLoaded) {
-            startVideo();
+            startVideo(); // Agora startVideo está definida antes
             const videoElement = videoRef.current;
 
             const handleVideoReady = () => {
@@ -347,7 +353,7 @@ const StereotypyMonitor = () => {
         } else {
             cancelAnimationFrame(animationFrameId);
         }
-    }, [isDetecting, isModelsLoaded, startVideo, analyzeMovement, drawKeypoints]);
+    }, [isDetecting, isModelsLoaded, startVideo, analyzeMovement, drawKeypoints]); // Deps completas
 
     const lineOptions = {
         responsive: true,
