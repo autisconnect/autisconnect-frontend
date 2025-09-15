@@ -147,6 +147,12 @@ const StereotypyMonitor = () => {
         const initializeDetector = async () => {
             try {
                 // Verificar se o TensorFlow.js está inicializado corretamente
+                console.log("Verificando inicialização do TensorFlow.js...");
+                console.log("tf:", !!tf);
+                console.log("tf.tidy:", typeof tf.tidy);
+                console.log("tf.browser:", !!tf.browser);
+                console.log("tf.browser.fromPixels:", typeof tf.browser?.fromPixels);
+                console.log("poseDetection.createDetector:", typeof poseDetection.createDetector);
                 if (!tf || !tf.tidy || !tf.browser || !tf.browser.fromPixels || !poseDetection.createDetector) {
                     console.error("TensorFlow.js ou pose-detection não está inicializado corretamente");
                     setError("Falha ao inicializar o TensorFlow.js ou modelo de pose. Verifique as importações.");
@@ -154,11 +160,12 @@ const StereotypyMonitor = () => {
                 }
 
                 // Forçar backend CPU e verificar inicialização
+                console.log("Configurando backend CPU...");
                 await tf.setBackend('cpu');
                 await tf.ready();
                 
                 // Aumentar atraso para garantir inicialização completa do backend
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Aumentado para 5 segundos
 
                 const backend = tf.getBackend();
                 console.log(`Backend do TF.js pronto: ${backend}`);
@@ -173,7 +180,9 @@ const StereotypyMonitor = () => {
 
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                console.log("Criando detector MoveNet...");
                 const detector = await poseDetection.createDetector(model, detectorConfig);
+                console.log("Detector criado:", detector);
 
                 detectorRef.current = detector;
                 setIsModelsLoaded(true);
@@ -224,7 +233,7 @@ const StereotypyMonitor = () => {
                 try {
                     tf.engine().startScope(); // Iniciar novo escopo
 
-                    // Verificar se tf.tidy e tf.browser.fromPixels estão definidos
+                    // Verificar funções do TensorFlow.js
                     console.log("Estado do tf:", !!tf);
                     console.log("tf.tidy disponível:", typeof tf.tidy);
                     console.log("tf.browser.fromPixels disponível:", typeof tf.browser?.fromPixels);
@@ -250,11 +259,13 @@ const StereotypyMonitor = () => {
                     console.log("Criando tensor a partir do vídeo...");
                     const tensor = tf.tidy(() => {
                         try {
+                            console.log("Chamando tf.browser.fromPixels...");
                             const tensorResult = tf.browser.fromPixels(videoEl);
                             console.log("Tensor criado:", { shape: tensorResult.shape, dtype: tensorResult.dtype });
                             return tensorResult;
                         } catch (err) {
                             console.error("Erro ao criar tensor com tf.browser.fromPixels:", err);
+                            setError(`Erro ao criar tensor: ${err.message}`);
                             return null;
                         }
                     });
@@ -279,6 +290,9 @@ const StereotypyMonitor = () => {
                         return;
                     }
 
+                    // Verificar o detector antes de estimatePoses
+                    console.log("Estado do detector:", detector);
+                    console.log("Método estimatePoses:", typeof detector.estimatePoses);
                     console.log("Executando estimatePoses...");
                     const poses = await detector.estimatePoses(tensor);
                     console.log("Poses detectadas:", poses);
@@ -290,13 +304,15 @@ const StereotypyMonitor = () => {
                         if (poses && poses.length > 0) {
                             analyzeMovementRef.current(poses[0].keypoints);
                             drawKeypoints(poses[0].keypoints, ctx);
+                        } else {
+                            console.warn("Nenhuma pose detectada.");
                         }
                     }
                 } catch (err) {
                     console.error("Erro durante a estimativa de pose:", err);
                     setError(`Erro na detecção de pose: ${err.message}`);
                 } finally {
-                    tf.engine().endScope(); // Garantir fim do escopo em caso de erro
+                    tf.engine().endScope(); // Garantir fim do escopo
                     console.log("Tensores ativos após fim do escopo:", tf.memory().numTensors);
                 }
             }
@@ -329,14 +345,15 @@ const StereotypyMonitor = () => {
             startDetection();
 
             return () => {
+                console.log("Executando cleanup do loop de detecção...");
                 cancelAnimationFrame(animationFrameId);
                 clearTimeout(videoTimeout);
                 if (videoRef.current && videoRef.current.srcObject) {
                     videoRef.current.srcObject.getTracks().forEach(track => track.stop());
                     videoRef.current.srcObject = null;
                 }
-                tf.engine().dispose(); // Limpar todos os tensores remanescentes
-                console.log("Cleanup do loop de detecção executado. Tensores finais:", tf.memory().numTensors);
+                // Removido tf.engine().dispose() para evitar erro
+                console.log("Cleanup concluído. Tensores finais:", tf.memory().numTensors);
             };
         }
     }, [isDetecting, isModelsLoaded, drawKeypoints]);
