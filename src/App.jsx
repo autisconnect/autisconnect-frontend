@@ -95,10 +95,11 @@ function App() {
       <Routes>
         {/* A rota Home agora usa 'index' para ser mais explícita */}
         <Route index element={<Home />} /> 
+        <Route path="/signup" element={<Signup />} />
         {/* Rotas de Autenticação (protegidas pelo AuthRoute) */}
         <Route element={<AuthRoute />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+
         </Route>
         
         {/* Rotas de Apresentação */}

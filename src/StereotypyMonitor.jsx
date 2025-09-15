@@ -191,7 +191,7 @@ const StereotypyMonitor = () => {
 
         const runDetectionLoop = async () => {
             const now = performance.now();
-            if (now - lastFrameTimeRef.current < 200) { // Throttle: máximo 5 FPS
+            if (now - lastFrameTimeRef.current < 300) { // Throttle: máximo 3 FPS
                 animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
@@ -239,9 +239,9 @@ const StereotypyMonitor = () => {
                         return;
                     }
 
+                    console.log("Criando tensor a partir do vídeo...");
                     const tensor = tf.tidy(() => {
                         try {
-                            console.log("Criando tensor a partir do vídeo...");
                             return tf.browser.fromPixels(videoEl);
                         } catch (err) {
                             console.error("Erro ao criar tensor com tf.browser.fromPixels:", err);
