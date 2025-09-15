@@ -170,28 +170,20 @@ const StereotypyMonitor = () => {
     // EFEITO 3: Loop de Detecção
     useEffect(() => {
         let animationFrameId;
-        let tf; // Variável para manter a instância do tf
 
-        const runDetectionLoop = async () => {
+        // A função do loop agora ACEITA `tf` como argumento
+        const runDetectionLoop = async (tf) => {
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
             if (detector && videoEl && videoEl.readyState === 4 && analyzeMovementRef.current) {
-                // tf.tidy() é a chave para prevenir vazamentos de memória.
-                // Ele automaticamente limpa todos os tensores criados dentro desta função.
                 const tensor = tf.tidy(() => {
-                    // Converte o quadro do vídeo em um tensor
-                    const videoTensor = tf.browser.fromPixels(videoEl);
-                    // Opcional: redimensionar ou processar o tensor se necessário
-                    return videoTensor;
+                    return tf.browser.fromPixels(videoEl);
                 });
 
                 try {
-                    // Passa o tensor para o detector, em vez do elemento de vídeo
                     const poses = await detector.estimatePoses(tensor);
-
-                    // Libera a memória do tensor de vídeo que criamos
-                    tensor.dispose();
+                    tensor.dispose(); // Libera a memória
 
                     const ctx = canvasRef.current?.getContext('2d');
                     if (ctx) {
@@ -203,20 +195,17 @@ const StereotypyMonitor = () => {
                     }
                 } catch (err) {
                     console.error("Erro durante a estimativa de pose:", err);
-                    // Se um erro ocorrer, ainda precisamos liberar o tensor
-                    if (tensor) {
-                        tensor.dispose();
-                    }
+                    if (tensor) tensor.dispose();
                 }
             }
             
-            // Chama o próximo quadro
-            animationFrameId = requestAnimationFrame(runDetectionLoop);
+            // O loop se chama recursivamente, passando `tf` para o próximo quadro
+            animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
         };
 
         const startDetection = async () => {
-            // Importa o TensorFlow dinamicamente apenas uma vez
-            tf = await import('@tensorflow/tfjs');
+            // Importa o TensorFlow dinamicamente
+            const tf = await import('@tensorflow/tfjs');
 
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
@@ -227,8 +216,8 @@ const StereotypyMonitor = () => {
                                 canvasRef.current.width = videoRef.current.videoWidth;
                                 canvasRef.current.height = videoRef.current.videoHeight;
                             }
-                            // Inicia o loop somente depois que o vídeo estiver pronto
-                            runDetectionLoop();
+                            // Inicia o loop, passando a instância de `tf` pela primeira vez
+                            runDetectionLoop(tf);
                         });
                     }
                 })
@@ -239,7 +228,6 @@ const StereotypyMonitor = () => {
             startDetection();
 
             return () => {
-                // Função de limpeza
                 cancelAnimationFrame(animationFrameId);
                 if (videoRef.current && videoRef.current.srcObject) {
                     videoRef.current.srcObject.getTracks().forEach(track => track.stop());
@@ -247,7 +235,7 @@ const StereotypyMonitor = () => {
                 }
             };
         }
-    }, [isDetecting, isModelsLoaded, drawKeypoints]); // Dependências corretas e estáveis
+    }, [isDetecting, isModelsLoaded, drawKeypoints]);
 
     const toggleDetection = useCallback(() => setIsDetecting(p => !p), []);
 
