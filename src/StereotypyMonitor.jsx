@@ -1,3 +1,6 @@
+// Ficheiro: src/StereotypyMonitor.jsx
+// VERSÃO FINAL CORRIGIDA - Adicionados os handlers de filtro
+
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Table, Badge, Form } from 'react-bootstrap';
@@ -31,7 +34,7 @@ const StereotypyMonitor = () => {
     const canvasRef = useRef(null);
     const detectorRef = useRef(null);
     const lastPoseRef = useRef(null);
-    const analyzeMovementRef = useRef(); // <-- NOVO: Ref para a função de análise
+    const analyzeMovementRef = useRef();
 
     // Estados
     const [patientId, setPatientId] = useState(null);
@@ -47,7 +50,7 @@ const StereotypyMonitor = () => {
 
     const location = useLocation();
 
-    // Funções auxiliares que não dependem de estado complexo
+    // Funções auxiliares
     const keypointsToObject = useCallback((keypoints) => keypoints.reduce((acc, kp) => {
         if (kp.name) acc[kp.name.replace(/\s+/g, '_').toLowerCase()] = { x: kp.x, y: kp.y, score: kp.score };
         return acc;
@@ -156,7 +159,7 @@ const StereotypyMonitor = () => {
         initializeDetector();
     }, [location]);
 
-    // EFEITO 3: Loop de Detecção (AGORA SIMPLIFICADO)
+    // EFEITO 3: Loop de Detecção
     useEffect(() => {
         let animationFrameId;
 
@@ -178,7 +181,6 @@ const StereotypyMonitor = () => {
                 if (ctx) {
                     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
                     if (poses && poses.length > 0) {
-                        // CHAMA A FUNÇÃO ATRAVÉS DO REF
                         analyzeMovementRef.current(poses[0].keypoints);
                         drawKeypoints(poses[0].keypoints, ctx);
                     }
@@ -208,11 +210,11 @@ const StereotypyMonitor = () => {
                 }
             };
         }
-    }, [isDetecting, isModelsLoaded, drawKeypoints]); // <-- LISTA DE DEPENDÊNCIAS FINALMENTE ESTÁVEL E SEM CICLOS!
+    }, [isDetecting, isModelsLoaded, drawKeypoints]);
 
     const toggleDetection = useCallback(() => setIsDetecting(p => !p), []);
 
-    // Funções para os gráficos e filtros (useMemo para performance)
+    // Funções para os gráficos e filtros
     const filteredLogs = useMemo(() => {
         let filteredData = stereotypyLog;
         const now = new Date();
@@ -236,6 +238,24 @@ const StereotypyMonitor = () => {
             datasets: [{ label: 'Frequência', data: types.map(type => filteredLogs.filter(item => item.type === type).length), backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)'] }]
         };
     }, [filteredLogs]);
+
+    // Handlers para os filtros (ADICIONADOS DE VOLTA)
+    const handlePeriodChange = useCallback((e) => setPeriodFilter(e.target.value), []);
+    const handleDateChange = useCallback((e) => setDateFilter(e.target.value), []);
+    const handleStereotypyFilterChange = useCallback((e) => setStereotypyFilter(e.target.value), []);
+
+    // Opções dos gráficos
+    const lineOptions = {
+        responsive: true,
+        plugins: { legend: { position: 'top' }, title: { display: true, text: 'Score ao Longo do Tempo' } },
+        scales: { y: { beginAtZero: true, max: 1, title: { display: true, text: 'Score' } }, x: { title: { display: true, text: 'Tempo' } } }
+    };
+
+    const barOptions = {
+        responsive: true,
+        plugins: { legend: { display: false }, title: { display: true, text: 'Distribuição de Estereotipias' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Frequência' } } }
+    };
 
     return (
         <Container fluid className="py-4 stereotypy-monitor-page">
@@ -347,13 +367,13 @@ const StereotypyMonitor = () => {
                         <Card className="mb-4">
                             <Card.Header>Estereotipias ao Longo do Tempo</Card.Header>
                             <Card.Body>
-                                <Line data={formatLineChartData()} options={lineOptions} />
+                                <Line data={lineChartData} options={lineOptions} />
                             </Card.Body>
                         </Card>
                         <Card className="mb-4">
                             <Card.Header>Distribuição de Estereotipias</Card.Header>
                             <Card.Body>
-                                <Bar data={formatBarChartData()} options={barOptions} />
+                                <Bar data={barChartData} options={barOptions} />
                             </Card.Body>
                         </Card>
                         <Card className="mb-4">
