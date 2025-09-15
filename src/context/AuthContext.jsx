@@ -1,74 +1,95 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+// src/context/AuthContext.jsx (VERSÃO FINAL E COMPATÍVEL)
+
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../services/api';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  useEffect(() => {
-    const verifyToken = async () => {
-      const token = localStorage.getItem('token');
-      console.log('VITE_API_URL:', import.meta.env.VITE_API_URL); // Depuração
-      console.log('Token:', token); // Depuração
-      console.log('Current path:', location.pathname); // Depuração
-      const publicRoutes = ['/', '/login', '/register'];
-      if (token && !publicRoutes.includes(location.pathname)) {
-        try {
-          const response = await apiClient.get('/auth/verify');
-          console.log('Verify response:', response.data); // Depuração
-          setUser({ id: response.data.userId, tipo_usuario: response.data.tipo_usuario });
-        } catch (error) {
-          console.error('Erro ao verificar autenticação:', error.message, error.response?.status, error.response?.data);
-          // Não remove o token imediatamente, apenas redireciona
-          if (!publicRoutes.includes(location.pathname)) {
-            navigate('/login');
-          }
-        }
-      } else {
-        setUser(null);
-        if (!publicRoutes.includes(location.pathname)) {
-          navigate('/login');
-        }
-      }
-      setLoading(false);
-    };
-    verifyToken();
-  }, [navigate, location.pathname]);
-
-  const login = (userData) => {
-    if (!userData || !userData.id || !userData.token || !userData.tipo_usuario) {
-      console.error('Dados de usuário incompletos para login');
-      return false;
-    }
-    localStorage.setItem('token', userData.token); // Garante que o token seja salvo
-    setUser(userData);
-    console.log('Usuário logado:', userData); // Depuração
-    return true;
-  };
-
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
+    apiClient.defaults.headers.common['Authorization'] = null;
     setUser(null);
     navigate('/login');
+  }, [navigate]);
+
+  // useEffect para verificação inicial de autenticação.
+  // Roda APENAS UMA VEZ.
+  useEffect(() => {
+    const verifyInitialAuth = async () => {
+      const token = localStorage.getItem('token');
+      console.log("AuthContext: Verificando autenticação inicial...");
+
+      if (token) {
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        try {
+          const response = await apiClient.get('/auth/verify');
+          if (response.data && response.data.valid) {
+            
+            // ===================================================
+            // >>>>> AQUI ESTÁ A CORREÇÃO PARA O TypeError <<<<<
+            // ===================================================
+            // Criamos o objeto 'user' com a propriedade 'id', como o resto da sua aplicação espera.
+            const userData = {
+              id: response.data.userId, // Mapeando userId para id
+              username: response.data.username,
+              tipo_usuario: response.data.tipo_usuario,
+              nome_completo: response.data.nome_completo // Adicionando outros dados úteis
+            };
+            console.log("AuthContext: Token válido. Usuário definido:", userData);
+            setUser(userData);
+
+          } else {
+            logout();
+          }
+        } catch (error) {
+          console.error("AuthContext: Falha ao verificar token. Fazendo logout.", error.message);
+          logout();
+        }
+      }
+      
+      setLoading(false);
+    };
+
+    verifyInitialAuth();
+  }, [logout]); // Dependência estável, roda apenas uma vez.
+
+  // Função de login
+  const login = (token, apiUserData) => {
+    if (!token || !apiUserData) return;
+    
+    localStorage.setItem('token', token);
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
+    // Também garantimos que o objeto 'user' criado no login tenha a propriedade 'id'
+    const appUserData = {
+        id: apiUserData.userId,
+        username: apiUserData.username,
+        tipo_usuario: apiUserData.tipo_usuario,
+        nome_completo: apiUserData.nome_completo
+    };
+    setUser(appUserData);
+
+    console.log('AuthContext: Usuário logado com sucesso:', appUserData);
+    navigate('/');
   };
 
-  const isAuthenticated = () => !!user;
-
-  const hasPermission = (requiredType, resourceId = null) => {
-    if (!user) return false;
-    const hasType = user.tipo_usuario === requiredType;
-    if (!resourceId) return hasType;
-    return hasType && user.id === resourceId;
+  const contextValue = {
+    user,
+    loading,
+    login,
+    logout,
+    isAuthenticated: !!user,
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, hasPermission, loading }}>
-      {loading ? <div>Carregando...</div> : children}
+    <AuthContext.Provider value={contextValue}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
