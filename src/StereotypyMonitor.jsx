@@ -157,6 +157,9 @@ const StereotypyMonitor = () => {
                 await tf.setBackend('cpu');
                 await tf.ready();
                 
+                // Adicionar atraso para garantir inicialização completa do backend
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 const backend = tf.getBackend();
                 console.log(`Backend do TF.js pronto: ${backend}`);
                 if (backend !== 'cpu') {
@@ -191,7 +194,7 @@ const StereotypyMonitor = () => {
 
         const runDetectionLoop = async () => {
             const now = performance.now();
-            if (now - lastFrameTimeRef.current < 300) { // Throttle: máximo 3 FPS
+            if (now - lastFrameTimeRef.current < 500) { // Throttle: máximo 2 FPS
                 animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
@@ -222,6 +225,9 @@ const StereotypyMonitor = () => {
                     tf.engine().startScope(); // Iniciar novo escopo
 
                     // Verificar se tf.tidy e tf.browser.fromPixels estão definidos
+                    console.log("Estado do tf:", !!tf);
+                    console.log("tf.tidy disponível:", typeof tf.tidy);
+                    console.log("tf.browser.fromPixels disponível:", typeof tf.browser?.fromPixels);
                     if (!tf.tidy || !tf.browser || !tf.browser.fromPixels) {
                         console.error("Funções do TensorFlow.js não estão disponíveis");
                         setError("TensorFlow.js não inicializado corretamente.");

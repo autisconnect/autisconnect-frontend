@@ -185,7 +185,7 @@ const Home = () => {
                                     A plataforma mais completa para conectar famílias de pessoas autistas a profissionais especializados e serviços inclusivos, promovendo suporte, inclusão e desenvolvimento em um ambiente seguro e acolhedor.
                                 </p>
                                 <div className="d-flex flex-wrap gap-3 mt-4">
-                                    <Link to="/signup" className="text-decoration-none">
+                                    <Link to="/Signup" className="text-decoration-none">
                                         <Button variant="light" size="lg" className="px-4 py-3">
                                             <CheckCircle className="me-2" size={20} />
                                             Cadastre-se
