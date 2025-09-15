@@ -17,6 +17,13 @@ import apiClient from '@/services/api';
 import logohori from '@/assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
 
+// Importações do TensorFlow.js no topo para evitar múltiplas instâncias
+import * as tf from '@tensorflow/tfjs';
+import * as poseDetection from '@tensorflow-models/pose-detection';
+import '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-converter';
+import '@tensorflow/tfjs-backend-webgl';
+
 ChartJS.register(
     CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
 );
@@ -139,23 +146,14 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
-                // Importações explícitas na ordem correta
-                await import('@tensorflow/tfjs-core');
-                await import('@tensorflow/tfjs-converter');
-                const tf = await import('@tensorflow/tfjs');
-                const poseDetection = await import('@tensorflow-models/pose-detection');
-                await import('@tensorflow/tfjs-backend-webgl');
-
-                await tf.setBackend('webgl');
+                // Forçar backend CPU para evitar problemas com WebGL
+                await tf.setBackend('cpu');
                 await tf.ready();
                 
                 const backend = tf.getBackend();
                 console.log(`Backend do TF.js pronto: ${backend}`);
-                if (backend !== 'webgl') {
-                    console.warn('Backend WebGL não disponível, tentando CPU como fallback');
-                    await tf.setBackend('cpu');
-                    await tf.ready();
-                    console.log(`Backend fallback: ${tf.getBackend()}`);
+                if (backend !== 'cpu') {
+                    console.warn('Backend CPU não foi definido corretamente');
                 }
 
                 const model = poseDetection.SupportedModels.MoveNet;
@@ -179,10 +177,10 @@ const StereotypyMonitor = () => {
         let animationFrameId;
         let videoTimeout;
 
-        const runDetectionLoop = async (tf) => {
+        const runDetectionLoop = async () => {
             const now = performance.now();
             if (now - lastFrameTimeRef.current < 100) { // Throttle: máximo 10 FPS
-                animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+                animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
             lastFrameTimeRef.current = now;
@@ -192,7 +190,7 @@ const StereotypyMonitor = () => {
 
             if (!videoEl) {
                 console.warn("Elemento de vídeo não encontrado");
-                animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+                animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
 
@@ -202,7 +200,7 @@ const StereotypyMonitor = () => {
                     console.error("Timeout: Vídeo não atingiu readyState 4");
                     setError("Não foi possível carregar o vídeo corretamente.");
                 }, 10000);
-                animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+                animationFrameId = requestAnimationFrame(runDetectionLoop);
                 return;
             }
             clearTimeout(videoTimeout);
@@ -230,15 +228,14 @@ const StereotypyMonitor = () => {
                 } catch (err) {
                     console.error("Erro durante a estimativa de pose:", err);
                     tf.engine().endScope(); // Garantir fim do escopo em caso de erro
+                    setError(`Erro na detecção de pose: ${err.message}`);
                 }
             }
 
-            animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+            animationFrameId = requestAnimationFrame(runDetectionLoop);
         };
 
         const startDetection = async () => {
-            const tf = await import('@tensorflow/tfjs');
-
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
                     if (videoRef.current) {
@@ -249,7 +246,7 @@ const StereotypyMonitor = () => {
                                 canvasRef.current.height = videoRef.current.videoHeight;
                             }
                             lastFrameTimeRef.current = performance.now();
-                            runDetectionLoop(tf);
+                            runDetectionLoop();
                         });
                     }
                 })
@@ -266,6 +263,7 @@ const StereotypyMonitor = () => {
                     videoRef.current.srcObject.getTracks().forEach(track => track.stop());
                     videoRef.current.srcObject = null;
                 }
+                tf.engine().dispose(); // Limpar todos os tensores remanescentes
                 console.log("Cleanup do loop de detecção executado");
             };
         }
