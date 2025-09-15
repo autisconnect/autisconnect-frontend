@@ -183,15 +183,23 @@ const StereotypyMonitor = () => {
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
-            if (detector && videoEl && videoEl.readyState === 4) {
-                const poses = await detector.estimatePoses(videoEl);
-                const ctx = canvasRef.current?.getContext('2d');
-                if (ctx) {
-                    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-                    if (poses && poses.length > 0) {
-                        analyzeMovementRef.current(poses[0].keypoints);
-                        drawKeypoints(poses[0].keypoints, ctx);
+            // Verificação de segurança para garantir que o ref da função já foi atribuído.
+            if (detector && videoEl && videoEl.readyState === 4 && analyzeMovementRef.current) {
+                try {
+                    const poses = await detector.estimatePoses(videoEl);
+                    const ctx = canvasRef.current?.getContext('2d');
+                    if (ctx) {
+                        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                        if (poses && poses.length > 0) {
+                            // Agora é seguro chamar a função
+                            analyzeMovementRef.current(poses[0].keypoints);
+                            drawKeypoints(poses[0].keypoints, ctx);
+                        }
                     }
+                } catch (err) {
+                    console.error("Erro durante a estimativa de pose:", err);
+                    // Opcional: parar a detecção se houver um erro no loop
+                    // setIsDetecting(false); 
                 }
             }
             animationFrameId = requestAnimationFrame(runDetectionLoop);
