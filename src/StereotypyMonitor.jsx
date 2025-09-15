@@ -17,10 +17,6 @@ import apiClient from '@/services/api';
 import logohori from '@/assets/logohoriz.jpg';
 import { X } from 'react-bootstrap-icons';
 
-import * as tf from '@tensorflow/tfjs';
-import * as poseDetection from '@tensorflow-models/pose-detection';
-import '@tensorflow/tfjs-backend-webgl';
-
 ChartJS.register(
     CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend
 );
@@ -142,17 +138,32 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
+                // PASSO 1: Importar as bibliotecas dinamicamente
+                const tf = await import('@tensorflow/tfjs');
+                const poseDetection = await import('@tensorflow-models/pose-detection');
+                await import('@tensorflow/tfjs-backend-webgl'); // Importa para registrar o backend
+
+                // PASSO 2: Usar as bibliotecas importadas
                 await tf.setBackend('webgl');
                 await tf.ready();
+                console.log(`Backend do TF.js pronto: ${tf.getBackend()}`);
+
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
+                
+                // A chamada que provavelmente estava falhando
                 const detector = await poseDetection.createDetector(model, detectorConfig);
+                
                 detectorRef.current = detector;
                 setIsModelsLoaded(true);
+                console.log("Detector de pose criado com sucesso.");
+
             } catch (err) {
+                console.error("Erro fatal ao inicializar o detector:", err);
                 setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
             }
         };
+
         initializeDetector();
     }, [location]);
 
