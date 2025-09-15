@@ -1,7 +1,8 @@
 import React from 'react';
 import { Routes, Route, useParams } from 'react-router-dom'; 
-import AuthNavigation from './context/AuthNavigation';
+//import AuthNavigation from './context/AuthNavigation';
 import ProtectedRoute from './ProtectedRoute';
+import AuthRoute from './AuthRoute';
 import Home from './Home';
 import Login from './Login';
 import Signup from './Signup';
@@ -90,12 +91,15 @@ function App() {
   return (
     <ErrorBoundary>
       {/* O AuthProvider e o Router foram movidos para o arquivo de entrada (main.jsx ou index.jsx) */}
-      <AuthNavigation />
+      {/* AuthNavigation />*/}
       <Routes>
         {/* A rota Home agora usa 'index' para ser mais explícita */}
         <Route index element={<Home />} /> 
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        {/* Rotas de Autenticação (protegidas pelo AuthRoute) */}
+        <Route element={<AuthRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
         
         {/* Rotas de Apresentação */}
         <Route path="/presentation" element={<PresentationServiceDashboard />} />

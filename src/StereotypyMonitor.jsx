@@ -146,17 +146,20 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
-                // Forçar backend CPU
+                // Forçar backend CPU e verificar inicialização
                 await tf.setBackend('cpu');
                 await tf.ready();
                 
                 const backend = tf.getBackend();
                 console.log(`Backend do TF.js pronto: ${backend}`);
                 if (backend !== 'cpu') {
-                    console.warn('Backend CPU não foi definido corretamente');
+                    console.error('Backend CPU não foi definido corretamente');
                     setError('Falha ao configurar o backend CPU.');
                     return;
                 }
+
+                // Verificar estado inicial do TensorFlow.js
+                console.log("Tensores iniciais antes de criar detector:", tf.memory().numTensors);
 
                 const model = poseDetection.SupportedModels.MoveNet;
                 const detectorConfig = { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING };
@@ -164,7 +167,7 @@ const StereotypyMonitor = () => {
 
                 detectorRef.current = detector;
                 setIsModelsLoaded(true);
-                console.log("Detector de pose criado com sucesso. Tensores iniciais:", tf.memory().numTensors);
+                console.log("Detector de pose criado com sucesso. Tensores após inicialização:", tf.memory().numTensors);
             } catch (err) {
                 console.error("Erro fatal ao inicializar o detector:", err);
                 setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
@@ -210,14 +213,22 @@ const StereotypyMonitor = () => {
             if (detector && analyzeMovementRef.current) {
                 try {
                     tf.engine().startScope(); // Iniciar novo escopo
-                    const tensor = tf.tidy(() => tf.browser.fromPixels(videoEl));
+                    const tensor = tf.tidy(() => {
+                        try {
+                            return tf.browser.fromPixels(videoEl);
+                        } catch (err) {
+                            console.error("Erro ao criar tensor com tf.browser.fromPixels:", err);
+                            return null;
+                        }
+                    });
                     console.log("Tensores ativos antes de estimatePoses:", tf.memory().numTensors);
 
                     // Verificar se o tensor é válido
-                    if (!tensor || typeof tensor.dispose !== 'function') {
+                    if (!tensor || !tf.isTensor(tensor)) {
                         console.error("Tensor inválido retornado por tf.browser.fromPixels");
                         tf.engine().endScope();
                         setError("Falha ao criar tensor a partir do vídeo.");
+                        animationFrameId = requestAnimationFrame(runDetectionLoop);
                         return;
                     }
 
@@ -273,7 +284,7 @@ const StereotypyMonitor = () => {
                     videoRef.current.srcObject = null;
                 }
                 tf.engine().dispose(); // Limpar todos os tensores remanescentes
-                console.log("Cleanup do loop de detecção executado");
+                console.log("Cleanup do loop de detecção executado. Tensores finais:", tf.memory().numTensors);
             };
         }
     }, [isDetecting, isModelsLoaded, drawKeypoints]);
