@@ -28,6 +28,7 @@ const StereotypyMonitor = () => {
     const detectorRef = useRef(null);
     const lastPoseRef = useRef(null);
     const analyzeMovementRef = useRef();
+    const lastFrameTimeRef = useRef(0); // Para controle de throttling
 
     // Estados
     const [patientId, setPatientId] = useState(null);
@@ -138,7 +139,7 @@ const StereotypyMonitor = () => {
 
         const initializeDetector = async () => {
             try {
-                // Importações explícitas para evitar conflitos
+                // Importações explícitas na ordem correta
                 await import('@tensorflow/tfjs-core');
                 await import('@tensorflow/tfjs-converter');
                 const tf = await import('@tensorflow/tfjs');
@@ -163,7 +164,7 @@ const StereotypyMonitor = () => {
 
                 detectorRef.current = detector;
                 setIsModelsLoaded(true);
-                console.log("Detector de pose criado com sucesso.");
+                console.log("Detector de pose criado com sucesso. Tensores iniciais:", tf.memory().numTensors);
             } catch (err) {
                 console.error("Erro fatal ao inicializar o detector:", err);
                 setError(`Falha ao carregar o modelo de IA. Erro: ${err.message}`);
@@ -179,6 +180,13 @@ const StereotypyMonitor = () => {
         let videoTimeout;
 
         const runDetectionLoop = async (tf) => {
+            const now = performance.now();
+            if (now - lastFrameTimeRef.current < 100) { // Throttle: máximo 10 FPS
+                animationFrameId = requestAnimationFrame(() => runDetectionLoop(tf));
+                return;
+            }
+            lastFrameTimeRef.current = now;
+
             const detector = detectorRef.current;
             const videoEl = videoRef.current;
 
@@ -201,12 +209,12 @@ const StereotypyMonitor = () => {
 
             if (detector && analyzeMovementRef.current) {
                 try {
-                    // Criar o tensor fora do tf.tidy para evitar async dentro dele
+                    tf.engine().startScope(); // Iniciar novo escopo
                     const tensor = tf.tidy(() => tf.browser.fromPixels(videoEl));
                     console.log("Tensores ativos antes de estimatePoses:", tf.memory().numTensors);
                     
                     const poses = await detector.estimatePoses(tensor);
-                    tensor.dispose(); // Liberar o tensor explicitamente
+                    tensor.dispose(); // Liberar tensor explicitamente
                     console.log("Tensores ativos após estimatePoses:", tf.memory().numTensors);
 
                     const ctx = canvasRef.current?.getContext('2d');
@@ -217,8 +225,11 @@ const StereotypyMonitor = () => {
                             drawKeypoints(poses[0].keypoints, ctx);
                         }
                     }
+                    tf.engine().endScope(); // Finalizar escopo
+                    console.log("Tensores ativos após fim do escopo:", tf.memory().numTensors);
                 } catch (err) {
                     console.error("Erro durante a estimativa de pose:", err);
+                    tf.engine().endScope(); // Garantir fim do escopo em caso de erro
                 }
             }
 
@@ -237,6 +248,7 @@ const StereotypyMonitor = () => {
                                 canvasRef.current.width = videoRef.current.videoWidth;
                                 canvasRef.current.height = videoRef.current.videoHeight;
                             }
+                            lastFrameTimeRef.current = performance.now();
                             runDetectionLoop(tf);
                         });
                     }
