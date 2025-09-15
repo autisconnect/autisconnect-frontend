@@ -160,8 +160,13 @@ const StereotypyMonitor = () => {
                 }
 
                 // Forçar backend CPU e verificar inicialização
-                console.log("Configurando backend CPU...");
+                console.log("Configurando backend TF.js...");
+                try {
+                await tf.setBackend('webgl');  // tenta webgl primeiro
+                } catch (e) {
+                console.warn("WebGL indisponível, usando CPU:", e);
                 await tf.setBackend('cpu');
+                }
                 await tf.ready();
                 
                 // Aumentar atraso para garantir inicialização completa do backend
@@ -325,13 +330,13 @@ const StereotypyMonitor = () => {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
-                    videoRef.current.addEventListener('loadeddata', () => {
+                    videoRef.current.addEventListener('loadedmetadata', () => {  // << TROQUE loadeddata por loadedmetadata
                         if (canvasRef.current) {
                             canvasRef.current.width = videoRef.current.videoWidth;
                             canvasRef.current.height = videoRef.current.videoHeight;
                         }
                         lastFrameTimeRef.current = performance.now();
-                        console.log("Vídeo carregado, iniciando loop de detecção...");
+                        console.log("Vídeo carregado (metadata), iniciando loop de detecção...");
                         runDetectionLoop();
                     }, { once: true });
                 }
@@ -430,9 +435,13 @@ const StereotypyMonitor = () => {
                         <Card className="mb-4">
                             <Card.Header className="d-flex justify-content-between align-items-center">
                                 <span>Detecção de Estereotipias em Tempo Real</span>
-                                <Button variant={isDetecting ? 'danger' : 'success'} onClick={toggleDetection}>
+                                    <Button 
+                                    variant={isDetecting ? 'danger' : 'success'} 
+                                    onClick={toggleDetection}
+                                    disabled={!isModelsLoaded}  // << NOVO
+                                    >
                                     {isDetecting ? 'Parar Detecção' : 'Iniciar Detecção'}
-                                </Button>
+                                    </Button>
                             </Card.Header>
                             <Card.Body className="text-center">
                                 <div style={{ position: 'relative', width: '100%', maxWidth: '500px', margin: '0 auto' }}>
