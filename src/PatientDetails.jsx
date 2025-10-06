@@ -32,7 +32,6 @@ ChartJS.register(
 const ROUTES = {
     EMOTION_DETECTOR: '/emotion-detector',
     STROKE_RISK_MONITOR: '/stroke-risk-monitor',
-    STEREOTYPY_MONITOR: '/stereotypy-monitor',
     TRIGGER_RECORDER: '/trigger-recorder',
 };
 
@@ -47,12 +46,10 @@ const PatientDetails = () => {
     const [notes, setNotes] = useState([]);
     const [triggerData, setTriggerData] = useState(null);
     const [strokeData, setStrokeData] = useState(null);
-    const [stereotypyData, setStereotypyData] = useState(null);
     const [emotionData, setEmotionData] = useState(null);
     const [emotionDistributionData, setEmotionDistributionData] = useState(null);
     const [triggers, setTriggers] = useState([]);
     const [strokeRisks, setStrokeRisks] = useState([]);
-    const [stereotypies, setStereotypies] = useState([]);
     const [emotions, setEmotions] = useState([]);
     const [emotionAnalysis, setEmotionAnalysis] = useState(null);
     const [prescriptions, setPrescriptions] = useState([]);
@@ -82,9 +79,6 @@ const PatientDetails = () => {
     const [vocalizationAnomaly, setVocalizationAnomaly] = useState(null);
     const [vocalizationTrendData, setVocalizationTrendData] = useState(null);
     const [repetitionPatternData, setRepetitionPatternData] = useState(null);
-    const [stereotypyAnalysis, setStereotypyAnalysis] = useState(null);
-    const [stereotypyPrediction, setStereotypyPrediction] = useState("Calculando previsão...");
-    const [stereotypyAnomaly, setStereotypyAnomaly] = useState(null);
     const [consultations, setConsultations] = useState([]);
     const [showConsultationModal, setShowConsultationModal] = useState(false);
     const [newConsultation, setNewConsultation] = useState({
@@ -474,47 +468,6 @@ const PatientDetails = () => {
         return summary;
     };
 
-    // ==========================
-    // >>>>> ESTEREOTIPIAS <<<<<
-    // ==========================
-
-    // Nível 1: Análise Estatística
-    const analyzeStereotypyPatterns = (records) => {
-        if (!records || records.length === 0) return null;
-
-        const counts = records.reduce((acc, rec) => {
-            acc[rec.type] = (acc[rec.type] || 0) + 1;
-            return acc;
-        }, {});
-
-        const dominantType = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, 'Nenhuma');
-        const totalDuration = records.reduce((sum, rec) => sum + (rec.duration || 0), 0);
-        const averageDuration = totalDuration / records.length;
-
-        return {
-            totalDetections: records.length,
-            dominantType,
-            averageDuration: averageDuration.toFixed(1),
-            distribution: counts,
-        };
-    };
-
-    // Nível 2: Resumo em Linguagem Natural
-    const generateStereotypyAISummary = (analysis) => {
-        if (!analysis) return "Aguardando dados de estereotipias para gerar resumo.";
-
-        const { dominantType, averageDuration, totalDetections } = analysis;
-        let summary = `Com base em **${totalDetections}** detecções, o padrão de comportamento repetitivo mais comum é **${dominantType}**. `;
-        summary += `A duração média de cada episódio é de **${averageDuration} segundos**. `;
-        if (dominantType === 'Balançar corpo') {
-            summary += "Isso pode indicar uma necessidade de estímulo vestibular ou uma forma de auto-regulação em resposta à ansiedade.";
-        } else if (dominantType === 'Movimento de mãos') {
-            summary += "Este comportamento é frequentemente associado a estados de excitação ou sobrecarga sensorial.";
-        }
-        return summary;
-    };
-
-
     useEffect(() => {
         const fetchPatientData = async () => {
             if (!user || !patientId) {
@@ -535,7 +488,6 @@ const PatientDetails = () => {
                     apiClient.get(`/vocalizations/${patientId}`),
                     apiClient.get(`/stroke-risk/${patientId}`),
                     apiClient.get(`/emotions/${patientId}`),
-                    apiClient.get(`/stereotypies/${patientId}`)
                 ]);
 
                 const patientData = patientRes.data;
@@ -544,7 +496,6 @@ const PatientDetails = () => {
                 const vocalizationsData = vocalizationsRes.data;
                 const strokeDataFromDB = strokeRes.data;
                 const emotionsDataFromDB = emotionsRes.data;
-                const stereotypiesData = stereotypiesRes.data;
 
                 const validVocalizations = (Array.isArray(vocalizationsData) ? vocalizationsData : []).map(v => {
                     let parsedAnalysis = {};
@@ -560,7 +511,6 @@ const PatientDetails = () => {
 
                 const validStrokeRisks = Array.isArray(strokeDataFromDB) ? strokeDataFromDB : [];
                 const validEmotions = Array.isArray(emotionsDataFromDB) ? emotionsDataFromDB : [];
-                const validStereotypies = Array.isArray(stereotypiesData) ? stereotypiesData : [];
 
                 setPatient(patientData);
                 setNotes(Array.isArray(notesData) ? notesData : []);
@@ -568,14 +518,12 @@ const PatientDetails = () => {
                 setVocalizations(validVocalizations);
                 setStrokeRisks(validStrokeRisks);
                 setEmotions(validEmotions);
-                setStereotypies(validStereotypies);
 
                 setVocalizationAnalysis(analyzeVocalizationPatterns(validVocalizations));
                 setStrokeRiskAnalysis(analyzeStrokeRiskPatterns(validStrokeRisks));
                 setEmotionAnalysis(analyzeEmotionPatterns(validEmotions));
-                setStereotypyAnalysis(analyzeStereotypyPatterns(validStereotypies));
 
-                processChartData(null, validStrokeRisks, validStereotypies, validEmotions, validVocalizations);
+                processChartData(null, validStrokeRisks, validEmotions, validVocalizations);
 
             } catch (err) {
                 console.error('Erro ao carregar dados do paciente:', err);
@@ -642,23 +590,7 @@ const PatientDetails = () => {
         }
     }, [vocalizations, patientId]);
 
-    useEffect(() => {
-        if (patientId && stereotypies.length > 0) {
-            const fetchStereotypyAI = async () => {
-                try {
-                    const response = await apiClient.get(`/ia-analysis/${patientId}?type=stereotypy`);
-                    setStereotypyPrediction(response.data.predictionText);
-                    setStereotypyAnomaly(response.data.anomaly);
-                } catch (err) {
-                    console.error("Erro ao buscar IA de estereotipias:", err);
-                    setStereotypyPrediction("Não foi possível conectar ao serviço de análise.");
-                }
-            };
-            fetchStereotypyAI();
-        }
-    }, [stereotypies, patientId]);
-
-    const processChartData = (triggers, strokeRisks, stereotypies, emotions, vocalizations) => {
+    const processChartData = (triggers, strokeRisks, emotions, vocalizations) => {
         const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
 
         // --- PROCESSAMENTO DE TRIGGERS (Ambientais) ---
@@ -693,22 +625,6 @@ const PatientDetails = () => {
             }]
         };
         setStrokeData(strokeChartData);
-
-        // --- PROCESSAMENTO DE ESTEREOTIPIAS ---
-        const stereotypyTypes = ['Balançar corpo', 'Movimento de mãos', 'Bater palmas'];
-        const stereotypyChartData = {
-            labels: stereotypyTypes,
-            datasets: [{
-                label: 'Frequência de Estereotipias',
-                data: stereotypyTypes.map(type => {
-                    return stereotypies.reduce((sum, s) => s.type === type ? sum + s.frequency : sum, 0);
-                }),
-                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'],
-                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
-                borderWidth: 1
-            }]
-        };
-        setStereotypyData(stereotypyChartData);
 
         // --- PROCESSAMENTO DE EMOÇÕES ---
         if (emotions && emotions.length > 0) {
@@ -814,37 +730,6 @@ const PatientDetails = () => {
             setRepetitionPatternData(null);
         }
     };
-
-    // >>>>> NOVO useEffect PARA IA DE ESTEREOTIPIAS <<<<<
-    useEffect(() => {
-        if (patientId && stereotypies.length > 0) {
-            const fetchStereotypyAI = async () => {
-                try {
-                    const response = await fetch(`http://localhost:5000/api/ia-analysis/${patientId}?type=stereotypy`, {
-                        headers: getAuthHeaders( )
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setStereotypyPrediction(data.predictionText);
-                        setStereotypyAnomaly(data.anomaly);
-                    } else {
-                        setStereotypyPrediction("Serviço de análise de estereotipias indisponível.");
-                    }
-                } catch (err) {
-                    console.error("Erro ao buscar IA de estereotipias:", err);
-                    setStereotypyPrediction("Não foi possível conectar ao serviço de análise.");
-                }
-            };
-            fetchStereotypyAI();
-        }
-    }, [stereotypies, patientId]);
-
-
-
-
-
-
-
 
     const handleOpenMonitoringTool = (route) => {
         const monitoringToolUrl = new URL(window.location.origin);
@@ -1046,9 +931,6 @@ const PatientDetails = () => {
                                 <Nav.Link eventKey="stroke">Risco de AVC</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link eventKey="stereotypy">Estereotipias</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
                                 <Nav.Link eventKey="emotion">Emoções</Nav.Link>
                             </Nav.Item>
                             {/* <Nav.Item>
@@ -1095,18 +977,6 @@ const PatientDetails = () => {
                                                 </Card>
                                             </Col>
                                             <Col md={3}>
-                                                <Card className="text-center mb-3 mb-md-0 shadow-sm">
-                                                    <Card.Body>
-                                                        <GraphUp className="text-primary mb-2" size={24} />
-                                                        <h6>Estereotipias Comuns</h6>
-                                                        <h3>{stereotypies[0]?.type || 'N/A'}</h3>
-                                                        <small className="text-muted">
-                                                            Frequência: {stereotypies[0]?.frequency || '0'}/semana
-                                                        </small>
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                            <Col md={3}>
                                                 <Card className="text-center shadow-sm">
                                                     <Card.Body>
                                                         <Calendar3 className="text-success mb-2" size={24} />
@@ -1137,16 +1007,6 @@ const PatientDetails = () => {
                                             </Card.Header>
                                             <Card.Body>
                                                 {emotionData ? <Line data={emotionData} options={lineOptions} /> : <p>Carregando...</p>}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Card className="shadow-sm h-100">
-                                            <Card.Header>
-                                                <h5 className="mb-0">Distribuição de Estereotipias</h5>
-                                            </Card.Header>
-                                            <Card.Body>
-                                                {stereotypyData ? <Pie data={stereotypyData} options={pieOptions} /> : <p>Carregando...</p>}
                                             </Card.Body>
                                         </Card>
                                     </Col>
@@ -1439,65 +1299,7 @@ const PatientDetails = () => {
                                     </Col>
                                 </Row>
                             </Tab.Pane>
-                            
-                            <Tab.Pane eventKey="stereotypy" className="no-print">
-                                <Row>
-                                    {/* IA Nível 2 e 3 */}
-                                    <Col md={12} className="mb-4">
-                                        <Card className="shadow-sm">
-                                            <Card.Header><h5 className="mb-0">Análise Inteligente de Estereotipias (IA)</h5></Card.Header>
-                                            <Card.Body>
-                                                <p className="lead ai-summary">
-                                                    {generateStereotypyAISummary(stereotypyAnalysis)}
-                                                </p>
-                                                <h6>Projeção de Tendência (IA - Nível 3)</h6>
-                                                <p>{stereotypyPrediction}</p>
-                                                {stereotypyAnomaly && stereotypyAnomaly.detected && (
-                                                    <Alert variant="danger" className="alert-anomaly">
-                                                        <strong>Alerta de Anomalia:</strong> {stereotypyAnomaly.message}
-                                                    </Alert>
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-
-                                    {/* Gráfico e IA Nível 1 */}
-                                    <Col md={8} className="mb-4">
-                                        <Card className="shadow-sm h-100">
-                                            <Card.Header><h5 className="mb-0">Distribuição de Estereotipias</h5></Card.Header>
-                                            <Card.Body>
-                                                {stereotypyData && stereotypyData.labels.length > 0 ? (
-                                                    <Pie data={stereotypyData} options={pieOptions} />
-                                                ) : (
-                                                    <p className="text-muted text-center pt-5">Não há dados para exibir o gráfico.</p>
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={4} className="mb-4">
-                                        <Card className="shadow-sm h-100">
-                                            <Card.Header><h5 className="mb-0">Insights Rápidos</h5></Card.Header>
-                                            <Card.Body>
-                                                {stereotypyAnalysis ? (
-                                                    <>
-                                                        <h6>Tipo Dominante</h6>
-                                                        <p className="h4"><Badge bg="info">{stereotypyAnalysis.dominantType}</Badge></p>
-                                                        <hr/>
-                                                        <h6>Duração Média</h6>
-                                                        <p className="h4">{stereotypyAnalysis.averageDuration} seg</p>
-                                                        <hr/>
-                                                        <h6>Total de Detecções</h6>
-                                                        <p className="h4">{stereotypyAnalysis.totalDetections}</p>
-                                                    </>
-                                                ) : (
-                                                    <p className="text-muted">Não há dados para análise.</p>
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                </Row>
-                            </Tab.Pane>
-
+                        
                             <Tab.Pane eventKey="emotion" className="no-print">
                                 <Row>
                                     {/* ================================================================== */}
@@ -1652,21 +1454,6 @@ const PatientDetails = () => {
                                                             aria-label="Abrir Monitor de AVC"
                                                         >
                                                             Abrir Monitor de AVC
-                                                        </Button>
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                            <Col md={6} className="mb-4">
-                                                <Card className="h-100">
-                                                    <Card.Body className="d-flex flex-column align-items-center">
-                                                        <h5 className="monitoring-title">Padrões Repetitivos</h5>
-                                                        <Button
-                                                            variant="info"
-                                                            onClick={() => handleOpenMonitoringTool(ROUTES.STEREOTYPY_MONITOR)}
-                                                            className="mt-auto"
-                                                            aria-label="Abrir Monitor de Estereotipias"
-                                                        >
-                                                            Abrir Monitor de Estereotipias
                                                         </Button>
                                                     </Card.Body>
                                                 </Card>

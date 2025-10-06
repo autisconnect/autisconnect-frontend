@@ -4,6 +4,7 @@ import path from 'path';  // Para resolver paths absolutos em alias
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  base: '/',
   resolve: {  // Seção para alias de paths
     alias: {
       '@': path.resolve(__dirname, './src'),  // Mapeia @ para ./src

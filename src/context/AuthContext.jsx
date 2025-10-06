@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../services/api';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,74 +10,114 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Função de logout centralizada e estável
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    delete apiClient.defaults.headers.common['Authorization'];
+    setUser(null);
+    navigate('/login');
+  }, [navigate]);
+
+  // Efeito principal que gerencia autenticação E roteamento
   useEffect(() => {
-    const verifyInitialAuth = async () => {
+    const handleAuthAndRouting = async () => {
       const token = localStorage.getItem('token');
-      console.log("AuthContext: Verificando autenticação inicial...");
+      
+      // Lista de rotas que qualquer um pode ver
+      const publicRoutes = [
+        '/', '/login', '/signup', '/presentation',
+        '/PresentationProfessionalDashboard', '/PresentationParentDashboard',
+        // Adicione outras rotas de apresentação aqui
+      ];
+      
+      // Verifica se a rota atual é pública (incluindo sub-rotas)
+      const isPublicRoute = publicRoutes.some(route => location.pathname.startsWith(route));
 
       if (token) {
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         try {
           const response = await apiClient.get('/auth/verify');
-          if (response.data && response.data.valid) {
-            // Mapeia 'userId' para 'id' para compatibilidade
-            const userData = {
-              id: response.data.userId,
-              username: response.data.username,
-              tipo_usuario: response.data.tipo_usuario,
-              nome_completo: response.data.nome_completo
+          const apiUser = response.data;
+          console.log('Resposta /auth/verify:', apiUser);
+
+          if (apiUser && apiUser.valid) {
+            const appUser = {
+              id: apiUser.userId,
+              username: apiUser.username,
+              tipo_usuario: apiUser.tipo_usuario,
+              nome_completo: apiUser.nome_completo
             };
-            setUser(userData);
+            setUser(appUser);
+
+            // LÓGICA DE REDIRECIONAMENTO PARA USUÁRIO LOGADO
+            if (location.pathname === '/login' || location.pathname === '/signup') {
+              switch (appUser.tipo_usuario) {
+                case 'medicos_terapeutas': navigate(`/professional-dashboard/${appUser.id}`); break;
+                case 'pais_responsavel': navigate(`/parent-dashboard/${appUser.id}`); break;
+                case 'secretaria': navigate(`/secretary-dashboard/${appUser.id}`); break;
+                case 'servicos_locais': navigate(`/service-dashboard/${appUser.id}`); break;
+                default: navigate('/');
+              }
+            }
           } else {
             logout();
           }
         } catch (error) {
-          console.error("AuthContext: Falha ao verificar token.", error.message);
+          console.error("Auth: Falha ao verificar token.", error.message);
           logout();
+        }
+      } else {
+        // LÓGICA PARA USUÁRIO NÃO LOGADO
+        setUser(null);
+        if (!isPublicRoute) {
+          navigate('/login');
         }
       }
       
       setLoading(false);
     };
 
-    verifyInitialAuth();
-  }, [logout]); 
+    handleAuthAndRouting();
+  }, [location.pathname, logout]); // Roda a cada mudança de URL
 
+  // Função de login que apenas atualiza o estado e o token
   const login = (token, apiUserData) => {
-    if (!token || !apiUserData) return;
-    
-    localStorage.setItem('token', token);
-    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    
-    const appUserData = {
-        id: apiUserData.userId,
-        username: apiUserData.username,
-        tipo_usuario: apiUserData.tipo_usuario,
-        nome_completo: apiUserData.nome_completo
-    };
-    setUser(appUserData);
-    navigate('/');
+      localStorage.setItem('token', token);
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      const appUserData = {
+          id: apiUserData.userId,
+          username: apiUserData.username,
+          tipo_usuario: apiUserData.tipo_usuario,
+          nome_completo: apiUserData.nome_completo
+      };
+      setUser(appUserData);
+
+      // >>>>> MUDANÇA PRINCIPAL AQUI <<<<<
+      // Em vez de navegar para a Home, redirecionamos DIRETAMENTE para o dashboard correto.
+      switch (appUserData.tipo_usuario) {
+          case 'medicos_terapeutas':
+              navigate(`/professional-dashboard/${appUserData.id}`);
+              break;
+          case 'pais_responsavel':
+              navigate(`/parent-dashboard/${appUserData.id}`);
+              break;
+          case 'secretaria':
+              navigate(`/secretary-dashboard/${appUserData.id}`);
+              break;
+          case 'servicos_locais':
+              navigate(`/service-dashboard/${appUserData.id}`);
+              break;
+          default:
+              // Se o tipo for desconhecido, vai para a Home como um fallback seguro.
+              navigate('/');
+      }
   };
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    apiClient.defaults.headers.common['Authorization'] = null;
-    setUser(null);
-    navigate('/login');
-  }, [navigate]);
-
-  const isAuthenticated = () => !!user;
-
-  const hasPermission = (requiredType, resourceId = null) => {
-    if (!user) return false;
-    const hasType = user.tipo_usuario === requiredType;
-    if (!resourceId) return hasType;
-    return hasType && user.id === resourceId;
-  };
+  const contextValue = { user, loading, login, logout };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, hasPermission, loading }}>
-      {loading ? <div>Carregando...</div> : children}
+    <AuthContext.Provider value={contextValue}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

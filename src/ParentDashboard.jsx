@@ -280,7 +280,6 @@ function ParentDashboard() {
                         <Nav variant="tabs" className="mb-3">
                             <Nav.Item><Nav.Link eventKey="overview">Visão Geral</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="emotion">Emoções</Nav.Link></Nav.Item>
-                            <Nav.Item><Nav.Link eventKey="stereotypy">Estereotipias</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="vocalization">Vocalizações</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="stroke">Risco de AVC</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="appointments">Consultas</Nav.Link></Nav.Item>

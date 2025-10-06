@@ -8,7 +8,7 @@ import apiClient from './services/api.js';
 import './App.css';
 
 function Login() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -39,38 +39,25 @@ function Login() {
         setError('');
 
         try {
-            console.log(`Tentando login para usuário: ${username}`);
-            const response = await apiClient.post('/login', { username, password });
+            console.log(`Tentando login para usuário: ${email}`);
+            
+            // CORRIGIDO: Enviando o objeto { email, password } corretamente
+            const response = await apiClient.post('/auth/login', { email, password });
+            
             console.log('Resposta do servidor:', response.data);
-            const { token, userId, tipo_usuario } = response.data;
+            const { token, user } = response.data;
 
-            if (!token || !userId || !tipo_usuario) {
+            if (!token || !user) {
                 throw new Error('Resposta de login inválida do servidor.');
             }
 
-            const id = parseInt(userId, 10);
-            if (isNaN(id) || id <= 0) {
-                throw new Error('ID de usuário inválido retornado pelo servidor.');
-            }
+            // A função 'login' do AuthContext agora cuida de tudo
+            login(token, user);
 
-            localStorage.setItem('token', token);
-            console.log('Token salvo no localStorage:', token); // Depuração
-            const loginSuccess = login({ id, token, username, tipo_usuario });
-
-            if (loginSuccess) {
-                redirectToDashboard(tipo_usuario, id);
-            } else {
-                setError('Erro ao processar login. Tente novamente.');
-            }
         } catch (err) {
-            console.error('Erro ao fazer login:', err.response?.data, err.message);
-            if (err.response && err.response.status === 401) {
-                setError('Credenciais inválidas. Verifique seu usuário e senha.');
-            } else if (err.response && err.response.status === 500) {
-                setError(`Erro interno no servidor: ${err.response.data.error || 'Desconhecido'} - ${err.response.data.details || 'Sem detalhes'}`);
-            } else {
-                setError(`Erro ao conectar com o servidor: ${err.message}`);
-            }
+            console.error('Erro ao fazer login:', err);
+            const errorMessage = err.response?.data?.error || 'Erro de conexão. Verifique sua rede e a URL da API.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -118,10 +105,10 @@ function Login() {
                                 <Form.Group className="mb-3" controlId="formUsername">
                                     <Form.Label>Usuário</Form.Label>
                                     <Form.Control
-                                        type="text"
-                                        placeholder="Digite seu usuário"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        type="email"
+                                        placeholder="Digite seu email"
+                                        value={email} // <<< CORRIGIDO: Usa o estado 'email'
+                                        onChange={(e) => setEmail(e.target.value)} // <<< CORRIGIDO: Usa 'setEmail'
                                         required
                                     />
                                 </Form.Group>

@@ -832,7 +832,11 @@ const ProfessionalDashboard = () => {
                                 <Nav.Link eventKey="assistants"><People className="me-2" />Colaboradores</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link onClick={() => window.open(`/financial-dashboard/${user.id}`, '_blank', 'noopener,noreferrer')}>
+                                <Nav.Link 
+                                    href={`/financial-dashboard/${user.id}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                >
                                     <Wallet2 className="me-2" />Financeiro
                                 </Nav.Link>
                             </Nav.Item>

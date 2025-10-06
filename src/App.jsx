@@ -19,7 +19,6 @@ import EmotionChart from './emotion-tracking/EmotionChart';
 import SessionsGraph from './emotion-tracking/SessionsGraph';
 import EmotionTrackingDashboard from './emotion-tracking/EmotionTrackingDashboard';
 import StrokeRiskMonitor from './StrokeRiskMonitor';
-import StereotypyMonitor from './StereotypyMonitor';
 import TriggerRecorder from './TriggerRecorder';
 import PatientDetails from './PatientDetails';
 import PresentationServiceDashboard from './presentation-dashboard/PresentationServiceDashboard';
@@ -32,7 +31,6 @@ import PresentationServiceCertification from './presentation-dashboard/Presentat
 import PresentationVirtualConsultations from './presentation-dashboard/PresentationVirtualConsultations';
 import PresentationCommunitySupport from './presentation-dashboard/PresentationCommunitySupport';
 import PresentationTriggerRecorder from './presentation-dashboard/PresentationTriggerRecorder';
-import PresentationStereotypyMonitor from './presentation-dashboard/PresentationStereotypyMonitor';
 import PresentationSecretaryDashboard from './presentation-dashboard/PresentationSecretaryDashboard';
 import PaymentSuccess from './PaymentSuccess';
 import PaymentFailure from './PaymentFailure';
@@ -90,8 +88,6 @@ const DynamicSessionsGraph = () => {
 function App() {
   return (
     <ErrorBoundary>
-      {/* O AuthProvider e o Router foram movidos para o arquivo de entrada (main.jsx ou index.jsx) */}
-      {/* AuthNavigation />*/}
       <Routes>
         {/* Rota Home Pública */}
         <Route index element={<Home />} /> 
@@ -114,7 +110,6 @@ function App() {
         <Route path="/presentation-dashboard/PresentationVirtualConsultations" element={<PresentationVirtualConsultations />} />
         <Route path="/presentation-dashboard/PresentationCommunitySupport" element={<PresentationCommunitySupport />} />
         <Route path="/presentation-dashboard/PresentationTriggerRecorder" element={<PresentationTriggerRecorder />} />
-        <Route path="/presentation-dashboard/PresentationStereotypyMonitor" element={<PresentationStereotypyMonitor />} />
         <Route path="/presentation-dashboard/PresentationSecretaryDashboard" element={<PresentationSecretaryDashboard />} />
         
         {/* Rotas Protegidas */}
@@ -153,10 +148,6 @@ function App() {
         <Route
           path="/stroke-risk-monitor"
           element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}><StrokeRiskMonitor /></ProtectedRoute>}
-        />
-        <Route
-          path="/stereotypy-monitor"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}><StereotypyMonitor /></ProtectedRoute>}
         />
         <Route
           path="/trigger-recorder"
