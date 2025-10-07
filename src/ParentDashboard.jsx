@@ -1,5 +1,5 @@
 // src/pages/ParentDashboard.jsx
-// VERSÃO COMPLETA E REESTRUTURADA
+// VERSÃO MODIFICADA COM DETALHES DO PACIENTE E PRESCRIÇÕES
 
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Container, Navbar, Card, Table, Form, Button, Nav, Tab, Row, Col, Spinner, Alert, Badge, Modal } from 'react-bootstrap';
@@ -15,7 +15,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 // Ícones
-import { GraphUp, Calendar3, ExclamationTriangle, Heart } from 'react-bootstrap-icons';
+import { GraphUp, Calendar3, ExclamationTriangle, Heart, Person, FileEarmarkMedical } from 'react-bootstrap-icons';
 
 // Componente para um Card de Estatística
 const StatCard = ({ title, value, subtitle, icon, color }) => (
@@ -65,6 +65,10 @@ function ParentDashboard() {
     const [professionalAvailability, setProfessionalAvailability] = useState([]);
     const [upcomingAppointments, setUpcomingAppointments] = useState([]);
 
+    // Prescrições Médicas
+    const [prescriptions, setPrescriptions] = useState([]);
+    const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
+
     // ===================================================
     // 2. FUNÇÕES DE FORMATAÇÃO E OPÇÕES DE GRÁFICOS
     // ===================================================
@@ -73,6 +77,12 @@ function ParentDashboard() {
         const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
         return `${age} anos`;
     };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleDateString('pt-BR');
+    };
+
     const lineOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Evolução ao Longo do Tempo' } } };
     const pieOptions = { responsive: true, plugins: { legend: { position: 'right' }, title: { display: true, text: 'Distribuição' } } };
 
@@ -82,7 +92,7 @@ function ParentDashboard() {
     const fetchData = useCallback(async (patientId) => {
         try {
             const [
-                patientRes, professionalsRes, emotionsRes, stereotypiesRes, vocalizationsRes, strokeRes, appointmentsRes
+                patientRes, professionalsRes, emotionsRes, stereotypiesRes, vocalizationsRes, strokeRes, appointmentsRes, prescriptionsRes
             ] = await Promise.all([
                 apiClient.get(`/parent/patient-details/${patientId}`),
                 apiClient.get(`/parent/patient/${patientId}/associated-professionals`),
@@ -90,7 +100,8 @@ function ParentDashboard() {
                 apiClient.get(`/stereotypies/${patientId}`),
                 apiClient.get(`/vocalizations/${patientId}`),
                 apiClient.get(`/stroke-risk/${patientId}`),
-                apiClient.get(`/appointments/patient/${patientId}?status=agendada,confirmada`)
+                apiClient.get(`/appointments/patient/${patientId}?status=agendada,confirmada`),
+                apiClient.get(`/prescriptions/patient/${patientId}`)
             ]);
 
             setPatient(patientRes.data);
@@ -100,6 +111,8 @@ function ParentDashboard() {
             setVocalizations(vocalizationsRes.data);
             setStrokeRisks(strokeRes.data);
             setUpcomingAppointments(appointmentsRes.data);
+            setPrescriptions(prescriptionsRes.data);
+            setFilteredPrescriptions(prescriptionsRes.data);
 
         } catch (err) {
             console.error("Erro ao carregar dados do dashboard:", err);
@@ -167,9 +180,6 @@ function ParentDashboard() {
                 datasets: [{ label: 'Frequência', data: stereotypyTypes.map(type => stereotypyCounts[type]), backgroundColor: ['#17a2b8', '#fd7e14', '#6f42c1'] }]
             });
         }
-        
-        // Adicione processamento para vocalizações e risco de AVC se necessário
-        // ...
 
     }, [emotions, stereotypies, vocalizations, strokeRisks]);
 
@@ -279,9 +289,11 @@ function ParentDashboard() {
                     <Tab.Container id="parent-dashboard-tabs" activeKey={activeTab} onSelect={setActiveTab}>
                         <Nav variant="tabs" className="mb-3">
                             <Nav.Item><Nav.Link eventKey="overview">Visão Geral</Nav.Link></Nav.Item>
+                            <Nav.Item><Nav.Link eventKey="patient-details">Detalhes do Paciente</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="emotion">Emoções</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="vocalization">Vocalizações</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="stroke">Risco de AVC</Nav.Link></Nav.Item>
+                            <Nav.Item><Nav.Link eventKey="prescription">Prescrição Médica</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="appointments">Consultas</Nav.Link></Nav.Item>
                             <Nav.Item><Nav.Link eventKey="monitoring-tools">Ferramentas</Nav.Link></Nav.Item>
                         </Nav>
@@ -304,12 +316,194 @@ function ParentDashboard() {
                                 </Row>
                             </Tab.Pane>
 
+                            <Tab.Pane eventKey="patient-details">
+                                <Row>
+                                    <Col md={12}>
+                                        <Card className="shadow-sm mb-4">
+                                            <Card.Header className="d-flex align-items-center">
+                                                <Person className="me-2" size={20} />
+                                                <h5 className="mb-0">Informações do Paciente</h5>
+                                            </Card.Header>
+                                            <Card.Body>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Table borderless>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td><strong>Nome:</strong></td>
+                                                                    <td>{patient.name}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><strong>Data de Nascimento:</strong></td>
+                                                                    <td>{formatDate(patient.birthDate)}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><strong>Idade:</strong></td>
+                                                                    <td>{formatAge(patient.birthDate)}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><strong>Telefone:</strong></td>
+                                                                    <td>{patient.phone || 'N/A'}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </Table>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Table borderless>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td><strong>Email:</strong></td>
+                                                                    <td>{patient.email || 'N/A'}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><strong>Diagnóstico:</strong></td>
+                                                                    <td>{patient.diagnosis || 'N/A'}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><strong>Responsável:</strong></td>
+                                                                    <td>{patient.parent || user?.nome_completo || 'N/A'}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><strong>Status:</strong></td>
+                                                                    <td><Badge bg="success">Ativo</Badge></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </Table>
+                                                    </Col>
+                                                </Row>
+                                                {patient.notes && (
+                                                    <Row className="mt-3">
+                                                        <Col md={12}>
+                                                            <h6>Observações:</h6>
+                                                            <p className="text-muted">{patient.notes}</p>
+                                                        </Col>
+                                                    </Row>
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                </Row>
+
+                                {/* Profissionais Associados */}
+                                <Row>
+                                    <Col md={12}>
+                                        <Card className="shadow-sm">
+                                            <Card.Header>
+                                                <h5 className="mb-0">Profissionais Associados</h5>
+                                            </Card.Header>
+                                            <Card.Body>
+                                                {associatedProfessionals.length > 0 ? (
+                                                    <Table striped bordered hover responsive>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Nome</th>
+                                                                <th>Especialidade</th>
+                                                                <th>Email</th>
+                                                                <th>Telefone</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {associatedProfessionals.map(prof => (
+                                                                <tr key={prof.id}>
+                                                                    <td>{prof.name}</td>
+                                                                    <td>{prof.specialty || 'N/A'}</td>
+                                                                    <td>{prof.email}</td>
+                                                                    <td>{prof.phone || 'N/A'}</td>
+                                                                    <td><Badge bg="success">Ativo</Badge></td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </Table>
+                                                ) : (
+                                                    <Alert variant="info">Nenhum profissional associado encontrado.</Alert>
+                                                )}
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                </Row>
+                            </Tab.Pane>
+
                             <Tab.Pane eventKey="emotion">
                                 <Card><Card.Header>Análise de Emoções</Card.Header><Card.Body>{emotionDistributionData ? <Pie data={emotionDistributionData} options={pieOptions} /> : <p>Sem dados.</p>}</Card.Body></Card>
                             </Tab.Pane>
                             
-                            <Tab.Pane eventKey="stereotypy">
-                                <Card><Card.Header>Análise de Estereotipias</Card.Header><Card.Body>{stereotypyChartData ? <Bar data={stereotypyChartData} options={{...pieOptions, indexAxis: 'y'}} /> : <p>Sem dados.</p>}</Card.Body></Card>
+                            <Tab.Pane eventKey="vocalization">
+                                <Card><Card.Header>Análise de Vocalizações</Card.Header><Card.Body>{vocalizationChartData ? <Bar data={vocalizationChartData} options={lineOptions} /> : <p>Sem dados.</p>}</Card.Body></Card>
+                            </Tab.Pane>
+
+                            <Tab.Pane eventKey="stroke">
+                                <Card><Card.Header>Análise de Risco de AVC</Card.Header><Card.Body>{strokeChartData ? <Line data={strokeChartData} options={lineOptions} /> : <p>Sem dados.</p>}</Card.Body></Card>
+                            </Tab.Pane>
+
+                            <Tab.Pane eventKey="prescription">
+                                <Card className="shadow-sm">
+                                    <Card.Header className="d-flex align-items-center">
+                                        <FileEarmarkMedical className="me-2" size={20} />
+                                        <h5 className="mb-0">Prescrições Médicas</h5>
+                                    </Card.Header>
+                                    <Card.Body>
+                                        {filteredPrescriptions.length > 0 ? (
+                                            <div className="prescription-list">
+                                                {filteredPrescriptions.map(prescription => (
+                                                    <Card key={prescription.id} className="mb-3 border-start border-primary border-3">
+                                                        <Card.Body>
+                                                            <Row className="mb-3">
+                                                                <Col md={4}>
+                                                                    <strong>Data da Prescrição:</strong><br />
+                                                                    <span className="text-muted">{formatDate(prescription.date)}</span>
+                                                                </Col>
+                                                                <Col md={4}>
+                                                                    <strong>Médico:</strong><br />
+                                                                    <span className="text-muted">{prescription.doctor_name || 'N/A'}</span>
+                                                                </Col>
+                                                                <Col md={4}>
+                                                                    <strong>Registro:</strong><br />
+                                                                    <span className="text-muted">{prescription.doctor_registration || 'N/A'}</span>
+                                                                </Col>
+                                                            </Row>
+                                                            
+                                                            <div className="prescription-content">
+                                                                <h6 className="text-primary mb-3">Prescrição:</h6>
+                                                                <Table striped bordered hover responsive size="sm">
+                                                                    <thead className="table-light">
+                                                                        <tr>
+                                                                            <th>Medicamento/Prescrição</th>
+                                                                            <th>Dosagem/Quantidade</th>
+                                                                            <th>Indicações</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {prescription.medications && prescription.medications.map((med, index) => (
+                                                                            <tr key={`${prescription.id}-${index}`}>
+                                                                                <td><strong>{med.medication}</strong></td>
+                                                                                <td>{med.dosage}</td>
+                                                                                <td>{med.indicationssuggestions || 'N/A'}</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </Table>
+                                                                
+                                                                {prescription.observations && (
+                                                                    <div className="mt-3">
+                                                                        <h6 className="text-secondary">Observações:</h6>
+                                                                        <p className="text-muted bg-light p-3 rounded">{prescription.observations}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </Card.Body>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <Alert variant="info" className="text-center">
+                                                <FileEarmarkMedical size={48} className="mb-3 text-muted" />
+                                                <h6>Nenhuma prescrição médica encontrada</h6>
+                                                <p className="mb-0">As prescrições médicas aparecerão aqui quando forem criadas pelos profissionais.</p>
+                                            </Alert>
+                                        )}
+                                    </Card.Body>
+                                </Card>
                             </Tab.Pane>
 
                             <Tab.Pane eventKey="appointments">
@@ -319,29 +513,80 @@ function ParentDashboard() {
                                         <Button variant="primary" onClick={handleOpenAppointmentModal}>Agendar Nova Consulta</Button>
                                     </Card.Header>
                                     <Card.Body>
-                                        <Table striped bordered hover responsive>
-                                            <thead><tr><th>Data</th><th>Hora</th><th>Profissional</th><th>Status</th></tr></thead>
-                                            <tbody>
-                                                {upcomingAppointments.length > 0 ? upcomingAppointments.map(appt => (
-                                                    <tr key={appt.id}>
-                                                        <td>{new Date(appt.appointment_date).toLocaleDateString('pt-BR')}</td>
-                                                        <td>{appt.appointment_time.substring(0, 5)}</td>
-                                                        <td>{appt.professionalName}</td>
-                                                        <td><Badge bg={appt.status === 'Confirmada' ? 'success' : 'warning'}>{appt.status}</Badge></td>
+                                        {upcomingAppointments.length > 0 ? (
+                                            <Table striped bordered hover responsive>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Data</th>
+                                                        <th>Horário</th>
+                                                        <th>Profissional</th>
+                                                        <th>Tipo</th>
+                                                        <th>Status</th>
+                                                        <th>Observações</th>
                                                     </tr>
-                                                )) : <tr><td colSpan="4" className="text-center">Nenhuma consulta agendada.</td></tr>}
-                                            </tbody>
-                                        </Table>
+                                                </thead>
+                                                <tbody>
+                                                    {upcomingAppointments.map(appointment => (
+                                                        <tr key={appointment.id}>
+                                                            <td>{formatDate(appointment.appointment_date)}</td>
+                                                            <td>{appointment.appointment_time}</td>
+                                                            <td>{appointment.professionalName}</td>
+                                                            <td>{appointment.appointment_type}</td>
+                                                            <td>
+                                                                <Badge bg={appointment.status === 'confirmada' ? 'success' : 'warning'}>
+                                                                    {appointment.status}
+                                                                </Badge>
+                                                            </td>
+                                                            <td>{appointment.notes || 'N/A'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </Table>
+                                        ) : (
+                                            <Alert variant="info">Nenhuma consulta agendada.</Alert>
+                                        )}
                                     </Card.Body>
                                 </Card>
                             </Tab.Pane>
 
                             <Tab.Pane eventKey="monitoring-tools">
                                 <Row>
-                                    <Col md={6} lg={3} className="mb-3"><Button className="w-100 p-3" variant="primary" onClick={() => handleOpenMonitoringTool('/emotion-detector')}>Detector de Emoções</Button></Col>
-                                    <Col md={6} lg={3} className="mb-3"><Button className="w-100 p-3" variant="info" onClick={() => handleOpenMonitoringTool('/stereotypy-monitor')}>Monitor de Estereotipias</Button></Col>
-                                    <Col md={6} lg={3} className="mb-3"><Button className="w-100 p-3" variant="success" onClick={() => handleOpenMonitoringTool('/trigger-recorder')}>Gravador de Voz</Button></Col>
-                                    <Col md={6} lg={3} className="mb-3"><Button className="w-100 p-3" variant="danger" onClick={() => handleOpenMonitoringTool('/stroke-risk-monitor')}>Monitor de Risco de AVC</Button></Col>
+                                    <Col md={4} className="mb-3">
+                                        <Card className="text-center h-100 shadow-sm">
+                                            <Card.Body>
+                                                <Heart className="text-primary mb-3" size={48} />
+                                                <h5>Detector de Emoções</h5>
+                                                <p>Monitore as emoções do paciente em tempo real</p>
+                                                <Button variant="primary" onClick={() => handleOpenMonitoringTool('/emotion-detector')}>
+                                                    Abrir Ferramenta
+                                                </Button>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <Col md={4} className="mb-3">
+                                        <Card className="text-center h-100 shadow-sm">
+                                            <Card.Body>
+                                                <ExclamationTriangle className="text-danger mb-3" size={48} />
+                                                <h5>Monitor de Risco de AVC</h5>
+                                                <p>Avalie sinais de risco de AVC através da análise facial</p>
+                                                <Button variant="danger" onClick={() => handleOpenMonitoringTool('/stroke-risk-monitor')}>
+                                                    Abrir Ferramenta
+                                                </Button>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <Col md={4} className="mb-3">
+                                        <Card className="text-center h-100 shadow-sm">
+                                            <Card.Body>
+                                                <GraphUp className="text-success mb-3" size={48} />
+                                                <h5>Gravador de Gatilhos</h5>
+                                                <p>Registre comportamentos e padrões repetitivos</p>
+                                                <Button variant="success" onClick={() => handleOpenMonitoringTool('/trigger-recorder')}>
+                                                    Abrir Ferramenta
+                                                </Button>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
                                 </Row>
                             </Tab.Pane>
                         </Tab.Content>
@@ -351,46 +596,84 @@ function ParentDashboard() {
 
             {/* Modal de Agendamento */}
             <Modal show={showAppointmentModal} onHide={() => setShowAppointmentModal(false)} size="lg">
-                <Modal.Header closeButton><Modal.Title>Agendar Nova Consulta</Modal.Title></Modal.Header>
-                <Form onSubmit={handleSaveAppointment}>
-                    <Modal.Body>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Profissional*</Form.Label>
-                            <Form.Select name="professionalId" value={newAppointment.professionalId} onChange={handleProfessionalChangeForAppointment} required>
-                                <option value="">Selecione o profissional</option>
-                                {associatedProfessionals.map(prof => (
-                                    <option key={prof.id} value={prof.id}>{prof.name} ({prof.specialty})</option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-                        {newAppointment.professionalId && (
-                            <>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Data*</Form.Label>
-                                    <Form.Control type="date" name="date" value={newAppointment.date} onChange={handleAppointmentInputChange} min={new Date().toISOString().split('T')[0]} required />
+                <Modal.Header closeButton>
+                    <Modal.Title>Solicitar Agendamento</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSaveAppointment}>
+                        <Row className="mb-3">
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Profissional</Form.Label>
+                                    <Form.Select
+                                        name="professionalId"
+                                        value={newAppointment.professionalId}
+                                        onChange={handleProfessionalChangeForAppointment}
+                                        required
+                                    >
+                                        <option value="">Selecione um profissional</option>
+                                        {associatedProfessionals.map(prof => (
+                                            <option key={prof.id} value={prof.id}>{prof.name}</option>
+                                        ))}
+                                    </Form.Select>
                                 </Form.Group>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Horário*</Form.Label>
-                                    <Form.Select name="time" value={newAppointment.time} onChange={handleAppointmentInputChange} required>
-                                        <option value="">Selecione um horário disponível</option>
-                                        {professionalAvailability.filter(slot => slot.date === newAppointment.date).map((slot, index) => (
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Data</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        name="date"
+                                        value={newAppointment.date}
+                                        onChange={handleAppointmentInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col md={6}>
+                                <Form.Group>
+                                    <Form.Label>Horário</Form.Label>
+                                    <Form.Select
+                                        name="time"
+                                        value={newAppointment.time}
+                                        onChange={handleAppointmentInputChange}
+                                        required
+                                    >
+                                        <option value="">Selecione um horário</option>
+                                        {professionalAvailability.map((slot, index) => (
                                             <option key={index} value={slot.time}>{slot.time}</option>
                                         ))}
                                     </Form.Select>
-                                    {newAppointment.date && professionalAvailability.filter(slot => slot.date === newAppointment.date).length === 0 && <small className="text-muted">Nenhum horário disponível para esta data.</small>}
                                 </Form.Group>
-                            </>
-                        )}
-                        <Form.Group className="mb-3">
-                            <Form.Label>Observações (opcional)</Form.Label>
-                            <Form.Control as="textarea" rows={3} name="notes" value={newAppointment.notes} onChange={handleAppointmentInputChange} placeholder="Motivo da consulta, sintomas, etc." />
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setShowAppointmentModal(false)}>Cancelar</Button>
-                        <Button variant="primary" type="submit">Enviar Solicitação</Button>
-                    </Modal.Footer>
-                </Form>
+                            </Col>
+                        </Row>
+                        <Row className="mb-3">
+                            <Col md={12}>
+                                <Form.Group>
+                                    <Form.Label>Observações</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={3}
+                                        name="notes"
+                                        value={newAppointment.notes}
+                                        onChange={handleAppointmentInputChange}
+                                        placeholder="Observações sobre a consulta (opcional)"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <div className="d-flex justify-content-end">
+                            <Button variant="secondary" className="me-2" onClick={() => setShowAppointmentModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" type="submit">
+                                Solicitar Agendamento
+                            </Button>
+                        </div>
+                    </Form>
+                </Modal.Body>
             </Modal>
         </div>
     );
