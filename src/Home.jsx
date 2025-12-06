@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
-import { ArrowRight, Star, Award, People, Heart, FileEarmarkText, Calendar, GraphUp, Calendar2Check, Wallet2, Bell, CheckCircle, PersonVideo, Mic, Sliders, Instagram, Whatsapp, Envelope } from 'react-bootstrap-icons';
+import { ArrowRight, Star, Award, People, Badge, Heart, FileEarmarkText, Calendar, GraphUp, Calendar2Check, Wallet2, Bell, CheckCircle, PersonVideo, Mic, Sliders, Instagram, Whatsapp, Envelope } from 'react-bootstrap-icons';
 import logohori from './assets/logo.png';
 import pais from './assets/pais.png';
 import medicos from './assets/medicos.png';
