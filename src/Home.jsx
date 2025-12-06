@@ -21,6 +21,7 @@ import {
     Instagram,
     Whatsapp,
     Envelope,
+    ExclamationTriangle,
     FileEarmarkText // este é o nome correto
     } from 'react-bootstrap-icons';
 
