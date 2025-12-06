@@ -22,7 +22,12 @@ import {
     Whatsapp,
     Envelope,
     ExclamationTriangle,
-    FileEarmarkText // este é o nome correto
+    Heart,
+    ExclamationTriangle,
+    Sliders,
+    Mic,
+    Calendar,
+    FileEarmarkText
     } from 'react-bootstrap-icons';
 
     import logohori from './assets/logo.png';
@@ -34,11 +39,57 @@ import {
     const Home = () => {
     const { loading } = useContext(AuthContext);
 
-    const benefits = [
-        { id: 1, title: "Conexão Facilitada", description: "Conecte-se facilmente com profissionais especializados e serviços inclusivos em sua região.", icon: <People size={30} /> },
-        { id: 2, title: "Monitoramento Contínuo", description: "Acompanhe o progresso e desenvolvimento com ferramentas avançadas de análise.", icon: <Heart size={30} /> },
-        { id: 3, title: "Suporte 24/7", description: "Acesso a recursos e comunidade de apoio disponível a qualquer momento.", icon: <CheckCircle size={30} /> }
-    ];
+    const [features] = useState([
+        {
+        id: 1,
+        title: "Monitoramento de Emoções",
+        description: "Tecnologia avançada de inteligência artificial para detectar e analisar expressões faciais em tempo real, ajudando a compreender melhor as emoções não verbalizadas e facilitando a comunicação.",
+        icon: <Heart className="feature-icon" size={40} />,
+        link: "/presentation-dashboard/PresentationEmotionDetector",
+        color: "#e74c3c"
+        },
+        {
+        id: 2,
+        title: "Avaliação de Risco de AVC",
+        description: "Ferramenta inovadora que utiliza análise de assimetrias faciais para identificar possíveis sinais de alerta precoces para AVC, proporcionando intervenção rápida e eficaz.",
+        icon: <ExclamationTriangle className="feature-icon" size={40} />,
+        link: "/presentation-dashboard/PresentationStrokeRiskMonitor",
+        color: "#f39c12"
+        },
+        {
+        id: 3,
+        title: "Agendamento Integrado",
+        description: "Sistema completo de agendamento que conecta famílias, profissionais e serviços com lembretes automáticos, confirmações e sincronização de calendários para maior organização.",
+        icon: <Calendar className="feature-icon" size={40} />,
+        link: "/presentation-dashboard/PresentationIntegratedScheduling",
+        color: "#3498db"
+        },
+        {
+        id: 4,
+        title: "Comunidade de Apoio",
+        description: "Fóruns especializados e grupos de discussão moderados para compartilhar experiências, obter suporte emocional e trocar conhecimentos entre famílias e profissionais.",
+        icon: <People className="feature-icon" size={40} />,
+        link: "/presentation-dashboard/PresentationCommunitySupport",
+        color: "#9b59b6"
+        },
+        {
+        id: 5,
+        title: "Consultas Virtuais",
+        description: "Plataforma segura e criptografada para consultas por videochamada, reduzindo deslocamentos e tornando o acompanhamento mais frequente e acessível para todas as famílias.",
+        icon: <ChatDots className="feature-icon" size={40} />,
+        link: "/presentation-dashboard/PresentationVirtualConsultations",
+        color: "#1abc9c"
+        },
+        {
+        id: 6,
+        title: 6,
+        title: "Certificação de Serviços",
+        description: "Programa abrangente de certificação e treinamento para estabelecimentos que desejam oferecer um ambiente adequado e acolhedor para pessoas autistas e suas famílias.",
+        icon: <Award className="feature-icon" size={40} />,
+        link: "/presentation-dashboard/PresentationServiceCertification",
+        color: "#e67e22"
+        }
+    ]);
 
     if (loading) {
         return (
@@ -103,134 +154,56 @@ import {
             </Container>
             </section>
 
-            {/* ==================== RECURSOS EXCLUSIVOS E INOVADORES ==================== */}
+            {/* RECURSOS EXCLUSIVOS E INOVADORES - NOVA VERSÃO DINÂMICA */}
             <section className="features-inovadoras py-5 bg-white" id="section-features">
-            <Container>
+                <Container>
                 <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold mb-4">
-                    Recursos Exclusivos <span className="text-primary">com Tecnologia de Ponta</span>
-                </h2>
-                <p className="lead text-muted col-lg-8 mx-auto">
-                    Ferramentas desenvolvidas com Inteligência Artificial e validação clínica para apoiar famílias e profissionais no dia a dia do TEA.
-                </p>
+                    <h2 className="display-4 fw-bold mb-3">Recursos Exclusivos e Inovadores</h2>
+                    <p className="lead text-muted">Tecnologia de ponta a serviço da inclusão e do desenvolvimento</p>
                 </div>
 
-                <Row className="g-4 g-lg-5 justify-content-center">
+                <Row className="g-5 justify-content-center">
+                    {features.map((feature) => (
+                    <Col key={feature.id} lg={4} md={6}>
+                        <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift position-relative overflow-hidden">
+                        {/* Faixa lateral colorida */}
+                        <div
+                            className="position-absolute start-0 top-0 bottom-0"
+                            style={{
+                            width: '8px',
+                            backgroundColor: feature.color,
+                            borderRadius: '8px 0 0 8px'
+                            }}
+                        />
 
-                {/* 1 - Monitoramento Emocional */}
-                <Col lg={4} md={6}>
-                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-start border-primary border-5">
-                    <div className="mb-4">
-                        <div className="icon-circle bg-gradient-primary text-white mx-auto d-flex align-items-center justify-content-center"
-                            style={{ width: '90px', height: '90px', borderRadius: '50%' }}>
-                        <Heart size={42} />
+                        {/* Ícone com fundo gradiente */}
+                        <div className="mb-4">
+                            <div
+                            className="icon-circle text-white mx-auto d-flex align-items-center justify-content-center shadow"
+                            style={{
+                                width: '90px',
+                                height: '90px',
+                                borderRadius: '50%',
+                                background: `linear-gradient(135deg, ${feature.color}, ${feature.color}dd)`
+                            }}
+                            >
+                            {React.cloneElement(feature.icon, { size: 42 })}
+                            </div>
                         </div>
-                    </div>
-                    <h4 className="fw-bold">Monitoramento Emocional por IA</h4>
-                    <p className="text-muted">
-                        Detecta em tempo real felicidade, tristeza, ansiedade, frustração e neutralidade usando apenas a câmera do celular ou computador.
-                    </p>
-                    <small className="text-success fw-bold">Disponível no app e web</small>
-                    </Card>
-                </Col>
 
-                {/* 2 - Risco de AVC */}
-                <Col lg={4} md={6}>
-                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-start border-danger border-5">
-                    <div className="mb-4">
-                        <div className="icon-circle bg-gradient-danger text-white mx-auto"
-                            style={{ width: '90px', height: '90px', borderRadius: '50%' }}>
-                        <ExclamationTriangle size={42} />
-                        </div>
-                    </div>
-                    <h4 className="fw-bold">Alerta Precoce de Risco de AVC</h4>
-                    <p className="text-muted">
-                        Analisa assimetria facial em segundos — sinal crítico em crianças com TEA — e envia alerta imediato aos responsáveis.
-                    </p>
-                    <small className="text-danger fw-bold">Pode salvar vidas</small>
-                    </Card>
-                </Col>
+                        <h4 className="fw-bold mb-3">{feature.title}</h4>
+                        <p className="text-muted small lh-lg">{feature.description}</p>
 
-                {/* 3 - Vocalizações */}
-                <Col lg={4} md={6}>
-                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-start border-warning border-5">
-                    <div className="mb-4">
-                        <div className="icon-circle bg-gradient-warning text-white mx-auto"
-                            style={{ width: '90px', height: '90px', borderRadius: '50%' }}>
-                        <Mic size={42} />
-                        </div>
-                    </div>
-                    <h4 className="fw-bold">Analisador de Vocalizações</h4>
-                    <p className="text-muted">
-                        Grava, transcreve e analisa padrões de fala: ecolalia, diversidade lexical, volume, velocidade e repetições.
-                    </p>
-                    <small className="text-warning fw-bold">Ideal para fonoaudiólogos</small>
-                    </Card>
-                </Col>
-
-                {/* 4 - Estereotipias (se quiser ativar depois) */}
-                {/* <Col lg={4} md={6}>
-                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-start border-info border-5">
-                    <div className="mb-4">
-                        <div className="icon-circle bg-gradient-info text-white mx-auto"
-                            style={{ width: '90px', height: '90px', borderRadius: '50%' }}>
-                        <PersonVideo size={42} />
-                        </div>
-                    </div>
-                    <h4 className="fw-bold">Detector de Estereotipias</h4>
-                    <p className="text-muted">
-                        Monitora automaticamente balançar de corpo, bater de mãos, giros e outros movimentos repetitivos pela webcam.
-                    </p>
-                    <small className="text-info fw-bold">Em breve</small>
-                    </Card>
-                </Col> */}
-
-                {/* 5 - Relatórios Científicos */}
-                <Col lg={4} md={6}>
-                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-start border-success border-5">
-                    <div className="mb-4">
-                        <div className="icon-circle bg-gradient-success text-white mx-auto"
-                            style={{ width: '90px', height: '90px', borderRadius: '50%' }}>
-                        <GraphUp size={42} />
-                        </div>
-                    </div>
-                    <h4 className="fw-bold">Relatórios Científicos Automáticos</h4>
-                    <p className="text-muted">
-                        Gráficos prontos de evolução (comunicação, interação social, comportamento) em PDF com 1 clique — perfeito para laudos e reuniões.
-                    </p>
-                    <small className="text-success fw-bold">Usado por +300 profissionais</small>
-                    </Card>
-                </Col>
-
-                {/* 6 - Prescrição Digital */}
-                <Col lg={4} md={6}>
-                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-start border-purple border-5">
-                    <div className="mb-4">
-                        <div className="icon-circle text-white mx-auto"
-                            style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'linear-gradient(135deg, #6f42c1, #a777e3)' }}>
-                        <FileEarmarkText size={42} />
-                        </div>
-                    </div>
-                    <h4 className="fw-bold">Prescrição & Laudo Digital</h4>
-                    <p className="text-muted">
-                        Modelos prontos, carimbo digital, assinatura eletrônica e impressão otimizada para entrega aos pais.
-                    </p>
-                    <small className="text-purple fw-bold">100% dentro da LGPD</small>
-                    </Card>
-                </Col>
-
+                        <Link to={feature.link} className="mt-auto">
+                            <Button variant="outline-primary" size="sm" className="mt-3">
+                            Explorar Recurso <ArrowRight className="ms-2" size={16} />
+                            </Button>
+                        </Link>
+                        </Card>
+                    </Col>
+                    ))}
                 </Row>
-
-                {/* Call to action no final da seção */}
-                <div className="text-center mt-5">
-                <p className="fs-5 text-muted mb-4">
-                    Tudo isso já está <strong>incluído</strong> nos planos a partir de R$ 47/mês
-                </p>
-                <Link to="/signup" className="btn btn-primary btn-lg px-5 shadow">
-                    Começar Agora – Teste Grátis 7 Dias
-                </Link>
-                </div>
-            </Container>
+                </Container>
             </section>
 
 
