@@ -2531,3 +2531,17 @@ p, span, div {
     text-align: center;
   }
 }
+
+
+/* css para a section de planos no arquivo home */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+}
+
+.icon-circle {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}

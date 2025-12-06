@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
-import { ArrowRight, Star, Award, People, Heart, Calendar, CheckCircle, PersonVideo, Mic, Sliders, Instagram, Whatsapp } from 'react-bootstrap-icons';
+import { ArrowRight, Star, Award, People, Heart, Calendar, CheckCircle, PersonVideo, Mic, Sliders, Instagram, Whatsapp, Envelope } from 'react-bootstrap-icons';
 import logohori from './assets/logo.png';
 import pais from './assets/pais.png';
 import medicos from './assets/medicos.png';
@@ -47,14 +47,14 @@ const Home = () => {
             link: "/presentation-dashboard/PresentationTriggerRecorder",
             color: "#9b59b6"
         },
-        {
+        /* {
             id: 5,
             title: "Detector de Estereotipias",
             description: "Utilize a webcam para monitorar e registrar a frequência e duração de comportamentos repetitivos, como balançar o corpo ou movimentos de mãos.",
             icon: <PersonVideo className="feature-icon" size={40} />,
             link: "/presentation-dashboard/PresentationStereotypyMonitor",
             color: "#1abc9c"
-        },
+        },*/
         {
             id: 6,
             title: "Gestão para Secretárias",
@@ -195,75 +195,133 @@ const Home = () => {
                 </Container>
             </section>
 
-            <section className="features-section py-5" id="section-features">
-                <Container>
-                    <div className="text-center mb-5">
-                        <h2 className="display-4 fw-bold mb-3">Recursos Exclusivos e Inovadores</h2>
-                        <p className="lead text-muted">Tecnologia de ponta a serviço da inclusão e do desenvolvimento</p>
+            {/* ===================================================
+                SEÇÃO: AUTISCONNECT PARA PROFISSIONAIS E CLÍNICAS
+            =================================================== */}
+            <section className="py-5" style={{ backgroundColor: '#f0f5ff' }}>
+            <Container>
+                <div className="text-center mb-5">
+                <h2 className="display-5 fw-bold mb-4">
+                    Feito para <span className="text-primary">Profissionais e Clínicas</span> que Transformam Vidas
+                </h2>
+                <p className="lead text-muted col-lg-9 mx-auto">
+                    Tenha controle total dos seus pacientes, evolua com dados reais, gerencie sua agenda e financeiro em um só lugar.
+                </p>
+                <div className="mt-4">
+                    <h3 className="display-6 fw-bold text-primary">
+                    A partir de apenas <span className="text-dark">R$ 97/mês</span>
+                    </h3>
+                    <p className="text-muted fs-5">Plano Analisar 50 – o mais escolhido por profissionais</p>
+                </div>
+                </div>
+
+                <Row className="g-5 justify-content-center">
+
+                {/* Card 1 */}
+                <Col lg={4} md={6}>
+                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
+                    <div className="mb-4">
+                        <div className="icon-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center"
+                            style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
+                        <People size={38} />
+                        </div>
                     </div>
-                    <Row className="g-4">
-                        {features.map((feature, index) => (
-                            <Col lg={4} md={6} className="mb-4" key={feature.id}>
-                                <Card className="feature-card h-100">
-                                    <Card.Body className="text-center">
-                                        <div className="feature-icon-wrapper mb-3" style={{ background: `linear-gradient(135deg, ${feature.color}15 0%, ${feature.color}25 100%)` }}>
-                                            <div style={{ color: feature.color }}>
-                                                {feature.icon}
-                                            </div>
-                                        </div>
-                                        <Card.Title className="h4 mb-3">{feature.title}</Card.Title>
-                                        <Card.Text className="text-muted mb-4">{feature.description}</Card.Text>
-                                        <Link to={feature.link} className="text-decoration-none">
-                                            <Button variant="outline-primary" className="w-100">
-                                                Explorar Recurso <ArrowRight className="ms-2" size={16} />
-                                            </Button>
-                                        </Link>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </Container>
-            </section>
-            <section className="pricing-section py-5" id="section-pricing">
-                <Container>
-                    <div className="text-center mb-5">
-                        <h2 className="display-4 fw-bold mb-3">Escolha o Plano Ideal para Você</h2>
-                        <p className="lead text-muted">Planos mensais flexíveis para famílias e profissionais.</p>
+                    <h4>Gestão Completa de Pacientes</h4>
+                    <p className="text-muted">
+                        Cadastro ilimitado, histórico clínico, evolução por métricas validadas, notas evolutivas e prescrições digitais.
+                    </p>
+                    </Card>
+                </Col>
+
+                {/* Card 2 */}
+                <Col lg={4} md={6}>
+                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
+                    <div className="mb-4">
+                        <div className="icon-circle bg-success text-white mx-auto"
+                            style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
+                        <GraphUp size={38} />
+                        </div>
                     </div>
-                    <Row className="g-4 justify-content-center">
-                        {plans.map(plan => (
-                            <Col lg={4} md={6} className="mb-4" key={plan.id}>
-                                <Card className="h-100 shadow-lg border-0 pricing-card">
-                                    <Card.Body className="d-flex flex-column">
-                                        <Card.Title className="h3 fw-bold text-center mb-3 text-primary">{plan.name}</Card.Title>
-                                        <Card.Text className="text-center text-muted mb-4">{plan.description}</Card.Text>
-                                        <div className="text-center mb-4">
-                                            <span className="display-5 fw-bold">{plan.price}</span>
-                                            <span className="text-muted">{plan.period}</span>
-                                        </div>
-                                        <ul className="list-unstyled mb-5 flex-grow-1">
-                                            {plan.features.map((feature, index) => (
-                                                <li key={index} className="mb-2 d-flex align-items-start">
-                                                    <CheckCircle className="text-success me-2 mt-1" size={18} />
-                                                    <span>{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <div className="mt-auto">
-                                            <Link to={plan.link} className="text-decoration-none">
-                                                <Button variant="primary" size="lg" className="w-100">
-                                                    Assinar Agora
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </Container>
+                    <h4>Relatórios Científicos Automáticos</h4>
+                    <p className="text-muted">
+                        Gráficos de progresso, distribuição de diagnósticos, evolução por domínio (comunicação, social, comportamento) prontos para laudos.
+                    </p>
+                    </Card>
+                </Col>
+
+                {/* Card 3 */}
+                <Col lg={4} md={6}>
+                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
+                    <div className="mb-4">
+                        <div className="icon-circle bg-info text-white mx-auto"
+                            style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
+                        <Calendar2Check size={38} />
+                        </div>
+                    </div>
+                    <h4>Agenda + Financeiro Integrado</h4>
+                    <p className="text-muted">
+                        Controle de consultas, valores, formas de pagamento, status financeiro.
+                    </p>
+                    </Card>
+                </Col>
+
+                {/* Card 4 */}
+                <Col lg={4} md={6}>
+                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
+                    <div className="mb-4">
+                        <div className="icon-circle bg-warning text-white mx-auto"
+                            style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
+                        <FileEarmarkText size={38} />
+                        </div>
+                    </div>
+                    <h4>Prescrições e Laudos Profissionais</h4>
+                    <p className="text-muted">
+                        Modelos prontos com impressão otimizada para entrega aos responsáveis.
+                    </p>
+                    </Card>
+                </Col>
+
+                {/* Card 5 */}
+                <Col lg={4} md={6}>
+                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift">
+                    <div className="mb-4">
+                        <div className="icon-circle bg-danger text-white mx-auto"
+                            style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
+                        <Bell size={38} />
+                        </div>
+                    </div>
+                    <h4>Notificações e Lembretes</h4>
+                    <p className="text-muted">
+                        Avisos automáticos para consultas, reavaliações e pendências financeiras.
+                    </p>
+                    </Card>
+                </Col>
+
+                {/* Card 6 - Destaque */}
+                <Col lg={4} md={6}>
+                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift border-primary position-relative">
+                    <div className="position-absolute top-0 start-50 translate-middle-x bg-primary text-white px-4 py-1 rounded-pill small fw-bold">
+                        MAIS VENDIDO
+                    </div>
+                    <div className="mb-4 pt-3">
+                        <div className="icon-circle bg-purple text-white mx-auto"
+                            style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#6f42c1' }}>
+                        <Wallet2 size={38} />
+                        </div>
+                    </div>
+                    <h4>Planos Analisar 50 até 500</h4>
+                    <p className="text-muted">
+                        Até <strong>500 pacientes ativos</strong> por mês.<br />
+                        Ideal para clínicas grandes e supervisores.
+                    </p>
+                    <Badge bg="primary" className="fs-6">A partir de R$ 297/mês</Badge>
+                    </Card>
+                </Col>
+
+                </Row>
+            </Container>
             </section>
+
             <section className="services-section py-5" id="section-services">
                 <Container>
                     <div className="text-center mb-5">
@@ -373,7 +431,14 @@ const Home = () => {
                     </Col>
                     <Col md={6} className="text-center text-md-end">
                         <p className="mb-0">
-                            Contato: <a href="mailto:autisconnect@gmail.com" className="text-white-50">autisconnect@gmail.com</a> | <Whatsapp size={16} className="me-1" /> <a href="https://wa.me/5581982540904" target="_blank" rel="noopener noreferrer" className="text-white-50">WhatsApp: 81 98254-0904</a>
+                            Contato:
+                            <a href="mailto:autisconnect@gmail.com" className="text-white-50">
+                                <Envelope size={16} className="me-1" /> autisconnect@gmail.com
+                            </a> |
+                            <Whatsapp size={16} className="me-1" />
+                            <a href="https://wa.me/5581982540904" target="_blank" rel="noopener noreferrer" className="text-white-50">
+                                WhatsApp: 81 98254-0904
+                            </a>
                             <a href="https://www.instagram.com/autisconnect" target="_blank" rel="noopener noreferrer" className="text-white-50 ms-3">
                                 <Instagram size={20} className="me-1" /> @autisconnect
                             </a>
