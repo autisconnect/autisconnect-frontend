@@ -2545,3 +2545,17 @@ p, span, div {
 .icon-circle {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
+
+.bg-gradient-primary   { background: linear-gradient(135deg, #007bff, #6610f2) !important; }
+.bg-gradient-danger    { background: linear-gradient(135deg, #dc3545, #fd7e14) !important; }
+.bg-gradient-warning   { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; }
+.bg-gradient-success   { background: linear-gradient(135deg, #28a745, #20c997) !important; }
+.text-purple { color: #6f42c1; }
+
+.hover-lift {
+  transition: all 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
