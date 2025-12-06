@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Carousel, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
-import { ArrowRight, Star, Award, People, Heart, Calendar, ChatDots, CheckCircle, PersonVideo, Mic, Sliders } from 'react-bootstrap-icons';
+import { ArrowRight, Star, Award, People, Heart, Calendar, CheckCircle, PersonVideo, Mic, Sliders, Instagram, Whatsapp } from 'react-bootstrap-icons';
 import logohori from './assets/logo.png';
 import pais from './assets/pais.png';
 import medicos from './assets/medicos.png';
@@ -11,50 +11,8 @@ import './App.css';
 
 const Home = () => {
     const { user, loading } = useContext(AuthContext);
-    const [showWelcome, setShowWelcome] = useState(false);
-    const [isVisible, setIsVisible] = useState({});
 
-    const [testimonials] = useState([
-        {
-            id: 1,
-            name: "Maria Silva",
-            role: "Mãe de criança autista",
-            text: "O AutisConnect transformou nossa rotina. Conseguimos encontrar profissionais especializados e acompanhar o progresso do meu filho de forma simples e eficiente. A plataforma nos deu esperança e direcionamento.",
-            rating: 5,
-            location: "São Paulo, SP"
-        },
-        {
-            id: 2,
-            name: "Dr. Carlos Mendes",
-            role: "Neurologista Pediátrico",
-            text: "Como profissional, a plataforma me permite acompanhar meus pacientes remotamente e colaborar com outros especialistas. A ferramenta de detecção de emoções é revolucionária e tem ajudado muito no diagnóstico.",
-            rating: 5,
-            location: "Rio de Janeiro, RJ"
-        },
-        {
-            id: 3,
-            name: "Restaurante Inclusivo Sabores",
-            role: "Serviço Local Parceiro",
-            text: "Desde que nos cadastramos no AutisConnect, recebemos treinamento especializado e aumentamos significativamente nosso atendimento a famílias com crianças autistas. Uma parceria que beneficia a todos.",
-            rating: 5,
-            location: "Belo Horizonte, MG"
-        },
-        {
-            id: 4,
-            name: "Ana Paula Rodrigues",
-            role: "Terapeuta Ocupacional",
-            text: "A integração entre profissionais na plataforma facilita muito o trabalho multidisciplinar. Posso acompanhar o progresso dos pacientes em tempo real e ajustar as terapias conforme necessário.",
-            rating: 5,
-            location: "Porto Alegre, RS"
-        }
-    ]);
 
-    const [stats, setStats] = useState({
-        families: 0,
-        professionals: 0,
-        services: 0,
-        successStories: 0
-    });
 
     const [features] = useState([
         {
@@ -107,6 +65,51 @@ const Home = () => {
         }
     ]);
 
+    const [plans] = useState([
+        {
+            id: 1,
+            name: "Plano Organizar",
+            price: "R$ 19,90", // Preço estimado, pois não foi fornecido
+            period: "/mês",
+            description: "Ideal para famílias que precisam de organização e suporte básico.",
+            features: [
+                "Acesso ao Portal de Pais",
+                "Organização de Rotinas e Agendas",
+                "Comunicação com Profissionais (Limitada)",
+                "Acesso à Comunidade de Apoio"
+            ],
+            link: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=ff7bcc9a70d74fa593d25a433d8b03ba"
+        },
+        {
+            id: 2,
+            name: "Plano Acompanhar+",
+            price: "R$ 49,90", // Preço estimado, pois não foi fornecido
+            period: "/mês",
+            description: "Para quem busca monitoramento e ferramentas avançadas de acompanhamento.",
+            features: [
+                "Tudo do Plano Organizar",
+                "Monitoramento de Progresso Detalhado",
+                "Ferramentas de IA (Monitoramento Emocional, etc.)",
+                "Relatórios de Desenvolvimento"
+            ],
+            link: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=c9b9e97b5b84405e88b9eab5f0d57490"
+        },
+        {
+            id: 3,
+            name: "Plano Gerenciar",
+            price: "R$ 99,90", // Preço estimado, pois não foi fornecido
+            period: "/mês",
+            description: "Solução completa para profissionais e clínicas que gerenciam múltiplos pacientes.",
+            features: [
+                "Tudo do Plano Acompanhar+",
+                "Dashboard Profissional Completo",
+                "Gestão de Múltiplos Pacientes",
+                "Suporte Prioritário"
+            ],
+            link: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=d6cea38104bc406780de450002dc6b09"
+        }
+    ]);
+
     const [benefits] = useState([
         {
             id: 1,
@@ -128,50 +131,14 @@ const Home = () => {
         }
     ]);
 
-    useEffect(() => {
-        const timer = setTimeout(() => setShowWelcome(true), 1000);
 
-        const statsInterval = setInterval(() => {
-            setStats(prev => ({
-                families: Math.min(prev.families + 12, 1450),
-                professionals: Math.min(prev.professionals + 6, 520),
-                services: Math.min(prev.services + 3, 240),
-                successStories: Math.min(prev.successStories + 4, 380)
-            }));
-        }, 50);
-
-        return () => {
-            clearTimeout(timer);
-            clearInterval(statsInterval);
-        };
-    }, []);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setIsVisible(prev => ({
-                            ...prev,
-                            [entry.target.id]: true
-                        }));
-                    }
-                });
-            },
-            { threshold: 0.1 }
-        );
-
-        const sections = document.querySelectorAll('[id^="section-"]');
-        sections.forEach((section) => observer.observe(section));
-
-        return () => observer.disconnect();
-    }, []);
 
     if (loading) {
         return <div>Carregando...</div>;
     }
 
     return (
+        <>
         <div className="home-page">
             <section className="hero-section" id="section-hero">
                 <Container>
@@ -227,44 +194,7 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
-            <section className="stats-section py-5" id="section-stats">
-                <Container>
-                    <div className="text-center mb-5">
-                        <h2 className="display-4 fw-bold mb-3">Nosso Impacto em Números</h2>
-                        <p className="lead text-muted">Veja como estamos transformando vidas e construindo uma comunidade mais inclusiva</p>
-                    </div>
-                    <Row className="g-4">
-                        <Col lg={3} md={6} className="mb-4">
-                            <div className="stat-item text-center">
-                                <div className="stat-number">{stats.families.toLocaleString()}+</div>
-                                <p className="stat-label">Famílias Conectadas</p>
-                                <small className="text-muted">Famílias que encontraram suporte e orientação</small>
-                            </div>
-                        </Col>
-                        <Col lg={3} md={6} className="mb-4">
-                            <div className="stat-item text-center">
-                                <div className="stat-number">{stats.professionals.toLocaleString()}+</div>
-                                <p className="stat-label">Profissionais Especializados</p>
-                                <small className="text-muted">Médicos, terapeutas e especialistas cadastrados</small>
-                            </div>
-                        </Col>
-                        <Col lg={3} md={6} className="mb-4">
-                            <div className="stat-item text-center">
-                                <div className="stat-number">{stats.services.toLocaleString()}+</div>
-                                <p className="stat-label">Serviços Inclusivos</p>
-                                <small className="text-muted">Estabelecimentos certificados e parceiros</small>
-                            </div>
-                        </Col>
-                        <Col lg={3} md={6} className="mb-4">
-                            <div className="stat-item text-center">
-                                <div className="stat-number">{stats.successStories.toLocaleString()}+</div>
-                                <p className="stat-label">Histórias de Sucesso</p>
-                                <small className="text-muted">Casos de sucesso documentados</small>
-                            </div>
-                        </Col>
-                    </Row>
-                </Container>
-            </section>
+
             <section className="features-section py-5" id="section-features">
                 <Container>
                     <div className="text-center mb-5">
@@ -288,6 +218,45 @@ const Home = () => {
                                                 Explorar Recurso <ArrowRight className="ms-2" size={16} />
                                             </Button>
                                         </Link>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                </Container>
+            </section>
+            <section className="pricing-section py-5" id="section-pricing">
+                <Container>
+                    <div className="text-center mb-5">
+                        <h2 className="display-4 fw-bold mb-3">Escolha o Plano Ideal para Você</h2>
+                        <p className="lead text-muted">Planos mensais flexíveis para famílias e profissionais.</p>
+                    </div>
+                    <Row className="g-4 justify-content-center">
+                        {plans.map(plan => (
+                            <Col lg={4} md={6} className="mb-4" key={plan.id}>
+                                <Card className="h-100 shadow-lg border-0 pricing-card">
+                                    <Card.Body className="d-flex flex-column">
+                                        <Card.Title className="h3 fw-bold text-center mb-3 text-primary">{plan.name}</Card.Title>
+                                        <Card.Text className="text-center text-muted mb-4">{plan.description}</Card.Text>
+                                        <div className="text-center mb-4">
+                                            <span className="display-5 fw-bold">{plan.price}</span>
+                                            <span className="text-muted">{plan.period}</span>
+                                        </div>
+                                        <ul className="list-unstyled mb-5 flex-grow-1">
+                                            {plan.features.map((feature, index) => (
+                                                <li key={index} className="mb-2 d-flex align-items-start">
+                                                    <CheckCircle className="text-success me-2 mt-1" size={18} />
+                                                    <span>{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className="mt-auto">
+                                            <Link to={plan.link} className="text-decoration-none">
+                                                <Button variant="primary" size="lg" className="w-100">
+                                                    Assinar Agora
+                                                </Button>
+                                            </Link>
+                                        </div>
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -368,45 +337,7 @@ const Home = () => {
                     </Row>
                 </Container>
             </section>
-            <section className="testimonials-section py-5" id="section-testimonials">
-                <Container>
-                    <div className="text-center mb-5">
-                        <h2 className="display-4 fw-bold mb-3">Histórias Reais de Transformação</h2>
-                        <p className="lead text-muted">Veja como o AutisConnect está mudando vidas em todo o Brasil</p>
-                    </div>
-                    <Carousel indicators controls interval={6000} className="testimonial-carousel">
-                        {testimonials.map(testimonial => (
-                            <Carousel.Item key={testimonial.id}>
-                                <Card className="testimonial-card mx-auto">
-                                    <Card.Body>
-                                        <div className="testimonial-rating mb-4">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star
-                                                    key={i}
-                                                    fill={i < testimonial.rating ? "#FFD700" : "none"}
-                                                    color={i < testimonial.rating ? "#FFD700" : "#e4e5e9"}
-                                                    className="me-1"
-                                                    size={24}
-                                                />
-                                            ))}
-                                        </div>
-                                        <Card.Text className="mb-4 fs-5">
-                                            "{testimonial.text}"
-                                        </Card.Text>
-                                        <div className="d-flex flex-column align-items-center">
-                                            <Card.Subtitle className="fw-bold text-primary mb-1">
-                                                {testimonial.name}
-                                            </Card.Subtitle>
-                                            <small className="text-muted mb-1">{testimonial.role}</small>
-                                            <small className="text-muted">{testimonial.location}</small>
-                                        </div>
-                                    </Card.Body>
-                                </Card>
-                            </Carousel.Item>
-                        ))}
-                    </Carousel>
-                </Container>
-            </section>
+
             <section className="cta-section py-5" id="section-cta">
                 <Container className="text-center">
                     <Row className="justify-content-center">
@@ -426,16 +357,32 @@ const Home = () => {
                                     </Button>
                                 </Link>
                             </div>
-                            <div className="mt-4">
-                                <small className="text-white-50">
-                                    Nrmendfsystems
-                                </small>
-                            </div>
+
                         </Col>
                     </Row>
                 </Container>
             </section>
         </div>
+        <footer className="footer-section py-4 bg-dark text-white-50">
+            <Container>
+                <Row className="justify-content-between align-items-center">
+                    <Col md={6} className="text-center text-md-start mb-3 mb-md-0">
+                        <p className="mb-0">
+                            &copy; {new Date().getFullYear()} Nf Representacoes Comerciais e Distribuicao Ltda 45.765.916/0001-70. Todos os direitos reservados.
+                        </p>
+                    </Col>
+                    <Col md={6} className="text-center text-md-end">
+                        <p className="mb-0">
+                            Contato: <a href="mailto:autisconnect@gmail.com" className="text-white-50">autisconnect@gmail.com</a> | <Whatsapp size={16} className="me-1" /> <a href="https://wa.me/5581982540904" target="_blank" rel="noopener noreferrer" className="text-white-50">WhatsApp: 81 98254-0904</a>
+                            <a href="https://www.instagram.com/autisconnect" target="_blank" rel="noopener noreferrer" className="text-white-50 ms-3">
+                                <Instagram size={20} className="me-1" /> @autisconnect
+                            </a>
+                        </p>
+                    </Col>
+                </Row>
+            </Container>
+        </footer>
+        </>
     );
 };
 
