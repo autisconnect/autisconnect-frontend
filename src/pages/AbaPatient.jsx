@@ -13,7 +13,7 @@ import AbaAiAnalysis from '../components/AbaAiAnalysis';
 // import AbaProgramSuggestions from '../components/AbaProgramSuggestions';
 // import AbaProgramMonitoring from '../components/AbaProgramMonitoring';
 
-import '../app.css';
+import './App.css';
 
 const AbaPatient = ({ patientId }) => {
     const [activeTab, setActiveTab] = useState('dashboard');
