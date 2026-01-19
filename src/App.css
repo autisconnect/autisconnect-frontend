@@ -2559,3 +2559,175 @@ p, span, div {
   transform: translateY(-10px);
   box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* DashboardABA.css - Padrão visual AutisConnect */
+
+.dashboard-aba-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Header padrão com logo e título */
+.aba-header-row {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+  border-radius: 0 0 20px 20px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.aba-header-row .details-logo {
+  height: 60px;
+  object-fit: contain;
+}
+
+.aba-header-row h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.aba-header-row p {
+  font-size: 1.1rem;
+  opacity: 0.95;
+  margin-bottom: 0;
+}
+
+.back-button-standalone {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-button-standalone:hover {
+  background-color: white;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+/* Cards gerais */
+.dashboard-aba-page .card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.dashboard-aba-page .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-aba-page .card-header {
+  background: linear-gradient(to right, #f093fb 0%, #f5576c 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+}
+
+/* Tabs customizadas */
+.dashboard-aba-page .nav-tabs {
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-aba-page .nav-tabs .nav-link {
+  color: #6c757d;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  transition: all 0.3s ease;
+}
+
+.dashboard-aba-page .nav-tabs .nav-link:hover {
+  color: #667eea;
+}
+
+.dashboard-aba-page .nav-tabs .nav-link.active {
+  color: #667eea;
+  background-color: transparent;
+  border-bottom: 3px solid #667eea;
+  font-weight: 700;
+}
+
+/* Cards de habilidades (seleção na aba Níveis de Auxílio) */
+.habilidade-card {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.habilidade-card:hover {
+  border-color: #d0d0ff;
+  background-color: #f8f9ff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.15);
+}
+
+.habilidade-card.selected {
+  border-color: #667eea;
+  background-color: #eef2ff;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.habilidade-card p:first-child {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.4rem;
+}
+
+.habilidade-card p:last-child {
+  font-size: 0.85rem;
+  color: #764ba2;
+  font-weight: 500;
+}

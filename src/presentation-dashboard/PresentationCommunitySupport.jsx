@@ -175,7 +175,10 @@ function PresentationCommunitySupport() {
                     <Container>
                         <Row>
                             <Col className="text-center">
-                                <p className="mb-0 text-muted">© 2025 Autisconnect. Todos os direitos reservados.</p>
+                                <p className="mb-0">
+                                    © {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
+                                    <small>Todos os direitos reservados.</small>
+                                </p>
                             </Col>
                         </Row>
                     </Container>

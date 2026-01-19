@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import { Line, Bar, Pie, Radar } from 'react-chartjs-2';
 import apiClient from './services/api';
+import AbaPatient from './pages/AbaPatient';
 
 import logohori from './assets/logo.png';
 import sloganProfissional from './assets/18.jpg';
@@ -33,6 +34,7 @@ const ROUTES = {
     EMOTION_DETECTOR: '/emotion-detector',
     STROKE_RISK_MONITOR: '/stroke-risk-monitor',
     TRIGGER_RECORDER: '/trigger-recorder',
+    ABA_MODULE: '/aba/patient',
 };
 
 const PatientDetails = () => {
@@ -945,6 +947,9 @@ const PatientDetails = () => {
                             <Nav.Item>
                                 <Nav.Link eventKey="prescription">Prescrição Médica</Nav.Link>
                             </Nav.Item>
+                            {/*<Nav.Item>
+                                <Nav.Link eventKey="aba">ABA</Nav.Link>
+                            </Nav.Item>*/}
                         </Nav>
 
                         <Tab.Content>
@@ -990,7 +995,7 @@ const PatientDetails = () => {
                                             </Col>
                                         </Row>
                                     </Col>
-                                    <Col md={6} className="mb-4">
+                                    {/* <Col md={6} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header>
                                                 <h5 className="mb-0">Evolução de Gatilhos e Estereotipias</h5>
@@ -999,7 +1004,7 @@ const PatientDetails = () => {
                                                 {triggerData ? <Line data={triggerData} options={lineOptions} /> : <p>Carregando...</p>}
                                             </Card.Body>
                                         </Card>
-                                    </Col>
+                                    </Col> */}
                                     <Col md={6} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header>
@@ -1169,14 +1174,14 @@ const PatientDetails = () => {
                                             <Card.Body>
                                                 {vocalizationAnalysis ? (
                                                     <Row className="mb-3 text-center">
-                                                        <Col><strong>Total de Gravações:</strong>  
-                            {vocalizationAnalysis.totalRecordings}</Col>
-                                                        <Col><strong>Média de Palavras:</strong>  
-                            {vocalizationAnalysis.averageWordCount}</Col>
-                                                        <Col><strong>Diversidade Léxica:</strong>  
-                            {vocalizationAnalysis.averageLexicalDiversity}%</Col>
-                                                        <Col><strong>Repetição Dominante:</strong>  
-                            <Badge bg="warning">{vocalizationAnalysis.dominantRepetition}</Badge></Col>
+                                                        <Col><strong>Total de Gravações:</strong>
+                                                            {vocalizationAnalysis.totalRecordings}</Col>
+                                                                <Col><strong>Média de Palavras:</strong>
+                                                            {vocalizationAnalysis.averageWordCount}</Col>
+                                                                <Col><strong>Diversidade Léxica:</strong>
+                                                            {vocalizationAnalysis.averageLexicalDiversity}%</Col>
+                                                                <Col><strong>Repetição Dominante:</strong>
+                                                            <Badge bg="warning">{vocalizationAnalysis.dominantRepetition}</Badge></Col>
                                                     </Row>
                                                 ) : <p className="text-muted text-center">Aguardando dados para exibir métricas.</p>}
                                                 
@@ -1238,8 +1243,8 @@ const PatientDetails = () => {
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Evolução do Índice de Assimetria Facial</h5></Card.Header>
                                             <Card.Body>
-                                                {strokeData && strokeData.labels.length > 0 ? 
-                                                    <Line data={strokeData} options={lineOptions} /> : 
+                                                {strokeData && strokeData.labels.length > 0 ?
+                                                    <Line data={strokeData} options={lineOptions} /> :
                                                     <p>Não há dados suficientes para exibir a evolução.</p>
                                                 }
                                             </Card.Body>
@@ -1299,9 +1304,11 @@ const PatientDetails = () => {
                                     </Col>
                                 </Row>
                             </Tab.Pane>
-                        
-                            <Tab.Pane eventKey="emotion" className="no-print">
-                                <Row>
+                                <Tab.Pane eventKey="aba" className="no-print">
+                                <AbaPatient patientId={patientId} />
+                            </Tab.Pane>
+
+                            <Tab.Pane eventKey="emotion" className="no-print">                               <Row>
                                     {/* ================================================================== */}
                                     {/* ================ GRÁFICOS DE VISUALIZAÇÃO DE DADOS =============== */}
                                     {/* ================================================================== */}
@@ -1468,12 +1475,33 @@ const PatientDetails = () => {
                                                             className="mt-auto"
                                                             aria-label="Abrir Gravador de Gatilhos"
                                                         >
-                                                            Abrir Gravador de Voz
+                                                        Abrir Gravador de Voz
+                                                    </Button>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        {/*<Col md={6} className="mb-4">
+                                            <Card className="h-100">
+                                                <Card.Body className="d-flex flex-column align-items-center">
+                                                    <h5 className="monitoring-title text-primary">Módulo ABA</h5>
+                                                        <a
+                                                        href={`/aba-dashboard/${patientId}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-100"
+                                                        >
+                                                        <Button
+                                                            variant="primary"
+                                                            className="mt-auto w-100 btn-lg"
+                                                            aria-label="Abrir Módulo ABA"
+                                                        >
+                                                            Abrir Módulo ABA
                                                         </Button>
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                        </Row>
+                                                        </a>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>*/}
+                                    </Row>
                                     </Card.Body>
                                 </Card>
                             </Tab.Pane>
@@ -1579,11 +1607,13 @@ const PatientDetails = () => {
                             <Tab.Pane eventKey="prescription">
                                 <div className="printable-prescription">
                                     <div className="print-header text-center">
-                                    <img 
-                                        src={sloganProfissional} 
-                                        alt="Slogan do Profissional" 
-                                        style={{ maxWidth: '100%', height: 'auto', marginBottom: '20px' }} 
-                                    />
+                                        {/*
+                                        <img 
+                                            src={sloganProfissional} 
+                                            alt="Slogan do Profissional" 
+                                            style={{ maxWidth: '100%', height: 'auto', marginBottom: '20px' }} 
+                                        />
+                                        */}
                                         <h4>Prescrição Médica</h4>
                                         <p><strong>Paciente:</strong> {patient?.name || 'N/A'}</p>
                                         <p><strong>Responsável:</strong> {patient?.parent || 'N/A'}</p>

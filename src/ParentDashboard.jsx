@@ -1,6 +1,3 @@
-// src/pages/ParentDashboard.jsx
-// VERSÃO MODIFICADA COM DETALHES DO PACIENTE E PRESCRIÇÕES
-
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Container, Navbar, Card, Table, Form, Button, Nav, Tab, Row, Col, Spinner, Alert, Badge, Modal } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -33,7 +30,7 @@ function ParentDashboard() {
     // ===================================================
     // 1. HOOKS E ESTADOS
     // ===================================================
-    const { user, logout } = useContext(AuthContext);
+    const { user, setUser, logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id: urlId } = useParams();
 
@@ -120,35 +117,55 @@ function ParentDashboard() {
         }
     }, []);
 
-    useEffect(() => {
-        if (!user || !user.userId) {
-            navigate('/login');
-            return;
-        }
-        if (urlId && urlId !== user.userId.toString()) {
-            navigate(`/parent-dashboard/${user.userId}`);
-            return;
+    // ===================================================
+    // EFEITO PRINCIPAL — VALIDAÇÃO + BUSCA DE DADOS
+    // ===================================================
+  useEffect(() => {
+    if (!user) {
+      console.log("ParentDashboard: Aguardando usuário...");
+      return;
+    }
+
+    if (user.tipo_usuario !== 'pais_responsavel') {
+      navigate('/login');
+      return;
+    }
+
+    if (urlId && urlId !== user.id.toString()) {
+      navigate(`/parent-dashboard/${user.id}`, { replace: true });
+      return;
+    }
+
+    const loadDashboardData = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        // ROTA QUE EXISTE E FUNCIONA NO SEU BACKEND
+        const response = await apiClient.get('/parent/children');
+        
+        if (!response.data || response.data.length === 0) {
+          setError("Nenhum filho cadastrado. Peça ao profissional para vincular um paciente.");
+          setLoading(false);
+          return;
         }
 
-        const fetchInitialData = async () => {
-            setLoading(true);
-            try {
-                const patientIdRes = await apiClient.get(`/parent/main-patient-id`);
-                const patientId = patientIdRes.data.patientId;
-                if (patientId) {
-                    await fetchData(patientId);
-                } else {
-                    setError("Nenhum paciente associado a este responsável.");
-                }
-            } catch (err) {
-                setError("Não foi possível encontrar o paciente associado.");
-            } finally {
-                setLoading(false);
-            }
-        };
+        // Pega o primeiro filho
+        const patientId = response.data[0].id;
+        
+        await fetchData(patientId);
 
-        fetchInitialData();
-    }, [user, urlId, navigate, fetchData]);
+      } catch (err) {
+        console.error("Erro ao carregar filhos:", err);
+        setError("Erro ao carregar dados do filho. Tente novamente mais tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+
+  }, [user, urlId, navigate, fetchData]);
 
     // ===================================================
     // 4. PROCESSAMENTO DE DADOS PARA GRÁFICOS

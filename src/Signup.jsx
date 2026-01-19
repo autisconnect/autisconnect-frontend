@@ -1150,9 +1150,9 @@ function Signup() {
                                 <Form.Group className="mb-3">
                                     <Form.Select value={tipoUsuario} onChange={handleTipoUsuarioChange} required>
                                         <option value="">Selecione...</option>
-                                        <option value="pais_responsavel">Pais ou Responsável</option>
+                                        {/*<option value="pais_responsavel">Pais ou Responsável</option>*/}
                                         <option value="medicos_terapeutas">Médicos ou Terapeutas</option>
-                                        <option value="servicos_locais">Serviços Locais (Grátis)</option>
+                                        {/*<option value="servicos_locais">Serviços Locais (Grátis)</option>*/}
                                     </Form.Select>
                                 </Form.Group>
                                 <Button variant="primary" type="submit" className="w-100">Continuar</Button>

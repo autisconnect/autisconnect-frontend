@@ -10,6 +10,7 @@ import ParentDashboard from './ParentDashboard';
 import ProfessionalDashboard from './ProfessionalDashboard';
 import FinancialDashboard from './FinancialDashboard';
 import SecretaryDashboard from './SecretaryDashboard';
+import DashboardABA from './DashboardABA';
 import ServiceDashboard from './ServiceDashboard';
 import ServiceDashboard01 from './service_dashboard/ServiceDashboard01';
 import ServiceDashboard17 from './service_dashboard/ServiceDashboard17';
@@ -32,8 +33,15 @@ import PresentationVirtualConsultations from './presentation-dashboard/Presentat
 import PresentationCommunitySupport from './presentation-dashboard/PresentationCommunitySupport';
 import PresentationTriggerRecorder from './presentation-dashboard/PresentationTriggerRecorder';
 import PresentationSecretaryDashboard from './presentation-dashboard/PresentationSecretaryDashboard';
+import PresentationPatientDetails from './presentation-dashboard/PresentationPatientDetails';
 import PaymentSuccess from './PaymentSuccess';
 import PaymentFailure from './PaymentFailure';
+
+// ABA Module Imports
+import AbaPatient from './pages/AbaPatient';
+import AbaDashboard from './pages/AbaDashboard';
+import AbaReport from './pages/AbaReport';
+
 import { Alert, Button } from 'react-bootstrap';
 import './App.css';
 
@@ -111,6 +119,8 @@ function App() {
         <Route path="/presentation-dashboard/PresentationCommunitySupport" element={<PresentationCommunitySupport />} />
         <Route path="/presentation-dashboard/PresentationTriggerRecorder" element={<PresentationTriggerRecorder />} />
         <Route path="/presentation-dashboard/PresentationSecretaryDashboard" element={<PresentationSecretaryDashboard />} />
+        <Route path="/presentation-dashboard/PresentationPatientDetails" element={<PresentationPatientDetails />} />
+
         
         {/* Rotas Protegidas */}
         <Route
@@ -128,6 +138,10 @@ function App() {
         <Route
           path="/secretary-dashboard/:id"
           element={<ProtectedRoute allowedUserTypes={['secretaria']}><SecretaryDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/aba-dashboard/:id"
+          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><DashboardABA /></ProtectedRoute>}
         />
         <Route
           path="/service-dashboard"
@@ -152,6 +166,20 @@ function App() {
         <Route
           path="/trigger-recorder"
           element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}><TriggerRecorder /></ProtectedRoute>}
+        />
+
+        {/* ABA Module Protected Routes */}
+        <Route
+          path="/aba/patient/:patientId"
+          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><AbaPatient /></ProtectedRoute>}
+        />
+        <Route
+          path="/aba/dashboard/:patientId"
+          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><AbaDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/aba/report/:patientId"
+          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><AbaReport /></ProtectedRoute>}
         />
 
         {/* Outras Rotas */}

@@ -106,7 +106,12 @@ function PresentationSecretaryDashboard() {
             </Container>
 
             <footer className="bg-light py-4 mt-5">
-                <Container><p className="mb-0 text-center text-muted">Nrmendfsystems. Todos os direitos reservados.</p></Container>
+                <Container>
+                    <p className="mb-0">
+                        © {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
+                        <small>Todos os direitos reservados.</small>
+                    </p>
+                </Container>
             </footer>
         </div>
     );

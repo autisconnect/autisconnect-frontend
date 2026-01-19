@@ -131,14 +131,19 @@ function PresentationProfessionalDashboard() {
                         <Card className="cta-card p-5">
                             <h3>Eleve o Nível da sua Prática Clínica</h3>
                             <p className="text-muted mb-4">Junte-se a centenas de profissionais que já estão utilizando nossa plataforma para otimizar a gestão e aprofundar o tratamento de pacientes com TEA.</p>
-                            <Button variant="primary" size="lg" onClick={handleSignUp}>Cadastre-se Agora</Button>
+                            <Button variant="primary" size="lg" onClick={handleSignUp}>Comece a Usar Agora</Button>
                         </Card>
                     </Col>
                 </Row>
             </Container>
 
             <footer className="bg-light py-4 mt-5">
-                <Container><p className="mb-0 text-center text-muted">Nrmendfsystems. Todos os direitos reservados.</p></Container>
+                <Container>
+                <p className="mb-0">
+                    © {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
+                    <small>Todos os direitos reservados.</small>
+                </p>
+                </Container>
             </footer>
         </div>
     );

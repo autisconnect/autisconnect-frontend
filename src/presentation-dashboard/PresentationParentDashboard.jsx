@@ -210,9 +210,7 @@ function PresentationParentDashboard() {
                         <p className="text-muted mb-4">
                             Comece a gerenciar o cuidado da sua criança com ferramentas simples e eficazes. Cadastre-se agora!
                         </p>
-                        <Button variant="primary" size="lg" onClick={handleSignUp}>
-                            Comece Agora
-                        </Button>
+                        <Button variant="primary" size="lg" onClick={handleSignUp}>Comece a Usar Agora</Button>
                     </Col>
                 </Row>
             </Container>
@@ -222,7 +220,10 @@ function PresentationParentDashboard() {
                     <Container>
                         <Row>
                             <Col className="text-center">
-                                <p className="mb-0 text-muted">© 2025 Autisconnect. Todos os direitos reservados.</p>
+                                <p className="mb-0">
+                                    © {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
+                                    <small>Todos os direitos reservados.</small>
+                                </p>
                             </Col>
                         </Row>
                     </Container>
