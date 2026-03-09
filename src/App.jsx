@@ -1,6 +1,5 @@
 import React from 'react';
-import { Routes, Route, useParams } from 'react-router-dom'; 
-//import AuthNavigation from './context/AuthNavigation';
+import { Routes, Route, useParams } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import AuthRoute from './AuthRoute';
 import Home from './Home';
@@ -21,7 +20,17 @@ import SessionsGraph from './emotion-tracking/SessionsGraph';
 import EmotionTrackingDashboard from './emotion-tracking/EmotionTrackingDashboard';
 import StrokeRiskMonitor from './StrokeRiskMonitor';
 import TriggerRecorder from './TriggerRecorder';
-import PatientDetails from './PatientDetails';
+import PatientDetails from './PatientDetails';           // visão do profissional
+import PatientDetailsParent from './PatientDetailsParent'; // visão dos pais (NOVO)
+import PaymentSuccess from './PaymentSuccess';
+import PaymentFailure from './PaymentFailure';
+
+// ABA Module Imports
+import AbaPatient from './pages/AbaPatient';
+import AbaDashboard from './pages/AbaDashboard';
+import AbaReport from './pages/AbaReport';
+
+// Componentes de apresentação (mantidos)
 import PresentationServiceDashboard from './presentation-dashboard/PresentationServiceDashboard';
 import PresentationProfessionalDashboard from './presentation-dashboard/PresentationProfessionalDashboard';
 import PresentationParentDashboard from './presentation-dashboard/PresentationParentDashboard';
@@ -34,18 +43,11 @@ import PresentationCommunitySupport from './presentation-dashboard/PresentationC
 import PresentationTriggerRecorder from './presentation-dashboard/PresentationTriggerRecorder';
 import PresentationSecretaryDashboard from './presentation-dashboard/PresentationSecretaryDashboard';
 import PresentationPatientDetails from './presentation-dashboard/PresentationPatientDetails';
-import PaymentSuccess from './PaymentSuccess';
-import PaymentFailure from './PaymentFailure';
-
-// ABA Module Imports
-import AbaPatient from './pages/AbaPatient';
-import AbaDashboard from './pages/AbaDashboard';
-import AbaReport from './pages/AbaReport';
 
 import { Alert, Button } from 'react-bootstrap';
 import './App.css';
 
-// O ErrorBoundary permanece o mesmo
+// ErrorBoundary
 class ErrorBoundary extends React.Component {
   state = { error: null };
 
@@ -75,7 +77,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Os componentes de função para rotas dinâmicas permanecem os mesmos
+// Componente dinâmico para ServiceDashboard por ID
 const PublicServiceDashboard = () => {
   const { id } = useParams();
   switch (id) {
@@ -88,6 +90,7 @@ const PublicServiceDashboard = () => {
   }
 };
 
+// SessionsGraph dinâmico
 const DynamicSessionsGraph = () => {
   const { userId } = useParams();
   return <SessionsGraph userId={userId ? parseInt(userId) : 2} />;
@@ -98,16 +101,15 @@ function App() {
     <ErrorBoundary>
       <Routes>
         {/* Rota Home Pública */}
-        <Route index element={<Home />} /> 
-        
-        {/* Rotas de Autenticação (Login e Signup) protegidas pelo AuthRoute */}
-        {/* Se o usuário estiver logado, ele não pode acessar estas rotas */}
+        <Route index element={<Home />} />
+
+        {/* Rotas de Autenticação (somente se NÃO logado) */}
         <Route element={<AuthRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>
-        
-        {/* Rotas de Apresentação */}
+
+        {/* Rotas de Apresentação (públicas) */}
         <Route path="/presentation" element={<PresentationServiceDashboard />} />
         <Route path="/PresentationProfessionalDashboard" element={<PresentationProfessionalDashboard />} />
         <Route path="/PresentationParentDashboard" element={<PresentationParentDashboard />} />
@@ -121,81 +123,150 @@ function App() {
         <Route path="/presentation-dashboard/PresentationSecretaryDashboard" element={<PresentationSecretaryDashboard />} />
         <Route path="/presentation-dashboard/PresentationPatientDetails" element={<PresentationPatientDetails />} />
 
-        
-        {/* Rotas Protegidas */}
+        {/* Rotas Protegidas - Pais / Responsáveis */}
         <Route
           path="/parent-dashboard/:id"
-          element={<ProtectedRoute allowedUserTypes={['pais_responsavel']}><ParentDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['pais_responsavel']}>
+              <ParentDashboard />
+            </ProtectedRoute>
+          }
         />
+
+        {/* Rotas Protegidas - Profissional */}
         <Route
           path="/professional-dashboard/:id"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><ProfessionalDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <ProfessionalDashboard />
+            </ProtectedRoute>
+          }
         />
+
+        {/* Visão do paciente - Profissional */}
+        <Route
+          path="/patient-details/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <PatientDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Visão do paciente - Pais / Responsáveis (NOVO) */}
+        <Route
+          path="/patient-details-parent/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['pais_responsavel']}>
+              <PatientDetailsParent />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Outras rotas protegidas */}
         <Route
           path="/financial-dashboard/:id"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><FinancialDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <FinancialDashboard />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/secretary-dashboard/:id"
-          element={<ProtectedRoute allowedUserTypes={['secretaria']}><SecretaryDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['secretaria']}>
+              <SecretaryDashboard />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/aba-dashboard/:id"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><DashboardABA /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <DashboardABA />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/service-dashboard"
-          element={<ProtectedRoute allowedUserTypes={['servicos_locais']}><ServiceDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['servicos_locais']}>
+              <ServiceDashboard />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/service-dashboard/:id"
-          element={<ProtectedRoute allowedUserTypes={['servicos_locais']}><PublicServiceDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['servicos_locais']}>
+              <PublicServiceDashboard />
+            </ProtectedRoute>
+          }
         />
-        <Route
-          path="/patient-details/:patientId"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><PatientDetails /></ProtectedRoute>}
-        />
+
+        {/* Ferramentas de monitoramento (permitidas para pais e profissionais) */}
         <Route
           path="/emotion-detector"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}><EmotionDetector /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <EmotionDetector />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/stroke-risk-monitor"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}><StrokeRiskMonitor /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <StrokeRiskMonitor />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/trigger-recorder"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}><TriggerRecorder /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <TriggerRecorder />
+            </ProtectedRoute>
+          }
         />
 
-        {/* ABA Module Protected Routes */}
+        {/* Rotas ABA */}
         <Route
           path="/aba/patient/:patientId"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><AbaPatient /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <AbaPatient />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/aba/dashboard/:patientId"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><AbaDashboard /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <AbaDashboard />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/aba/report/:patientId"
-          element={<ProtectedRoute allowedUserTypes={['medicos_terapeutas']}><AbaReport /></ProtectedRoute>}
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
+              <AbaReport />
+            </ProtectedRoute>
+          }
         />
 
-        {/* Outras Rotas */}
+        {/* Rotas públicas / utilitárias */}
         <Route path="/emotion-graph" element={<EmotionChart />} />
         <Route path="/sessions-graph" element={<SessionsGraph userId={2} />} />
         <Route path="/sessions-graph/:userId" element={<DynamicSessionsGraph />} />
         <Route path="/emotion-dashboard" element={<EmotionTrackingDashboard />} />
-        <Route path="/service_dashboard/ServiceDashboard:id" element={<PublicServiceDashboard />} />
-        <Route path="/service_dashboard/ServiceDashboard01" element={<ServiceDashboard01 />} />
-        <Route path="/service_dashboard/ServiceDashboard17" element={<ServiceDashboard17 />} />
-        <Route path="/service_dashboard/ServiceDashboard18" element={<ServiceDashboard18 />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-failure" element={<PaymentFailure />} />
-        
-        {/* Adicione uma rota "catch-all" para páginas não encontradas */}
-        <Route path="*" element={<div>Página não encontrada</div>} />
+
+        {/* Rota 404 */}
+        <Route path="*" element={<div>Página não encontrada (404)</div>} />
       </Routes>
     </ErrorBoundary>
   );
