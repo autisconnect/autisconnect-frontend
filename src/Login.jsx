@@ -17,22 +17,6 @@ function Login() {
 
     const handleBackToHome = () => navigate('/');
 
-    const redirectToDashboard = (tipoUsuario, userId) => {
-        console.log(`Redirecionando para dashboard: tipo=${tipoUsuario}, id=${userId}`);
-        const id = parseInt(userId, 10);
-        if (isNaN(id) || id <= 0) {
-            setError('Erro ao determinar o ID do usuário.');
-            return;
-        }
-        switch (tipoUsuario) {
-            case 'pais_responsavel': navigate(`/parent-dashboard/${id}`); break;
-            case 'medicos_terapeutas': navigate(`/professional-dashboard/${id}`); break;
-            case 'servicos_locais': navigate(`/service-dashboard/${id}`); break;
-            case 'secretaria': navigate(`/secretary-dashboard/${id}`); break;
-            default: setError('Tipo de usuário desconhecido.'); navigate('/');
-        }
-    };
-
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);

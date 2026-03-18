@@ -2330,6 +2330,7 @@ p, span, div {
 .emotion-detector-page .card .card-header,
 .stroke-risk-monitor-page .card .card-header,
 .trigger-recorder-page .card .card-header,
+.aba-module-page .card .card-header,
 .stereotypy-monitor-page .card .card-header {
     /* Herda todos os estilos da classe .autisconnect-card-header */
     background: linear-gradient(135deg, #007bff, #4e54c8);
@@ -2348,6 +2349,7 @@ p, span, div {
 .emotion-detector-page .card .card-header h5,
 .stroke-risk-monitor-page .card .card-header h5,
 .trigger-recorder-page .card .card-header h5,
+.aba-module-page .card .card-header h5,
 .stereotypy-monitor-page .card .card-header h5  {
     color: white;
 }
@@ -2597,6 +2599,38 @@ p, span, div {
 
 
 
+/* ABA Module - alinhado ao monitoramento de emoções */
+.aba-module-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.aba-module-page .nav-tabs {
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 1.5rem;
+}
+
+.aba-module-page .nav-tabs .nav-link {
+  color: #6c757d;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  transition: all 0.3s ease;
+}
+
+.aba-module-page .nav-tabs .nav-link:hover {
+  color: #667eea;
+}
+
+.aba-module-page .nav-tabs .nav-link.active {
+  color: #667eea;
+  background-color: transparent;
+  border-bottom: 3px solid #667eea;
+  font-weight: 700;
+}
+
 /* DashboardABA.css - PadrÃ£o visual AutisConnect */
 
 .dashboard-aba-page {
@@ -2731,3 +2765,7 @@ p, span, div {
   color: #764ba2;
   font-weight: 500;
 }
+
+
+
+

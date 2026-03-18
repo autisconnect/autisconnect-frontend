@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
 import { Calendar2Check, People, GraphUp, Wallet2, PlusCircle, FileEarmarkText, Bell } from 'react-bootstrap-icons'; // Ícones adicionados
 import { Line, Bar, Pie } from 'react-chartjs-2';
@@ -48,7 +48,7 @@ const ProfessionalDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [patients, setPatients] = useState([]);
     const [consultations, setConsultations] = useState([]);
-    const [notifications, setNotifications] = useState([]);
+    const [notifications] = useState([]);
     const [assistants, setAssistants] = useState([]);
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
     const [showPatientModal, setShowPatientModal] = useState(false);
@@ -61,8 +61,8 @@ const ProfessionalDashboard = () => {
     const [newNote, setNewNote] = useState({ title: '', content: '' });
     const [loading, setLoading] = useState(true);
     const [loadingCharts, setLoadingCharts] = useState(false);
-    const [loadingPatients, setLoadingPatients] = useState(false);
-    const [loadingConsultations, setLoadingConsultations] = useState(false);
+    const [loadingPatients] = useState(false);
+    const [loadingConsultations] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [professionalInfo, setProfessionalInfo] = useState({
@@ -143,10 +143,6 @@ const ProfessionalDashboard = () => {
     });
 
     // Funções de API
-    const getAuthHeaders = () => ({
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
-    });
 //ok
     // Função genérica para tratar erros de API
     const handleApiError = (err, context) => {
@@ -269,8 +265,7 @@ const ProfessionalDashboard = () => {
         try {
             // URL relativa, o apiClient cuida do resto.
             const response = await apiClient.get(`/professional/${user.id}/patient-progress`);
-            
-            const data = response.data; // Dados já vêm em .data com Axios
+            const data = Array.isArray(response.data) ? response.data : [];
 
             // A lógica para processar os dados e montar o gráfico permanece a mesma.
             const labels = [...new Set(data.map(item => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
@@ -297,10 +292,11 @@ const ProfessionalDashboard = () => {
             setPatientProgressData({ labels, datasets });
 
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
-            handleApiError(err, 'buscar o progresso dos pacientes');
-            
-            // Zera os dados do gráfico em caso de erro.
+            if (err.response?.status !== 404) {
+                // Usa a função genérica para exibir o erro.
+                handleApiError(err, 'buscar o progresso dos pacientes');
+            }
+            // Zera os dados do gráfico em caso de erro/404.
             setPatientProgressData({ labels: [], datasets: [] });
         }
     };
@@ -349,35 +345,76 @@ const ProfessionalDashboard = () => {
         setLoadingCharts(true);
         try {
             const response = await apiClient.get(`/professional/${user.id}/appointment-types`);
-            const data = response.data;
+            const data = response.data || {};
             setAppointmentTypeData({
-            labels: data.labels,
-            datasets: [
-                {
-                label: 'Tipos de Consulta',
-                data: data.data,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
+                labels: Array.isArray(data.labels) ? data.labels : [],
+                datasets: [
+                    {
+                        label: 'Tipos de Consulta',
+                        data: Array.isArray(data.data) ? data.data : [],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                        ],
+                        borderWidth: 1,
+                    },
                 ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                ],
-                borderWidth: 1,
-                },
-            ],
             });
         } catch (err) {
-            console.error('Erro ao buscar tipos de consulta:', err.response?.data, err.message);
-            handleApiError(err, 'buscar tipos de consulta');
+            if (err.response?.status === 404) {
+                try {
+                    const fallbackResponse = await apiClient.get(`/appointments/professional/${user.id}`);
+                    const list = Array.isArray(fallbackResponse.data) ? fallbackResponse.data : [];
+                    const counts = list.reduce((acc, item) => {
+                        const key = item.appointment_type || 'Consulta Regular';
+                        acc[key] = (acc[key] || 0) + 1;
+                        return acc;
+                    }, {});
+                    const labels = Object.keys(counts);
+                    const data = Object.values(counts);
+                    setAppointmentTypeData({
+                        labels,
+                        datasets: [
+                            {
+                                label: 'Tipos de Consulta',
+                                data,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',
+                                    'rgba(54, 162, 235, 0.6)',
+                                    'rgba(255, 206, 86, 0.6)',
+                                    'rgba(75, 192, 192, 0.6)',
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                ],
+                                borderWidth: 1,
+                            },
+                        ],
+                    });
+                    return;
+                } catch (fallbackErr) {
+                    if (fallbackErr.response?.status !== 404) {
+                        handleApiError(fallbackErr, 'buscar tipos de consulta');
+                    }
+                }
+            } else {
+                console.error('Erro ao buscar tipos de consulta:', err.response?.data, err.message);
+                handleApiError(err, 'buscar tipos de consulta');
+            }
             setAppointmentTypeData({
-            labels: [],
-            datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+                labels: [],
+                datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
             });
         } finally {
             setLoadingCharts(false);
@@ -611,10 +648,13 @@ const ProfessionalDashboard = () => {
         });
     };
 
+    const normalizedSearch = (searchTerm || '').toLowerCase();
     const filteredPatients = patients.filter(patient => {
-        const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            patient.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesFilter = statusFilter === '' || statusFilter === 'todos' || patient.status === statusFilter;
+        if (!patient) return false;
+        const name = (patient.name ?? '').toString().toLowerCase();
+        const diagnosis = (patient.diagnosis ?? '').toString().toLowerCase();
+        const matchesSearch = name.includes(normalizedSearch) || diagnosis.includes(normalizedSearch);
+        const matchesFilter = statusFilter === '' || statusFilter === 'todos' || (patient.status ?? '') === statusFilter;
         return matchesSearch && matchesFilter;
     });
 
@@ -699,11 +739,13 @@ const ProfessionalDashboard = () => {
 
         fetchAllData();
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, navigate, dashboardId]);
 
     useEffect(() => {
         if (!user || loading) return;
         fetchPatients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusFilter]);
 
     if (loading) {
@@ -1751,3 +1793,7 @@ const ProfessionalDashboard = () => {
 };
 
 export default ProfessionalDashboard;
+
+
+
+

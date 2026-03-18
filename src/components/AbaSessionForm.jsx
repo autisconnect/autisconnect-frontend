@@ -95,9 +95,8 @@ const AbaSessionForm = ({ patientId, onSaved }) => {
     ============================== */
     return (
         <Card className="shadow-sm">
+            <Card.Header>Registro de Sessão ABA</Card.Header>
             <Card.Body>
-                <h5 className="mb-3">Registro de Sessão ABA</h5>
-
                 {success && (
                     <Alert variant="success">
                         Sessão registrada com sucesso.

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, Alert, Badge } from 'react-bootstrap';
 
 /**
@@ -12,8 +12,8 @@ const AbaProgramMonitoring = ({ monitoring }) => {
     if (!monitoring) {
         return (
             <Card className="shadow-sm">
+                <Card.Header>Monitoramento de Programas ABA</Card.Header>
                 <Card.Body>
-                    <h5>Monitoramento de Programas ABA</h5>
                     <p className="text-muted mb-0">
                         Dados insuficientes para monitoramento.
                     </p>
@@ -42,9 +42,8 @@ const AbaProgramMonitoring = ({ monitoring }) => {
 
     return (
         <Card className="shadow-sm">
+            <Card.Header>Monitoramento Inteligente do Programa</Card.Header>
             <Card.Body>
-                <h5 className="mb-3">Monitoramento Inteligente do Programa</h5>
-
                 {/* STATUS */}
                 <Alert variant="light" className="border">
                     <div className="d-flex justify-content-between align-items-center">
@@ -73,14 +72,14 @@ const AbaProgramMonitoring = ({ monitoring }) => {
                 {/* ALERTAS */}
                 {monitoring.status === 'ESTAGNAÇÃO' && (
                     <Alert variant="warning" className="mt-3">
-                        ⚠️ O programa atual não apresenta ganhos clínicos
+                        Atenção: o programa atual não apresenta ganhos clínicos
                         relevantes. Avaliar ajustes ou substituição.
                     </Alert>
                 )}
 
                 {monitoring.status === 'REGRESSÃO' && (
                     <Alert variant="danger" className="mt-3">
-                        🚨 Evidência de regressão. Recomendada intervenção
+                        Atenção: evidência de regressão. Recomendada intervenção
                         imediata e revisão do programa.
                     </Alert>
                 )}
@@ -90,3 +89,4 @@ const AbaProgramMonitoring = ({ monitoring }) => {
 };
 
 export default AbaProgramMonitoring;
+

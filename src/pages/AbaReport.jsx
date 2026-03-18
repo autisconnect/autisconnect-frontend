@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Alert, Spinner, Button, Badge } from 'react-bootstrap';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import AbaCharts from '../components/AbaCharts';
 import AbaAiAnalysis from '../components/AbaAiAnalysis';
@@ -10,9 +10,16 @@ import abaService from '../services/abaService';
 import abaAiService from '../services/abaAiService';
 import abaReportService from '../services/abaReportService';
 
-const AbaReport = () => {
+const AbaReport = ({ patientId: propPatientId, embedded = false, showPdf = true }) => {
     const location = useLocation();
-    const [patientId, setPatientId] = useState(null);
+    const { patientId: routePatientId } = useParams();
+
+    const queryPatientId = useMemo(() => {
+        const params = new URLSearchParams(location.search);
+        return params.get('patientId');
+    }, [location.search]);
+
+    const patientId = propPatientId || routePatientId || queryPatientId;
 
     const [sessions, setSessions] = useState([]);
     const [analytics, setAnalytics] = useState(null);
@@ -23,31 +30,49 @@ const AbaReport = () => {
     const [generating, setGenerating] = useState(false);
 
     /* ==============================
-       Extrair patientId
-    ============================== */
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        setPatientId(params.get('patientId'));
-    }, [location]);
-
-    /* ==============================
        Carregar dados do relatório
     ============================== */
     const loadReportData = async () => {
-        if (!patientId) return;
+        if (!patientId) {
+            setError('Paciente não identificado.');
+            setLoading(false);
+            return;
+        }
 
         try {
             setLoading(true);
+            setError(null);
 
-            const sessionsRes = await abaService.getSessions(patientId);
-            setSessions(sessionsRes.data);
+            const results = await Promise.allSettled([
+                abaService.getSessions(patientId),
+                abaAiService.getAnalytics(patientId),
+                abaAiService.getForecast(patientId)
+            ]);
 
-            const analyticsRes = await abaAiService.getAnalytics(patientId);
-            setAnalytics(analyticsRes.data);
+            const [sessionsRes, analyticsRes, forecastRes] = results;
 
-            const forecastRes = await abaAiService.getForecast(patientId);
-            setForecast(forecastRes.data);
+            if (sessionsRes.status === 'fulfilled') {
+                setSessions(sessionsRes.value.data || []);
+            } else {
+                setSessions([]);
+            }
 
+            if (analyticsRes.status === 'fulfilled') {
+                setAnalytics(analyticsRes.value.data);
+            } else {
+                setAnalytics(null);
+            }
+
+            if (forecastRes.status === 'fulfilled') {
+                setForecast(forecastRes.value.data);
+            } else {
+                setForecast(null);
+            }
+
+            const hasSuccess = results.some((result) => result.status === 'fulfilled');
+            if (!hasSuccess) {
+                setError('Erro ao carregar dados do relatório ABA.');
+            }
         } catch (err) {
             console.error(err);
             setError('Erro ao carregar dados do relatório ABA.');
@@ -80,40 +105,46 @@ const AbaReport = () => {
        Render
     ============================== */
     if (loading) {
-        return (
-            <Container className="py-5 text-center">
+        const loadingContent = (
+            <div className="py-5 text-center">
                 <Spinner animation="border" />
                 <p className="mt-3">Gerando visão clínica ABA...</p>
-            </Container>
+            </div>
         );
+
+        if (embedded) return loadingContent;
+        return <Container className="py-5 text-center">{loadingContent}</Container>;
     }
 
     if (error) {
+        const errorContent = (
+            <Alert variant="danger">{error}</Alert>
+        );
+
+        if (embedded) return errorContent;
         return (
             <Container className="py-5">
-                <Alert variant="danger">{error}</Alert>
+                {errorContent}
             </Container>
         );
     }
 
-    return (
-        <Container fluid className="py-4">
-
-            {/* ==========================
-                CABEÇALHO
-            ========================== */}
-            <Row className="mb-4 align-items-center">
-                <Col>
-                    <h2 className="mb-1">Relatório ABA + IA</h2>
-                    <small className="text-muted">
-                        Documento clínico consolidado
-                    </small>
-                </Col>
-                <Col className="text-end">
-                    <Badge bg="secondary">Assinável</Badge>{' '}
-                    <Badge bg="info">IA Validada</Badge>
-                </Col>
-            </Row>
+    const content = (
+        <>
+            {!embedded && (
+                <Row className="mb-4 align-items-center">
+                    <Col>
+                        <h2 className="mb-1">Relatório ABA + IA</h2>
+                        <small className="text-muted">
+                            Documento clínico consolidado
+                        </small>
+                    </Col>
+                    <Col className="text-end">
+                        <Badge bg="secondary">Assinável</Badge>{' '}
+                        <Badge bg="info">IA Validada</Badge>
+                    </Col>
+                </Row>
+            )}
 
             {/* ==========================
                 RESUMO EXECUTIVO
@@ -121,8 +152,8 @@ const AbaReport = () => {
             <Row className="mb-4">
                 <Col>
                     <Card className="shadow-sm">
+                        <Card.Header>Resumo Clínico</Card.Header>
                         <Card.Body>
-                            <h5>Resumo Clínico</h5>
                             <p className="mb-1">
                                 <strong>Total de Sessões:</strong> {analytics?.totalSessions}
                             </p>
@@ -167,20 +198,32 @@ const AbaReport = () => {
             {/* ==========================
                 RODAPÉ – AÇÕES
             ========================== */}
-            <Row className="mt-5">
-                <Col className="text-end">
-                    <Button
-                        variant="success"
-                        onClick={handleGeneratePdf}
-                        disabled={generating}
-                    >
-                        {generating ? 'Gerando PDF...' : 'Gerar Relatório PDF'}
-                    </Button>
-                </Col>
-            </Row>
+            {showPdf && (
+                <Row className="mt-5">
+                    <Col className="text-end">
+                        <Button
+                            variant="success"
+                            onClick={handleGeneratePdf}
+                            disabled={generating}
+                        >
+                            {generating ? 'Gerando PDF...' : 'Gerar Relatório PDF'}
+                        </Button>
+                    </Col>
+                </Row>
+            )}
+        </>
+    );
 
+    if (embedded) {
+        return content;
+    }
+
+    return (
+        <Container fluid className="py-4 aba-module-page">
+            {content}
         </Container>
     );
 };
 
 export default AbaReport;
+

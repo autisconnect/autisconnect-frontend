@@ -1,4 +1,4 @@
-Ôªøimport axios from 'axios';
+import axios from 'axios';
 
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 const isLocalHost =
@@ -24,7 +24,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     console.log('API Base URL:', baseURL);
     console.log('Token enviado:', token);
-    console.log('Requisi√ß√£o para:', config.url);
+    console.log('RequisiÁ„o para:', config.url);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,17 +37,24 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (!error.response) {
-      console.error('Erro de conex√£o com a API:', error.message);
+      console.error('Erro de conex„o com a API:', error.message);
     } else {
-      console.error('Erro na requisi√ß√£o:', error.response.status, error.response.data);
-      if (error.response.status === 401) {
+      const status = error.response.status;
+      const url = error.response.config?.url || '';
+      const isSilent404 = status === 404 && (url.includes('/patient-progress') || url.includes('/appointment-types'));
+
+      if (!isSilent404) {
+        console.error('Erro na requisiÁ„o:', status, error.response.data);
+      }
+
+      if (status === 401) {
         console.log('Erro 401 detectado, redirecionando para /login');
         localStorage.removeItem('token');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-      } else if (error.response.status === 404) {
-        console.log('Erro 404 detectado:', error.response.config.url);
+      } else if (status === 404 && !isSilent404) {
+        console.log('Erro 404 detectado:', url);
       }
     }
     return Promise.reject(error);
@@ -55,4 +62,5 @@ api.interceptors.response.use(
 );
 
 export default api;
+
 

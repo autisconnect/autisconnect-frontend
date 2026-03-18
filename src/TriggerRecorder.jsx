@@ -10,13 +10,12 @@ import axios from 'axios';
 const TriggerRecorder = () => {
     // Estados
     const [patientId, setPatientId] = useState(null);
-    const [patientName, setPatientName] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [analysisResults, setAnalysisResults] = useState([]);
     const [transcribedText, setTranscribedText] = useState('');
-    const [isTranscribing, setIsTranscribing] = useState(false);
+    const [, setIsTranscribing] = useState(false);
 
     // Refs
     const recognitionRef = useRef(null);

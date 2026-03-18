@@ -10,6 +10,8 @@ import userPhoto18 from './assets/UsersPhoto/UsersPhoto18.jpg';
 import userPhoto17 from './assets/UsersPhoto/UsersPhoto17.jpg';
 import './App.css';
 
+const defaultUserPhoto = userPhoto17;
+
 // Configuração base da API
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -233,7 +235,6 @@ const getUserPhotoUrl = (userId, profileData = null) => {
 
       // Buscar dados do usuário com endpoints mais robustos
       let profileResponse;
-      let profileEndpointUsed = '';
       
       // Tentar múltiplos endpoints para buscar o perfil
       const profileEndpoints = [
@@ -246,7 +247,6 @@ const getUserPhotoUrl = (userId, profileData = null) => {
       for (const endpoint of profileEndpoints) {
         try {
           profileResponse = await axios.get(endpoint.url, { headers });
-          profileEndpointUsed = endpoint.name;
           break;
         } catch (profileError) {
           console.warn(`Endpoint ${endpoint.name} falhou:`, profileError.message);
@@ -371,6 +371,7 @@ const getUserPhotoUrl = (userId, profileData = null) => {
     }
 
     fetchData(currentUserId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate, dashboardId, isPublicView]);
 
   const averageRating = useMemo(() => {
@@ -1188,4 +1189,7 @@ const getUserPhotoUrl = (userId, profileData = null) => {
 };
 
 export default ServiceDashboard;
+
+
+
 

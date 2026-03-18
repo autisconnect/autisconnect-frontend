@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
-// Imports corretos do shadcn/ui usando alias (mais limpo e padrão)
+// Imports corretos do shadcn/ui usando alias (mais limpo e padrÃ£o)
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
@@ -10,7 +10,7 @@ import AbaCharts from "./components/AbaCharts";
 import AbaAiAnalysis from "./components/AbaAiAnalysis";
 import AbaSessionsList from "./components/AbaSessionsList"; // pode usar como histórico temporário
 
-// Os componentes abaixo AINDA NÃO EXISTEM na sua estrutura atual → comentados
+// Os componentes abaixo AINDA NÃƒO EXISTEM na sua estrutura atual â†’ comentados
 // import { KPIDashboard } from "./components/aba/KPIDashboard";
 // import { ComparacaoHabilidades } from "./components/ComparacaoHabilidades";
 // import { HistoricoSessoes } from "./components/HistoricoSessoes";
@@ -24,7 +24,7 @@ export default function DashboardABA() {
   const idPaciente = id ? parseInt(id, 10) : 1;
 
   // Estado temporário até implementar seleção real de habilidade
-  const [selectedHabilidade] = useState(null);
+  const [selectedHabilidade, setSelectedHabilidade] = useState(null);
 
   // Dados mock para evitar erros enquanto trpc não estiver funcionando
   const habilidadesMock = [
@@ -39,7 +39,7 @@ export default function DashboardABA() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard ABA</h1>
           <p className="text-gray-600 mt-2">
-            Análise completa do progresso e desempenho das habilidades – Paciente {idPaciente}
+            Análise completa do progresso e desempenho das habilidades do Paciente {idPaciente}
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function DashboardABA() {
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2">
             <TabsTrigger value="kpis">KPIs</TabsTrigger>
             <TabsTrigger value="comparacao">Comparação</TabsTrigger>
-            <TabsTrigger value="niveis">Níveis de Auxílio</TabsTrigger>
+            <TabsTrigger value="niveis">Ní­veis de Auxí­lio</TabsTrigger>
             <TabsTrigger value="historico">Histórico</TabsTrigger>
           </TabsList>
 
@@ -56,7 +56,7 @@ export default function DashboardABA() {
             <Card>
               <CardHeader>
                 <CardTitle>Indicadores Chave de Desempenho (KPIs)</CardTitle>
-                <CardDescription>Visão geral do progresso clínico</CardDescription>
+                <CardDescription>Visão geral do progresso clí­nico</CardDescription>
               </CardHeader>
               <CardContent>
                 {/* Usando AbaCharts como substituto temporário para KPIDashboard */}
@@ -80,19 +80,19 @@ export default function DashboardABA() {
                   Funcionalidade de comparação avançada em desenvolvimento
                 </p>
                 <p className="text-sm text-gray-500 mt-4">
-                  Em breve: gráficos comparativos entre habilidades e períodos
+                  Em breve: gráficos comparativos entre habilidades e perí­odos
                 </p>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ==================== Aba Níveis de Auxílio ==================== */}
+          {/* ==================== Aba NÃ­veis de AuxÃ­lio ==================== */}
           <TabsContent value="niveis" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Níveis de Auxílio por Habilidade</CardTitle>
+                <CardTitle>Ní­veis de Auxí­lio por Habilidade</CardTitle>
                 <CardDescription>
-                  Selecione uma habilidade para visualizar o nível atual de prompt
+                  Selecione uma habilidade para visualizar o ní­vel atual de prompt
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -110,7 +110,7 @@ export default function DashboardABA() {
                         onClick={() => setSelectedHabilidade(hab.id)}
                       >
                         <p className="font-medium">{hab.descricao}</p>
-                        <p className="text-sm text-gray-600 mt-1">Domínio: {hab.dominio}</p>
+                        <p className="text-sm text-gray-600 mt-1">Domí­nio: {hab.dominio}</p>
                       </Card>
                     ))}
                   </div>
@@ -130,14 +130,14 @@ export default function DashboardABA() {
                   </div>
                 ) : (
                   <p className="text-center text-gray-500 py-8">
-                    Clique em uma habilidade acima para visualizar os níveis de auxílio
+                    Clique em uma habilidade acima para visualizar os ní­veis de auxílio
                   </p>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* ==================== Aba Histórico ==================== */}
+          {/* ==================== Aba HistÃ³rico ==================== */}
           <TabsContent value="historico" className="space-y-6">
             <Card>
               <CardHeader>
@@ -145,7 +145,7 @@ export default function DashboardABA() {
                 <CardDescription>Todas as sessões registradas do paciente</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Usando AbaSessionsList como base temporária */}
+                {/* Usando AbaSessionsList como base temporÃ¡ria */}
                 <AbaSessionsList patientId={idPaciente} />
                 <p className="text-center text-sm text-gray-500 mt-6">
                   Versão completa do histórico em desenvolvimento...
@@ -158,3 +158,4 @@ export default function DashboardABA() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-﻿// PatientDetailsParent.jsx (versÃ£o corrigida e completa)
+﻿// PatientDetailsParent.jsx (versão corrigida e completa)
 
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Nav, Tab, Button, Table, Alert, Spinner, Form, Modal, Badge } from 'react-bootstrap';
@@ -7,10 +7,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import { Line, Bar, Pie, Radar } from 'react-chartjs-2';
 import apiClient from './services/api';
-import AbaPatient from './pages/AbaPatient';
+import AbaReport from './pages/AbaReport';
 
 import logohori from './assets/logo.png';
-import sloganProfissional from './assets/18.jpg';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -48,20 +47,14 @@ const PatientDetailsParent = () => {
     const navigate = useNavigate();
     const [patient, setPatient] = useState(null);
     const [notes, setNotes] = useState([]);
-    const [triggerData, setTriggerData] = useState(null);
     const [strokeData, setStrokeData] = useState(null);
     const [emotionData, setEmotionData] = useState(null);
     const [emotionDistributionData, setEmotionDistributionData] = useState(null);
-    const [triggers, setTriggers] = useState([]);
+    const [triggers] = useState([]);
     const [strokeRisks, setStrokeRisks] = useState([]);
     const [emotions, setEmotions] = useState([]);
     const [emotionAnalysis, setEmotionAnalysis] = useState(null);
     const [prescriptions, setPrescriptions] = useState([]);
-    const [newPrescription, setNewPrescription] = useState({
-        date: '',
-        medications: [{ medication: '', dosage: '', indicationssuggestions: '' }],
-        observations: ''
-    });
     const [searchDate, setSearchDate] = useState('');
     const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
     const [activeTab, setActiveTab] = useState('overview');
@@ -76,7 +69,6 @@ const PatientDetailsParent = () => {
     const [strokeRiskAnalysis, setStrokeRiskAnalysis] = useState(null);
     const [strokePrediction, setStrokePrediction] = useState("Calculando previsão...");
     const [strokeAnomaly, setStrokeAnomaly] = useState(null);
-    const [triggerAnalysis, setTriggerAnalysis] = useState(null);
     const [vocalizations, setVocalizations] = useState([]);
     const [vocalizationAnalysis, setVocalizationAnalysis] = useState(null);
     const [vocalizationPrediction, setVocalizationPrediction] = useState("Calculando previsão...");
@@ -103,7 +95,6 @@ const PatientDetailsParent = () => {
     const lineOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Evolução ao Longo do Tempo' } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Valor' } } } };
     const pieOptions = { responsive: true, plugins: { legend: { position: 'right' }, title: { display: true, text: 'Distribuição' } } };
     const barOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Comparação entre Sessões' } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentagem (%)' } } } };
-    const radarOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Perfil Emocional' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 1 } } };
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
     const formatAge = (birthDate) => { if (!birthDate) return 'N/A'; const today = new Date(); const birth = new Date(birthDate); let age = today.getFullYear() - birth.getFullYear(); const monthDiff = today.getMonth() - birth.getMonth(); if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) { age--; } return `${age} anos`; };
 
@@ -115,13 +106,13 @@ const PatientDetailsParent = () => {
                 : await apiClient.get(`/appointments/patient/${patientId}`);
             setConsultations(response.data);
         } catch (err) {
-            setError(err.response.data.error || 'Falha ao buscar histÃ³rico de consultas.');
+            setError(err.response.data.error || 'Falha ao buscar histórico de consultas.');
         }
     };
 
     const handleFieldUpdate = async (appointmentId, field, value) => {
-        if (user.tipo_usuario === 'pais_responsÃ¡vel') {
-            setError('Perfil de responsÃ¡vel nÃ£o pode editar consultas.');
+        if (user.tipo_usuario === 'pais_responsável') {
+            setError('Perfil de responsável não pode editar consultas.');
             return;
         }
         setConsultations(prev => prev.map(c => c.id === appointmentId ? { ...c, [field]: value } : c));
@@ -141,13 +132,13 @@ const PatientDetailsParent = () => {
     };
 
     const handleSaveConsultation = async (e) => {
-        if (user.tipo_usuario === 'pais_responsÃ¡vel') {
-            setError('Perfil de responsÃ¡vel nÃ£o pode criar consultas por este formulario.');
+        if (user.tipo_usuario === 'pais_responsável') {
+            setError('Perfil de responsável não pode criar consultas por este formulario.');
             return;
         }
         e.preventDefault();
         if (!newConsultation.appointment_date || !newConsultation.appointment_time || !newConsultation.value) {
-            setError('Data, hora e valor sÃ£o campos obrigatorios.');
+            setError('Data, hora e valor são campos obrigatorios.');
             return;
         }
         try {
@@ -172,12 +163,12 @@ const PatientDetailsParent = () => {
     };
 
     const handleSaveNote = async () => {
-        if (user.tipo_usuario === 'pais_responsÃ¡vel') {
-            setError('Perfil de responsÃ¡vel nÃ£o pode criar notas clinicas.');
+        if (user.tipo_usuario === 'pais_responsável') {
+            setError('Perfil de responsável não pode criar notas clinicas.');
             return;
         }
         if (!newNoteData.title || !newNoteData.content) {
-            setError('Por favor, preencha o tÃ­tulo e o conteÃºdo da nota.');
+            setError('Por favor, preencha o título e o conteúdo da nota.');
             return;
         }
         try {
@@ -210,7 +201,7 @@ const PatientDetailsParent = () => {
             return recordDate > new Date(now - 2 * oneDay) && recordDate < new Date(now - oneDay);
         });
 
-        // 1. Calcular Emocao Dominante e DistribuiÃ§Ã£o
+        // 1. Calcular Emocao Dominante e Distribuição
         const totalCount = emotionRecords.length;
         const counts = emotionRecords.reduce((acc, record) => {
             acc[record.emotion] = (acc[record.emotion] || 0) + 1;
@@ -295,7 +286,7 @@ const PatientDetailsParent = () => {
 
     const generateAISummary = (analysis) => {
         if (!analysis) {
-            // Retorna uma string vazia ou uma mensagem padrao se nÃ£o houver anÃ¡lise
+            // Retorna uma string vazia ou uma mensagem padrao se não houver análise
             return "Aguardando dados suficientes para gerar o resumo...";
         }
 
@@ -327,7 +318,7 @@ const PatientDetailsParent = () => {
             // Pega a data do primeiro pico detectado para o resumo
             const firstPeakDateMatch = emotionalPeaks[0].match(/\d{2}\/\d{2}\/\d{4}/);
             if (firstPeakDateMatch) {
-                summary += `**Alertas de pico** foram registrados, sugerindo que dias específicos, como ${firstPeakDateMatch[0]}, podem merecer uma anÃ¡lise mais aprofundada.`;
+                summary += `**Alertas de pico** foram registrados, sugerindo que dias específicos, como ${firstPeakDateMatch[0]}, podem merecer uma análise mais aprofundada.`;
             }
         }
 
@@ -379,9 +370,9 @@ const PatientDetailsParent = () => {
         }
 
         if (hasRecentHighRisk) {
-            summary += `**Alerta:** Foram detectados episÃ³dios de risco **Alto** na última semana, recomendando-se atencao a quaisquer sintomas.`;
+            summary += `**Alerta:** Foram detectados episódios de risco **Alto** na Última semana, recomendando-se atencao a quaisquer sintomas.`;
         } else {
-            summary += "NÃ£o foram detectados episÃ³dios de risco alto na última semana.";
+            summary += "Não foram detectados episódios de risco alto na Última semana.";
         }
 
         return summary;
@@ -391,65 +382,17 @@ const PatientDetailsParent = () => {
     // >>>>> Gatilho <<<<<
     // ===================
 
-    const analyzeTriggerPatterns = (triggerRecords) => {
-        if (!triggerRecords || triggerRecords.length === 0) return null;
-
-        const totalCount = triggerRecords.length;
-
-        const countsByType = triggerRecords.reduce((acc, record) => {
-            acc[record.type] = (acc[record.type] || 0) + 1;
-            return acc;
-        }, {});
-
-        const dominantType = Object.keys(countsByType).reduce((a, b) => countsByType[a] > countsByType[b] ? a : b, 'Nenhum');
-
-        const averageIntensity = triggerRecords.reduce((sum, record) => sum + (record.intensity || 0), 0) / totalCount;
-
-        const recordsByDayOfWeek = triggerRecords.reduce((acc, record) => {
-            const day = new Date(record.date).toLocaleDateString('pt-BR', { weekday: 'long' });
-            acc[day] = (acc[day] || 0) + 1;
-            return acc;
-        }, {});
-        
-        const peakDay = Object.keys(recordsByDayOfWeek).reduce((a, b) => recordsByDayOfWeek[a] > recordsByDayOfWeek[b] ? a : b, 'Nenhum');
-
-        return {
-            totalCount,
-            dominantType,
-            averageIntensity: averageIntensity.toFixed(1),
-            peakDay,
-            distribution: countsByType
-        };
-    };
-
-    const generateTriggerAISummary = (analysis) => {
-        if (!analysis) return "Aguardando dados de gatilhos para gerar resumo.";
-
-        const { dominantType, averageIntensity, peakDay, totalCount } = analysis;
-
-        let summary = `Foram registrados **${totalCount}** gatilhos no periodo. `;
-        summary += `O tipo de gatilho mais comum foi **${dominantType}**, sugerindo uma sensibilidade particular a estimulos dessa natureza. `;
-        summary += `A intensidade media dos gatilhos foi de **${averageIntensity} de 10**. `;
-        
-        if (peakDay !== 'Nenhum') {
-            summary += `O dia da semana com maior incidencia de eventos foi **${peakDay}**, o que pode indicar padroes na rotina do paciente.`;
-        }
-
-        return summary;
-    };
-
     // ==========================
     // >>>>> VOCALIZAES <<<<<
     // ==========================
 
-    // NÃ­vel 1: AnÃ¡lise EstatÃ­stica
+    // Nível 1: Análise Estatística
     const analyzeVocalizationPatterns = (vocalizationRecords) => {
         if (!vocalizationRecords || vocalizationRecords.length === 0) return null;
 
         const allAnalyses = vocalizationRecords.map(v => v.analysis);
 
         const totalWordCount = allAnalyses.reduce((sum, a) => sum + a.wordCount, 0);
-        const totalUniqueWords = allAnalyses.reduce((sum, a) => sum + a.uniqueWords, 0);
         const averageDiversity = allAnalyses.reduce((sum, a) => sum + a.lexicalDiversity, 0) / allAnalyses.length;
 
         const allRepeatedWords = allAnalyses.flatMap(a => a.repeatedWords);
@@ -468,7 +411,7 @@ const PatientDetailsParent = () => {
         };
     };
 
-    // NÃ­vel 2: Resumo em Linguagem Natural
+    // Nível 2: Resumo em Linguagem Natural
     const generateVocalizationAISummary = (analysis) => {
         if (!analysis) return "Aguardando dados de vocalizacao para gerar resumo.";
 
@@ -478,9 +421,9 @@ const PatientDetailsParent = () => {
         summary += `A diversidade lexical media  de **${averageLexicalDiversity}%**, indicando a complexidade da comunicao. `;
 
         if (dominantRepetition !== 'Nenhuma') {
-            summary += `O padrao de repeticao mais comum observado foi a palavra/frase **"${dominantRepetition}"**, o que pode ser um ponto de interesse para anÃ¡lise de ecolalia ou perseveracao.`;
+            summary += `O padrao de repeticao mais comum observado foi a palavra/frase **"${dominantRepetition}"**, o que pode ser um ponto de interesse para análise de ecolalia ou perseveracao.`;
         } else {
-            summary += "NÃ£o foram observados padroes de repeticao significativos (ecolalia) nas gravacoes."
+            summary += "Não foram observados padroes de repeticao significativos (ecolalia) nas gravacoes."
         }
 
         return summary;
@@ -541,7 +484,7 @@ const PatientDetailsParent = () => {
                 setStrokeRiskAnalysis(analyzeStrokeRiskPatterns(validStrokeRisks));
                 setEmotionAnalysis(analyzeEmotionPatterns(validEmotions));
 
-                processChartData(null, validStrokeRisks, validEmotions, validVocalizations);
+                processChartData(validStrokeRisks, validEmotions, validVocalizations);
 
             } catch (err) {
                 console.error('Erro ao carregar dados do paciente:', err);
@@ -553,6 +496,7 @@ const PatientDetailsParent = () => {
         };
 
         fetchPatientData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, patientId, periodFilter, navigate]);
 
 
@@ -561,7 +505,7 @@ const PatientDetailsParent = () => {
         if (patientId && emotions.length > 0) {
             const fetchAIAnalysis = async () => {
                 try {
-                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}type=emotion`);
+                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}?type=emotion`);
                     setPrediction(aiResponse.data.predictionText || "Previsão gerada com sucesso.");
                     setAnomaly(aiResponse.data.anomaly || null);
                 } catch (aiError) {
@@ -580,7 +524,7 @@ const PatientDetailsParent = () => {
         if (patientId && strokeRisks.length > 0) {
             const fetchStrokeAIAnalysis = async () => {
                 try {
-                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}type=stroke`);
+                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}?type=stroke`);
                     setStrokePrediction(aiResponse.data.predictionText || "Previsão de risco gerada.");
                     setStrokeAnomaly(aiResponse.data.anomaly || null);
                 } catch (aiError) {
@@ -608,27 +552,7 @@ const PatientDetailsParent = () => {
         }
     }, [vocalizations, patientId]);
 
-    const processChartData = (triggers, strokeRisks, emotions, vocalizations) => {
-        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-
-        // --- PROCESSAMENTO DE TRIGGERS (Ambientais) ---
-        const triggerTypes = ['Sonoro', 'Visual', 'Tatil'];
-        const triggerChartData = {
-            labels: months,
-            datasets: triggerTypes.map((type, index) => ({
-                label: type,
-                data: months.map((_, monthIndex) => {
-                    const date = `2025-0${monthIndex + 1}-01`;
-                    const trigger = (triggers || []).find(t => t.date && t.type === type && t.date.startsWith(date.slice(0, 7)));
-                    return trigger ? trigger.count || 0 : 0;
-                }),
-                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'][index],
-                backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'][index],
-                fill: true,
-                tension: 0.4
-            }))
-        };
-        setTriggerData(triggerChartData);
+    const processChartData = (strokeRisks, emotions, vocalizations) => {
 
         // --- PROCESSAMENTO DE RISCO DE AVC ---
         const strokeChartData = {
@@ -756,53 +680,8 @@ const PatientDetailsParent = () => {
         window.open(monitoringToolUrl.toString(), '_blank', 'noopener,noreferrer');
     };
 
-    const handleCloseTab = () => {
-        window.close();
-    };
-
     const handlePeriodChange = (e) => {
         setPeriodFilter(e.target.value);
-    };
-
-    const handlePrescriptionChange = (e, index) => {
-        const { name, value } = e.target;
-        if (name === 'observations') {
-            setNewPrescription(prev => ({ ...prev, observations: value }));
-        } else {
-            const updatedMedications = [...newPrescription.medications];
-            updatedMedications[index] = { ...updatedMedications[index], [name]: value };
-            setNewPrescription(prev => ({ ...prev, medications: updatedMedications }));
-        }
-    };
-
-    const handleAddMedication = () => {
-        setNewPrescription(prev => ({
-            ...prev,
-            medications: [...prev.medications, { medication: '', dosage: '', indicationssuggestions: '' }]
-        }));
-    };
-
-    const handleRemoveMedication = (index) => {
-        setNewPrescription(prev => ({
-            ...prev,
-            medications: prev.medications.filter((_, i) => i !== index)
-        }));
-    };
-
-    const handleSavePrescription = () => {
-        if (!newPrescription.date || newPrescription.medications.some(m => !m.medication || !m.dosage)) {
-            alert('Por favor, preencha todos os campos obrigatórios (Data, Medicamento e Dosagem).');
-            return;
-        }
-        const newPrescriptionData = {
-            id: prescriptions.length + 1,
-            date: newPrescription.date,
-            medications: newPrescription.medications,
-            observations: newPrescription.observations
-        };
-        setPrescriptions([...prescriptions, newPrescriptionData]);
-        setFilteredPrescriptions([...prescriptions, newPrescriptionData]);
-        setNewPrescription({ date: '', medications: [{ medication: '', dosage: '', indicationssuggestions: '' }], observations: '' });
     };
 
     const handleDeletePrescription = (id) => {
@@ -880,13 +759,13 @@ const PatientDetailsParent = () => {
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
                 </Col>
 
-                {/* Coluna da Logo e TÃ­tulo (Centralizada) */}
+                {/* Coluna da Logo e Título (Centralizada) */}
                 <Col>
                     <h1 className="patient-name mb-0 mt-2">Dashboard Paciente</h1>
                     <p className="patient-info text-muted mb-0">{patient.name} - {patient.specialInfo}</p>
                 </Col>
 
-                {/* Coluna das InformaÃ§Ãµes do Paciente ( direita) */}
+                {/* Coluna das Informações do Paciente ( direita) */}
                 <Col xs="auto">
                     <div className="patient-info-block">
                         <div className="info-item">
@@ -959,6 +838,9 @@ const PatientDetailsParent = () => {
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link eventKey="prescription">Prescrição Médica</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="aba-activity">Atividade ABA</Nav.Link>
                             </Nav.Item>
                             {/*<Nav.Item>
                                 <Nav.Link eventKey="aba">ABA</Nav.Link>
@@ -1070,8 +952,8 @@ const PatientDetailsParent = () => {
                                                         note && note.id ? (
                                                             <Card key={note.id} className="mb-2">
                                                                 <Card.Body>
-                                                                    <h6>{note.title || 'Sem tÃ­tulo'}</h6>
-                                                                    <p className="mb-1">{note.content || 'Sem conteÃºdo'}</p>
+                                                                    <h6>{note.title || 'Sem título'}</h6>
+                                                                    <p className="mb-1">{note.content || 'Sem conteúdo'}</p>
                                                                     <small className="text-muted">
                                                                         {formatDate(note.date || note.createdAt || note.created_at)}
                                                                     </small>
@@ -1091,13 +973,13 @@ const PatientDetailsParent = () => {
                                             <Modal.Body>
                                                 <Form>
                                                     <Form.Group controlId="noteTitle" className="mb-3">
-                                                        <Form.Label>Tí­tulo</Form.Label>
+                                                        <Form.Label>Título</Form.Label>
                                                         <Form.Control
                                                             type="text"
                                                             value={newNoteData.title}
                                                             onChange={(e) => setNewNoteData({ ...newNoteData, title: e.target.value })}
                                                             required
-                                                            placeholder="Digite o tí­tulo da nota"
+                                                            placeholder="Digite o título da nota"
                                                         />
                                                     </Form.Group>
                                                     <Form.Group controlId="noteContent">
@@ -1129,7 +1011,7 @@ const PatientDetailsParent = () => {
                             {/* >>>>> ABA "GATILHOS" ATUALIZADA E COMPLETA <<<<< */}
                             <Tab.Pane eventKey="trigger" className="no-print">
                                 <Row>
-                                    {/* IA NÃ­vel 2 e 3 */}
+                                    {/* IA Nível 2 e 3 */}
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm">
                                             <Card.Header><h5 className="mb-0">Análise Inteligente de Vocalização (IA)</h5></Card.Header>
@@ -1137,7 +1019,7 @@ const PatientDetailsParent = () => {
                                                 <p className="lead ai-summary">
                                                     {generateVocalizationAISummary(vocalizationAnalysis)}
                                                 </p>
-                                                <h6>Projecao de Tendência de Comunicação (IA - Ní­vel 3)</h6>
+                                                <h6>Projecao de Tendência de Comunicação (IA - Nível 3)</h6>
                                                 <p>{vocalizationPrediction}</p>
                                                 {vocalizationAnomaly && vocalizationAnomaly.detected && (
                                                     <Alert variant="danger" className="alert-anomaly">
@@ -1148,7 +1030,7 @@ const PatientDetailsParent = () => {
                                         </Card>
                                     </Col>
 
-                                    {/* GrÃ¡ficos */}
+                                    {/* Gráficos */}
                                     <Col md={8} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Evolução da Complexidade da Linguagem</h5></Card.Header>
@@ -1183,7 +1065,7 @@ const PatientDetailsParent = () => {
                                     {/* Tabela de Historico */}
                                     <Col md={12}>
                                         <Card className="shadow-sm">
-                                            <Card.Header><h5 className="mb-0">Histórico de Vocalições</h5></Card.Header>
+                                            <Card.Header><h5 className="mb-0">Histórico de Vocalizações</h5></Card.Header>
                                             <Card.Body>
                                                 {vocalizationAnalysis ? (
                                                     <Row className="mb-3 text-center">
@@ -1203,7 +1085,7 @@ const PatientDetailsParent = () => {
                                                         <tr>
                                                             <th>Data</th>
                                                             <th>Cont. Palavras</th>
-                                                            <th>Palavras únicas</th>
+                                                            <th>Palavras Únicas</th>
                                                             <th>Diversidade</th>
                                                             <th>Texto Transcrito</th>
                                                         </tr>
@@ -1234,7 +1116,7 @@ const PatientDetailsParent = () => {
 
                             <Tab.Pane eventKey="stroke" className="no-print">
                                 <Row>
-                                    {/* IA NÃ­vel 2 e 3 */}
+                                    {/* IA Nível 2 e 3 */}
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm">
                                             <Card.Header><h5 className="mb-0">Análise Inteligente de Risco de AVC (IA)</h5></Card.Header>
@@ -1244,14 +1126,14 @@ const PatientDetailsParent = () => {
                                                 </p>
                                                 {strokeRiskAnalysis.hasRecentHighRisk && (
                                                     <Alert variant="danger" className="alert-anomaly">
-                                                        <strong>Alerta de Risco Elevado:</strong> Foram detectados episódios de risco **Alto** na última semana. Recomenda-se atenção redobrada aos sinais de AVC.
+                                                        <strong>Alerta de Risco Elevado:</strong> Foram detectados episódios de risco **Alto** na Última semana. Recomenda-se atenção redobrada aos sinais de AVC.
                                                     </Alert>
                                                 )}
                                             </Card.Body>
                                         </Card>
                                     </Col>
 
-                                    {/* GrÃ¡ficos */}
+                                    {/* Gráficos */}
                                     <Col md={8} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Evolução do Índice de Assimetria Facial</h5></Card.Header>
@@ -1264,7 +1146,7 @@ const PatientDetailsParent = () => {
                                         </Card>
                                     </Col>
 
-                                    {/* IA NÃ­vel 1 */}
+                                    {/* IA Nível 1 */}
                                     <Col md={4} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Análise de Risco</h5></Card.Header>
@@ -1303,7 +1185,7 @@ const PatientDetailsParent = () => {
                                     {/* =================================================== */}
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm card-ia-prediction">
-                                            <Card.Header><h5 className="mb-0">Projeções e Anomalias de Risco (IA - Ní­vel 3)</h5></Card.Header>
+                                            <Card.Header><h5 className="mb-0">Projeções e Anomalias de Risco (IA - Nível 3)</h5></Card.Header>
                                             <Card.Body>
                                                 <h6>Projeção de Tendência</h6>
                                                 <p>{strokePrediction}</p>
@@ -1317,8 +1199,19 @@ const PatientDetailsParent = () => {
                                     </Col>
                                 </Row>
                             </Tab.Pane>
-                                <Tab.Pane eventKey="aba" className="no-print">
-                                <AbaPatient patientId={patientId} />
+                                <Tab.Pane eventKey="aba-activity" className="no-print">
+                                <Card className="shadow-sm">
+                                    <Card.Header>
+                                        <h5 className="mb-0">Laudos de Acompanhamento ABA</h5>
+                                    </Card.Header>
+                                    <Card.Body>
+                                        <Alert variant="info" className="mb-4">
+                                            Os registros da Atividade ABA são inseridos apenas pelos profissionais.
+                                            Aqui você acompanha os laudos e análises disponíveis.
+                                        </Alert>
+                                        <AbaReport patientId={patientId} embedded showPdf={false} />
+                                    </Card.Body>
+                                </Card>
                             </Tab.Pane>
 
                             <Tab.Pane eventKey="emotion" className="no-print">                               <Row>
@@ -1359,7 +1252,7 @@ const PatientDetailsParent = () => {
                                     <Col md={12}>
                                         <Card className="shadow-sm">
                                             <Card.Header>
-                                                <h5 className="mb-0">Análise de Padrões Emocionais (IA - Ní­vel 1)</h5>
+                                                <h5 className="mb-0">Análise de Padrões Emocionais (IA - Nível 1)</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 {emotionAnalysis ? (
@@ -1380,7 +1273,7 @@ const PatientDetailsParent = () => {
                                                         <Col md={6}>
                                                             <h6><ExclamationTriangle className="me-2" />Insights e Tendências</h6>
                                                             <p>
-                                                                <strong>Emoçõo Dominante:</strong>{' '}
+                                                                <strong>Emoção Dominante:</strong>{' '}
                                                                 <Badge bg="primary">{emotionAnalysis.dominantEmotion.toUpperCase()}</Badge>
                                                             </p>
                                                             <h6>Tendência (Hoje vs. Ontem)</h6>
@@ -1415,7 +1308,7 @@ const PatientDetailsParent = () => {
                                             </Card.Header>
                                             <Card.Body>
                                                 <p className="lead ai-summary">
-                                                    {/* Esta funo gera o pargrafo de texto com base na anÃ¡lise */}
+                                                    {/* Esta funo gera o pargrafo de texto com base na análise */}
                                                     {generateAISummary(emotionAnalysis)}
                                                 </p>
                                             </Card.Body>
@@ -1427,7 +1320,7 @@ const PatientDetailsParent = () => {
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm card-ia-prediction">
                                             <Card.Header>
-                                                <h5 className="mb-0">Projeções e Anomalias (IA - Ní­vel 3)</h5>
+                                                <h5 className="mb-0">Projeções e Anomalias (IA - Nível 3)</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 <h6>Previsão para Próximas 24h</h6>
@@ -1558,7 +1451,7 @@ const PatientDetailsParent = () => {
                                                                     <option value="Confirmada">Confirmada</option>
                                                                     <option value="Realizada">Realizada</option>
                                                                     <option value="Cancelada">Cancelada</option>
-                                                                    <option value="NÃ£o Realizada">Não Realizada</option>
+                                                                    <option value="Não Realizada">Não Realizada</option>
                                                                     <option value="Remarcada">Remarcada</option>
                                                                 </Form.Select>
                                                             </td>
@@ -1571,15 +1464,15 @@ const PatientDetailsParent = () => {
                                                                 >
                                                                     <option value="">N/A</option>
                                                                     <option value="Pix">Pix</option>
-                                                                    <option value="CrÃ©dito">Crédito</option>
-                                                                    <option value="DÃ©bito">Débito</option>
+                                                                    <option value="Crédito">Crédito</option>
+                                                                    <option value="Débito">Débito</option>
                                                                     <option value="Dinheiro">Dinheiro</option>
-                                                                    <option value="Plano de SaÃºde">Plano de Saúde</option>
+                                                                    <option value="Plano de Saúde">Plano de Saúde</option>
                                                                     <option value="Outros">Outros</option>
                                                                 </Form.Select>
                                                             </td>
                                                             <td>
-                                                                {(c.payment_method === 'Plano de SaÃºde' || c.payment_method === 'Outros') && (
+                                                                {(c.payment_method === 'Plano de Saúde' || c.payment_method === 'Outros') && (
                                                                     <Form.Control
                                                                         type="text"
                                                                         size="sm"
@@ -1748,7 +1641,7 @@ const PatientDetailsParent = () => {
                                         <option value="Regular">Consulta Regular</option>
                                         <option value="Inicial">Consulta Inicial</option>
                                         <option value="Acompanhamento">Acompanhamento</option>
-                                        <option value="AvaliaÃ§Ã£o">AvaliaÃ§Ã£o</option>
+                                        <option value="Avaliação">Avaliação</option>
                                         <option value="Terapia">Terapia</option>
                                     </Form.Select>
                                 </Form.Group>
@@ -1765,7 +1658,7 @@ const PatientDetailsParent = () => {
                                         <option value="Agendada">Agendada</option>
                                         <option value="Confirmada">Confirmada</option>
                                         <option value="Cancelada">Cancelada</option>
-                                        <option value="NÃ£o Realizada">NÃ£o Realizada</option>
+                                        <option value="Não Realizada">Não Realizada</option>
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
@@ -1804,14 +1697,14 @@ const PatientDetailsParent = () => {
                         <Row>
                             <Col md={12}>
                                 <Form.Group className="mb-3" controlId="consultationNotes">
-                                    <Form.Label>ObservaÃ§Ãµes</Form.Label>
+                                    <Form.Label>Observações</Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={3}
                                         name="notes"
                                         value={newConsultation.notes}
                                         onChange={handleConsultationInputChange}
-                                        placeholder="Digite observaÃ§Ãµes sobre a consulta"
+                                        placeholder="Digite observações sobre a consulta"
                                     />
                                 </Form.Group>
                             </Col>
@@ -1828,21 +1721,21 @@ const PatientDetailsParent = () => {
                                         onChange={handleConsultationInputChange}
                                     >
                                         <option value="Pix">Pix</option>
-                                        <option value="CrÃ©dito">CartÃ£o de CrÃ©dito</option>
-                                        <option value="DÃ©bito">CartÃ£o de DÃ©bito</option>
+                                        <option value="Crédito">Cartão de Crédito</option>
+                                        <option value="Débito">Cartão de Débito</option>
                                         <option value="Dinheiro">Dinheiro</option>
-                                        <option value="Plano de SaÃºde">Plano de SaÃºde</option>
+                                        <option value="Plano de Saúde">Plano de Saúde</option>
                                         <option value="Outros">Outros</option>
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
-                            {(newConsultation.payment_method === 'Plano de SaÃºde' || newConsultation.payment_method === 'Outros') && (
+                            {(newConsultation.payment_method === 'Plano de Saúde' || newConsultation.payment_method === 'Outros') && (
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="paymentDetails">
                                         <Form.Label>
-                                            {newConsultation.payment_method === 'Plano de SaÃºde' ? 'Qual Plano de SaÃºde' : 'Especifique a Forma de Pagamento'}
+                                            {newConsultation.payment_method === 'Plano de Saúde' ? 'Qual Plano de Saúde' : 'Especifique a Forma de Pagamento'}
                                         </Form.Label>
-                                        {newConsultation.payment_method === 'Plano de SaÃºde' ? (
+                                        {newConsultation.payment_method === 'Plano de Saúde' ? (
                                             <Form.Select
                                                 name="payment_details"
                                                 value={newConsultation.payment_details}
@@ -1850,7 +1743,7 @@ const PatientDetailsParent = () => {
                                             >
                                                 <option value="">Selecione...</option>
                                                 <option value="Hapvida">Hapvida</option>
-                                                <option value="Bradesco SaÃºde">Bradesco SaÃºde</option>
+                                                <option value="Bradesco Saúde">Bradesco Saúde</option>
                                                 <option value="SulAmerica">SulAmerica</option>
                                                 <option value="Unimed">Unimed</option>
                                                 <option value="Amil">Amil</option>
@@ -1883,6 +1776,18 @@ const PatientDetailsParent = () => {
     );
 };
 export default PatientDetailsParent;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

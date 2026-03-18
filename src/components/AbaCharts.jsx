@@ -29,7 +29,7 @@ const AbaCharts = ({ sessions = [], compact = false }) => {
 
         return sessions
             .slice()
-            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+            .sort((a, b) => new Date(a.createdAt || a.sessionDate) - new Date(b.createdAt || b.sessionDate))
             .map((s) => {
                 const accuracy =
                     s.totalTrials && s.totalTrials > 0
@@ -52,7 +52,7 @@ const AbaCharts = ({ sessions = [], compact = false }) => {
                 })();
 
                 return {
-                    date: dayjs(s.createdAt).format('DD/MM'),
+                    date: dayjs(s.createdAt || s.sessionDate).format('DD/MM'),
                     accuracy,
                     promptScore,
                     generalization: s.generalization ? 1 : 0
@@ -63,8 +63,8 @@ const AbaCharts = ({ sessions = [], compact = false }) => {
     if (!chartData.length) {
         return (
             <Card className="shadow-sm">
+                <Card.Header>Evolução ABA</Card.Header>
                 <Card.Body>
-                    <h5>Evolução ABA</h5>
                     <p className="text-muted mb-0">
                         Dados insuficientes para gerar gráficos.
                     </p>
@@ -78,9 +78,8 @@ const AbaCharts = ({ sessions = [], compact = false }) => {
     ============================== */
     return (
         <Card className="shadow-sm">
+            <Card.Header>Evolução ABA</Card.Header>
             <Card.Body>
-                <h5 className="mb-3">Evolução ABA</h5>
-
                 <ResponsiveContainer width="100%" height={compact ? 260 : 360}>
                     <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -149,7 +148,7 @@ const AbaCharts = ({ sessions = [], compact = false }) => {
 
                 {!compact && (
                     <div className="mt-3 text-muted small">
-                        <strong>Prompt:</strong> Físico → Verbal → Gestual → Independente<br />
+                        <strong>Prompt:</strong> Físico ? Verbal ? Gestual ? Independente<br />
                         <strong>Generalização:</strong> 1 = ocorreu / 0 = não ocorreu
                     </div>
                 )}
@@ -159,3 +158,4 @@ const AbaCharts = ({ sessions = [], compact = false }) => {
 };
 
 export default AbaCharts;
+

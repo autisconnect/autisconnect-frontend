@@ -231,8 +231,6 @@ function Signup() {
         }
     };
 
-    const handleBackToHome = () => navigate('/');
-
     // --- RENDERIZAÇÃO CONDICIONAL DAS ETAPAS ---
     const renderEtapa = () => {
         switch (etapa) {

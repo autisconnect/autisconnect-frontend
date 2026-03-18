@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Card, Alert, Button, Modal, Badge } from 'react-bootstrap';
 import abaProgramService from '../services/abaProgramService';
 
@@ -16,6 +16,19 @@ const AbaProgramReplacement = ({ monitoring, onActionCompleted }) => {
 
     if (!monitoring || monitoring.status !== 'ESTAGNAÇÃO') {
         return null;
+    }
+
+    if (!monitoring.programId) {
+        return (
+            <Card className="shadow-sm">
+                <Card.Body>
+                    <h5 className="mb-3">Substituição de Programa ABA</h5>
+                    <Alert variant="warning" className="mb-0">
+                        Programa não cadastrado. Cadastre o programa para permitir a substituição.
+                    </Alert>
+                </Card.Body>
+            </Card>
+        );
     }
 
     /* ==============================
@@ -130,3 +143,6 @@ const AbaProgramReplacement = ({ monitoring, onActionCompleted }) => {
 };
 
 export default AbaProgramReplacement;
+
+
+

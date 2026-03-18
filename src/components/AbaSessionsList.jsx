@@ -1,13 +1,70 @@
-import React from 'react';
-import { Card, Table, Badge } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Card, Table, Badge, Alert, Spinner } from 'react-bootstrap';
 import dayjs from 'dayjs';
+import abaService from '../services/abaService';
 
-const AbaSessionsList = ({ sessions }) => {
+const AbaSessionsList = ({ sessions: sessionsProp, patientId }) => {
+    const isControlled = sessionsProp !== undefined;
+    const [sessions, setSessions] = useState(Array.isArray(sessionsProp) ? sessionsProp : []);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (isControlled) {
+            setSessions(Array.isArray(sessionsProp) ? sessionsProp : []);
+        }
+    }, [isControlled, sessionsProp]);
+
+    useEffect(() => {
+        const loadSessions = async () => {
+            if (isControlled || !patientId) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await abaService.getSessions(patientId);
+                setSessions(response.data || []);
+            } catch (err) {
+                console.error(err);
+                setError('Erro ao carregar sessões ABA.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadSessions();
+    }, [isControlled, patientId]);
+
+    if (loading) {
+        return (
+            <Card className="shadow-sm">
+                <Card.Header>Histórico de Sessões ABA</Card.Header>
+                <Card.Body className="text-center">
+                    <Spinner animation="border" size="sm" />
+                    <span className="ms-2">Carregando sessões...</span>
+                </Card.Body>
+            </Card>
+        );
+    }
+
+    if (error) {
+        return (
+            <Card className="shadow-sm">
+                <Card.Header>Histórico de Sessões ABA</Card.Header>
+                <Card.Body>
+                    <Alert variant="warning" className="mb-0">
+                        {error}
+                    </Alert>
+                </Card.Body>
+            </Card>
+        );
+    }
+
     if (!sessions || sessions.length === 0) {
         return (
             <Card className="shadow-sm">
+                <Card.Header>Histórico de Sessões ABA</Card.Header>
                 <Card.Body>
-                    <h5>Histórico de Sessões ABA</h5>
                     <p className="text-muted mb-0">
                         Nenhuma sessão registrada até o momento.
                     </p>
@@ -40,9 +97,8 @@ const AbaSessionsList = ({ sessions }) => {
 
     return (
         <Card className="shadow-sm">
+            <Card.Header>Histórico de Sessões ABA</Card.Header>
             <Card.Body>
-                <h5 className="mb-3">Histórico de Sessões ABA</h5>
-
                 <Table responsive hover bordered size="sm">
                     <thead>
                         <tr>
@@ -60,7 +116,7 @@ const AbaSessionsList = ({ sessions }) => {
                         {sessions.map((session) => (
                             <tr key={session.id}>
                                 <td>
-                                    {dayjs(session.createdAt).format('DD/MM/YYYY')}
+                                    {session.createdAt || session.sessionDate ? dayjs(session.createdAt || session.sessionDate).format('DD/MM/YYYY') : '--'}
                                 </td>
                                 <td>
                                     <Badge bg="secondary">
@@ -76,7 +132,7 @@ const AbaSessionsList = ({ sessions }) => {
                                     {getPromptBadge(session.promptLevel)}
                                 </td>
                                 <td className="text-center">
-                                    {session.generalization ? '✔️' : '—'}
+                                    {session.generalization ? '??' : '—'}
                                 </td>
                                 <td>
                                     {session.durationMinutes
@@ -93,3 +149,4 @@ const AbaSessionsList = ({ sessions }) => {
 };
 
 export default AbaSessionsList;
+

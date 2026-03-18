@@ -1,4 +1,4 @@
-// src/components/AbaReportPDF.jsx
+﻿// src/components/AbaReportPDF.jsx
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
@@ -6,11 +6,10 @@ const styles = StyleSheet.create({
   page: { padding: 30, fontSize: 11 },
   title: { fontSize: 16, marginBottom: 10, textAlign: 'center' },
   section: { marginBottom: 12 },
-  label: { fontWeight: 'bold' },
-  // ... outros estilos
+  label: { fontWeight: 'bold' }
 });
 
-const AbaReportPDF = ({ patient, sessions, programs, analytics, forecast }) => (
+const AbaReportPDF = ({ patient, programs }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <Text style={styles.title}>Relatório ABA + IA</Text>
@@ -22,9 +21,15 @@ const AbaReportPDF = ({ patient, sessions, programs, analytics, forecast }) => (
 
       <View style={styles.section}>
         <Text style={styles.label}>Programas ABA</Text>
-        {programs?.map(p => (
-          <Text key={p.id}>{p.programName} — Status: {p.status}</Text>
-        ))}
+        {programs?.length ? (
+          programs.map((program) => (
+            <Text key={program.id}>
+              {program.programName} — Status: {program.status}
+            </Text>
+          ))
+        ) : (
+          <Text>Nenhum programa registrado.</Text>
+        )}
       </View>
 
       {/* Adicione mais seções conforme necessário */}

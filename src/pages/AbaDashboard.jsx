@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Alert, Spinner, Badge } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import AbaCharts from '../components/AbaCharts';
 import AbaAiAnalysis from '../components/AbaAiAnalysis';
@@ -10,11 +10,18 @@ import AbaProgramMonitoring from '../components/AbaProgramMonitoring';
 import abaService from '../services/abaService';
 import abaAiService from '../services/abaAiService';
 
-const AbaDashboard = () => {
+const AbaDashboard = ({ patientId: propPatientId }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { patientId: routePatientId } = useParams();
 
-    const [patientId, setPatientId] = useState(null);
+    const queryPatientId = useMemo(() => {
+        const params = new URLSearchParams(location.search);
+        return params.get('patientId');
+    }, [location.search]);
+
+    const patientId = propPatientId || routePatientId || queryPatientId;
+
     const [sessions, setSessions] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [forecast, setForecast] = useState(null);
@@ -24,34 +31,56 @@ const AbaDashboard = () => {
     const [error, setError] = useState(null);
 
     /* ==============================
-       Extrair patientId
-    ============================== */
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        setPatientId(params.get('patientId'));
-    }, [location]);
-
-    /* ==============================
        Carregar dados do dashboard
     ============================== */
     const loadDashboardData = async () => {
-        if (!patientId) return;
+        if (!patientId) {
+            setError('Paciente não identificado.');
+            setLoading(false);
+            return;
+        }
 
         try {
             setLoading(true);
+            setError(null);
 
-            const sessionsRes = await abaService.getSessions(patientId);
-            setSessions(sessionsRes.data);
+            const results = await Promise.allSettled([
+                abaService.getSessions(patientId),
+                abaAiService.getAnalytics(patientId),
+                abaAiService.getForecast(patientId),
+                abaAiService.getMonitoring(patientId)
+            ]);
 
-            const analyticsRes = await abaAiService.getAnalytics(patientId);
-            setAnalytics(analyticsRes.data);
+            const [sessionsRes, analyticsRes, forecastRes, monitoringRes] = results;
 
-            const forecastRes = await abaAiService.getForecast(patientId);
-            setForecast(forecastRes.data);
+            if (sessionsRes.status === 'fulfilled') {
+                setSessions(sessionsRes.value.data || []);
+            } else {
+                setSessions([]);
+            }
 
-            const monitoringRes = await abaAiService.getMonitoring(patientId);
-            setMonitoring(monitoringRes.data);
+            if (analyticsRes.status === 'fulfilled') {
+                setAnalytics(analyticsRes.value.data);
+            } else {
+                setAnalytics(null);
+            }
 
+            if (forecastRes.status === 'fulfilled') {
+                setForecast(forecastRes.value.data);
+            } else {
+                setForecast(null);
+            }
+
+            if (monitoringRes.status === 'fulfilled') {
+                setMonitoring(monitoringRes.value.data);
+            } else {
+                setMonitoring(null);
+            }
+
+            const hasSuccess = results.some((result) => result.status === 'fulfilled');
+            if (!hasSuccess) {
+                setError('Erro ao carregar dashboard ABA.');
+            }
         } catch (err) {
             console.error(err);
             setError('Erro ao carregar dashboard ABA.');
@@ -69,15 +98,17 @@ const AbaDashboard = () => {
        Helpers visuais
     ============================== */
     const getStatusBadge = () => {
-        if (!monitoring?.stagnation?.condition) return null;
+        if (!monitoring?.status) return null;
 
-        switch (monitoring.stagnation.condition) {
+        switch (monitoring.status) {
             case 'ESTAGNAÇÃO':
                 return <Badge bg="warning">Estagnação</Badge>;
             case 'REGRESSÃO':
                 return <Badge bg="danger">Regressão</Badge>;
+            case 'PROGRESSO':
+                return <Badge bg="success">Progresso</Badge>;
             default:
-                return <Badge bg="success">Estável</Badge>;
+                return <Badge bg="info">Estável</Badge>;
         }
     };
 
@@ -102,7 +133,7 @@ const AbaDashboard = () => {
     }
 
     return (
-        <Container fluid className="py-4">
+        <Container fluid className="py-4 aba-module-page">
 
             {/* ==========================
                 CABEÇALHO
@@ -199,7 +230,7 @@ const AbaDashboard = () => {
                     <button
                         className="btn btn-primary"
                         onClick={() =>
-                            navigate(`/aba/patient?patientId=${patientId}`)
+                            navigate(`/aba/patient/${patientId}`)
                         }
                     >
                         Abrir Módulo ABA Completo

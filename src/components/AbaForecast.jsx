@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, Alert, ProgressBar, Badge } from 'react-bootstrap';
 
 /**
@@ -8,12 +8,12 @@ import { Card, Alert, ProgressBar, Badge } from 'react-bootstrap';
  * - Tendência clínica
  * - Apoio à decisão terapêutica
  */
-const AbaForecast = ({ forecast, sessions = [], compact = false }) => {
+const AbaForecast = ({ forecast, compact = false }) => {
     if (!forecast) {
         return (
             <Card className="shadow-sm">
+                <Card.Header>Previsão de Desempenho ABA</Card.Header>
                 <Card.Body>
-                    <h5>Previsão de Desempenho ABA</h5>
                     <p className="text-muted mb-0">
                         Dados insuficientes para gerar previsão.
                     </p>
@@ -56,9 +56,8 @@ const AbaForecast = ({ forecast, sessions = [], compact = false }) => {
     ============================== */
     return (
         <Card className="shadow-sm h-100">
+            <Card.Header>Previsão IA – Desempenho Futuro</Card.Header>
             <Card.Body>
-                <h5 className="mb-3">Previsão IA – Desempenho Futuro</h5>
-
                 {/* TENDÊNCIA */}
                 <Alert variant={getTrendVariant(forecast.trend)}>
                     <strong>Tendência Prevista:</strong>{' '}
@@ -115,7 +114,7 @@ const AbaForecast = ({ forecast, sessions = [], compact = false }) => {
                 {/* ALERTAS */}
                 {forecast.trend === 'NEGATIVA' && (
                     <Alert variant="danger" className="mt-3">
-                        🚨 Atenção: possível necessidade de intervenção preventiva.
+                        Atenção: possível necessidade de intervenção preventiva.
                     </Alert>
                 )}
             </Card.Body>

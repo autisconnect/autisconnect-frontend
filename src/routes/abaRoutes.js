@@ -1,16 +1,11 @@
-'use strict';
+﻿import express from 'express';
+import { authenticateToken } from '../middlewares/authMiddleware';
+import abaSessionController from '../controllers/abaSessionController';
+import abaAiController from '../controllers/abaAiController';
+import abaProgramController from '../controllers/abaProgramController';
+import abaReportController from '../controllers/abaReportController';
 
-const express = require('express');
 const router = express.Router();
-
-// Middlewares
-const { authenticateToken } = require('../middlewares/authMiddleware');
-
-// Controllers
-const abaSessionController = require('../controllers/abaSessionController');
-const abaAiController = require('../controllers/abaAiController');
-const abaProgramController = require('../controllers/abaProgramController');
-const abaReportController = require('../controllers/abaReportController');
 
 /* =========================================================
    SESSÕES ABA (CRUD)
@@ -120,4 +115,4 @@ router.get(
     abaReportController.generatePdf
 );
 
-module.exports = router;
+export default router;

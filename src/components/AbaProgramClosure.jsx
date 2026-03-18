@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Card, Alert, Button, Modal, Badge } from 'react-bootstrap';
 import abaProgramService from '../services/abaProgramService';
 
@@ -15,10 +15,22 @@ const AbaProgramClosure = ({ monitoring, onActionCompleted }) => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
-    if (!monitoring || !monitoring.closureRecommendation) {
+        if (!monitoring || !monitoring.closureRecommendation) {
         return null;
     }
 
+    if (!monitoring.programId) {
+        return (
+            <Card className="shadow-sm">
+                <Card.Body>
+                    <h5 className="mb-3">Encerramento de Programa ABA</h5>
+                    <Alert variant="warning" className="mb-0">
+                        Programa não cadastrado. Cadastre o programa para permitir o encerramento.
+                    </Alert>
+                </Card.Body>
+            </Card>
+        );
+    }
     /* ==============================
        Handlers
     ============================== */
@@ -123,3 +135,5 @@ const AbaProgramClosure = ({ monitoring, onActionCompleted }) => {
 };
 
 export default AbaProgramClosure;
+
+

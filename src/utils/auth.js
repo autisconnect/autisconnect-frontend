@@ -21,16 +21,15 @@ const getToken = () => {
 
 const setToken = (token) => {
   localStorage.setItem('token', token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
 };
 
-{/* const initializeAuth = async () => {
-  let token = getToken();
-  if (!token) {
-    token = await login('admin', 'admin123'); // Credenciais padrão apenas para inicialização
-  } else {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+const initializeAuth = async () => {
+  const token = getToken();
+  if (token) {
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
   }
-}; */}
+  return token;
+};
 
 export { login, getToken, setToken, initializeAuth };

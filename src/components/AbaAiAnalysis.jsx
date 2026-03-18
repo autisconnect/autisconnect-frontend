@@ -12,8 +12,8 @@ const AbaAiAnalysis = ({ analytics, compact = false }) => {
     if (!analytics) {
         return (
             <Card className="shadow-sm">
+                <Card.Header>Análise Inteligente ABA</Card.Header>
                 <Card.Body>
-                    <h5>Análise Inteligente ABA</h5>
                     <p className="text-muted mb-0">
                         Dados insuficientes para análise IA.
                     </p>
@@ -60,9 +60,8 @@ const AbaAiAnalysis = ({ analytics, compact = false }) => {
     ============================== */
     return (
         <Card className="shadow-sm h-100">
+            <Card.Header>Análise IA – Progresso ABA</Card.Header>
             <Card.Body>
-                <h5 className="mb-3">Análise IA – Progresso ABA</h5>
-
                 {/* STATUS GERAL */}
                 <Alert variant={getStatusVariant(analytics.overallStatus)}>
                     <strong>Status Geral:</strong>{' '}
@@ -124,13 +123,13 @@ const AbaAiAnalysis = ({ analytics, compact = false }) => {
                 {/* ALERTAS */}
                 {analytics.overallStatus === 'ESTAGNAÇÃO' && (
                     <Alert variant="warning" className="mt-3">
-                        ⚠️ Sugere-se revisão do programa ABA atual.
+                        ?? Sugere-se revisão do programa ABA atual.
                     </Alert>
                 )}
 
                 {analytics.overallStatus === 'REGRESSÃO' && (
                     <Alert variant="danger" className="mt-3">
-                        🚨 Recomendado ajuste imediato de estratégias terapêuticas.
+                        ?? Recomendado ajuste imediato de estratégias terapêuticas.
                     </Alert>
                 )}
             </Card.Body>

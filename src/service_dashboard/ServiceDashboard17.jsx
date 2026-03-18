@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 // Added FaTimes back for cancel action
-import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaFacebook, FaInstagram, FaClock, FaListAlt, FaCertificate, FaUsers, FaComments, FaCalendarCheck, FaStar, FaStarHalfAlt, FaRegStar, FaTimes } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaFacebook, FaInstagram, FaClock, FaListAlt, FaCertificate, FaUsers, FaComments, FaCalendarCheck, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import logohori from '../assets/logohoriz copy.jpg';
 import nrmendfsystems from '../assets/17.jpg';
@@ -145,21 +145,6 @@ function ServiceDashboard17() {
         setReservationSuccess(`Solicitação de reserva para ${reservationDate} às ${reservationTime} enviada! Aguarde a confirmação.`);
         setReservationError(null);
         // Keep modal open to show success message
-    };
-
-    const handleCancelReservation = (reservationId) => {
-        // Simulate API call to cancel reservation
-        if (window.confirm('Tem certeza que deseja cancelar esta solicitação de reserva?')) {
-            console.log(`Solicitando cancelamento da reserva ${reservationId}`);
-            alert(`Solicitação de cancelamento para reserva ${reservationId} enviada (simulação).`);
-            // Update state locally (or refetch)
-            setServiceData(prevData => ({
-                ...prevData,
-                reservations: prevData.reservations.map(res =>
-                    res.id === reservationId ? { ...res, status: 'Cancelada' } : res
-                )
-            }));
-        }
     };
 
     const averageRating = useMemo(() => {
@@ -354,4 +339,5 @@ function ServiceDashboard17() {
 }
 
 export default ServiceDashboard17;
+
 

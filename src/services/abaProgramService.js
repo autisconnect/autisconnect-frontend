@@ -1,4 +1,4 @@
-import api from '../../../services/api';
+import api from './api';
 
 /**
  * abaProgramService
@@ -35,3 +35,4 @@ const abaProgramService = {
 };
 
 export default abaProgramService;
+

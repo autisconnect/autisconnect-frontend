@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, Badge, Alert, ListGroup } from 'react-bootstrap';
 
 /**
@@ -10,7 +10,19 @@ import { Card, Badge, Alert, ListGroup } from 'react-bootstrap';
  * - Regressão
  * - Perfil de resposta do paciente
  */
-const AbaProgramSuggestions = ({ suggestions }) => {
+const AbaProgramSuggestions = ({ suggestions, error }) => {
+    if (error) {
+        return (
+            <Card className="shadow-sm">
+                <Card.Body>
+                    <h5>Sugestões de Programas ABA</h5>
+                    <Alert variant="warning" className="mb-0">
+                        {error}
+                    </Alert>
+                </Card.Body>
+            </Card>
+        );
+    }
     if (!suggestions || suggestions.length === 0) {
         return (
             <Card className="shadow-sm">
@@ -80,3 +92,4 @@ const AbaProgramSuggestions = ({ suggestions }) => {
 };
 
 export default AbaProgramSuggestions;
+

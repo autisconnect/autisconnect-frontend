@@ -3,7 +3,7 @@ import {
   Container, Navbar, Card, Row, Col, Spinner, Alert, Badge, 
   Nav, Tab, Button, Table, Form, Modal 
 } from 'react-bootstrap';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
 import logohori from './assets/logo.png';
@@ -59,8 +59,6 @@ const StatCard = ({ title, value, subtitle, icon, color }) => (
 function ParentDashboard() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { id: urlId } = useParams();
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -172,7 +170,7 @@ function ParentDashboard() {
       }
     }
 
-    // Fallback local quando nÃ£o houver retorno das rotas de parent
+    // Fallback local quando não houver retorno das rotas de parent
     // Fallback final local
     const fallbackChild = {
       id: 16,
@@ -254,7 +252,6 @@ function ParentDashboard() {
       setError('Erro ao agendar consulta. Verifique a disponibilidade.');
     }
   };
-
   useEffect(() => {
     if (!user) return;
 
@@ -273,8 +270,8 @@ function ParentDashboard() {
     };
 
     loadInitialData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
-
   useEffect(() => {
     if (selectedPatient) {
       fetchConsultations(selectedPatient.id);
@@ -576,7 +573,7 @@ function ParentDashboard() {
                 <option value="Credito">Cartão de Crédito</option>
                 <option value="Debito">Cartão de Débito</option>
                 <option value="Dinheiro">Dinheiro</option>
-                <option value="Plano de SaÃºde">Plano de Saúde</option>
+                <option value="Plano de Saúde">Plano de Saúde</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-0">
@@ -602,6 +599,11 @@ function ParentDashboard() {
 }
 
 export default ParentDashboard;
+
+
+
+
+
 
 
 

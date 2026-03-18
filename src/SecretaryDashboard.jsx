@@ -204,6 +204,10 @@ const SecretaryDashboard = () => {
 //ok
     const handleAddNote = async (e) => {
         e.preventDefault();
+        if (!selectedPatient || !selectedPatient.id) {
+            setError('Selecione um paciente para adicionar nota.');
+            return;
+        }
         if (!selectedPatient) return;
         try {
             await apiClient.post(`/secretary/patients/${selectedPatient.id}/notes`, newNote);
@@ -896,11 +900,50 @@ const SecretaryDashboard = () => {
                                                     </Button>
                                                 </Modal.Footer>
                                             </Form>
-                                        </Modal>
-                        
-      </Container>
+                                        </Modal>        <Modal show={showNoteModal} onHide={() => setShowNoteModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Adicionar Nota</Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleAddNote}>
+            <Modal.Body>
+              {!selectedPatient?.id && (
+                <Alert variant="warning">Selecione um paciente para adicionar a nota.</Alert>
+              )}
+              <Form.Group className="mb-3">
+                <Form.Label>Titulo</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newNote.title}
+                  onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                  disabled={!selectedPatient?.id}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Conteudo</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={newNote.content}
+                  onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+                  disabled={!selectedPatient?.id}
+                  required
+                />
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowNoteModal(false)}>
+                Cancelar
+              </Button>
+              <Button variant="primary" type="submit" disabled={!selectedPatient?.id}>
+                Salvar Nota
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>      </Container>
     </Container>
   );
 };
 
 export default SecretaryDashboard;
+

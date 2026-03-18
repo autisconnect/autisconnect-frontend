@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Alert, Form, Button } from 'react-bootstrap'; // Adicionado Button
 import apiClient from './services/api';
 import { Line, Bar } from 'react-chartjs-2';
@@ -195,10 +195,11 @@ const StrokeRiskMonitor = () => {
     // Lógica de controle para iniciar e parar a detecção
     useEffect(() => {
         loadModels();
+        const videoElement = videoRef.current;
         return () => {
             if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
-            if (videoRef.current && videoRef.current.srcObject) {
-                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            if (videoElement && videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
             }
         };
     }, []);
@@ -206,7 +207,6 @@ const StrokeRiskMonitor = () => {
     useEffect(() => {
         if (isModelsLoaded) startVideo();
     }, [isModelsLoaded]);
-
     useEffect(() => {
         const videoElement = videoRef.current;
         if (isDetecting && patientId && isModelsLoaded && videoElement) {
@@ -220,6 +220,7 @@ const StrokeRiskMonitor = () => {
         } else {
             if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isDetecting, patientId, isModelsLoaded]);
 
     // Função para atualizar a distribuição de risco
@@ -527,3 +528,6 @@ const StrokeRiskMonitor = () => {
 };
 
 export default StrokeRiskMonitor;
+
+
+

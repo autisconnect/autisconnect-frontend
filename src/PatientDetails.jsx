@@ -8,7 +8,6 @@ import apiClient from './services/api';
 import AbaPatient from './pages/AbaPatient';
 
 import logohori from './assets/logo.png';
-import sloganProfissional from './assets/18.jpg';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -46,11 +45,10 @@ const PatientDetails = () => {
     const navigate = useNavigate();
     const [patient, setPatient] = useState(null);
     const [notes, setNotes] = useState([]);
-    const [triggerData, setTriggerData] = useState(null);
     const [strokeData, setStrokeData] = useState(null);
     const [emotionData, setEmotionData] = useState(null);
     const [emotionDistributionData, setEmotionDistributionData] = useState(null);
-    const [triggers, setTriggers] = useState([]);
+    const [triggers] = useState([]);
     const [strokeRisks, setStrokeRisks] = useState([]);
     const [emotions, setEmotions] = useState([]);
     const [emotionAnalysis, setEmotionAnalysis] = useState(null);
@@ -74,7 +72,6 @@ const PatientDetails = () => {
     const [strokeRiskAnalysis, setStrokeRiskAnalysis] = useState(null);
     const [strokePrediction, setStrokePrediction] = useState("Calculando previsão...");
     const [strokeAnomaly, setStrokeAnomaly] = useState(null);
-    const [triggerAnalysis, setTriggerAnalysis] = useState(null);
     const [vocalizations, setVocalizations] = useState([]);
     const [vocalizationAnalysis, setVocalizationAnalysis] = useState(null);
     const [vocalizationPrediction, setVocalizationPrediction] = useState("Calculando previsão...");
@@ -96,12 +93,11 @@ const PatientDetails = () => {
     });
 
     // ===================================================
-    // 2. FUNÇÕES AUXILIARES (handlers, formatters, etc.)
+    // 2. FUNÃ‡Ã•ES AUXILIARES (handlers, formatters, etc.)
     // ===================================================
     const lineOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Evolução ao Longo do Tempo' } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Valor' } } } };
     const pieOptions = { responsive: true, plugins: { legend: { position: 'right' }, title: { display: true, text: 'Distribuição' } } };
     const barOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Comparação entre Sessões' } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentagem (%)' } } } };
-    const radarOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Perfil Emocional' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 1 } } };
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
     const formatAge = (birthDate) => { if (!birthDate) return 'N/A'; const today = new Date(); const birth = new Date(birthDate); let age = today.getFullYear() - birth.getFullYear(); const monthDiff = today.getMonth() - birth.getMonth(); if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) { age--; } return `${age} anos`; };
 
@@ -111,7 +107,7 @@ const PatientDetails = () => {
             const response = await apiClient.get(`/appointments/patient/${patientId}`);
             setConsultations(response.data);
         } catch (err) {
-            setError(err.response?.data?.error || 'Falha ao buscar histórico de consultas.');
+            setError(err.response?.data?.error || 'Falha ao buscar histÃ³rico de consultas.');
         }
     };
 
@@ -135,7 +131,7 @@ const PatientDetails = () => {
     const handleSaveConsultation = async (e) => {
         e.preventDefault();
         if (!newConsultation.appointment_date || !newConsultation.appointment_time || !newConsultation.value) {
-            setError('Data, hora e valor são campos obrigatórios.');
+            setError('Data, hora e valor sÃ£o campos obrigatÃ³rios.');
             return;
         }
         try {
@@ -143,7 +139,7 @@ const PatientDetails = () => {
                 ...newConsultation,
                 patient_id: patientId,
                 professional_id: user.id,
-                payment_method: ['Outros', 'Plano de Saúde'].includes(newConsultation.payment_method)
+                payment_method: ['Outros', 'Plano de SaÃºde'].includes(newConsultation.payment_method)
                     ? newConsultation.payment_details
                     : newConsultation.payment_method
             };
@@ -161,7 +157,7 @@ const PatientDetails = () => {
 
     const handleSaveNote = async () => {
         if (!newNoteData.title || !newNoteData.content) {
-            setError('Por favor, preencha o título e o conteúdo da nota.');
+            setError('Por favor, preencha o tÃ­tulo e o conteÃºdo da nota.');
             return;
         }
         try {
@@ -194,7 +190,7 @@ const PatientDetails = () => {
             return recordDate > new Date(now - 2 * oneDay) && recordDate < new Date(now - oneDay);
         });
 
-        // 1. Calcular Emoção Dominante e Distribuição
+        // 1. Calcular EmoÃ§Ã£o Dominante e DistribuiÃ§Ã£o
         const totalCount = emotionRecords.length;
         const counts = emotionRecords.reduce((acc, record) => {
             acc[record.emotion] = (acc[record.emotion] || 0) + 1;
@@ -215,7 +211,7 @@ const PatientDetails = () => {
             percentage: ((counts[emotion] / totalCount) * 100).toFixed(1)
         })).sort((a, b) => b.percentage - a.percentage);
 
-        // 2. Calcular Tendência Diária
+        // 2. Calcular TendÃªncia DiÃ¡ria
         const todayDominant = todayRecords.reduce((acc, record) => {
             acc[record.emotion] = (acc[record.emotion] || 0) + 1;
             return acc;
@@ -267,7 +263,7 @@ const PatientDetails = () => {
         if (volatility > 60) volatilityText = 'altamente volátil';
 
 
-        // O return final que usa todas as variáveis calculadas.
+        // O return final que usa todas as variÃ¡veis calculadas.
         return {
             dominantEmotion,
             distribution,
@@ -279,16 +275,16 @@ const PatientDetails = () => {
 
     const generateAISummary = (analysis) => {
         if (!analysis) {
-            // Retorna uma string vazia ou uma mensagem padrão se não houver análise
+            // Retorna uma string vazia ou uma mensagem padrÃ£o se nÃ£o houver anÃ¡lise
             return "Aguardando dados suficientes para gerar o resumo...";
         }
 
         const { dominantEmotion, distribution, trend, emotionalPeaks, volatilityText } = analysis;
 
-        // Frase 1: Emoção principal
+        // Frase 1: EmoÃ§Ã£o principal
         let summary = `No período analisado, o paciente demonstrou um estado emocional predominantemente **${dominantEmotion}**. `;
 
-        // Frase 2: Emoções secundárias notáveis
+        // Frase 2: EmoÃ§Ãµes secundÃ¡rias notÃ¡veis
         const secondaryEmotion = distribution.find(d => d.emotion !== dominantEmotion && parseFloat(d.percentage) > 15);
         if (secondaryEmotion) {
             summary += `Houve também uma presença significativa de sentimentos de **${secondaryEmotion.emotion}** (${secondaryEmotion.percentage}%). `;
@@ -297,16 +293,16 @@ const PatientDetails = () => {
         // Frase 3: Volatilidade
         summary += `O comportamento emocional geral mostrou-se **${volatilityText}**. `;
 
-        // Frase 4: Tendências (só mostra se houver uma tendência clara)
-        if (trend.happy < -2) { // Usando números inteiros para comparação
+        // Frase 4: TendÃªncias (sÃ³ mostra se houver uma tendÃªncia clara)
+        if (trend.happy < -2) { // Usando nÃºmeros inteiros para comparaÃ§Ã£o
             summary += "Foi observada uma tendência de **diminuição na felicidade** nas detecções recentes. ";
         } else if (trend.sad > 2 || trend.angry > 2) {
             summary += "Foi observada uma tendência de **aumento em emoções negativas** (tristeza/raiva) recentemente. ";
         } else if (trend.happy > 2) {
-            summary += "Observa-se uma **tendência positiva** recente, com um aumento notável na emoção 'feliz'. ";
+            summary += "Observa-se uma **tendência positiva** recente, com um aumento notÃ¡vel na emoção 'feliz'. ";
         }
 
-        // Frase 5: Picos (só mostra se houver picos)
+        // Frase 5: Picos (sÃ³ mostra se houver picos)
         if (emotionalPeaks.length > 0) {
             // Pega a data do primeiro pico detectado para o resumo
             const firstPeakDateMatch = emotionalPeaks[0].match(/\d{2}\/\d{2}\/\d{4}/);
@@ -354,12 +350,12 @@ const PatientDetails = () => {
         const { lastRiskLevel, distribution, hasRecentHighRisk } = analysis;
         const highRiskPercentage = distribution.find(d => d.level === 'Alto')?.percentage || 0;
 
-        let summary = `O nível de risco mais recente do paciente foi classificado como **${lastRiskLevel}**. `;
+        let summary = `O ní­vel de risco mais recente do paciente foi classificado como **${lastRiskLevel}**. `;
         
         if (highRiskPercentage > 10) {
-            summary += `É importante notar que **${highRiskPercentage}%** das medições indicaram um risco **Alto**, o que sugere a necessidade de monitoramento contínuo. `;
+            summary += `É importante notar que **${highRiskPercentage}%** das medicações indicaram um risco **Alto**, o que sugere a necessidade de monitoramento contí­nuo. `;
         } else {
-            summary += `A maioria das medições indicou um risco baixo a moderado. `;
+            summary += `A maioria das medicações indicou um risco baixo a moderado. `;
         }
 
         if (hasRecentHighRisk) {
@@ -375,65 +371,17 @@ const PatientDetails = () => {
     // >>>>> Gatilho <<<<<
     // ===================
 
-    const analyzeTriggerPatterns = (triggerRecords) => {
-        if (!triggerRecords || triggerRecords.length === 0) return null;
-
-        const totalCount = triggerRecords.length;
-
-        const countsByType = triggerRecords.reduce((acc, record) => {
-            acc[record.type] = (acc[record.type] || 0) + 1;
-            return acc;
-        }, {});
-
-        const dominantType = Object.keys(countsByType).reduce((a, b) => countsByType[a] > countsByType[b] ? a : b, 'Nenhum');
-
-        const averageIntensity = triggerRecords.reduce((sum, record) => sum + (record.intensity || 0), 0) / totalCount;
-
-        const recordsByDayOfWeek = triggerRecords.reduce((acc, record) => {
-            const day = new Date(record.date).toLocaleDateString('pt-BR', { weekday: 'long' });
-            acc[day] = (acc[day] || 0) + 1;
-            return acc;
-        }, {});
-        
-        const peakDay = Object.keys(recordsByDayOfWeek).reduce((a, b) => recordsByDayOfWeek[a] > recordsByDayOfWeek[b] ? a : b, 'Nenhum');
-
-        return {
-            totalCount,
-            dominantType,
-            averageIntensity: averageIntensity.toFixed(1),
-            peakDay,
-            distribution: countsByType
-        };
-    };
-
-    const generateTriggerAISummary = (analysis) => {
-        if (!analysis) return "Aguardando dados de gatilhos para gerar resumo.";
-
-        const { dominantType, averageIntensity, peakDay, totalCount } = analysis;
-
-        let summary = `Foram registrados **${totalCount}** gatilhos no período. `;
-        summary += `O tipo de gatilho mais comum foi **${dominantType}**, sugerindo uma sensibilidade particular a estímulos dessa natureza. `;
-        summary += `A intensidade média dos gatilhos foi de **${averageIntensity} de 10**. `;
-        
-        if (peakDay !== 'Nenhum') {
-            summary += `O dia da semana com maior incidência de eventos foi **${peakDay}**, o que pode indicar padrões na rotina do paciente.`;
-        }
-
-        return summary;
-    };
-
     // ==========================
     // >>>>> VOCALIZAÇÕES <<<<<
     // ==========================
 
-    // Nível 1: Análise Estatística
+    // NÃ­vel 1: AnÃ¡lise EstatÃ­stica
     const analyzeVocalizationPatterns = (vocalizationRecords) => {
         if (!vocalizationRecords || vocalizationRecords.length === 0) return null;
 
         const allAnalyses = vocalizationRecords.map(v => v.analysis);
 
         const totalWordCount = allAnalyses.reduce((sum, a) => sum + a.wordCount, 0);
-        const totalUniqueWords = allAnalyses.reduce((sum, a) => sum + a.uniqueWords, 0);
         const averageDiversity = allAnalyses.reduce((sum, a) => sum + a.lexicalDiversity, 0) / allAnalyses.length;
 
         const allRepeatedWords = allAnalyses.flatMap(a => a.repeatedWords);
@@ -452,14 +400,14 @@ const PatientDetails = () => {
         };
     };
 
-    // Nível 2: Resumo em Linguagem Natural
+    // NÃ­vel 2: Resumo em Linguagem Natural
     const generateVocalizationAISummary = (analysis) => {
         if (!analysis) return "Aguardando dados de vocalização para gerar resumo.";
 
         const { averageWordCount, averageLexicalDiversity, dominantRepetition, totalRecordings } = analysis;
 
         let summary = `Com base em **${totalRecordings}** gravações, o paciente apresenta uma média de **${averageWordCount}** palavras por vocalização. `;
-        summary += `A diversidade lexical média é de **${averageLexicalDiversity}%**, indicando a complexidade da comunicação. `;
+        summary += `A diversidade lexical média de **${averageLexicalDiversity}%**, indicando a complexidade da comunicação. `;
 
         if (dominantRepetition !== 'Nenhuma') {
             summary += `O padrão de repetição mais comum observado foi a palavra/frase **"${dominantRepetition}"**, o que pode ser um ponto de interesse para análise de ecolalia ou perseveração.`;
@@ -482,7 +430,7 @@ const PatientDetails = () => {
             try {
                 const [
                     patientRes, notesRes, consultationsRes, vocalizationsRes,
-                    strokeRes, emotionsRes, stereotypiesRes
+                    strokeRes, emotionsRes
                 ] = await Promise.all([
                     apiClient.get(`/professional/${user.id}/patients/${patientId}`),
                     apiClient.get(`/professional/${user.id}/patients/${patientId}/notes`),
@@ -525,7 +473,7 @@ const PatientDetails = () => {
                 setStrokeRiskAnalysis(analyzeStrokeRiskPatterns(validStrokeRisks));
                 setEmotionAnalysis(analyzeEmotionPatterns(validEmotions));
 
-                processChartData(null, validStrokeRisks, validEmotions, validVocalizations);
+                processChartData(validStrokeRisks, validEmotions, validVocalizations);
 
             } catch (err) {
                 console.error('Erro ao carregar dados do paciente:', err);
@@ -537,10 +485,11 @@ const PatientDetails = () => {
         };
 
         fetchPatientData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, patientId, periodFilter, navigate]);
 
 
-    // Adicione este novo useEffect logo após o useEffect acima
+    // Adicione este novo useEffect logo apÃ³s o useEffect acima
     useEffect(() => {
         if (patientId && emotions.length > 0) {
             const fetchAIAnalysis = async () => {
@@ -550,7 +499,7 @@ const PatientDetails = () => {
                     setAnomaly(aiResponse.data.anomaly || null);
                 } catch (aiError) {
                     console.error("Erro ao buscar análise de IA de emoções:", aiError);
-                    setPrediction("Não foi possível conectar ao serviço de análise de emoções.");
+                    setPrediction("Não foi possí­vel conectar ao serviço de análise de emoções.");
                 }
             };
             fetchAIAnalysis();
@@ -569,7 +518,7 @@ const PatientDetails = () => {
                     setStrokeAnomaly(aiResponse.data.anomaly || null);
                 } catch (aiError) {
                     console.error("Erro ao buscar análise de IA para Risco de AVC:", aiError);
-                    setStrokePrediction("Não foi possível conectar ao serviço de análise de risco.");
+                    setStrokePrediction("Não foi possí­vel conectar ao serviço de análise de risco.");
                 }
             };
             fetchStrokeAIAnalysis();
@@ -585,34 +534,14 @@ const PatientDetails = () => {
                     setVocalizationAnomaly(response.data.anomaly);
                 } catch (err) {
                     console.error("Erro ao buscar IA de vocalizações:", err);
-                    setVocalizationPrediction("Não foi possível conectar ao serviço de análise de vocalizações.");
+                    setVocalizationPrediction("Não foi possí­vel conectar ao serviço de análise de vocalizações.");
                 }
             };
             fetchVocalizationAI();
         }
     }, [vocalizations, patientId]);
 
-    const processChartData = (triggers, strokeRisks, emotions, vocalizations) => {
-        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-
-        // --- PROCESSAMENTO DE TRIGGERS (Ambientais) ---
-        const triggerTypes = ['Sonoro', 'Visual', 'Tátil'];
-        const triggerChartData = {
-            labels: months,
-            datasets: triggerTypes.map((type, index) => ({
-                label: type,
-                data: months.map((_, monthIndex) => {
-                    const date = `2025-0${monthIndex + 1}-01`;
-                    const trigger = (triggers || []).find(t => t.date && t.type === type && t.date.startsWith(date.slice(0, 7)));
-                    return trigger ? trigger.count || 0 : 0;
-                }),
-                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'][index],
-                backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'][index],
-                fill: true,
-                tension: 0.4
-            }))
-        };
-        setTriggerData(triggerChartData);
+    const processChartData = (strokeRisks, emotions, vocalizations) => {
 
         // --- PROCESSAMENTO DE RISCO DE AVC ---
         const strokeChartData = {
@@ -689,7 +618,7 @@ const PatientDetails = () => {
                 labels: sortedVocalizations.map(v => formatDate(v.date)),
                 datasets: [
                     {
-                        label: 'Diversidade Léxica (%)',
+                        label: 'Diversidade Lexica (%)',
                         data: sortedVocalizations.map(v => (v.analysis_data.lexicalDiversity * 100).toFixed(1)), 
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -738,10 +667,6 @@ const PatientDetails = () => {
         monitoringToolUrl.pathname = route;
         monitoringToolUrl.searchParams.append('patientId', patientId);
         window.open(monitoringToolUrl.toString(), '_blank', 'noopener,noreferrer');
-    };
-
-    const handleCloseTab = () => {
-        window.close();
     };
 
     const handlePeriodChange = (e) => {
@@ -864,13 +789,13 @@ const PatientDetails = () => {
                     <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
                 </Col>
 
-                {/* Coluna da Logo e Título (Centralizada) */}
+                {/* Coluna da Logo e TÃ­tulo (Centralizada) */}
                 <Col>
                     <h1 className="patient-name mb-0 mt-2">Dashboard Paciente</h1>
                     <p className="patient-info text-muted mb-0">{patient.name} - {patient.specialInfo}</p>
                 </Col>
 
-                {/* Coluna das Informações do Paciente (à direita) */}
+                {/* Coluna das Informacoes do Paciente (a direita) */}
                 <Col xs="auto">
                     <div className="patient-info-block">
                         <div className="info-item">
@@ -888,7 +813,7 @@ const PatientDetails = () => {
                     </div>
                 </Col>
 
-                {/* Coluna do Botão Sair */}
+                {/* Coluna do BotÃ£o Sair */}
                 <Col xs="auto">
                     <Button 
                         variant="outline-primary" 
@@ -903,7 +828,7 @@ const PatientDetails = () => {
             <Row className="mb-4 no-print">
                 <Col md={3}>
                     <div className="d-flex align-items-center">
-                        <label htmlFor="period-filter" className="me-2">Período:</label>
+                        <label htmlFor="period-filter" className="me-2">Perí­odo:</label>
                         <select
                             id="period-filter"
                             className="form-select"
@@ -936,7 +861,7 @@ const PatientDetails = () => {
                                 <Nav.Link eventKey="emotion">Emoções</Nav.Link>
                             </Nav.Item>
                             {/* <Nav.Item>
-                                <Nav.Link eventKey="vocalization">Vocalizações</Nav.Link>
+                                <Nav.Link eventKey="vocalization">Vocalizaçõees</Nav.Link>
                             </Nav.Item> */}
                             <Nav.Item>
                                 <Nav.Link eventKey="monitoring-tools">Ferramentas de Monitoramento</Nav.Link>
@@ -1057,8 +982,8 @@ const PatientDetails = () => {
                                                         note && note.id ? (
                                                             <Card key={note.id} className="mb-2">
                                                                 <Card.Body>
-                                                                    <h6>{note.title || 'Sem título'}</h6>
-                                                                    <p className="mb-1">{note.content || 'Sem conteúdo'}</p>
+                                                                    <h6>{note.title || 'Sem tÃ­tulo'}</h6>
+                                                                    <p className="mb-1">{note.content || 'Sem conteÃºdo'}</p>
                                                                     <small className="text-muted">
                                                                         {formatDate(note.createdAt)}
                                                                     </small>
@@ -1084,7 +1009,7 @@ const PatientDetails = () => {
                                                             value={newNoteData.title}
                                                             onChange={(e) => setNewNoteData({ ...newNoteData, title: e.target.value })}
                                                             required
-                                                            placeholder="Digite o título da nota"
+                                                            placeholder="Digite o tÃ­tulo da nota"
                                                         />
                                                     </Form.Group>
                                                     <Form.Group controlId="noteContent">
@@ -1095,7 +1020,7 @@ const PatientDetails = () => {
                                                             value={newNoteData.content}
                                                             onChange={(e) => setNewNoteData({ ...newNoteData, content: e.target.value })}
                                                             required
-                                                            placeholder="Digite o conteúdo da nota"
+                                                            placeholder="Digite o conteÃºdo da nota"
                                                         />
                                                     </Form.Group>
                                                 </Form>
@@ -1116,7 +1041,7 @@ const PatientDetails = () => {
                             {/* >>>>> ABA "GATILHOS" ATUALIZADA E COMPLETA <<<<< */}
                             <Tab.Pane eventKey="trigger" className="no-print">
                                 <Row>
-                                    {/* IA Nível 2 e 3 */}
+                                    {/* IA NÃ­vel 2 e 3 */}
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm">
                                             <Card.Header><h5 className="mb-0">Análise Inteligente de Vocalização (IA)</h5></Card.Header>
@@ -1124,7 +1049,7 @@ const PatientDetails = () => {
                                                 <p className="lead ai-summary">
                                                     {generateVocalizationAISummary(vocalizationAnalysis)}
                                                 </p>
-                                                <h6>Projeção de Tendência de Comunicação (IA - Nível 3)</h6>
+                                                <h6>Projeção de Tendência de Comunicação (IA - Níível 3)</h6>
                                                 <p>{vocalizationPrediction}</p>
                                                 {vocalizationAnomaly && vocalizationAnomaly.detected && (
                                                     <Alert variant="danger" className="alert-anomaly">
@@ -1135,7 +1060,7 @@ const PatientDetails = () => {
                                         </Card>
                                     </Col>
 
-                                    {/* Gráficos */}
+                                    {/* GrÃ¡ficos */}
                                     <Col md={8} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Evolução da Complexidade da Linguagem</h5></Card.Header>
@@ -1144,12 +1069,12 @@ const PatientDetails = () => {
                                                     <Line data={vocalizationTrendData} options={{
                                                         ...lineOptions,
                                                         scales: {
-                                                            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Diversidade Léxica (%)' } },
+                                                            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Diversidade LÃ©xica (%)' } },
                                                             y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Contagem de Palavras' } },
                                                         }
                                                     }} />
                                                 ) : (
-                                                    <p className="text-muted text-center pt-5">Não há dados suficientes para exibir a evolução.</p>
+                                                    <p className="text-muted text-center pt-5">Não há¡ dados suficientes para exibir a evolução.</p>
                                                 )}
                                             </Card.Body>
                                         </Card>
@@ -1167,7 +1092,7 @@ const PatientDetails = () => {
                                         </Card>
                                     </Col>
 
-                                    {/* Tabela de Histórico */}
+                                    {/* Tabela de HistÃ³rico */}
                                     <Col md={12}>
                                         <Card className="shadow-sm">
                                             <Card.Header><h5 className="mb-0">Histórico de Vocalizações</h5></Card.Header>
@@ -1178,7 +1103,7 @@ const PatientDetails = () => {
                                                             {vocalizationAnalysis.totalRecordings}</Col>
                                                                 <Col><strong>Média de Palavras:</strong>
                                                             {vocalizationAnalysis.averageWordCount}</Col>
-                                                                <Col><strong>Diversidade Léxica:</strong>
+                                                                <Col><strong>Diversidade Lóxica:</strong>
                                                             {vocalizationAnalysis.averageLexicalDiversity}%</Col>
                                                                 <Col><strong>Repetição Dominante:</strong>
                                                             <Badge bg="warning">{vocalizationAnalysis.dominantRepetition}</Badge></Col>
@@ -1221,7 +1146,7 @@ const PatientDetails = () => {
 
                             <Tab.Pane eventKey="stroke" className="no-print">
                                 <Row>
-                                    {/* IA Nível 2 e 3 */}
+                                    {/* IA NÃ­vel 2 e 3 */}
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm">
                                             <Card.Header><h5 className="mb-0">Análise Inteligente de Risco de AVC (IA)</h5></Card.Header>
@@ -1231,14 +1156,14 @@ const PatientDetails = () => {
                                                 </p>
                                                 {strokeRiskAnalysis?.hasRecentHighRisk && (
                                                     <Alert variant="danger" className="alert-anomaly">
-                                                        <strong>Alerta de Risco Elevado:</strong> Foram detetados episódios de risco **Alto** na última semana. Recomenda-se atenção redobrada aos sinais de AVC.
+                                                        <strong>Alerta de Risco Elevado:</strong> Foram detetados episódios de risco **Alto** na Última semana. Recomenda-se atenção redobrada aos sinais de AVC.
                                                     </Alert>
                                                 )}
                                             </Card.Body>
                                         </Card>
                                     </Col>
 
-                                    {/* Gráficos */}
+                                    {/* GrÃ¡ficos */}
                                     <Col md={8} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Evolução do Índice de Assimetria Facial</h5></Card.Header>
@@ -1251,7 +1176,7 @@ const PatientDetails = () => {
                                         </Card>
                                     </Col>
 
-                                    {/* IA Nível 1 */}
+                                    {/* IA NÃ­vel 1 */}
                                     <Col md={4} className="mb-4">
                                         <Card className="shadow-sm h-100">
                                             <Card.Header><h5 className="mb-0">Análise de Risco</h5></Card.Header>
@@ -1290,7 +1215,7 @@ const PatientDetails = () => {
                                     {/* =================================================== */}
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm card-ia-prediction">
-                                            <Card.Header><h5 className="mb-0">Projeções e Anomalias de Risco (IA - Nível 3)</h5></Card.Header>
+                                            <Card.Header><h5 className="mb-0">Projeções e Anomalias de Risco (IA - Ní­vel 3)</h5></Card.Header>
                                             <Card.Body>
                                                 <h6>Projeção de Tendência</h6>
                                                 <p>{strokePrediction}</p>
@@ -1310,7 +1235,7 @@ const PatientDetails = () => {
 
                             <Tab.Pane eventKey="emotion" className="no-print">                               <Row>
                                     {/* ================================================================== */}
-                                    {/* ================ GRÁFICOS DE VISUALIZAÇÃO DE DADOS =============== */}
+                                    {/* ================ GRÁICOS DE VISUALIZAÇÃO DE DADOS =============== */}
                                     {/* ================================================================== */}
                                     <Col md={8} className="mb-4">
                                         <Card className="shadow-sm h-100">
@@ -1346,7 +1271,7 @@ const PatientDetails = () => {
                                     <Col md={12}>
                                         <Card className="shadow-sm">
                                             <Card.Header>
-                                                <h5 className="mb-0">Análise de Padrões Emocionais (IA - Nível 1)</h5>
+                                                <h5 className="mb-0">Análise de Padrções Emocionais (IA - Ní­vel 1)</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 {emotionAnalysis ? (
@@ -1398,7 +1323,7 @@ const PatientDetails = () => {
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm">
                                             <Card.Header>
-                                                <h5 className="mb-0">Resumo Inteligente (IA - Nível 2)</h5>
+                                                <h5 className="mb-0">Resumo Inteligente (IA - Ní­vel 2)</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 <p className="lead ai-summary">
@@ -1414,7 +1339,7 @@ const PatientDetails = () => {
                                     <Col md={12} className="mb-4">
                                         <Card className="shadow-sm card-ia-prediction">
                                             <Card.Header>
-                                                <h5 className="mb-0">Projeções e Anomalias (IA - Nível 3)</h5>
+                                                <h5 className="mb-0">Projeções e Anomalias (IA - Ní­vel 3)</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 <h6>Previsão para Próximas 24h</h6>
@@ -1443,7 +1368,7 @@ const PatientDetails = () => {
                                                             variant="primary"
                                                             onClick={() => handleOpenMonitoringTool('/emotion-detector')}
                                                             className="mt-auto"
-                                                            aria-label="Abrir Detector de Emoções"
+                                                            aria-label="Abrir Detector de EmoÃ§Ãµes"
                                                         >
                                                             Abrir Detector de Emoções
                                                         </Button>
@@ -1480,27 +1405,24 @@ const PatientDetails = () => {
                                                 </Card.Body>
                                             </Card>
                                         </Col>
-                                        {/*<Col md={6} className="mb-4">
+                                        <Col md={6} className="mb-4">
                                             <Card className="h-100">
                                                 <Card.Body className="d-flex flex-column align-items-center">
-                                                    <h5 className="monitoring-title text-primary">Módulo ABA</h5>
-                                                        <a
-                                                        href={`/aba-dashboard/${patientId}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="w-100"
-                                                        >
-                                                        <Button
-                                                            variant="primary"
-                                                            className="mt-auto w-100 btn-lg"
-                                                            aria-label="Abrir Módulo ABA"
-                                                        >
-                                                            Abrir Módulo ABA
-                                                        </Button>
-                                                        </a>
+                                                    <h5 className="monitoring-title">Módulo ABA</h5>
+                                                    <p className="text-muted small mb-3">
+                                                        Gestão de atividades e habilidades
+                                                    </p>
+                                                    <Button
+                                                        variant="info"
+                                                        onClick={() => handleOpenMonitoringTool(`${ROUTES.ABA_MODULE}/${patientId}`)}
+                                                        className="mt-auto"
+                                                        aria-label="Abrir Módulo ABA"
+                                                    >
+                                                        Abrir Módulo ABA
+                                                    </Button>
                                                 </Card.Body>
                                             </Card>
-                                        </Col>*/}
+                                        </Col>
                                     </Row>
                                     </Card.Body>
                                 </Card>
@@ -1508,7 +1430,7 @@ const PatientDetails = () => {
                             <Tab.Pane eventKey="consultation" className="no-print">
                                 <Card className="shadow-sm">
                                     <Card.Header className="d-flex justify-content-between align-items-center">
-                                        <h5 className="mb-0">Histórico de Consultas</h5>
+                                        <h5 className="mb-0">HistÃ³rico de Consultas</h5>
                                         <Button variant="primary" onClick={() => setShowConsultationModal(true)}>
                                             <PlusCircle className="me-2" /> Registrar Nova Consulta
                                         </Button>
@@ -1545,7 +1467,7 @@ const PatientDetails = () => {
                                                                     <option value="Confirmada">Confirmada</option>
                                                                     <option value="Realizada">Realizada</option>
                                                                     <option value="Cancelada">Cancelada</option>
-                                                                    <option value="Não Realizada">Não Realizada</option>
+                                                                    <option value="NÃ£o Realizada">Não Realizada</option>
                                                                     <option value="Remarcada">Remarcada</option>
                                                                 </Form.Select>
                                                             </td>
@@ -1558,15 +1480,15 @@ const PatientDetails = () => {
                                                                 >
                                                                     <option value="">N/A</option>
                                                                     <option value="Pix">Pix</option>
-                                                                    <option value="Crédito">Crédito</option>
-                                                                    <option value="Débito">Débito</option>
+                                                                    <option value="CrÃ©dito">Crédito</option>
+                                                                    <option value="DÃ©bito">Débito</option>
                                                                     <option value="Dinheiro">Dinheiro</option>
-                                                                    <option value="Plano de Saúde">Plano de Saúde</option>
+                                                                    <option value="Plano de SaÃºde">Plano de Saúde</option>
                                                                     <option value="Outros">Outros</option>
                                                                 </Form.Select>
                                                             </td>
                                                             <td>
-                                                                {(c.payment_method === 'Plano de Saúde' || c.payment_method === 'Outros') && (
+                                                                {(c.payment_method === 'Plano de SaÃºde' || c.payment_method === 'Outros') && (
                                                                     <Form.Control
                                                                         type="text"
                                                                         size="sm"
@@ -1652,7 +1574,7 @@ const PatientDetails = () => {
                                     )}
                                     <div className="print-footer">
                                         <p><strong>Médico:</strong> {user && user.name ? user.name : 'Profissional não identificado'}</p>
-                                        <p><strong>Inscrição:</strong> {user && user.registration ? user.registration : 'Inscrição não disponível'}</p>
+                                        <p><strong>Inscrição:</strong> {user && user.registration ? user.registration : 'Inscrição não disponí­vel'}</p>
                                         <p><strong>Assinatura:</strong></p>
                                         <div className="signature-line"></div>
                                     </div>
@@ -1781,7 +1703,7 @@ const PatientDetails = () => {
                                                         </Form.Group>
                                                     </Col>
                                                     <Col md={9} className="d-flex align-items-end">
-                                                        <Button variant="secondary" onClick={handlePrint} aria-label="Imprimir prescrições">
+                                                        <Button variant="secondary" onClick={handlePrint} aria-label="Imprimir prescriÃ§Ãµes">
                                                             Imprimir
                                                         </Button>
                                                     </Col>
@@ -1892,7 +1814,7 @@ const PatientDetails = () => {
                                         <option value="Regular">Consulta Regular</option>
                                         <option value="Inicial">Consulta Inicial</option>
                                         <option value="Acompanhamento">Acompanhamento</option>
-                                        <option value="Avaliação">Avaliação</option>
+                                        <option value="AvaliaÃ§Ã£o">Avaliação</option>
                                         <option value="Terapia">Terapia</option>
                                     </Form.Select>
                                 </Form.Group>
@@ -1909,7 +1831,7 @@ const PatientDetails = () => {
                                         <option value="Agendada">Agendada</option>
                                         <option value="Confirmada">Confirmada</option>
                                         <option value="Cancelada">Cancelada</option>
-                                        <option value="Não Realizada">Não Realizada</option>
+                                        <option value="NÃ£o Realizada">Não Realizada</option>
                                         <option value="Remarcada">Remarcada</option>
                                     </Form.Select>
                                 </Form.Group>
@@ -1956,7 +1878,7 @@ const PatientDetails = () => {
                                         name="notes"
                                         value={newConsultation.notes}
                                         onChange={handleConsultationInputChange}
-                                        placeholder="Digite observações sobre a consulta"
+                                        placeholder="Digite observaÃ§Ãµes sobre a consulta"
                                     />
                                 </Form.Group>
                             </Col>
@@ -1973,10 +1895,10 @@ const PatientDetails = () => {
                                         onChange={handleConsultationInputChange}
                                     >
                                         <option value="Pix">Pix</option>
-                                        <option value="Crédito">Cartão de Crédito</option>
-                                        <option value="Débito">Cartão de Débito</option>
+                                        <option value="CrÃ©dito">Cartão de Crédito</option>
+                                        <option value="DÃ©bito">Cartão de Débito</option>
                                         <option value="Dinheiro">Dinheiro</option>
-                                        <option value="Plano de Saúde">Plano de Saúde</option>
+                                        <option value="Plano de SaÃºde">Plano de Saúde</option>
                                         <option value="Outros">Outros</option>
                                     </Form.Select>
                                 </Form.Group>
@@ -1995,8 +1917,8 @@ const PatientDetails = () => {
                                             >
                                                 <option value="">Selecione...</option>
                                                 <option value="Hapvida">Hapvida</option>
-                                                <option value="Bradesco Saúde">Bradesco Saúde</option>
-                                                <option value="SulAmérica">SulAmérica</option>
+                                                <option value="Bradesco Saúde">Bradesco SaÃºde</option>
+                                                <option value="SulAmérica">SulAmÃ©rica</option>
                                                 <option value="Unimed">Unimed</option>
                                                 <option value="Amil">Amil</option>
                                             </Form.Select>
@@ -2029,3 +1951,6 @@ const PatientDetails = () => {
 };
 
 export default PatientDetails;
+
+
+
