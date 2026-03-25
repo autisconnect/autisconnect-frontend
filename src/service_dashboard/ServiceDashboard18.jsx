@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Navbar, Card, Table, ListGroup, Nav, Tab, Row, Col, Button, Modal, Form, Image, Alert, Badge } from 'react-bootstrap';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-// Added FaTimes back for cancel action
-import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaFacebook, FaInstagram, FaClock, FaListAlt, FaCertificate, FaUsers, FaComments, FaCalendarCheck, FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaWhatsapp, FaFacebook, FaInstagram, FaClock, FaListAlt, FaCertificate, FaUsers, FaComments, FaCalendarCheck, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
-import logohori from '../assets/logohoriz copy.jpg';
+import logohori from '../assets/logonovo.png';
 import espacoTerapeutico from '../assets/18.jpg';
 
 // --- Leaflet Icon Fix ---
@@ -17,13 +16,302 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
+// --- AutisConnect Color Palette ---
+const autisConnectColors = {
+    primary: '#003D7A',      // Azul Escuro
+    secondary: '#DC143C',    // Vermelho/Crimson
+    accent: '#FFD700',       // Amarelo/Ouro
+    light: '#F8F9FA',        // Cinza muito claro
+    white: '#FFFFFF',
+    text: '#003D7A',
+    textMuted: '#6C757D',
+    border: '#E9ECEF',
+    success: '#28A745',
+    warning: '#FFC107',
+    danger: '#DC3545',
+};
+
+// --- Custom Styles ---
+const customStyles = `
+    :root {
+        --autisconnect-primary: ${autisConnectColors.primary};
+        --autisconnect-secondary: ${autisConnectColors.secondary};
+        --autisconnect-accent: ${autisConnectColors.accent};
+        --autisconnect-light: ${autisConnectColors.light};
+    }
+
+    .autisconnect-navbar {
+        background: linear-gradient(135deg, ${autisConnectColors.primary} 0%, #004a96 100%) !important;
+        box-shadow: 0 2px 8px rgba(0, 61, 122, 0.15);
+        border-bottom: 3px solid ${autisConnectColors.accent};
+    }
+
+    .autisconnect-navbar .navbar-brand {
+        font-weight: 700;
+        color: ${autisConnectColors.white} !important;
+    }
+
+    .autisconnect-navbar .btn-outline-light {
+        border-color: ${autisConnectColors.white};
+        color: ${autisConnectColors.white};
+    }
+
+    .autisconnect-navbar .btn-outline-light:hover {
+        background-color: ${autisConnectColors.accent};
+        border-color: ${autisConnectColors.accent};
+        color: ${autisConnectColors.primary};
+    }
+
+    .autisconnect-hero {
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 61, 122, 0.1);
+    }
+
+    .autisconnect-hero-overlay {
+        background: linear-gradient(135deg, rgba(0, 61, 122, 0.85) 0%, rgba(220, 20, 60, 0.75) 100%);
+        backdrop-filter: blur(4px);
+        border-radius: 12px;
+    }
+
+    .autisconnect-hero h1 {
+        color: ${autisConnectColors.white};
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        letter-spacing: -0.5px;
+    }
+
+    .autisconnect-hero p {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .autisconnect-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 61, 122, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .autisconnect-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 61, 122, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .autisconnect-card-header {
+        background: linear-gradient(135deg, ${autisConnectColors.primary} 0%, #004a96 100%);
+        color: ${autisConnectColors.white};
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .autisconnect-card-header svg {
+        color: ${autisConnectColors.accent};
+    }
+
+    .autisconnect-nav-pills .nav-link {
+        color: ${autisConnectColors.text};
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .autisconnect-nav-pills .nav-link:hover {
+        background-color: ${autisConnectColors.light};
+        color: ${autisConnectColors.primary};
+    }
+
+    .autisconnect-nav-pills .nav-link.active {
+        background: linear-gradient(135deg, ${autisConnectColors.primary} 0%, #004a96 100%);
+        color: ${autisConnectColors.white};
+        box-shadow: 0 2px 8px rgba(0, 61, 122, 0.2);
+    }
+
+    .autisconnect-btn-primary {
+        background: linear-gradient(135deg, ${autisConnectColors.primary} 0%, #004a96 100%);
+        border: none;
+        color: ${autisConnectColors.white};
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .autisconnect-btn-primary:hover {
+        background: linear-gradient(135deg, #004a96 0%, ${autisConnectColors.primary} 100%);
+        color: ${autisConnectColors.white};
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 61, 122, 0.3);
+    }
+
+    .autisconnect-btn-secondary {
+        background-color: ${autisConnectColors.secondary};
+        border: none;
+        color: ${autisConnectColors.white};
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .autisconnect-btn-secondary:hover {
+        background-color: #b30a2c;
+        color: ${autisConnectColors.white};
+        transform: translateY(-2px);
+    }
+
+    .autisconnect-badge {
+        background-color: ${autisConnectColors.accent};
+        color: ${autisConnectColors.primary};
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .autisconnect-badge-secondary {
+        background-color: ${autisConnectColors.secondary};
+        color: ${autisConnectColors.white};
+    }
+
+    .autisconnect-list-group-item {
+        border: 1px solid ${autisConnectColors.border};
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .autisconnect-list-group-item:hover {
+        background-color: ${autisConnectColors.light};
+        border-color: ${autisConnectColors.primary};
+    }
+
+    .autisconnect-feedback-item {
+        border-left: 4px solid ${autisConnectColors.accent};
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: ${autisConnectColors.light};
+        margin-bottom: 1rem;
+    }
+
+    .autisconnect-rating-avg {
+        color: ${autisConnectColors.primary};
+        font-weight: 800;
+    }
+
+    .autisconnect-modal-header {
+        background: linear-gradient(135deg, ${autisConnectColors.primary} 0%, #004a96 100%);
+        color: ${autisConnectColors.white};
+        border: none;
+    }
+
+    .autisconnect-modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .autisconnect-form-label {
+        color: ${autisConnectColors.primary};
+        font-weight: 600;
+    }
+
+    .autisconnect-form-control {
+        border: 2px solid ${autisConnectColors.border};
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .autisconnect-form-control:focus {
+        border-color: ${autisConnectColors.primary};
+        box-shadow: 0 0 0 0.2rem rgba(0, 61, 122, 0.15);
+    }
+
+    .autisconnect-alert-success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        border-radius: 8px;
+    }
+
+    .autisconnect-alert-danger {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        border-radius: 8px;
+    }
+
+    .autisconnect-link {
+        color: ${autisConnectColors.secondary};
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .autisconnect-link:hover {
+        color: #b30a2c;
+        text-decoration: underline;
+    }
+
+    .autisconnect-divider {
+        border-top: 2px solid ${autisConnectColors.accent};
+        margin: 1.5rem 0;
+    }
+
+    .autisconnect-tab-content {
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .autisconnect-map-container {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 61, 122, 0.1);
+    }
+`;
+
+// --- Star Rating Display Component ---
+const StarRating = ({ rating }) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    for (let i = 0; i < fullStars; i++) {
+        stars.push(<FaStar key={`full-${i}`} style={{ color: autisConnectColors.accent }} />);
+    }
+    if (halfStar) {
+        stars.push(<FaStarHalfAlt key="half" style={{ color: autisConnectColors.accent }} />);
+    }
+    for (let i = 0; i < emptyStars; i++) {
+        stars.push(<FaRegStar key={`empty-${i}`} style={{ color: autisConnectColors.textMuted }} />);
+    }
+    return <span className="ms-1">{stars}</span>;
+};
+
 // --- Mock Data ---
 const mockServiceData = {
-    1: {
-        id: 1,
+    18: {
+        id: 18,
         mainPhoto: espacoTerapeutico,
-        //name: 'Acolher Espaço Terapêutico',
-        //segment: 'Terapeuta Ocupacional',
+        name: 'Acolher Espaço Terapêutico',
+        segment: 'Terapeuta Ocupacional',
         description: 'Um ambiente cuidadosamente projetado para promover o desenvolvimento, a autonomia e o bem-estar de indivíduos com TEA',
         hours: 'Seg-Sex: 07:00-20:00',
         menuServices: [
@@ -40,7 +328,6 @@ const mockServiceData = {
             phone: '(87) 99971-0062',
             whatsapp: '(87) 99971-0062',
             socialMedia: {
-                //facebook: 'https://facebook.com/clinicabemestar',
                 instagram: 'https://instagram.com/acolher.espaco_terapeutico',
             },
         },
@@ -57,29 +344,10 @@ const mockServiceData = {
     },
 };
 
-// Star Rating Display Component
-const StarRating = ({ rating }) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-    for (let i = 0; i < fullStars; i++) {
-        stars.push(<FaStar key={`full-${i}`} className="text-warning" />);
-    }
-    if (halfStar) {
-        stars.push(<FaStarHalfAlt key="half" className="text-warning" />);
-    }
-    for (let i = 0; i < emptyStars; i++) {
-        stars.push(<FaRegStar key={`empty-${i}`} className="text-warning" />);
-    }
-    return <span className="ms-1">{stars}</span>;
-};
-
 // --- Component ---
 function ServiceDashboard18() {
     const { id: serviceId } = useParams();
-    const id = serviceId || '1';
+    const id = serviceId || '18';
 
     const [serviceData, setServiceData] = useState(null);
     const [error, setError] = useState(null);
@@ -132,19 +400,17 @@ function ServiceDashboard18() {
         }
         console.log(`Solicitando reserva para ${reservationDate} às ${reservationTime}`);
         const newReservation = {
-            id: Date.now(), // Simple mock ID
+            id: Date.now(),
             date: reservationDate,
             time: reservationTime,
-            status: 'Pendente' // Initial status
+            status: 'Pendente'
         };
-        // Simulate adding to the list (in real app, this comes from API response)
         setServiceData(prevData => ({
             ...prevData,
             reservations: [...(prevData.reservations || []), newReservation]
         }));
         setReservationSuccess(`Solicitação de reserva para ${reservationDate} às ${reservationTime} enviada! Aguarde a confirmação.`);
         setReservationError(null);
-        // Keep modal open to show success message
     };
 
     const averageRating = useMemo(() => {
@@ -157,7 +423,7 @@ function ServiceDashboard18() {
     if (error) {
         return (
             <Container className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                <Alert variant="danger">{error}</Alert>
+                <Alert className="autisconnect-alert-danger">{error}</Alert>
             </Container>
         );
     }
@@ -165,52 +431,68 @@ function ServiceDashboard18() {
     if (!serviceData) {
         return (
             <Container className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                <div>Carregando informações do serviço...</div>
+                <div style={{ color: autisConnectColors.primary, fontWeight: 600 }}>Carregando informações do serviço...</div>
             </Container>
         );
     }
 
     return (
-        <div className="app">
+        <div className="app" style={{ backgroundColor: autisConnectColors.light, minHeight: '100vh' }}>
+            <style>{customStyles}</style>
+
             {/* Navbar */}
-            <Navbar bg="light" expand="lg" sticky="top" className="shadow-sm mb-4 service-navbar">
+            <Navbar expand="lg" sticky="top" className="autisconnect-navbar mb-4">
                 <Container fluid>
-                    <Navbar.Brand href="/">
-                        <img src={logohori} alt="Autisconnect Logo" className="d-inline-block align-top logo" />
+                    <Navbar.Brand href="/" className="fw-bold">
+                        <img src={logohori} alt="Autisconnect Logo" className="d-inline-block align-top" style={{ height: '40px', marginRight: '10px' }} />
                     </Navbar.Brand>
-                    <span className="navbar-text mx-auto d-none d-lg-block">
-                        
+                    <span className="navbar-text mx-auto d-none d-lg-block" style={{ color: autisConnectColors.white, fontWeight: 600 }}>
+                        {serviceData.name}
                     </span>
-                    <Button variant="outline-secondary" size="sm" onClick={handleCloseTab}>Voltar</Button>
+                    <Button 
+                        className="autisconnect-btn-primary d-flex align-items-center gap-2"
+                        size="sm" 
+                        onClick={handleCloseTab}
+                    >
+                        <FaArrowLeft /> Voltar
+                    </Button>
                 </Container>
             </Navbar>
 
             {/* Main Content Area */}
-            <Container fluid className="px-md-4">
+            <Container fluid className="px-3 px-md-4 pb-5">
                 {/* Hero Section */}
-                <Row className="service-hero-section mb-4 align-items-center" style={{ backgroundImage: `url(${serviceData.mainPhoto})` }}>
-                    <Col className="service-hero-overlay p-4 p-md-5 text-white">
+                <Row className="autisconnect-hero mb-4 align-items-center" style={{ backgroundImage: `url(${serviceData.mainPhoto})` }}>
+                    <Col className="autisconnect-hero-overlay p-4 p-md-5 text-white">
                         <h1 className="display-4 fw-bold mb-3">{serviceData.name}</h1>
-                        <p className="lead mb-2">{serviceData.segment}</p>
-                        <p className="mb-3">{serviceData.description || 'Descrição do serviço não disponível.'}</p>
+                        <p className="lead mb-2" style={{ fontSize: '1.3rem', fontWeight: 600 }}>{serviceData.segment}</p>
+                        <p className="mb-0" style={{ fontSize: '1.05rem', lineHeight: '1.6' }}>{serviceData.description || 'Descrição do serviço não disponível.'}</p>
                     </Col>
                 </Row>
 
                 {/* Tab Navigation & Content */}
                 <Tab.Container id="service-dashboard-tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
-                    <Row>
+                    <Row className="g-4">
                         {/* Sidebar Navigation */}
                         <Col lg={3} className="mb-3 mb-lg-0">
-                            <Nav variant="pills" className="flex-column service-dashboard-nav shadow-sm rounded p-3 bg-light">
-                                <Nav.Item className="mb-1">
-                                    <Nav.Link eventKey="visao-geral"><FaUsers className="me-2" />Visão Geral</Nav.Link>
+                            <Nav variant="pills" className="flex-column autisconnect-nav-pills p-4 bg-white rounded-3" style={{ boxShadow: '0 2px 8px rgba(0, 61, 122, 0.08)' }}>
+                                <Nav.Item className="mb-2">
+                                    <Nav.Link eventKey="visao-geral" className="d-flex align-items-center gap-2">
+                                        <FaUsers style={{ color: autisConnectColors.accent }} /> Visão Geral
+                                    </Nav.Link>
                                 </Nav.Item>
-                                <Nav.Item className="mb-1">
-                                    <Nav.Link eventKey="feedback"><FaComments className="me-2" />Avaliações</Nav.Link>
+                                <Nav.Item className="mb-3">
+                                    <Nav.Link eventKey="feedback" className="d-flex align-items-center gap-2">
+                                        <FaComments style={{ color: autisConnectColors.accent }} /> Avaliações
+                                    </Nav.Link>
                                 </Nav.Item>
-                                <Nav.Item className="mt-3">
-                                    <Button variant="primary" className="w-100" onClick={handleShowReservationModal}>
-                                        <FaCalendarCheck className="me-1" /> Solicitar Atendimento
+                                <div className="autisconnect-divider"></div>
+                                <Nav.Item>
+                                    <Button 
+                                        className="autisconnect-btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                                        onClick={handleShowReservationModal}
+                                    >
+                                        <FaCalendarCheck /> Solicitar Atendimento
                                     </Button>
                                 </Nav.Item>
                             </Nav>
@@ -218,52 +500,117 @@ function ServiceDashboard18() {
 
                         {/* Tab Content Area */}
                         <Col lg={9}>
-                            <Tab.Content className="service-dashboard-content">
+                            <Tab.Content className="autisconnect-tab-content">
                                 {/* Visão Geral Tab */}
                                 <Tab.Pane eventKey="visao-geral">
-                                    <Row>
+                                    <Row className="g-4">
                                         {/* Left Column: Details */}
-                                        <Col md={7} className="mb-3 mb-md-0">
-                                            <Card className="shadow-sm mb-3">
-                                                <Card.Header as="h5"><FaClock className="me-2" />Horário</Card.Header>
-                                                <Card.Body><pre className="mb-0">{serviceData.hours}</pre></Card.Body>
+                                        <Col md={7}>
+                                            {/* Horário */}
+                                            <Card className="autisconnect-card mb-4">
+                                                <Card.Header className="autisconnect-card-header">
+                                                    <FaClock /> Horário de Funcionamento
+                                                </Card.Header>
+                                                <Card.Body style={{ padding: '1.5rem' }}>
+                                                    <p style={{ fontSize: '1.1rem', color: autisConnectColors.primary, fontWeight: 600, margin: 0 }}>
+                                                        {serviceData.hours}
+                                                    </p>
+                                                </Card.Body>
                                             </Card>
-                                            <Card className="shadow-sm mb-3">
-                                                <Card.Header as="h5"><FaListAlt className="me-2" />Serviços</Card.Header>
+
+                                            {/* Serviços */}
+                                            <Card className="autisconnect-card mb-4">
+                                                <Card.Header className="autisconnect-card-header">
+                                                    <FaListAlt /> Serviços Oferecidos
+                                                </Card.Header>
                                                 <ListGroup variant="flush">
                                                     {serviceData.menuServices?.length > 0 ? serviceData.menuServices.map((service) => (
-                                                        <ListGroup.Item key={service.id} className="d-flex justify-content-between align-items-start">
-                                                            <div><div className="fw-bold">{service.name}</div>{service.description}</div>
-                                                            <Badge bg="primary" pill className="ms-2">{service.price}</Badge>
+                                                        <ListGroup.Item key={service.id} className="autisconnect-list-group-item" style={{ border: 'none', padding: '1rem' }}>
+                                                            <div className="d-flex justify-content-between align-items-start">
+                                                                <div className="flex-grow-1">
+                                                                    <div className="fw-bold" style={{ color: autisConnectColors.primary, fontSize: '1.05rem', marginBottom: '0.25rem' }}>
+                                                                        {service.name}
+                                                                    </div>
+                                                                    <p style={{ color: autisConnectColors.textMuted, margin: 0, fontSize: '0.95rem' }}>
+                                                                        {service.description}
+                                                                    </p>
+                                                                </div>
+                                                                {service.price && (
+                                                                    <Badge className="autisconnect-badge ms-2">{service.price}</Badge>
+                                                                )}
+                                                            </div>
                                                         </ListGroup.Item>
-                                                    )) : <ListGroup.Item>Nenhum item cadastrado.</ListGroup.Item>}
+                                                    )) : (
+                                                        <ListGroup.Item style={{ padding: '1rem', color: autisConnectColors.textMuted }}>
+                                                            Nenhum serviço cadastrado.
+                                                        </ListGroup.Item>
+                                                    )}
                                                 </ListGroup>
                                             </Card>
-                                            <Card className="shadow-sm mb-3">
-                                                <Card.Header as="h5"><FaCertificate className="me-2" />Certificados</Card.Header>
+
+                                            {/* Certificados */}
+                                            <Card className="autisconnect-card">
+                                                <Card.Header className="autisconnect-card-header">
+                                                    <FaCertificate /> Certificações e Selos
+                                                </Card.Header>
                                                 <ListGroup variant="flush">
                                                     {serviceData.certificates?.length > 0 ? serviceData.certificates.map((cert) => (
-                                                        <ListGroup.Item key={cert.id}>{cert.name}</ListGroup.Item>
-                                                    )) : <ListGroup.Item>Nenhum certificado cadastrado.</ListGroup.Item>}
+                                                        <ListGroup.Item key={cert.id} style={{ padding: '1rem', borderBottom: `1px solid ${autisConnectColors.border}`, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                            <span style={{ color: autisConnectColors.accent, fontSize: '1.2rem' }}>✓</span>
+                                                            <span style={{ color: autisConnectColors.primary, fontWeight: 500 }}>{cert.name}</span>
+                                                        </ListGroup.Item>
+                                                    )) : (
+                                                        <ListGroup.Item style={{ padding: '1rem', color: autisConnectColors.textMuted }}>
+                                                            Nenhum certificado cadastrado.
+                                                        </ListGroup.Item>
+                                                    )}
                                                 </ListGroup>
                                             </Card>
                                         </Col>
+
                                         {/* Right Column: Map & Contact */}
                                         <Col md={5}>
-                                            <Card className="shadow-sm mb-3" style={{ height: '300px' }}>
-                                                <Card.Header as="h5"><FaMapMarkerAlt className="me-2" />Localização</Card.Header>
-                                                <MapContainer center={serviceData.coordinates || [-8.047562, -34.877]} zoom={15} style={{ height: '100%', width: '100%' }} whenCreated={setMapInstance}>
-                                                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
-                                                    {serviceData.coordinates && <Marker position={serviceData.coordinates}><Popup>{serviceData.name}</Popup></Marker>}
-                                                </MapContainer>
+                                            {/* Mapa */}
+                                            <Card className="autisconnect-card mb-4" style={{ height: '350px' }}>
+                                                <Card.Header className="autisconnect-card-header">
+                                                    <FaMapMarkerAlt /> Localização
+                                                </Card.Header>
+                                                <div className="autisconnect-map-container" style={{ height: '100%', width: '100%' }}>
+                                                    <MapContainer center={serviceData.coordinates || [-8.047562, -34.877]} zoom={15} style={{ height: '100%', width: '100%' }} whenCreated={setMapInstance}>
+                                                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+                                                        {serviceData.coordinates && <Marker position={serviceData.coordinates}><Popup>{serviceData.name}</Popup></Marker>}
+                                                    </MapContainer>
+                                                </div>
                                             </Card>
-                                            <Card className="shadow-sm">
-                                                <Card.Header as="h5"><FaPhone className="me-2" />Contato</Card.Header>
+
+                                            {/* Contato */}
+                                            <Card className="autisconnect-card">
+                                                <Card.Header className="autisconnect-card-header">
+                                                    <FaPhone /> Contato
+                                                </Card.Header>
                                                 <ListGroup variant="flush">
-                                                    <ListGroup.Item><FaPhone className="me-2" /> {serviceData.contact?.phone || 'Não informado'}</ListGroup.Item>
-                                                    {serviceData.contact?.whatsapp && <ListGroup.Item><FaWhatsapp className="me-2 text-success" /> <a href={`https://wa.me/${serviceData.contact.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">{serviceData.contact.whatsapp}</a></ListGroup.Item>}
-                                                    {serviceData.contact?.socialMedia?.facebook && <ListGroup.Item><FaFacebook className="me-2 text-primary" /> <a href={serviceData.contact.socialMedia.facebook} target="_blank" rel="noopener noreferrer">Facebook</a></ListGroup.Item>}
-                                                    {serviceData.contact?.socialMedia?.instagram && <ListGroup.Item><FaInstagram className="me-2 text-danger" /> <a href={serviceData.contact.socialMedia.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></ListGroup.Item>}
+                                                    <ListGroup.Item style={{ padding: '1rem', borderBottom: `1px solid ${autisConnectColors.border}`, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                        <FaPhone style={{ color: autisConnectColors.primary }} />
+                                                        <span style={{ color: autisConnectColors.text, fontWeight: 500 }}>
+                                                            {serviceData.contact?.phone || 'Não informado'}
+                                                        </span>
+                                                    </ListGroup.Item>
+                                                    {serviceData.contact?.whatsapp && (
+                                                        <ListGroup.Item style={{ padding: '1rem', borderBottom: `1px solid ${autisConnectColors.border}`, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                            <FaWhatsapp style={{ color: '#25D366' }} />
+                                                            <a href={`https://wa.me/${serviceData.contact.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="autisconnect-link">
+                                                                {serviceData.contact.whatsapp}
+                                                            </a>
+                                                        </ListGroup.Item>
+                                                    )}
+                                                    {serviceData.contact?.socialMedia?.instagram && (
+                                                        <ListGroup.Item style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                            <FaInstagram style={{ color: '#E4405F' }} />
+                                                            <a href={serviceData.contact.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="autisconnect-link">
+                                                                Instagram
+                                                            </a>
+                                                        </ListGroup.Item>
+                                                    )}
                                                 </ListGroup>
                                             </Card>
                                         </Col>
@@ -272,30 +619,54 @@ function ServiceDashboard18() {
 
                                 {/* Avaliações Tab */}
                                 <Tab.Pane eventKey="feedback">
-                                    <h4 className="mb-3">Avaliações do Estabelecimento</h4>
-                                    <Card className="shadow-sm mb-4">
-                                        <Card.Header as="h5">Avaliação Média</Card.Header>
-                                        <Card.Body className="text-center">
-                                            <span className="fs-2 fw-bold me-2">{averageRating}</span>
-                                            <StarRating rating={parseFloat(averageRating)} />
-                                            <span className="text-muted ms-1">({serviceData.feedbacks?.length || 0} avaliações)</span>
+                                    <h3 className="mb-4" style={{ color: autisConnectColors.primary, fontWeight: 700 }}>
+                                        Avaliações do Estabelecimento
+                                    </h3>
+
+                                    {/* Avaliação Média */}
+                                    <Card className="autisconnect-card mb-4">
+                                        <Card.Header className="autisconnect-card-header">
+                                            Avaliação Média
+                                        </Card.Header>
+                                        <Card.Body style={{ padding: '2rem', textAlign: 'center' }}>
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <span className="autisconnect-rating-avg" style={{ fontSize: '3rem', marginRight: '1rem' }}>
+                                                    {averageRating}
+                                                </span>
+                                                <StarRating rating={parseFloat(averageRating)} />
+                                            </div>
+                                            <p style={{ color: autisConnectColors.textMuted, margin: 0, fontSize: '0.95rem' }}>
+                                                Baseado em {serviceData.feedbacks?.length || 0} avaliações
+                                            </p>
                                         </Card.Body>
                                     </Card>
-                                    <Card className="shadow-sm">
-                                        <Card.Header as="h5">Comentários de Usuários</Card.Header>
-                                        <ListGroup variant="flush">
-                                            {serviceData.feedbacks && serviceData.feedbacks.length > 0 ? serviceData.feedbacks.map((fb) => (
-                                                <ListGroup.Item key={fb.id} className="feedback-item">
-                                                    <div className="d-flex w-100 justify-content-between mb-1">
-                                                        <StarRating rating={fb.rating} />
-                                                        <small className="text-muted">{new Date(fb.date + 'T00:00:00').toLocaleDateString()}</small>
+
+                                    {/* Comentários */}
+                                    <Card className="autisconnect-card">
+                                        <Card.Header className="autisconnect-card-header">
+                                            Comentários de Usuários
+                                        </Card.Header>
+                                        <Card.Body style={{ padding: '1.5rem' }}>
+                                            {serviceData.feedbacks && serviceData.feedbacks.length > 0 ? (
+                                                serviceData.feedbacks.map((fb) => (
+                                                    <div key={fb.id} className="autisconnect-feedback-item">
+                                                        <div className="d-flex w-100 justify-content-between align-items-center mb-2">
+                                                            <StarRating rating={fb.rating} />
+                                                            <small style={{ color: autisConnectColors.textMuted, fontWeight: 500 }}>
+                                                                {new Date(fb.date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                                                            </small>
+                                                        </div>
+                                                        <p style={{ color: autisConnectColors.text, margin: 0, lineHeight: 1.6 }}>
+                                                            {fb.comment}
+                                                        </p>
                                                     </div>
-                                                    <p className="mb-1">{fb.comment}</p>
-                                                </ListGroup.Item>
-                                            )) : (
-                                                <ListGroup.Item>Nenhum feedback recebido ainda.</ListGroup.Item>
+                                                ))
+                                            ) : (
+                                                <p style={{ color: autisConnectColors.textMuted, textAlign: 'center', padding: '2rem 0' }}>
+                                                    Nenhum feedback recebido ainda.
+                                                </p>
                                             )}
-                                        </ListGroup>
+                                        </Card.Body>
                                     </Card>
                                 </Tab.Pane>
                             </Tab.Content>
@@ -306,30 +677,65 @@ function ServiceDashboard18() {
 
             {/* Reservation Modal */}
             <Modal show={showReservationModal} onHide={handleCloseReservationModal} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>Solicitar Atendimento para {serviceData.name}</Modal.Title>
+                <Modal.Header className="autisconnect-modal-header">
+                    <Modal.Title style={{ fontWeight: 700 }}>
+                        Solicitar Atendimento
+                    </Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    {reservationSuccess && <Alert variant="success">{reservationSuccess}</Alert>}
-                    {reservationError && <Alert variant="danger">{reservationError}</Alert>}
+                <Modal.Body style={{ padding: '2rem' }}>
+                    {reservationSuccess && (
+                        <Alert className="autisconnect-alert-success" style={{ marginBottom: '1rem' }}>
+                            {reservationSuccess}
+                        </Alert>
+                    )}
+                    {reservationError && (
+                        <Alert className="autisconnect-alert-danger" style={{ marginBottom: '1rem' }}>
+                            {reservationError}
+                        </Alert>
+                    )}
                     {!reservationSuccess && (
                         <Form>
                             <Form.Group className="mb-3" controlId="reservationDate">
-                                <Form.Label>Data Desejada</Form.Label>
-                                <Form.Control type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} min={new Date().toISOString().split('T')[0]} required />
+                                <Form.Label className="autisconnect-form-label">Data Desejada</Form.Label>
+                                <Form.Control 
+                                    type="date" 
+                                    className="autisconnect-form-control"
+                                    value={reservationDate} 
+                                    onChange={(e) => setReservationDate(e.target.value)} 
+                                    min={new Date().toISOString().split('T')[0]} 
+                                    required 
+                                />
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="reservationTime">
-                                <Form.Label>Hora Desejada</Form.Label>
-                                <Form.Control type="time" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} required />
+                                <Form.Label className="autisconnect-form-label">Hora Desejada</Form.Label>
+                                <Form.Control 
+                                    type="time" 
+                                    className="autisconnect-form-control"
+                                    value={reservationTime} 
+                                    onChange={(e) => setReservationTime(e.target.value)} 
+                                    required 
+                                />
                             </Form.Group>
-                            <p className="text-muted small">Sua solicitação será enviada ao estabelecimento para confirmação.</p>
+                            <p style={{ color: autisConnectColors.textMuted, fontSize: '0.9rem', marginBottom: 0 }}>
+                                Sua solicitação será enviada ao estabelecimento para confirmação.
+                            </p>
                         </Form>
                     )}
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseReservationModal}>Fechar</Button>
+                <Modal.Footer style={{ padding: '1.5rem', borderTop: `1px solid ${autisConnectColors.border}` }}>
+                    <Button 
+                        className="autisconnect-btn-secondary"
+                        onClick={handleCloseReservationModal}
+                    >
+                        Fechar
+                    </Button>
                     {!reservationSuccess && (
-                        <Button variant="primary" onClick={handleMakeReservation}>Enviar Solicitação</Button>
+                        <Button 
+                            className="autisconnect-btn-primary"
+                            onClick={handleMakeReservation}
+                        >
+                            Enviar Solicitação
+                        </Button>
                     )}
                 </Modal.Footer>
             </Modal>
@@ -338,5 +744,3 @@ function ServiceDashboard18() {
 }
 
 export default ServiceDashboard18;
-
-

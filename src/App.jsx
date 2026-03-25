@@ -199,7 +199,7 @@ function App() {
         <Route
           path="/service-dashboard/:id"
           element={
-            <ProtectedRoute allowedUserTypes={['servicos_locais']}>
+            <ProtectedRoute allowedUserTypes={['servicos_locais', 'pais_responsavel']}>
               <PublicServiceDashboard />
             </ProtectedRoute>
           }

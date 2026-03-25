@@ -240,8 +240,8 @@ function Signup() {
                         <Card.Body>
                             <Card.Title className="text-center mb-4">
                                 {tipoUsuario === 'pais_responsavel' && 'Cadastro de Pais ou Responsável'}
-                                {tipoUsuario === 'medicos_terapeutas' && 'Cadastro de Médicos ou Terapeutas'}
-                                {tipoUsuario === 'servicos_locais' && 'Cadastro de Serviços Locais'}
+                                {tipoUsuario === 'medicos_terapeutas' && 'Cadastro de Medicos ou Terapeutas'}
+                                {tipoUsuario === 'servicos_locais' && 'Cadastro de Servicos Locais'}
                             </Card.Title>
                             <Form onSubmit={handleSubmitCadastro}>
                                 {tipoUsuario === 'pais_responsavel' && (
@@ -735,7 +735,7 @@ function Signup() {
                                                     </Col>
                                                     <Col md={6}>
                                                         <Form.Group className="mb-3" controlId="formCnpjVinculado">
-                                                            <Form.Label>CNPJ Vinculado a Serviços</Form.Label>
+                                                            <Form.Label>CNPJ Vinculado a Servicos</Form.Label>
                                                             <Form.Control
                                                                 type="text"
                                                                 name="cnpj_vinculado"
@@ -962,6 +962,30 @@ function Signup() {
                                                     </Col>
                                                 </Row>
                                                 <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formTelefoneServico">
+                                                            <Form.Label>Telefone</Form.Label>
+                                                            <Form.Control
+                                                                type="text"
+                                                                name="telefone"
+                                                                placeholder="Telefone da empresa"
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formHorarioFuncionamento">
+                                                            <Form.Label>Horário de Funcionamento</Form.Label>
+                                                            <Form.Control
+                                                                type="text"
+                                                                name="horario_funcionamento"
+                                                                placeholder="Ex: Seg-Sex 08:00-18:00"
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
                                                     <Col md={4}>
                                                         <Form.Group className="mb-3" controlId="formCepEmpresa">
                                                             <Form.Label>CEP</Form.Label>
@@ -1055,41 +1079,141 @@ function Signup() {
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formLatitudeEmpresa">
+                                                            <Form.Label>Latitude (opcional)</Form.Label>
+                                                            <Form.Control
+                                                                type="text"
+                                                                name="latitude"
+                                                                placeholder="Ex: -3.71722"
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formLongitudeEmpresa">
+                                                            <Form.Label>Longitude (opcional)</Form.Label>
+                                                            <Form.Control
+                                                                type="text"
+                                                                name="longitude"
+                                                                placeholder="Ex: -38.54337"
+                                                                onChange={handleInputChange}
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+
+                                            </Card.Body>
+                                        </Card>
+
+                                                                                <Card className="mb-4">
+                                            <Card.Header className="bg-warning">
+                                                <h5 className="mb-0">Detalhes dos Servicos</h5>
+                                            </Card.Header>
+                                            <Card.Body>
+                                                <Row>
+                                                    <Col md={12}>
+                                                        <Form.Group className="mb-3" controlId="formServicosOferecidos">
+                                                            <Form.Label>Servicos oferecidos</Form.Label>
+                                                            <div className="d-flex flex-wrap gap-3">
+                                                                <Form.Check type="checkbox" id="servico-aba" name="servicos" value="ABA" label="ABA" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-fono" name="servicos" value="Fonoaudiologia" label="Fonoaudiologia" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-psico" name="servicos" value="Psicopedagogia" label="Psicopedagogia" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-equo" name="servicos" value="Equoterapia" label="Equoterapia" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-natacao" name="servicos" value="Natacao Adaptada" label="Natacao Adaptada" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-musica" name="servicos" value="Musica" label="Musica" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-artes" name="servicos" value="Artes" label="Artes" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-odonto" name="servicos" value="Odontologia Sensorial" label="Odontologia Sensorial" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-psiq" name="servicos" value="Psiquiatria" label="Psiquiatria" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="servico-neuro" name="servicos" value="Neuropediatria" label="Neuropediatria" onChange={handleInputChange} />
+                                                            </div>
+                                                            <small className="text-muted">Selecione todos os servicos oferecidos.</small>
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formModalidadeServico">
+                                                            <Form.Label>Modalidade</Form.Label>
+                                                            <Form.Select name="modalidade" onChange={handleInputChange} defaultValue="">
+                                                                <option value="">Selecione...</option>
+                                                                <option value="Presencial">Presencial</option>
+                                                                <option value="Online">Online</option>
+                                                                <option value="Hibrido">Hibrido</option>
+                                                            </Form.Select>
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formNivelSuporteServico">
+                                                            <Form.Label>Nivel de suporte atendido</Form.Label>
+                                                            <div className="d-flex flex-wrap gap-3">
+                                                                <Form.Check type="checkbox" id="nivel-1" name="nivel_suporte" value="1" label="Nivel 1" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="nivel-2" name="nivel_suporte" value="2" label="Nivel 2" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="nivel-3" name="nivel_suporte" value="3" label="Nivel 3" onChange={handleInputChange} />
+                                                            </div>
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formFaixaEtariaServico">
+                                                            <Form.Label>Faixa etaria atendida</Form.Label>
+                                                            <div className="d-flex flex-wrap gap-3">
+                                                                <Form.Check type="checkbox" id="faixa-0-3" name="faixa_etaria" value="0-3" label="0-3 anos" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="faixa-4-7" name="faixa_etaria" value="4-7" label="4-7 anos" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="faixa-8-12" name="faixa_etaria" value="8-12" label="8-12 anos" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="faixa-13-17" name="faixa_etaria" value="13-17" label="13-17 anos" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="faixa-18" name="faixa_etaria" value="18+" label="18+ anos" onChange={handleInputChange} />
+                                                            </div>
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3" controlId="formCoberturaServico">
+                                                            <Form.Label>Cobertura</Form.Label>
+                                                            <div className="d-flex flex-wrap gap-3">
+                                                                <Form.Check type="checkbox" id="cobertura-convenio" name="cobertura" value="Convenio" label="Convenio" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="cobertura-particular" name="cobertura" value="Particular" label="Particular" onChange={handleInputChange} />
+                                                                <Form.Check type="checkbox" id="cobertura-plano" name="cobertura" value="PlanoSaude" label="Plano de Saude" onChange={handleInputChange} />
+                                                            </div>
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
                                             </Card.Body>
                                         </Card>
 
                                         <Card className="mb-4">
                                             <Card.Header className="bg-warning">
-                                                <h5 className="mb-0">Descrição e Vinculação</h5>
+                                                <h5 className="mb-0">Descricao e Vinculacao</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 <Row>
                                                     <Col md={12}>
                                                         <Form.Group className="mb-3" controlId="formDescricaoServico">
-                                                            <Form.Label>Descrição dos Serviços</Form.Label>
+                                                            <Form.Label>Descricao dos Servicos</Form.Label>
                                                             <Form.Control
                                                                 as="textarea"
                                                                 rows={4}
                                                                 name="descricao_servico"
-                                                                placeholder="Descreva os serviços oferecidos pela empresa"
+                                                                placeholder="Descreva os servicos oferecidos pela empresa"
                                                                 onChange={handleInputChange}
                                                                 required
                                                             />
-                                                            <small className="text-muted">Detalhe os serviços, especialidades e diferenciais da empresa</small>
+                                                            <small className="text-muted">Detalhe os servicos, especialidades e diferenciais da empresa</small>
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
                                                 <Row>
                                                     <Col md={12}>
                                                         <Form.Group className="mb-3" controlId="formVinculacaoMedico">
-                                                            <Form.Label>Vinculação a Médico ou Profissional</Form.Label>
+                                                            <Form.Label>Vinculacao a Medico ou Profissional</Form.Label>
                                                             <Form.Control
                                                                 type="text"
                                                                 name="vinculacao_medico"
-                                                                placeholder="Nome do médico ou profissional responsável (opcional)"
+                                                                placeholder="Nome do medico ou profissional responsavel (opcional)"
                                                                 onChange={handleInputChange}
                                                             />
-                                                            <small className="text-muted">Informe o nome do médico ou profissional responsável pelos serviços</small>
+                                                            <small className="text-muted">Informe o nome do medico ou profissional responsavel pelos servicos</small>
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
@@ -1149,8 +1273,8 @@ function Signup() {
                                     <Form.Select value={tipoUsuario} onChange={handleTipoUsuarioChange} required>
                                         <option value="">Selecione...</option>
                                         <option value="pais_responsavel">Pais ou Responsável</option>
-                                        <option value="medicos_terapeutas">Médicos ou Terapeutas</option>
-                                        {/*<option value="servicos_locais">Serviços Locais (Grátis)</option>*/}
+                                        <option value="medicos_terapeutas">Medicos ou Terapeutas</option>
+                                        {/*<option value="servicos_locais">Servicos Locais (Grátis)</option>*/}
                                     </Form.Select>
                                 </Form.Group>
                                 <Button variant="primary" type="submit" className="w-100">Continuar</Button>
@@ -1173,7 +1297,7 @@ function Signup() {
                 <Container>
                     <h1 className="display-3 fw-bold mb-4 text-white">Bem-vindo ao <span className="text-gradient">AutisConnect</span></h1>
                     <p className="text-center lead mb-5">
-                        {etapa === 'planos' ? 'Falta pouco! Escolha o plano que melhor se adapta às suas necessidades.' : 'Cadastre-se para começar a conectar sua família a serviços inclusivos e suporte especializado.'}
+                        {etapa === 'planos' ? 'Falta pouco! Escolha o plano que melhor se adapta às suas necessidades.' : 'Cadastre-se para começar a conectar sua família a servicos inclusivos e suporte especializado.'}
                     </p>
                     {error && <Alert variant="danger">{error}</Alert>}
                     {renderEtapa()}
@@ -1184,3 +1308,6 @@ function Signup() {
 }
 
 export default Signup;
+
+
+
