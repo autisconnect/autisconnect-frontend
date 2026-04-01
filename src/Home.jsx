@@ -34,7 +34,7 @@ import servico3 from './assets/servico3.jpeg';
 // Imagens do Hero Banner
 import img1 from './assets/img1.png';
 import img2 from './assets/img2.png';
-//import img3 from './assets/img3.png';
+import img3 from './assets/img3.png';
 //import img4 from './assets/img4.png';
 
 import './App.css';
@@ -99,7 +99,7 @@ const Home = () => {
     const bannerSlides = [
         { id: 1, image: img1, showButton: true,  buttonLink: "https://calendar.app.google/WYc6Lm5gzHqqir7q7" },
         { id: 2, image: img2, showButton: false, buttonLink: "" }
-        //{ id: 3, image: img3, showButton: false, buttonLink: "" },
+        { id: 3, image: img3, showButton: false, buttonLink: "" },
         //{ id: 4, image: img4, showButton: false, buttonLink: "" }
     ];
 
