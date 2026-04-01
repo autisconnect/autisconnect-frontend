@@ -1,12 +1,12 @@
 ﻿import React, { useState, useEffect, useContext } from 'react';
 import { 
-  Container, Navbar, Card, Row, Col, Spinner, Alert, Badge, 
+  Container, Card, Row, Col, Spinner, Alert, Badge, 
   Nav, Tab, Button, Table, Form, Modal 
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
-import logohori from './assets/logo.png';
+import logonovo from './assets/logonovo.png';
 import './App.css';
 
 // Graficos - Importacao correta conforme ProfessionalDashboard
@@ -40,7 +40,7 @@ ChartJS.register(
 );
 
 // Icones
-import { Calendar3, Person, GraphUp, PlusCircle, Calendar2Check, BoxArrowUpRight, Controller, People, GeoAlt, Search, StarFill } from 'react-bootstrap-icons';
+import { Calendar3, GraphUp, PlusCircle, Calendar2Check, BoxArrowUpRight, People, GeoAlt, Search, StarFill } from 'react-bootstrap-icons';
 
 // Card de Estatistica
 const StatCard = ({ title, value, subtitle, icon, color }) => (
@@ -655,45 +655,84 @@ function ParentDashboard() {
 
   return (
     <div className="App bg-light min-vh-100">
-      <Navbar bg="white" expand="lg" fixed="top" className="shadow-sm py-3">
+      <nav className="top-bar fixed-top shadow-sm">
         <Container>
-          <Navbar.Brand>
-            <img src={logohori} alt="Logo" className="logo" style={{ height: '40px' }} />
-          </Navbar.Brand>
-          <Navbar.Text className="mx-auto d-none d-lg-block fw-light">
-            Dashboard dos Pais: <strong className="fw-semibold text-primary">{user.nome_completo || user.username || 'Responsavel'}</strong>
-          </Navbar.Text>
-          <Button variant="outline-danger" size="sm" onClick={handleLogout}>Sair</Button>
-        </Container>
-      </Navbar>
-
-      <main style={{ marginTop: '100px', paddingBottom: '50px' }}>
-        <Container>
-          {successMessage && <Alert variant="success" dismissible onClose={() => setSuccessMessage('')}>{successMessage}</Alert>}
-          {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
-
-          <Row className="mb-4 align-items-center">
-            <Col>
-              <h2 className="fw-bold mb-0">Visão Geral</h2>
-              <p className="text-muted mb-0">Acompanhe o desenvolvimento de seus filhos</p>
+          <Row className="align-items-center py-3">
+            <Col md={4} className="text-center text-md-start">
+              <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
             </Col>
-            <Col xs="auto" className="d-flex gap-2">
-              {children.length > 1 && (
-                <Form.Select 
-                  className="border-0 shadow-sm" 
-                  value={selectedPatient.id} 
-                  onChange={(e) => setSelectedPatient(children.find(c => c.id === parseInt(e.target.value)))}
-                >
-                  {children.map(child => (
-                    <option key={child.id} value={child.id}>{child.name}</option>
-                  ))}
-                </Form.Select>
-              )}
-              <Button variant="primary" onClick={() => handlePatientSelect(selectedPatient)} className="d-flex align-items-center text-nowrap">
-                <BoxArrowUpRight className="me-2" /> Dashboard do Paciente
-              </Button>
+            <Col md={4} className="text-center d-none d-md-block">
+              <span className="text-white fw-semibold">Dashboard dos Pais</span>
+            </Col>
+            <Col md={4} className="text-center text-md-end">
+              <Button variant="outline-light" size="sm" onClick={handleLogout}>Sair</Button>
             </Col>
           </Row>
+        </Container>
+      </nav>
+
+      <div className="home-page" style={{ paddingTop: '85px' }}>
+        <section className="hero-section hero-short">
+          <Container>
+            <Row className="align-items-center">
+              <Col lg={7} className="mb-4 mb-lg-0">
+                <div className="hero-content-box p-4 rounded-4">
+                  <h2 className="display-6 fw-bold mb-2 text-white">Dashboard dos Pais</h2>
+                  <p className="text-white-90 mb-2">
+                    Bem-vindo(a), {user?.nome_completo || user?.username || 'Responsavel'}.
+                  </p>
+                  <p className="text-white-90 mb-0">
+                    Acompanhe o desenvolvimento do seu filho, consultas e rede de apoio.
+                  </p>
+                </div>
+              </Col>
+              <Col lg={5}>
+                <Card className="shadow-sm border-0">
+                  <Card.Body>
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                      <div>
+                        <h5 className="fw-bold mb-1">Paciente atual</h5>
+                        <div className="text-muted">
+                          {selectedPatient ? selectedPatient.name : 'Nenhum paciente selecionado'}
+                        </div>
+                      </div>
+                      {selectedPatient && (
+                        <Badge bg="info">{selectedPatient.nivel_suporte || 'Nivel 2'}</Badge>
+                      )}
+                    </div>
+                    {children.length > 1 && (
+                      <Form.Select
+                        className="border-0 shadow-sm mb-3"
+                        value={selectedPatient?.id || ''}
+                        onChange={(e) => {
+                          const next = children.find((c) => c.id === parseInt(e.target.value, 10));
+                          if (next) setSelectedPatient(next);
+                        }}
+                      >
+                        {children.map((child) => (
+                          <option key={child.id} value={child.id}>{child.name}</option>
+                        ))}
+                      </Form.Select>
+                    )}
+                    <Button
+                      variant="primary"
+                      onClick={() => selectedPatient && handlePatientSelect(selectedPatient)}
+                      className="d-flex align-items-center justify-content-center w-100"
+                      disabled={!selectedPatient}
+                    >
+                      <BoxArrowUpRight className="me-2" /> Abrir Dashboard do Paciente
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </section>
+
+        <main className="dashboard-section py-4">
+          <Container>
+          {successMessage && <Alert variant="success" dismissible onClose={() => setSuccessMessage('')}>{successMessage}</Alert>}
+          {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
 
           {selectedPatient ? (
             <>
@@ -702,7 +741,7 @@ function ParentDashboard() {
                   <StatCard title="Paciente" value={selectedPatient.name} icon={<People />} color="primary" />
                 </Col>
                 <Col md={3}>
-                  <StatCard title="Nível de Suporte" value={selectedPatient.nivel_suporte || 'Nível 2'} icon={<GraphUp />} color="warning" />
+                  <StatCard title="Nivel de Suporte" value={selectedPatient.nivel_suporte || 'Nivel 2'} icon={<GraphUp />} color="warning" />
                 </Col>
                 <Col md={3}>
                   <StatCard title="Consultas" value={consultations.length} icon={<Calendar2Check />} color="success" />
@@ -718,7 +757,6 @@ function ParentDashboard() {
                     <Nav variant="pills" className="nav-pills-custom">
                       <Nav.Item><Nav.Link eventKey="overview" className="px-4">Resumo</Nav.Link></Nav.Item>
                       <Nav.Item><Nav.Link eventKey="appointments" className="px-4">Consultas</Nav.Link></Nav.Item>
-                      <Nav.Item><Nav.Link eventKey="games" className="px-4">Games <Badge bg="secondary" className="ms-1" style={{ fontSize: '0.6rem' }}>em breve</Badge></Nav.Link></Nav.Item>
                       <Nav.Item><Nav.Link eventKey="services" className="px-4">Servicos & Rede TEA</Nav.Link></Nav.Item>
                     </Nav>
                   </Card.Header>
@@ -787,13 +825,6 @@ function ParentDashboard() {
                         )}
                       </Tab.Pane>
 
-                      <Tab.Pane eventKey="games">
-                        <div className="text-center py-5">
-                          <Controller size={64} className="text-muted mb-3" />
-                          <h4 className="fw-bold">Games Terapêuticos</h4>
-                          <p className="text-muted">Disponível em breve para {selectedPatient.name}.</p>
-                        </div>
-                      </Tab.Pane>
 
                       <Tab.Pane eventKey="services">
                         <div className="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
@@ -1129,6 +1160,20 @@ function ParentDashboard() {
           )}
         </Container>
       </main>
+
+      <footer className="footer-section py-4">
+        <Container>
+          <Row className="align-items-center">
+            <Col md={6} className="footer-left text-start">
+              <p className="mb-0">
+                {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                <small>Todos os direitos reservados.</small>
+              </p>
+            </Col>
+          </Row>
+        </Container>
+      </footer>
+    </div>
 
       {/* Modal para Marcar Consulta */}
       <Modal show={showAppointmentModal} onHide={() => setShowAppointmentModal(false)} size="lg" centered>

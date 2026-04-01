@@ -34,8 +34,8 @@ import servico3 from './assets/servico3.jpeg';
 // Imagens do Hero Banner
 import img1 from './assets/img1.png';
 import img2 from './assets/img2.png';
-import img3 from './assets/img3.png';
-import img4 from './assets/img4.png';
+//import img3 from './assets/img3.png';
+//import img4 from './assets/img4.png';
 
 import './App.css';
 
@@ -98,9 +98,9 @@ const Home = () => {
 
     const bannerSlides = [
         { id: 1, image: img1, showButton: true,  buttonLink: "https://calendar.app.google/WYc6Lm5gzHqqir7q7" },
-        { id: 2, image: img2, showButton: false, buttonLink: "" },
-        { id: 3, image: img3, showButton: false, buttonLink: "" },
-        { id: 4, image: img4, showButton: false, buttonLink: "" }
+        { id: 2, image: img2, showButton: false, buttonLink: "" }
+        //{ id: 3, image: img3, showButton: false, buttonLink: "" },
+        //{ id: 4, image: img4, showButton: false, buttonLink: "" }
     ];
 
     useEffect(() => {
@@ -136,8 +136,7 @@ const Home = () => {
                             <img 
                                 src={logonovo} 
                                 alt="AutisConnect" 
-                                className="top-bar-logo" 
-                                style={{ maxHeight: '55px' }}
+                                className="top-bar-logo"
                             />
                         </Col>
                         <Col md={5} className="text-center text-md-end">
@@ -382,17 +381,19 @@ const Home = () => {
             </div>
 
             {/* RODAPÉ */}
-            <footer className="footer-section py-5 bg-dark text-white-50">
+            <footer className="footer-section py-5">
                 <Container>
                     <Row className="justify-content-between align-items-center text-center text-md-start">
-                        <Col md={5} className="mb-4 mb-md-0">
+                        <Col md={4} className="mb-4 mb-md-0 footer-left">
                             <p className="mb-0">
-                                © {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
+                                {'\u00a9'} {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
                                 <small>Todos os direitos reservados.</small>
                             </p>
                         </Col>
-
-                        <Col md={5} className="text-md-end">
+                        <Col md={4} className="mb-4 mb-md-0 text-center">
+                            <img src={logonovo} alt="AutisConnect" className="footer-logo" />
+                        </Col>
+                        <Col md={4} className="text-md-end text-white-50">
                             <p className="mb-0">
                                 <strong>Contato:</strong><br />
                                 <a href="mailto:autisconnect@gmail.com" className="text-white-50 d-inline-flex align-items-center mb-1">

@@ -1,0 +1,77 @@
+/* PatientDetailsParent / PatientDetails - Games Section Layout */
+.ac-games-container {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 32px;
+  overflow: hidden;
+  border: 1px solid var(--ac-glass-border);
+  box-shadow: var(--ac-shadow-hd);
+  margin-top: 20px;
+}
+
+.ac-games-header {
+  background: var(--ac-yellow-hd);
+  padding: 32px 40px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.ac-games-header::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  animation: headerShine 8s infinite linear;
+  pointer-events: none;
+}
+
+.ac-games-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.ac-games-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.ac-games-subtitle {
+  margin: 4px 0 0;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ac-games-badge {
+  background: #000;
+  color: #ffd700;
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ac-games-body {
+  padding: 40px;
+  background: radial-gradient(circle at bottom left, rgba(30, 41, 59, 0.3), transparent);
+}
+
+@media (max-width: 768px) {
+  .ac-games-header-content { flex-direction: column; text-align: center; gap: 16px; }
+  .ac-games-header { padding: 24px; }
+  .ac-games-body { padding: 20px; }
+}

@@ -17,7 +17,7 @@ import AbaReport from './AbaReport';
 import abaService from '../services/abaService';
 import abaAiService from '../services/abaAiService';
 
-import logohori from '../assets/logo.png';
+import logonovo from '../assets/logonovo.png';
 import '../App.css';
 
 const AbaPatient = () => {
@@ -287,27 +287,51 @@ default:
     };
 
     return (
-        <Container fluid className="py-4 aba-module-page">
-            <Row className="professional-header-row mb-4 align-items-center">
-                <Col className="text-center">
-                    <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-                    <h1 className="professional-name mb-0 mt-2">Módulo ABA</h1>
-                    <p className="small text-muted mb-0">
-                        Monitoramento clínico do paciente {patientId || ''}
-                    </p>
-                </Col>
-                <Col xs="auto">
-                    <Button
-                        variant="outline-primary"
-                        onClick={handleExit}
-                        className="back-button-standalone"
-                    >
-                        <X /> Sair
-                    </Button>
-                </Col>
-            </Row>
+        <div className="App bg-light min-vh-100">
+            <nav className="top-bar fixed-top shadow-sm">
+                <Container>
+                    <Row className="align-items-center py-3">
+                        <Col md={4} className="text-center text-md-start">
+                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={4} className="text-center d-none d-md-block">
+                            <span className="text-white fw-semibold">Modulo ABA</span>
+                        </Col>
+                        <Col md={4} className="text-center text-md-end">
+                            <Button variant="outline-light" size="sm" onClick={handleExit}>
+                                <X className="me-2" /> Fechar
+                            </Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </nav>
 
-            {loadError && (
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col lg={7} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h2 className="display-6 fw-bold mb-2 text-white">Modulo ABA</h2>
+                                    <p className="text-white-90 mb-1">Monitoramento clinico do paciente {patientId || ''}</p>
+                                    <p className="text-white-90 mb-0">Planejamento, sessoes e evolucao em um so lugar.</p>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <Card className="shadow-sm border-0">
+                                    <Card.Body>
+                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
+                                        <div className="text-muted">Acompanhe habilidades, sessoes e analises IA.</div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <main className="dashboard-section py-4">
+                    <Container fluid className="aba-module-page">
+{loadError && (
                 <Alert variant="warning" className="mb-4">
                     {loadError}
                 </Alert>
@@ -350,6 +374,22 @@ default:
 
             {renderTab()}
         </Container>
+            </main>
+
+            <footer className="footer-section py-4">
+                <Container>
+                    <Row className="align-items-center">
+                        <Col md={6} className="footer-left text-start">
+                            <p className="mb-0">
+                                {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                                <small>Todos os direitos reservados.</small>
+                            </p>
+                        </Col>
+                    </Row>
+                </Container>
+            </footer>
+        </div>
+    </div>
     );
 };
 

@@ -5,7 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
-import logohori from './assets/logo.png';
+import logonovo from './assets/logonovo.png';
 import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
@@ -118,19 +118,73 @@ const FinancialDashboard = () => {
     }) || [];
 
     return (
-        <Container fluid className="py-4 financial-dashboard">
-            <Row className="professional-header-row mb-4 align-items-center">
-                <Col xs="auto">
-                    <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-                </Col>
-                <Col>
-                    <h1 className="professional-name mb-0 mt-2">Dashboard Financeiro</h1>
-                    <p className="professional-specialty text-muted mb-0">{professionalName}</p>
-                </Col>
-                <Col xs="auto">
-                    <Button variant="danger" onClick={handleLogout}>Sair</Button>
-                </Col>
-            </Row>
+        <div className="App bg-light min-vh-100">
+            <nav className="top-bar fixed-top shadow-sm">
+                <Container>
+                    <Row className="align-items-center py-3">
+                        <Col md={4} className="text-center text-md-start">
+                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={4} className="text-center d-none d-md-block">
+                            <span className="text-white fw-semibold">Dashboard Financeiro</span>
+                        </Col>
+                        <Col md={4} className="text-center text-md-end">
+                            <Button variant="outline-light" size="sm" onClick={handleLogout}>Sair</Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </nav>
+
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col lg={7} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h2 className="display-6 fw-bold mb-2 text-white">Dashboard Financeiro</h2>
+                                    <p className="text-white-90 mb-1">
+                                        {professionalName || user?.nome_completo || user?.username || 'Profissional'}
+                                    </p>
+                                    <p className="text-white-90 mb-0">
+                                        Controle receitas, pagamentos e indicadores financeiros.
+                                    </p>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <Card className="shadow-sm border-0">
+                                    <Card.Body>
+                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Saldo atual</span>
+                                            <span className="fw-semibold">
+                                                {financialData?.summary?.balance ? `R$ ${Number(financialData.summary.balance).toFixed(2)}` : 'R$ 0,00'}
+                                            </span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Receita mensal</span>
+                                            <span className="fw-semibold">
+                                                {financialData?.summary?.monthlyRevenue ? `R$ ${Number(financialData.summary.monthlyRevenue).toFixed(2)}` : 'R$ 0,00'}
+                                            </span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-3">
+                                            <span className="text-muted">Pagamentos pendentes</span>
+                                            <span className="fw-semibold">
+                                                {financialData?.summary?.pendingPayments || 0}
+                                            </span>
+                                        </div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <Badge bg="info">Financeiro ativo</Badge>
+                                            <Badge bg="secondary">Clinica</Badge>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <main className="dashboard-section py-4">
+                    <Container fluid className="financial-dashboard">
             <Row className="mb-4">
                 <Col md={4}>
                     <Card body className="text-center shadow-sm">
@@ -271,6 +325,22 @@ const FinancialDashboard = () => {
                 </Card.Body>
             </Card>
         </Container>
+        </main>
+
+        <footer className="footer-section py-4">
+            <Container>
+                <Row className="align-items-center">
+                    <Col md={6} className="footer-left text-start">
+                        <p className="mb-0">
+                            {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                            <small>Todos os direitos reservados.</small>
+                        </p>
+                    </Col>
+                </Row>
+            </Container>
+        </footer>
+      </div>
+    </div>
     );
 };
 

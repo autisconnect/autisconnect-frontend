@@ -8,7 +8,7 @@ import apiClient from './services/api.js';
 
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-import logohori from './assets/logo.png';
+import logonovo from './assets/logonovo.png';
 import './App.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -342,22 +342,68 @@ const SecretaryDashboard = () => {
         );
     }
 
-    return (
-        <Container fluid className="py-4 secretary-dashboard">
-        <Row className="professional-header-row mb-4 align-items-center">
-            <Col xs="auto">
-                <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-            </Col>
-            <Col>
-                <h1 className="professional-name mb-0">Dashboard da Secretária</h1>
-                <p className="professional-specialty text-muted mb-0">Organizando a clínica de {professional?.name || '...'}</p>
-            </Col>
-            <Col xs="auto">
-                <Button variant="danger" onClick={() => { logout(); navigate('/'); }}>Sair</Button>
-            </Col>
-        </Row>
+return (
+        <div className="App bg-light min-vh-100">
+            <nav className="top-bar fixed-top shadow-sm">
+                <Container>
+                    <Row className="align-items-center py-3">
+                        <Col md={4} className="text-center text-md-start">
+                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={4} className="text-center d-none d-md-block">
+                            <span className="text-white fw-semibold">Dashboard da Secretaria</span>
+                        </Col>
+                        <Col md={4} className="text-center text-md-end">
+                            <Button variant="outline-light" size="sm" onClick={() => { logout(); navigate('/'); }}>Sair</Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </nav>
 
-      <Container fluid>
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col lg={7} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h2 className="display-6 fw-bold mb-2 text-white">Dashboard da Secretaria</h2>
+                                    <p className="text-white-90 mb-1">
+                                        Organizando a clinica de {professional?.name || '...' }.
+                                    </p>
+                                    <p className="text-white-90 mb-0">
+                                        Gestao de pacientes, consultas e comunicacao em um so lugar.
+                                    </p>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <Card className="shadow-sm border-0">
+                                    <Card.Body>
+                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Pacientes cadastrados</span>
+                                            <span className="fw-semibold">{patients.length}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Consultas agendadas</span>
+                                            <span className="fw-semibold">{appointments.length}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-3">
+                                            <span className="text-muted">Mensagens</span>
+                                            <span className="fw-semibold">{messages.length}</span>
+                                        </div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <Badge bg="info">Equipe ativa</Badge>
+                                            <Badge bg="secondary">Clinica</Badge>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <main className="dashboard-section py-4">
+                    <Container fluid className="secretary-dashboard">
         {successMessage && <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>{successMessage}</Alert>}
         {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
                 <Card.Body>
@@ -940,8 +986,24 @@ const SecretaryDashboard = () => {
               </Button>
             </Modal.Footer>
           </Form>
-        </Modal>      </Container>
+</Modal>
     </Container>
+  </main>
+
+  <footer className="footer-section py-4">
+      <Container>
+          <Row className="align-items-center">
+              <Col md={6} className="footer-left text-start">
+                  <p className="mb-0">
+                      {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                      <small>Todos os direitos reservados.</small>
+                  </p>
+              </Col>
+          </Row>
+      </Container>
+  </footer>
+  </div>
+  </div>
   );
 };
 

@@ -8,8 +8,11 @@ import { AuthContext } from './context/AuthContext';
 import { Line, Bar, Pie, Radar } from 'react-chartjs-2';
 import apiClient from './services/api';
 import AbaReport from './pages/AbaReport';
+import GamesPanel from './games/GamesPanel';
+import GamesReport from './games/GamesReport';
+import './games/gamesSection.css';
 
-import logohori from './assets/logo.png';
+import logohori from './assets/logonovo.png';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -97,6 +100,15 @@ const PatientDetailsParent = () => {
     const barOptions = { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Comparação entre Sessões' } }, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentagem (%)' } } } };
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
     const formatAge = (birthDate) => { if (!birthDate) return 'N/A'; const today = new Date(); const birth = new Date(birthDate); let age = today.getFullYear() - birth.getFullYear(); const monthDiff = today.getMonth() - birth.getMonth(); if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) { age--; } return `${age} anos`; };
+    const nextConsultation = consultations && consultations.length > 0 ? consultations[0] : null;
+
+    const handleBackToParent = () => {
+        if (user?.id) {
+            navigate(`/parent-dashboard/${user.id}`);
+            return;
+        }
+        window.close();
+    };
 
     const fetchConsultations = async () => {
         if (!user || !patientId) return;
@@ -730,8 +742,77 @@ const PatientDetailsParent = () => {
     }
 
     return (
-        <Container fluid className="py-4 patient-details-page">
-            <style>
+        <div className="App bg-light min-vh-100">
+            <nav className="top-bar fixed-top shadow-sm">
+                <Container>
+                    <Row className="align-items-center py-3">
+                        <Col md={4} className="text-center text-md-start">
+                            <img src={logohori} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={4} className="text-center d-none d-md-block">
+                            <span className="text-white fw-semibold">Paciente</span>
+                        </Col>
+                        <Col md={4} className="text-center text-md-end">
+                            <Button variant="outline-light" size="sm" onClick={handleBackToParent}>
+                                <ArrowLeft className="me-2" /> Voltar ao Dashboard dos Pais
+                            </Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </nav>
+
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col lg={7} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h2 className="display-6 fw-bold mb-2 text-white">Dashboard do Paciente</h2>
+                                    <p className="text-white-90 mb-1">
+                                        {patient?.name || 'Paciente'} {patient?.specialInfo ? `- ${patient.specialInfo}` : ''}
+                                    </p>
+                                    <p className="text-white-90 mb-0">
+                                        Idade: {patient ? formatAge(patient.birthDate) : 'N/A'} | Diagnostico: {patient?.diagnosis || 'N/A'}
+                                    </p>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <Card className="shadow-sm border-0">
+                                    <Card.Body>
+                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
+                                        <div className="text-muted mb-3">
+                                            Responsavel: {patient?.parent || user?.nome_completo || 'N/A'}
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Diagnostico</span>
+                                            <span className="fw-semibold">{patient?.diagnosis || 'N/A'}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Nivel de suporte</span>
+                                            <span className="fw-semibold">{patient?.nivel_suporte || '2'}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-3">
+                                            <span className="text-muted">Proxima consulta</span>
+                                            <span className="fw-semibold">
+                                                {nextConsultation
+                                                    ? `${formatDate(nextConsultation.appointment_date || nextConsultation.date)} ${formatTime(nextConsultation.appointment_time || nextConsultation.time)}`
+                                                    : 'Sem agendamento'}
+                                            </span>
+                                        </div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <Badge bg="info">Consultas: {consultations.length}</Badge>
+                                            <Badge bg="secondary">Paciente ativo</Badge>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <main className="dashboard-section py-4">
+                    <Container fluid className="patient-details-page">
+                        <style>
                 {`
                     @media print {
                         body * { visibility: hidden; }
@@ -751,49 +832,6 @@ const PatientDetailsParent = () => {
                     {successMessage}
                 </Alert>
             )}
-
-            <Row className="patient-header-row mb-4 align-items-center">
-                
-                {/* Coluna da Logo */}
-                <Col xs="auto">
-                    <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-                </Col>
-
-                {/* Coluna da Logo e Título (Centralizada) */}
-                <Col>
-                    <h1 className="patient-name mb-0 mt-2">Dashboard Paciente</h1>
-                    <p className="patient-info text-muted mb-0">{patient.name} - {patient.specialInfo}</p>
-                </Col>
-
-                {/* Coluna das Informações do Paciente ( direita) */}
-                <Col xs="auto">
-                    <div className="patient-info-block">
-                        <div className="info-item">
-                            <strong>Idade:</strong>
-                            <span>{formatAge(patient.birthDate)}</span>
-                        </div>
-                        <div className="info-item">
-                            <strong>Diagnóstico:</strong>
-                            <span>{patient.diagnosis || 'N/A'}</span>
-                        </div>
-                        <div className="info-item">
-                            <strong>Responsável:</strong>
-                            <span>{patient.parent || 'N/A'}</span>
-                        </div>
-                    </div>
-                </Col>
-
-                {/* Coluna do Botao Sair */}
-                <Col xs="auto">
-                    <Button 
-                        variant="outline-primary" 
-                        onClick={() => window.close()} 
-                        className="back-button-standalone"
-                    >
-                        <ArrowLeft /> Sair
-                    </Button>
-                </Col>
-            </Row>
 
             <Row className="mb-4 no-print">
                 <Col md={3}>
@@ -829,6 +867,9 @@ const PatientDetailsParent = () => {
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link eventKey="emotion">Emoções</Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey="games">Games</Nav.Link>
                             </Nav.Item>
                             {/* <Nav.Item>
                                 <Nav.Link eventKey="vocalization">Vocalizaes</Nav.Link>
@@ -1336,6 +1377,25 @@ const PatientDetailsParent = () => {
                                 </Row>
                             </Tab.Pane>
 
+                            <Tab.Pane eventKey="games" className="no-print">
+                                <div className="ac-games-container">
+                                    <div className="ac-games-header">
+                                        <div className="ac-games-header-content">
+                                            <div className="ac-games-title-group">
+                                                <h2 className="ac-games-title">Módulo de Jogos Terapêuticos</h2>
+                                                <p className="ac-games-subtitle">Gestão Inteligente TEA</p>
+                                            </div>
+                                            <div className="ac-games-badge">Inovação & Tecnologia</div>
+                                        </div>
+                                    </div>
+                                    <div className="ac-games-body">
+                                        <GamesReport patientId={patientId} />
+                                        <div className="my-4" />
+                                        <GamesPanel patientId={patientId} />
+                                    </div>
+                                </div>
+                            </Tab.Pane>
+
                             <Tab.Pane eventKey="monitoring-tools" className="no-print">
                                 <Card className="shadow-sm">
                                     <Card.Body>
@@ -1773,6 +1833,22 @@ const PatientDetailsParent = () => {
                 </Form>
             </Modal>
         </Container>
+        </main>
+
+        <footer className="footer-section py-4">
+            <Container>
+                <Row className="align-items-center">
+                    <Col md={6} className="footer-left text-start">
+                        <p className="mb-0">
+                            {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                            <small>Todos os direitos reservados.</small>
+                        </p>
+                    </Col>
+                </Row>
+            </Container>
+        </footer>
+      </div>
+    </div>
     );
 };
 export default PatientDetailsParent;

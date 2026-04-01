@@ -1,0 +1,203 @@
+﻿/* AutisConnect - High Definition & Innovation Theme */
+:root {
+  --ac-primary-blue: #001f3f;
+  --ac-primary-red: #e60000;
+  --ac-accent-gradient: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+  --ac-yellow-hd: linear-gradient(135deg, #ffd700 0%, #ffcc00 50%, #ffb700 100%);
+  --ac-dark-bg: #0a0c10;
+  --ac-card-bg: rgba(255, 255, 255, 0.05);
+  --ac-glass-border: rgba(255, 255, 255, 0.1);
+  --ac-text-main: #f8fafc;
+  --ac-text-muted: #94a3b8;
+  --ac-shadow-hd: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.game1-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #1e293b, #0a0c10);
+  padding: 32px;
+  color: var(--ac-text-main);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.game1-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 40px;
+  background: var(--ac-yellow-hd);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 28px;
+  box-shadow: 0 15px 35px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efeito de brilho tecnológico que percorre o cabeçalho */
+.game1-header::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: rotate(45deg);
+  animation: headerShine 6s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes headerShine {
+  0% { transform: translate(-100%, -100%) rotate(45deg); }
+  100% { transform: translate(100%, 100%) rotate(45deg); }
+}
+
+.game1-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  z-index: 1;
+}
+
+.game1-logo-img {
+  height: 70px;
+  width: auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.game1-header-info h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #000;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.game1-header-info p {
+  margin: 4px 0 0;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.game1-status-bar {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  z-index: 1;
+}
+
+.game1-status-badge {
+  background: rgba(0, 0, 0, 0.1);
+  color: #000;
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.game1-back {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.game1-back:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background: #1e293b;
+}
+
+.game1-canvas {
+  width: 100%;
+  max-width: 1200px;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: var(--ac-shadow-hd);
+  border: 2px solid var(--ac-glass-border);
+  background: #000;
+  position: relative;
+}
+
+.game1-footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--ac-text-muted);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Modal Styling - High Definition */
+.game1-advance-modal .modal-content {
+  background: #0f172a;
+  border: 1px solid var(--ac-glass-border);
+  border-radius: 32px;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+}
+
+.game1-advance-hero {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-radius: 24px;
+  padding: 32px;
+  text-align: center;
+  border: 1px solid var(--ac-glass-border);
+  margin-bottom: 20px;
+}
+
+.game1-advance-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--ac-accent-gradient);
+  border-radius: 24px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+}
+
+.game1-advance-actions {
+  padding: 0 32px 32px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.game1-advance-actions .btn-primary {
+  background: var(--ac-accent-gradient);
+  border: none;
+  padding: 16px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+
+@media (max-width: 768px) {
+  .game1-page { padding: 16px; }
+  .game1-header { flex-direction: column; padding: 24px; text-align: center; gap: 20px; }
+  .game1-logo-container { flex-direction: column; }
+  .game1-canvas { aspect-ratio: 4 / 3; border-radius: 20px; }
+}

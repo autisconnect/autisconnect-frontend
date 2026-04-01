@@ -3,9 +3,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, ListGroup, Badge } from 'react-bootstrap';
-import logohori from './assets/logohoriz.jpg';
+import logonovo from './assets/logonovo.png';
 import { X } from 'react-bootstrap-icons';
 import axios from 'axios';
+import './App.css';
 
 const TriggerRecorder = () => {
     // Estados
@@ -164,25 +165,51 @@ const TriggerRecorder = () => {
 
     // --- Renderização ---
     return (
-        <Container fluid className="py-4 trigger-recorder-page">
-                <Row className="professional-header-row mb-4 align-items-center">
+        <div className="App bg-light min-vh-100">
+            <nav className="top-bar fixed-top shadow-sm">
+                <Container>
+                    <Row className="align-items-center py-3">
+                        <Col md={4} className="text-center text-md-start">
+                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={4} className="text-center d-none d-md-block">
+                            <span className="text-white fw-semibold">Analisador de Vocalizacoes</span>
+                        </Col>
+                        <Col md={4} className="text-center text-md-end">
+                            <Button variant="outline-light" size="sm" onClick={() => window.close()}>
+                                <X className="me-2" /> Fechar
+                            </Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </nav>
 
-                    <Col className="text-center">
-                        <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-                        <h1 className="professional-name mb-0 mt-2">Analisador de Vocalizações</h1>
-                    </Col>
-                    <Col xs="auto">
-                    <Button 
-                        variant="outline-primary" 
-                        onClick={() => window.close()} 
-                        className="back-button-standalone"
-                    >
-                        <X /> Sair
-                    </Button>
-                    </Col>
-                </Row>
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col lg={7} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h2 className="display-6 fw-bold mb-2 text-white">Analisador de Vocalizacoes</h2>
+                                    <p className="text-white-90 mb-1">Registre e acompanhe padroes de vocalizacao.</p>
+                                    <p className="text-white-90 mb-0">Dados organizados para apoio terapeutico.</p>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <Card className="shadow-sm border-0">
+                                    <Card.Body>
+                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
+                                        <div className="text-muted">Use a gravacao para gerar insights automaticos.</div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
 
-                    {error && <Alert variant="danger" onClose={() => setError(null)} dismissible>{error}</Alert>}
+                <main className="dashboard-section py-4">
+                    <Container fluid className="trigger-recorder-page">
+{error && <Alert variant="danger" onClose={() => setError(null)} dismissible>{error}</Alert>}
 
                     <Row className="align-items-center mb-3">
                         <Col xs="auto">
@@ -227,6 +254,22 @@ const TriggerRecorder = () => {
                         </ListGroup>
                     )}
         </Container>
+            </main>
+
+            <footer className="footer-section py-4">
+                <Container>
+                    <Row className="align-items-center">
+                        <Col md={6} className="footer-left text-start">
+                            <p className="mb-0">
+                                {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                                <small>Todos os direitos reservados.</small>
+                            </p>
+                        </Col>
+                    </Row>
+                </Container>
+            </footer>
+        </div>
+    </div>
     );
 };
 

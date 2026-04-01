@@ -1,13 +1,12 @@
 // frontend/src/pages/Signup.jsx
 
 import React, { useState } from 'react';
-import { Container, Navbar, Form, Card, Button, Alert, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Form, Card, Button, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
 import apiClient from './services/api.js';
-import logohori from './assets/logo.png';
+import logohori from './assets/logonovo.png';
 import './App.css';
-import axios from 'axios';
 
 // Componente para exibir os cards de planos
 const PlanCard = ({ title, price, features, planId, onSelect, isLoading, isSelected }) => (
@@ -1286,28 +1285,59 @@ function Signup() {
     };
 
     return (
-        <div className="App">
-            <Navbar bg="light" expand="lg" fixed="top" className="mb-4">
+        <div className="App auth-page">
+            <nav className="top-bar fixed-top shadow-sm">
                 <Container>
-                    <Navbar.Brand href="/"><img src={logohori} alt="Logo" className="logo" /></Navbar.Brand>
-                    <div className="ms-auto"><ArrowLeft size={30} onClick={() => navigate('/')} style={{ cursor: 'pointer' }} /></div>
+                    <Row className="align-items-center py-3">
+                        <Col md={7} className="text-center text-md-start">
+                            <img src={logohori} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={5} className="text-center text-md-end">
+                            <ArrowLeft size={30} onClick={() => navigate('/')} style={{ cursor: 'pointer', color: '#ffffff' }} />
+                        </Col>
+                    </Row>
                 </Container>
-            </Navbar>
-            <section className="signup-section py-5" style={{ marginTop: '70px' }}>
-                <Container>
-                    <h1 className="display-3 fw-bold mb-4 text-white">Bem-vindo ao <span className="text-gradient">AutisConnect</span></h1>
-                    <p className="text-center lead mb-5">
-                        {etapa === 'planos' ? 'Falta pouco! Escolha o plano que melhor se adapta às suas necessidades.' : 'Cadastre-se para começar a conectar sua família a servicos inclusivos e suporte especializado.'}
-                    </p>
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    {renderEtapa()}
-                </Container>
-            </section>
+            </nav>
+
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-start">
+                            <Col lg={5} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h1 className="display-5 fw-bold mb-3 text-white">
+                                        Bem-vindo ao <span className="text-gradient">AutisConnect</span>
+                                    </h1>
+                                    <p className="text-white-90 mb-0">
+                                        {etapa === 'planos'
+                                            ? 'Falta pouco! Escolha o plano ideal para ativar sua conta.'
+                                            : 'Cadastre-se para comecar a conectar sua familia a servicos inclusivos e suporte especializado.'}
+                                    </p>
+                                </div>
+                            </Col>
+                            <Col lg={7}>
+                                {error && <Alert variant="danger">{error}</Alert>}
+                                {renderEtapa()}
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <footer className="footer-section py-4">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col md={6} className="footer-left text-start">
+                                <p className="mb-0">
+                                    {'\u00a9'} 2026 Nf Representações Comerciais Ltda.<br />
+                                    <small>Todos os direitos reservados.</small>
+                                </p>
+                            </Col>
+                        </Row>
+                    </Container>
+                </footer>
+            </div>
         </div>
     );
 }
 
 export default Signup;
-
-
-

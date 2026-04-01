@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+﻿import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import { Spinner, Container } from 'react-bootstrap';
@@ -15,12 +15,28 @@ function AuthRoute() {
     }
 
     if (user) {
-        // Se o usuário já está logado, redireciona para a página inicial.
-        // O AuthContext cuidará do redirecionamento para o dashboard específico.
-        return <Navigate to="/" replace />;
+        // If the user is already logged in, redirect straight to the correct dashboard.
+        let target = '/';
+        switch (user.tipo_usuario) {
+            case 'medicos_terapeutas':
+                target = `/professional-dashboard/${user.id}`;
+                break;
+            case 'pais_responsavel':
+                target = `/parent-dashboard/${user.id}`;
+                break;
+            case 'secretaria':
+                target = `/secretary-dashboard/${user.id}`;
+                break;
+            case 'servicos_locais':
+                target = `/service-dashboard/${user.id}`;
+                break;
+            default:
+                target = '/';
+        }
+        return <Navigate to={target} replace />;
     }
 
-    // Se não há usuário, permite o acesso à rota filha (Login ou Signup).
+    // If there is no user, allow access to the child route (Login or Signup).
     return <Outlet />;
 }
 

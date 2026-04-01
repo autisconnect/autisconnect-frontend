@@ -1,0 +1,30 @@
+.games-report__hero {
+  background: linear-gradient(120deg, #e8f5ff 0%, #fdf3e7 100%);
+  border-radius: 18px;
+}
+
+.games-report__tabs {
+  display: flex;
+  gap: 8px;
+  padding: 16px 16px 0;
+  flex-wrap: wrap;
+}
+
+.games-report__metric {
+  border-radius: 16px;
+}
+
+.games-report__chart {
+  border-radius: 16px;
+}
+
+.games-report__empty {
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.games-report table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

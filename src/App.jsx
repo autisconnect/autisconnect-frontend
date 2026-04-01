@@ -24,6 +24,8 @@ import PatientDetails from './PatientDetails';           // visão do profission
 import PatientDetailsParent from './PatientDetailsParent'; // visão dos pais (NOVO)
 import PaymentSuccess from './PaymentSuccess';
 import PaymentFailure from './PaymentFailure';
+import Game1Page from './games/game1/Game1Page';
+import Game2Page from './games/game2/Game2Page';
 
 // ABA Module Imports
 import AbaPatient from './pages/AbaPatient';
@@ -159,6 +161,25 @@ function App() {
           element={
             <ProtectedRoute allowedUserTypes={['pais_responsavel']}>
               <PatientDetailsParent />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Jogos Terapêuticos */}
+        <Route
+          path="/games/game1/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <Game1Page />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/games/game2/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <Game2Page />
             </ProtectedRoute>
           }
         />

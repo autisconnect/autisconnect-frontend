@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+﻿import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';  // Para resolver paths absolutos em alias
 
@@ -27,5 +27,10 @@ export default defineConfig(({ mode }) => ({
         secure: mode !== 'development',
       },
     },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setupTests.js',
+    globals: true,
   },
 }));

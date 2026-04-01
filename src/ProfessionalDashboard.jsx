@@ -6,7 +6,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
-import logohori from './assets/logo.png';
+import logonovo from './assets/logonovo.png';
 import './App.css';
 
 // Registrar componentes do Chart.js
@@ -758,8 +758,68 @@ const ProfessionalDashboard = () => {
     }
 
     return (
-        <Container fluid className="py-4 patient-details-page">
-            <style>
+        <div className="App bg-light min-vh-100">
+            <nav className="top-bar fixed-top shadow-sm">
+                <Container>
+                    <Row className="align-items-center py-3">
+                        <Col md={4} className="text-center text-md-start">
+                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+                        </Col>
+                        <Col md={4} className="text-center d-none d-md-block">
+                            <span className="text-white fw-semibold">Dashboard Profissional</span>
+                        </Col>
+                        <Col md={4} className="text-center text-md-end">
+                            <Button variant="outline-light" size="sm" onClick={handleLogout}>Sair</Button>
+                        </Col>
+                    </Row>
+                </Container>
+            </nav>
+
+            <div className="home-page" style={{ paddingTop: '85px' }}>
+                <section className="hero-section hero-short">
+                    <Container>
+                        <Row className="align-items-center">
+                            <Col lg={7} className="mb-4 mb-lg-0">
+                                <div className="hero-content-box p-4 rounded-4">
+                                    <h2 className="display-6 fw-bold mb-2 text-white">Dashboard Profissional</h2>
+                                    <p className="text-white-90 mb-1">
+                                        {professionalInfo.name || user?.nome_completo || user?.username || 'Profissional'}
+                                    </p>
+                                    <p className="text-white-90 mb-0">
+                                        Especialidade: {professionalInfo.specialty || 'N/A'}
+                                    </p>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <Card className="shadow-sm border-0">
+                                    <Card.Body>
+                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Pacientes ativos</span>
+                                            <span className="fw-semibold">{professionalInfo.totalPatients || 0}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <span className="text-muted">Consultas hoje</span>
+                                            <span className="fw-semibold">{professionalInfo.todayAppointments || 0}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center justify-content-between mb-3">
+                                            <span className="text-muted">Consultas na semana</span>
+                                            <span className="fw-semibold">{professionalInfo.weekAppointments || 0}</span>
+                                        </div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <Badge bg="info">Painel ativo</Badge>
+                                            <Badge bg="secondary">Clinica</Badge>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <main className="dashboard-section py-4">
+                    <Container fluid className="professional-dashboard">
+                        <style>
                 {`
                     @media print {
                         body * { visibility: hidden; }
@@ -783,52 +843,7 @@ const ProfessionalDashboard = () => {
             
             <div className="professional-dashboard">
 
-            <Row className="professional-header-row mb-4 align-items-center">
-                
-                {/* Coluna da Logo */}
-                <Col xs="auto">
-                    <img src={logohori} alt="AutisConnect Logo" className="details-logo" />
-                </Col>
-
-                {/* Coluna do Título e Informações do Profissional */}
-                <Col>
-                    <h1 className="professional-name mb-0">Dashboard Profissional</h1>
-                    <p className="professional-specialty text-muted mb-0">{professionalInfo.name} - {professionalInfo.specialty}</p>
-                </Col>
-
-                {/* Coluna dos Cards de Resumo */}
-                <Col xs="auto">
-                    <div className="d-flex gap-3">
-                        <Card className="summary-card">
-                            <Card.Body>
-                                <div className="d-flex align-items-center">
-                                    <People className="summary-icon text-primary me-3" />
-                                    <div>
-                                        <div className="summary-value">{professionalInfo.totalPatients}</div>
-                                        <div className="summary-label">Pacientes Ativos</div>
-                                    </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                        <Card className="summary-card">
-                            <Card.Body>
-                                <div className="d-flex align-items-center">
-                                    <Calendar2Check className="summary-icon text-success me-3" />
-                                    <div>
-                                        <div className="summary-value">{professionalInfo.todayAppointments}</div>
-                                        <div className="summary-label">Consultas Hoje</div>
-                                    </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </div>
-                </Col>
-
-                {/* Coluna do Botão de Logout */}
-                <Col xs="auto">
-                    <Button variant="danger" onClick={handleLogout}>Sair</Button>
-                </Col>
-            </Row>
+            
 
                 <Container fluid className="py-4 professional-dashboard">
                     {/* Mensagens de feedback */}
@@ -1789,6 +1804,22 @@ const ProfessionalDashboard = () => {
                 </Modal>
             </div>
         </Container>
+        </main>
+
+        <footer className="footer-section py-4">
+            <Container>
+                <Row className="align-items-center">
+                    <Col md={6} className="footer-left text-start">
+                        <p className="mb-0">
+                            {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+                            <small>Todos os direitos reservados.</small>
+                        </p>
+                    </Col>
+                </Row>
+            </Container>
+        </footer>
+      </div>
+    </div>
     );
 };
 

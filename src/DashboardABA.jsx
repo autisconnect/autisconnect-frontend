@@ -1,5 +1,8 @@
 ﻿import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { Container as RBContainer, Row as RBRow, Col as RBCol, Button as RBButton } from "react-bootstrap";
+import logonovo from "./assets/logonovo.png";
+import "./App.css";
 
 // Imports corretos do shadcn/ui usando alias (mais limpo e padrÃ£o)
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +37,50 @@ export default function DashboardABA() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="App bg-light min-vh-100">
+      <nav className="top-bar fixed-top shadow-sm">
+        <RBContainer>
+          <RBRow className="align-items-center py-3">
+            <RBCol md={4} className="text-center text-md-start">
+              <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+            </RBCol>
+            <RBCol md={4} className="text-center d-none d-md-block">
+              <span className="text-white fw-semibold">Dashboard ABA</span>
+            </RBCol>
+            <RBCol md={4} className="text-center text-md-end">
+              <RBButton variant="outline-light" size="sm" onClick={() => window.history.back()}>
+                Voltar
+              </RBButton>
+            </RBCol>
+          </RBRow>
+        </RBContainer>
+      </nav>
+
+      <div className="home-page" style={{ paddingTop: '85px' }}>
+        <section className="hero-section hero-short">
+          <RBContainer>
+            <RBRow className="align-items-center">
+              <RBCol lg={7} className="mb-4 mb-lg-0">
+                <div className="hero-content-box p-4 rounded-4">
+                  <h2 className="display-6 fw-bold mb-2 text-white">Dashboard ABA</h2>
+                  <p className="text-white-90 mb-1">Visao completa do progresso do paciente.</p>
+                  <p className="text-white-90 mb-0">Paciente #{idPaciente}</p>
+                </div>
+              </RBCol>
+              <RBCol lg={5}>
+                <Card className="shadow-sm border-0">
+                  <CardHeader>
+                    <CardTitle>Resumo rapido</CardTitle>
+                    <CardDescription>Habilidades, sessoes e progresso clinico.</CardDescription>
+                  </CardHeader>
+                </Card>
+              </RBCol>
+            </RBRow>
+          </RBContainer>
+        </section>
+
+        <main className="dashboard-section py-4">
+          <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard ABA</h1>
@@ -156,6 +202,22 @@ export default function DashboardABA() {
         </Tabs>
       </div>
     </div>
+    </main>
+
+    <footer className="footer-section py-4">
+      <RBContainer>
+        <RBRow className="align-items-center">
+          <RBCol md={6} className="footer-left text-start">
+            <p className="mb-0">
+              {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
+              <small>Todos os direitos reservados.</small>
+            </p>
+          </RBCol>
+        </RBRow>
+      </RBContainer>
+    </footer>
+  </div>
+</div>
   );
 }
 
