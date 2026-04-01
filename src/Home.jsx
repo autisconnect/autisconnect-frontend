@@ -98,8 +98,8 @@ const Home = () => {
 
     const bannerSlides = [
         { id: 1, image: img1, showButton: true,  buttonLink: "https://calendar.app.google/WYc6Lm5gzHqqir7q7" },
-        { id: 2, image: img2, showButton: false, buttonLink: "" }
-        { id: 3, image: img3, showButton: false, buttonLink: "" },
+        { id: 2, image: img2, showButton: false, buttonLink: "" },
+        { id: 3, image: img3, showButton: false, buttonLink: "" }
         //{ id: 4, image: img4, showButton: false, buttonLink: "" }
     ];
 
