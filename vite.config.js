@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => ({
     outDir: 'build',
     assetsDir: 'assets',
     chunkSizeWarningLimit: 1000,  // Mantido, mas pode aumentar se warnings de assets
-    sourcemap: true,  // Mantido: Para debug em produção (facilita logs no Render)
+    // Sourcemaps de produção elevam bastante o uso de memória no Netlify.
+    sourcemap: mode !== 'production',
   },
   server: {
     fs: {
