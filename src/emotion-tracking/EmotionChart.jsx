@@ -14,6 +14,18 @@ import {
 
     ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
+    const emotionTranslations = {
+    neutral: 'neutro',
+    happy: 'feliz',
+    sad: 'triste',
+    angry: 'raiva',
+    fearful: 'medo',
+    disgusted: 'enojado',
+    surprised: 'surpreso'
+    };
+
+    const emotionsOrder = ['happy', 'sad', 'angry', 'surprised', 'disgusted', 'fearful', 'neutral'];
+
     const EmotionChart = ({ userId, startDate, endDate }) => {
     const [emotionData, setEmotionData] = useState([]);
     const [error, setError] = useState(null);
@@ -56,10 +68,7 @@ import {
         fetchEmotions();
     }, [userId, startDate, endDate]);
 
-    const emotionToValue = (emotion) => {
-        const emotionsOrder = ['happy', 'sad', 'angry', 'surprised', 'disgusted', 'fearful', 'neutral'];
-        return emotionsOrder.indexOf(emotion);
-    };
+    const emotionToValue = (emotion) => emotionsOrder.indexOf(emotion);
 
     const chartData = {
         labels: emotionData.map(item => new Date(item.timestamp).toLocaleString('pt-BR', {
@@ -85,8 +94,8 @@ import {
         y: {
             ticks: {
             callback: (value) => {
-                const emotionsOrder = ['happy', 'sad', 'angry', 'surprised', 'disgusted', 'fearful', 'neutral'];
-                return emotionsOrder[value] || '';
+                const emotionKey = emotionsOrder[value];
+                return emotionTranslations[emotionKey] || '';
             },
             },
             title: {
@@ -106,8 +115,8 @@ import {
         tooltip: {
             callbacks: {
             label: (context) => {
-                const emotionsOrder = ['happy', 'sad', 'angry', 'surprised', 'disgusted', 'fearful', 'neutral'];
-                return `Emoção: ${emotionsOrder[context.raw]}`;
+                const emotionKey = emotionsOrder[context.raw];
+                return `Emoção: ${emotionTranslations[emotionKey] || emotionKey || ''}`;
             },
             },
         },

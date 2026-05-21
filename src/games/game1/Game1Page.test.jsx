@@ -81,10 +81,10 @@ describe('Game1Page', () => {
       await onSessionComplete()({ reason: 'completed' });
     });
 
-    expect(await screen.findByText(/Escolha o proximo passo/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Continuar no proximo nivel/i })).toBeEnabled();
-    expect(screen.getByRole('button', { name: /Repetir este nivel/i })).toBeEnabled();
-    expect(screen.getByRole('button', { name: /Encerrar agora/i })).toBeEnabled();
+    expect(await screen.findByText(/Excelente Trabalho!/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Avan.ar para o N.vel 2/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Praticar Novamente/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Encerrar Sess.o/i })).toBeEnabled();
 
     expect(apiPostMock).toHaveBeenCalledWith('/games/game1/end-session', expect.any(Object));
   });

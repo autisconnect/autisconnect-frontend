@@ -27,6 +27,9 @@ function AuthRoute() {
             case 'secretaria':
                 target = `/secretary-dashboard/${user.id}`;
                 break;
+            case 'clinica':
+                target = `/clinic-dashboard/${user.id}`;
+                break;
             case 'servicos_locais':
                 target = `/service-dashboard/${user.id}`;
                 break;

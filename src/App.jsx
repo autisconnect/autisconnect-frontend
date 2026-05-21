@@ -7,6 +7,7 @@ import Login from './Login';
 import Signup from './Signup';
 import ParentDashboard from './ParentDashboard';
 import ProfessionalDashboard from './ProfessionalDashboard';
+import ClinicDashboard from './ClinicDashboard';
 import FinancialDashboard from './FinancialDashboard';
 import SecretaryDashboard from './SecretaryDashboard';
 import DashboardABA from './DashboardABA';
@@ -26,6 +27,8 @@ import PaymentSuccess from './PaymentSuccess';
 import PaymentFailure from './PaymentFailure';
 import Game1Page from './games/game1/Game1Page';
 import Game2Page from './games/game2/Game2Page';
+import Game3Page from './games/game3/Game3Page';
+import Game4Page from './games/game4/Game4Page';
 
 // ABA Module Imports
 import AbaPatient from './pages/AbaPatient';
@@ -147,6 +150,15 @@ function App() {
 
         {/* Visão do paciente - Profissional */}
         <Route
+          path="/clinic-dashboard/:id"
+          element={
+            <ProtectedRoute allowedUserTypes={['clinica', 'medicos_terapeutas', 'secretaria']}>
+              <ClinicDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/patient-details/:patientId"
           element={
             <ProtectedRoute allowedUserTypes={['medicos_terapeutas']}>
@@ -180,6 +192,22 @@ function App() {
           element={
             <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
               <Game2Page />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/games/game3/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <Game3Page />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/games/game4/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <Game4Page />
             </ProtectedRoute>
           }
         />

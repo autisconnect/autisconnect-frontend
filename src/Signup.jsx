@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Container, Form, Card, Button, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
+import axios from 'axios';
 import apiClient from './services/api.js';
 import logohori from './assets/logonovo.png';
 import './App.css';
@@ -43,6 +44,7 @@ function Signup() {
     const [isLoading, setIsLoading] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState({ value: 0, variant: 'danger', text: 'Senha fraca' });
     const navigate = useNavigate();
+    const isBusinessUser = tipoUsuario === 'servicos_locais' || tipoUsuario === 'clinica';
 
     // --- LÓGICA DE NAVEGAÇÃO ENTRE ETAPAS ---
     const handleTipoUsuarioChange = (e) => {
@@ -78,13 +80,16 @@ function Signup() {
             await apiClient.post("/signup", payload);
             
             // PASSO 2: Lógica condicional baseada no tipo de usuário
-            if (tipoUsuario === 'servicos_locais') {
+            if (isBusinessUser) {
                 // Se for um serviço local (grátis), mostra sucesso e redireciona para o login.
                 setSuccess('Cadastro realizado com sucesso! Você já pode fazer o login.');
+                if (tipoUsuario === 'clinica') {
+                    setSuccess('Cadastro da clínica realizado com sucesso! Você já pode fazer o login.');
+                }
                 setTimeout(() => navigate('/login'), 3000);
             } else {
                 // Para usuários pagos, faz o login para obter o token e avança para a seleção de planos.
-                const loginResponse = await apiClient.post('/login', {
+                const loginResponse = await apiClient.post('/auth/login', {
                     username: formData.email,
                     password: formData.password,
                 });
@@ -240,6 +245,7 @@ function Signup() {
                             <Card.Title className="text-center mb-4">
                                 {tipoUsuario === 'pais_responsavel' && 'Cadastro de Pais ou Responsável'}
                                 {tipoUsuario === 'medicos_terapeutas' && 'Cadastro de Medicos ou Terapeutas'}
+                                {tipoUsuario === 'clinica' && 'Cadastro de Clínica'}
                                 {tipoUsuario === 'servicos_locais' && 'Cadastro de Servicos Locais'}
                             </Card.Title>
                             <Form onSubmit={handleSubmitCadastro}>
@@ -859,7 +865,7 @@ function Signup() {
                                     </>
                                 )}
 
-                                {tipoUsuario === 'servicos_locais' && (
+                                {isBusinessUser && (
                                     <>
                                         <Card className="mb-4">
                                             <Card.Header className="bg-warning">
@@ -873,7 +879,7 @@ function Signup() {
                                                             <Form.Control
                                                                 type="email"
                                                                 name="email"
-                                                                placeholder="Digite o email da empresa"
+                                                                placeholder={tipoUsuario === 'clinica' ? 'Digite o email da clínica' : 'Digite o email da empresa'}
                                                                 onChange={handleInputChange}
                                                                 required
                                                             />
@@ -913,7 +919,7 @@ function Signup() {
 
                                         <Card className="mb-4">
                                             <Card.Header className="bg-warning">
-                                                <h5 className="mb-0">Dados da Empresa</h5>
+                                                <h5 className="mb-0">{tipoUsuario === 'clinica' ? 'Dados da Clínica' : 'Dados da Empresa'}</h5>
                                             </Card.Header>
                                             <Card.Body>
                                                 <Row>
@@ -963,11 +969,11 @@ function Signup() {
                                                 <Row>
                                                     <Col md={6}>
                                                         <Form.Group className="mb-3" controlId="formTelefoneServico">
-                                                            <Form.Label>Telefone</Form.Label>
+                                                            <Form.Label>{tipoUsuario === 'clinica' ? 'Telefone da clínica' : 'Telefone'}</Form.Label>
                                                             <Form.Control
                                                                 type="text"
                                                                 name="telefone"
-                                                                placeholder="Telefone da empresa"
+                                                                placeholder={tipoUsuario === 'clinica' ? 'Telefone da clínica' : 'Telefone da empresa'}
                                                                 onChange={handleInputChange}
                                                             />
                                                         </Form.Group>
@@ -1273,6 +1279,7 @@ function Signup() {
                                         <option value="">Selecione...</option>
                                         <option value="pais_responsavel">Pais ou Responsável</option>
                                         <option value="medicos_terapeutas">Medicos ou Terapeutas</option>
+                                        <option value="clinica">Clinica</option>
                                         {/*<option value="servicos_locais">Servicos Locais (Grátis)</option>*/}
                                     </Form.Select>
                                 </Form.Group>

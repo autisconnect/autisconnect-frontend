@@ -18,13 +18,13 @@ ChartJS.register(
 
 // Objeto para tradução das emoções
 const emotionTranslations = {
-    neutral: 'Neutro',
-    happy: 'Feliz',
-    sad: 'Triste',
-    angry: 'Raiva',
-    fearful: 'Medo',
-    disgusted: 'Nojo',
-    surprised: 'Surpresa'
+    neutral: 'neutro',
+    happy: 'feliz',
+    sad: 'triste',
+    angry: 'raiva',
+    fearful: 'medo',
+    disgusted: 'enojado',
+    surprised: 'surpreso'
 };
 
 const validEmotions = Object.keys(emotionTranslations);
@@ -323,7 +323,7 @@ const EmotionDetector = () => {
         return {
             labels,
             datasets: [
-                { label: 'Feliz', data: happyData, backgroundColor: 'rgba(75, 192, 192, 0.6)' },
+                { label: emotionTranslations.happy, data: happyData, backgroundColor: 'rgba(75, 192, 192, 0.6)' },
                 { label: 'Engajado', data: engagedData, backgroundColor: 'rgba(54, 162, 235, 0.6)' }
             ]
         };
@@ -464,10 +464,10 @@ const EmotionDetector = () => {
                             <p>Com base nas emoções detectadas, observamos que a emoção predominante é <strong>{emotion}</strong>. Isso pode indicar o estado emocional atual da pessoa.</p>
                             <h5>Recomendações</h5>
                             <ul>
-                                {emotion === 'Feliz' && <li>Continue com atividades que promovem alegria e bem-estar.</li>}
-                                {emotion === 'Triste' && <li>Considere atividades que elevam o humor, como música alegre ou exercícios físicos.</li>}
-                                {emotion === 'Raiva' && <li>Técnicas de respiração e relaxamento podem ajudar a reduzir sentimentos de raiva.</li>}
-                                {emotion === 'Medo' && <li>Exercícios de mindfulness podem ajudar a reduzir a ansiedade e o medo.</li>}
+                                {emotion === 'feliz' && <li>Continue com atividades que promovem alegria e bem-estar.</li>}
+                                {emotion === 'triste' && <li>Considere atividades que elevam o humor, como música alegre ou exercícios físicos.</li>}
+                                {emotion === 'raiva' && <li>Técnicas de respiração e relaxamento podem ajudar a reduzir sentimentos de raiva.</li>}
+                                {emotion === 'medo' && <li>Exercícios de mindfulness podem ajudar a reduzir a ansiedade e o medo.</li>}
                                 <li>Monitore regularmente as emoções para identificar padrões ao longo do tempo.</li>
                                 <li>Compare os resultados entre diferentes sessões para avaliar o progresso.</li>
                             </ul>

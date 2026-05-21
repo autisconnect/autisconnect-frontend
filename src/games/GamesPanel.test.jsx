@@ -20,6 +20,8 @@ describe('GamesPanel', () => {
 
     expect(await screen.findByText(/Games Terapêuticos/i)).toBeInTheDocument();
     expect(screen.getByText(/Emotional Regulation Adventures/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Iniciar/i })).toBeEnabled();
+    const startButtons = screen.getAllByRole('button', { name: /Iniciar/i });
+    expect(startButtons.length).toBeGreaterThan(0);
+    expect(startButtons[0]).toBeEnabled();
   });
 });

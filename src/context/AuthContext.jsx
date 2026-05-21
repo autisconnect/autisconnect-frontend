@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }) => {
                 case 'medicos_terapeutas': navigate(`/professional-dashboard/${appUser.id}`); break;
                 case 'pais_responsavel': navigate(`/parent-dashboard/${appUser.id}`); break;
                 case 'secretaria': navigate(`/secretary-dashboard/${appUser.id}`); break;
+                case 'clinica': navigate(`/clinic-dashboard/${appUser.id}`); break;
                 case 'servicos_locais': navigate(`/service-dashboard/${appUser.id}`); break;
                 default: navigate('/');
               }
@@ -103,6 +104,9 @@ export const AuthProvider = ({ children }) => {
               break;
           case 'secretaria':
               navigate(`/secretary-dashboard/${appUserData.id}`);
+              break;
+          case 'clinica':
+              navigate(`/clinic-dashboard/${appUserData.id}`);
               break;
           case 'servicos_locais':
               navigate(`/service-dashboard/${appUserData.id}`);
