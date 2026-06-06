@@ -3,7 +3,7 @@ import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstra
 // Ícones atualizados para refletir as funcionalidades reais
 import { FaVideo, FaChartLine, FaChartBar, FaLightbulb, FaInfoCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import logohori from '../assets/logo.png';
+import logonovo from '../assets/logonovo.png';
 import '../App.css';
 
 // Importe as novas imagens que você vai criar
@@ -27,7 +27,7 @@ function PresentationEmotionDetector() {
         <div className="presentation-page">
             <Navbar bg="light" variant="light" expand="lg" fixed="top" className="mb-4 service-navbar">
                 <Container>
-                    <Navbar.Brand><img src={logohori} alt="AutisConnect Logo" className="d-inline-block align-top logo" /></Navbar.Brand>
+                    <Navbar.Brand><img src={logonovo} alt="AutisConnect Logo" className="d-inline-block align-top logo" /></Navbar.Brand>
                     <div className="ms-auto">
                         <Button variant="danger" onClick={handleBackToMain} style={{ backgroundColor: '#e74c3c', borderColor: '#e74c3c' }}>Voltar</Button>
                     </div>

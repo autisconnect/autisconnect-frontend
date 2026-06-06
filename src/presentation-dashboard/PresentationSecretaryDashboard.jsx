@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstrap';
 import { FaCalendarAlt, FaUserPlus, FaChartBar, FaTasks } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import logohori from '../assets/logo.png';
+import logonovo from '../assets/logonovo.png';
 import '../App.css';
 
 // Importe as imagens que você vai criar
@@ -26,7 +26,7 @@ function PresentationSecretaryDashboard() {
         <div className="presentation-page">
             <Navbar bg="light" variant="light" expand="lg" fixed="top" className="mb-4 service-navbar">
                 <Container>
-                    <Navbar.Brand><img src={logohori} alt="AutisConnect Logo" className="d-inline-block align-top logo" /></Navbar.Brand>
+                    <Navbar.Brand><img src={logonovo} alt="AutisConnect Logo" className="d-inline-block align-top logo" /></Navbar.Brand>
                     <div className="ms-auto">
                         <Button variant="danger" onClick={handleBackToMain} style={{ backgroundColor: '#e67e22', borderColor: '#e67e22' }}>Voltar</Button>
                     </div>

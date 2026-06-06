@@ -1,120 +1,314 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { Badge, Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext';
-
-// ÍCONES
 import {
     ArrowRight,
-    Star,
     Award,
-    People,
-    Heart,
     Calendar,
-    GraphUp,
     Calendar2Check,
-    Wallet2,
-    Bell,
     CheckCircle,
-    Sliders,
-    Instagram,
-    Whatsapp,
     Envelope,
     ExclamationTriangle,
     FileEarmarkText,
-    Youtube,
-    ArrowLeft
+    GraphUp,
+    Heart,
+    Instagram,
+    People,
+    Sliders,
+    Star,
+    Whatsapp,
+    Youtube
 } from 'react-bootstrap-icons';
+import { AuthContext } from './context/AuthContext';
 
 import logonovo from './assets/logonovo.png';
 import servico1 from './assets/servico1.jpeg';
 import servico2 from './assets/servico2.jpeg';
 import servico3 from './assets/servico3.jpeg';
-
-// Imagens do Hero Banner
-import img1 from './assets/img1.png';
-import img2 from './assets/img2.png';
-import img3 from './assets/img3.png';
-import img4 from './assets/img4.png';
+import heroImage from './assets/img1.png';
 
 import './App.css';
 
+const DEMO_URL = 'https://calendar.app.google/WYc6Lm5gzHqqir7q7';
+const WHATSAPP_PHONE = '5581982540904';
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}`;
+
+const TRACKING_EVENTS = {
+    demoClick: 'click_demonstracao',
+    whatsappClick: 'click_whatsapp',
+    signupClick: 'click_cadastro',
+    trialClick: 'click_teste_gratuito',
+    pricingClick: 'click_planos',
+    leadSubmit: 'envio_formulario_lead',
+    featureClick: 'click_recurso_home'
+};
+
+const seoConfig = {
+    title: 'AutisConnect | Software para autismo e gestão de pacientes TEA',
+    description:
+        'Plataforma para autismo que centraliza gestão de pacientes TEA, prontuário, agenda, financeiro, portal dos pais e monitoramento emocional.',
+    keywords:
+        'software para autismo, sistema para clínicas TEA, gestão de pacientes TEA, prontuário TEA, monitoramento emocional TEA, plataforma para autismo'
+};
+
+{/*const trustBadges = [
+    'Startup incubada pelo Porto Digital',
+    'Plataforma especializada em TEA',
+    'Monitoramento Emocional Integrado'
+];*/}
+
+const painPoints = [
+    'Informações espalhadas',
+    'Múltiplas ferramentas',
+    'Retrabalho administrativo',
+    'Comunicação descentralizada',
+    'Dificuldade de acompanhar evolução'
+];
+
+const solutionPillars = [
+    {
+        title: 'Organizar',
+        text: 'Pacientes, agenda, financeiro e documentos em uma rotina mais clara.',
+        icon: <Calendar2Check size={34} />
+    },
+    {
+        title: 'Conectar',
+        text: 'Famílias, profissionais e informações relevantes no mesmo fluxo.',
+        icon: <People size={34} />
+    },
+    {
+        title: 'Acompanhar',
+        text: 'Evolução clínica, registros e monitoramento emocional com mais contexto.',
+        icon: <GraphUp size={34} />
+    }
+];
+
+const emotionalSignals = ['Linha do tempo emocional', 'Indicadores', 'IA', 'Evolução'];
+
+const features = [
+    {
+        id: 1,
+        title: 'Monitoramento emocional',
+        description: 'Transforme sinais emocionais em dados de apoio ao acompanhamento TEA.',
+        icon: <Heart className="feature-icon" size={40} />,
+        link: '/presentation-dashboard/PresentationEmotionDetector',
+        color: '#d9486e'
+    },
+    {
+        id: 2,
+        title: 'Dashboard profissional',
+        description: 'Gerencie pacientes, consultas e evolução em um único sistema.',
+        icon: <Sliders className="feature-icon" size={40} />,
+        link: '/PresentationProfessionalDashboard',
+        color: '#2563eb'
+    },
+    {
+        id: 3,
+        title: 'Portal dos pais',
+        description: 'Aproxime famílias da rotina terapêutica e do progresso da criança.',
+        icon: <People className="feature-icon" size={40} />,
+        link: '/PresentationParentDashboard',
+        color: '#7c3aed'
+    },
+    {
+        id: 4,
+        title: 'Gestão administrativa',
+        description: 'Organize agenda, cadastro, relatórios e atendimento da clínica.',
+        icon: <Calendar className="feature-icon" size={40} />,
+        link: '/presentation-dashboard/PresentationSecretaryDashboard',
+        color: '#0f9f8f'
+    },
+    {
+        id: 5,
+        title: 'Detalhes do paciente',
+        description: 'Centralize histórico, prescrições, consultas, gráficos e observações.',
+        icon: <FileEarmarkText className="feature-icon" size={40} />,
+        link: '/presentation-dashboard/PresentationPatientDetails',
+        color: '#f97316'
+    },
+    {
+        id: 6,
+        title: 'IA de apoio clínico',
+        description: 'Use análises inteligentes para ampliar contexto e acelerar decisões.',
+        icon: <ExclamationTriangle className="feature-icon" size={40} />,
+        link: '/presentation-dashboard/PresentationStrokeRiskMonitor',
+        color: '#f59e0b'
+    }
+];
+
+const routineBenefits = [
+    'Menos retrabalho',
+    'Mais organização',
+    'Mais produtividade',
+    'Melhor acompanhamento',
+    'Informações centralizadas',
+    'Decisões mais rápidas'
+];
+
+const audienceCards = [
+    {
+        title: 'Profissionais',
+        text: 'Controle pacientes, consultas, documentos e evolução clínica com menos esforço administrativo.',
+        cta: 'Agendar Demonstração',
+        image: servico2
+    },
+    {
+        title: 'Clínicas',
+        text: 'Organize operação, equipe, agenda e financeiro para crescer com processos mais previsíveis.',
+        cta: 'Solicitar Apresentação',
+        image: servico3
+    },
+    {
+        title: 'Pais e Responsáveis',
+        text: 'Acompanhe informações importantes, comunicação e progresso em uma experiência mais simples.',
+        cta: 'Conhecer Plataforma',
+        image: servico1
+    }
+];
+
+const pricingPlans = [
+    {
+        name: 'Pais e Responsáveis',
+        price: 'R$ 89,90',
+        period: '/mês',
+        benefit: 'Acompanhe a evolução, jogos terapêuticos e monitoramentos em uma área segura.',
+        features: ['Portal dos Pais', 'Monitoramento emocional', 'Jogos terapêuticos', 'Histórico centralizado'],
+        cta: 'Começar acompanhamento'
+    },
+    {
+        name: 'Analisar 50',
+        price: 'R$ 189,90',
+        period: '/mês',
+        benefit: 'Ideal para profissionais que precisam centralizar até 50 pacientes.',
+        features: ['Até 50 pacientes', 'Agenda e documentos', 'Evolução clínica', 'Acesso à IA'],
+        cta: 'Escolher Analisar 50',
+        highlight: true
+    },
+    {
+        name: 'Analisar 100',
+        price: 'R$ 259,90',
+        period: '/mês',
+        benefit: 'Mais capacidade para consultórios em expansão e equipes multidisciplinares.',
+        features: ['Até 100 pacientes', 'Gestão de rotina', 'Relatórios e gráficos', 'Portal integrado'],
+        cta: 'Escolher Analisar 100'
+    },
+    {
+        name: 'Analisar 200',
+        price: 'R$ 349,90',
+        period: '/mês',
+        benefit: 'Para clínicas que precisam de organização, escala e visão de operação.',
+        features: ['Até 200 pacientes', 'Fluxos administrativos', 'Financeiro', 'Indicadores de evolução'],
+        cta: 'Escolher Analisar 200'
+    },
+    {
+        name: 'Analisar 500',
+        price: 'R$ 499,90',
+        period: '/mês',
+        benefit: 'Plano robusto para operações maiores com alto volume de acompanhamento.',
+        features: ['Até 500 pacientes', 'Gestão ampliada', 'Equipe integrada', 'Dados centralizados'],
+        cta: 'Falar com comercial'
+    }
+];
+
+const updateMetaTag = (selector, attribute, value) => {
+    let element = document.head.querySelector(selector);
+
+    if (!element) {
+        element = document.createElement('meta');
+        const match = selector.match(/\[(name|property)="(.+)"\]/);
+        if (match) {
+            element.setAttribute(match[1], match[2]);
+        }
+        document.head.appendChild(element);
+    }
+
+    element.setAttribute(attribute, value);
+};
+
+const trackEvent = (eventName, eventData = {}) => {
+    if (typeof window === 'undefined') return;
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: eventName, ...eventData });
+
+    if (typeof window.gtag === 'function') {
+        window.gtag('event', eventName, eventData);
+    }
+
+    if (typeof window.fbq === 'function') {
+        window.fbq('trackCustom', eventName, eventData);
+    }
+};
+
+const getWhatsAppUrl = (message = 'Olá! Quero conhecer o AutisConnect.') =>
+    `${WHATSAPP_URL}?text=${encodeURIComponent(message)}`;
+
 const Home = () => {
     const { loading } = useContext(AuthContext);
+    const [leadForm, setLeadForm] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        profile: ''
+    });
+    const [leadSent, setLeadSent] = useState(false);
 
-    const [features] = useState([
-        {
-            id: 1,
-            title: "Monitoramento de Emoções",
-            description: "Tecnologia avançada de inteligência artificial para detectar e analisar expressões faciais em tempo real, ajudando a compreender melhor as emoções não verbalizadas e facilitando a comunicação.",
-            icon: <Heart className="feature-icon" size={40} />,
-            link: "/presentation-dashboard/PresentationEmotionDetector",
-            color: "#e74c3c"
-        },
-        {
-            id: 2,
-            title: "Avaliação de Risco de AVC",
-            description: "Ferramenta inovadora que utiliza análise de assimetrias faciais para identificar possíveis sinais de alerta precoces para AVC, proporcionando intervenção rápida e eficaz.",
-            icon: <ExclamationTriangle className="feature-icon" size={40} />,
-            link: "/presentation-dashboard/PresentationStrokeRiskMonitor",
-            color: "#f39c12"
-        },
-        {
-            id: 3,
-            title: "Dashboard Profissional",
-            description: "Gerencie pacientes, colaboradores, finanças e consultas em um só lugar. Relatórios clínicos, ferramentas de IA e visão completa da sua prática com apenas alguns cliques.",
-            icon: <Sliders className="feature-icon" size={40} />,
-            link: "/PresentationProfessionalDashboard",
-            color: "#3498db"
-        },
-        {
-            id: 4,
-            title: "Portal dos Pais",
-            description: "Acompanhe o desenvolvimento da sua criança, agende consultas, converse com médicos, acesse jogos educativos e encontre serviços inclusivos — tudo em um só lugar seguro e intuitivo.",
-            icon: <People className="feature-icon" size={40} />,
-            link: "/PresentationParentDashboard",
-            color: "#9b59b6"
-        },
-        {
-            id: 5,
-            title: "Gestão para Secretárias",
-            description: "Centralize agendamentos, cadastre pacientes, visualize relatórios de desempenho e organize toda a rotina administrativa da clínica com uma plataforma simples e poderosa.",
-            icon: <Calendar className="feature-icon" size={40} />,
-            link: "/presentation-dashboard/PresentationSecretaryDashboard",
-            color: "#1abc9c"
-        },
-        {
-            id: 6,
-            title: "Detalhes do Paciente",
-            description: "Acompanhe evolução clínica completa, gráficos de progresso, prescrições, consultas e análises de IA em um só lugar.",
-            icon: <GraphUp className="feature-icon" size={40} />,
-            link: "/presentation-dashboard/PresentationPatientDetails",
-            color: "#e67e22"
-        }
-    ]);
+    const whatsappLeadUrl = useMemo(() => {
+        const message = [
+            'Olá! Quero solicitar uma demonstração do AutisConnect.',
+            leadForm.name && `Nome: ${leadForm.name}`,
+            leadForm.email && `E-mail: ${leadForm.email}`,
+            leadForm.phone && `Telefone: ${leadForm.phone}`,
+            leadForm.profile && `Perfil: ${leadForm.profile}`
+        ]
+            .filter(Boolean)
+            .join('\n');
 
-    // ==================== HERO BANNER ====================
-    const [currentSlide, setCurrentSlide] = useState(0);
-
-    const bannerSlides = [
-        { id: 1, image: img1, showButton: true,  buttonLink: "https://calendar.app.google/WYc6Lm5gzHqqir7q7" },
-        { id: 2, image: img2, showButton: false, buttonLink: "" },
-        { id: 3, image: img3, showButton: false, buttonLink: "" },
-        { id: 4, image: img4, showButton: false, buttonLink: "" }
-    ];
+        return getWhatsAppUrl(message);
+    }, [leadForm]);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
-        }, 6000);
-        return () => clearInterval(interval);
+        document.title = seoConfig.title;
+        updateMetaTag('meta[name="description"]', 'content', seoConfig.description);
+        updateMetaTag('meta[name="keywords"]', 'content', seoConfig.keywords);
+        updateMetaTag('meta[property="og:title"]', 'content', seoConfig.title);
+        updateMetaTag('meta[property="og:description"]', 'content', seoConfig.description);
+        updateMetaTag('meta[property="og:type"]', 'content', 'website');
+
+        const schemaId = 'autisconnect-home-schema';
+        let schemaScript = document.getElementById(schemaId);
+        if (!schemaScript) {
+            schemaScript = document.createElement('script');
+            schemaScript.id = schemaId;
+            schemaScript.type = 'application/ld+json';
+            document.head.appendChild(schemaScript);
+        }
+
+        schemaScript.textContent = JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'AutisConnect',
+            applicationCategory: 'HealthApplication',
+            operatingSystem: 'Web',
+            description: seoConfig.description,
+            keywords: seoConfig.keywords
+        });
     }, []);
 
-    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
-    const goToSlide = (index) => setCurrentSlide(index);
+    const handleLeadChange = (event) => {
+        const { name, value } = event.target;
+        setLeadForm((currentForm) => ({ ...currentForm, [name]: value }));
+    };
 
-    const currentBanner = bannerSlides[currentSlide];
+    const handleLeadSubmit = (event) => {
+        event.preventDefault();
+        trackEvent(TRACKING_EVENTS.leadSubmit, {
+            profile: leadForm.profile,
+            source: 'home_lead_form'
+        });
+        setLeadSent(true);
+        window.open(whatsappLeadUrl, '_blank', 'noopener,noreferrer');
+    };
 
     if (loading) {
         return (
@@ -128,32 +322,37 @@ const Home = () => {
 
     return (
         <>
-            {/* BARRA FIXA NO TOPO */}
-            <nav className="top-bar fixed-top shadow-sm">
+            <nav className="top-bar fixed-top shadow-sm autis-home-nav">
                 <Container>
-                    <Row className="align-items-center py-3">
-                        <Col md={7} className="text-center text-md-start">
-                            <img 
-                                src={logonovo} 
-                                alt="AutisConnect" 
-                                className="top-bar-logo"
-                            />
+                    <Row className="align-items-center gy-3 py-3">
+                        <Col lg={3} md={4} className="text-center text-md-start">
+                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
                         </Col>
-                        <Col md={5} className="text-center text-md-end">
-                            <div className="d-flex justify-content-center justify-content-md-end gap-3">
-                                <Link to="/signup" className="text-decoration-none">
+                        <Col lg={9} md={8}>
+                            <div className="autis-home-nav__actions">
+                                <a href="#recursos" className="autis-home-nav__link">Recursos</a>
+                                <a href="#planos" className="autis-home-nav__link">Planos</a>
+                                <a
+                                    href={DEMO_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-decoration-none"
+                                    onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: 'nav' })}
+                                >
                                     <Button variant="light" size="md" className="px-4 py-2">
-                                        <CheckCircle className="me-2" size={18} /> Cadastre-se
+                                        Agendar Demonstração
                                     </Button>
-                                </Link>
-                                <Link to="/login" className="text-decoration-none"
+                                </a>
+                                <Link
+                                    to="/login"
+                                    className="text-decoration-none"
                                     onClick={() => {
                                         localStorage.removeItem('token');
                                         localStorage.removeItem('user');
                                     }}
                                 >
                                     <Button variant="outline-light" size="md" className="px-4 py-2">
-                                        <ArrowRight className="me-2" size={18} /> Fazer Login
+                                        Fazer Login
                                     </Button>
                                 </Link>
                             </div>
@@ -162,104 +361,127 @@ const Home = () => {
                 </Container>
             </nav>
 
-            <div className="home-page" style={{ paddingTop: '85px' }}>
-
-                {/* HERO CURTA */}
-                <section className="hero-section hero-short" id="section-hero">
+            <main className="home-page landing-home">
+                <section
+                    className="landing-hero"
+                    style={{ backgroundImage: `linear-gradient(90deg, rgba(10, 28, 48, 0.92), rgba(10, 28, 48, 0.68), rgba(10, 28, 48, 0.38)), url(${heroImage})` }}
+                >
                     <Container>
-                        <Row className="align-items-center py-5">
-                            <Col lg={6} className="mb-5 mb-lg-0">
-                                <div className="hero-content-box p-5 rounded-4">
-                                    <h1 className="display-4 fw-bold mb-4 text-white">
-                                        Bem-vindo ao <span className="text-gradient">AutisConnect</span>
-                                    </h1>
-                                    <p className="lead mb-4 text-white-90">
-                                        A plataforma mais completa para conectar famílias de pessoas autistas a profissionais especializados e serviços inclusivos.
-                                    </p>
+                        <Row className="align-items-center">
+                            <Col lg={8} xl={7}>
+                                <h1>Organize pacientes, centralize informações e melhore o acompanhamento TEA em uma única plataforma.</h1>
+                                <p className="landing-hero__subtitle">
+                                    O AutisConnect conecta profissionais, famílias e informações do acompanhamento,
+                                    reduzindo retrabalho e facilitando a evolução dos pacientes.
+                                </p>
+                                <div className="landing-hero__actions">
+                                    <a
+                                        href={DEMO_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: 'hero' })}
+                                    >
+                                        <Button variant="light" size="lg">
+                                            Agendar Demonstração <ArrowRight size={18} />
+                                        </Button>
+                                    </a>
+                                    <a
+                                        href={getWhatsAppUrl('Olá! Quero testar gratuitamente o AutisConnect.')}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => {
+                                            trackEvent(TRACKING_EVENTS.trialClick, { location: 'hero' });
+                                            trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'hero_trial' });
+                                        }}
+                                    >
+                                        <Button variant="success" size="lg">
+                                            Teste Gratuitamente
+                                        </Button>
+                                    </a>
+                                    <a
+                                        href={getWhatsAppUrl()}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'hero' })}
+                                    >
+                                        <Button variant="outline-light" size="lg">
+                                            <Whatsapp size={18} /> Falar pelo WhatsApp
+                                        </Button>
+                                    </a>
                                 </div>
-                            </Col>
-                            <Col lg={6} className="text-center">
-                                <img 
-                                    src={logonovo} 
-                                    alt="AutisConnect" 
-                                    className="img-fluid hero-logo" 
-                                    style={{ maxHeight: '320px' }}
-                                />
+                                {/*<div className="landing-trust-bar">
+                                    {trustBadges.map((badge) => (
+                                        <span key={badge}>
+                                            <CheckCircle size={17} /> {badge}
+                                        </span>
+                                    ))}
+                                </div>*/}
                             </Col>
                         </Row>
                     </Container>
                 </section>
 
-                {/* HERO BANNER */}
-                <section className="hero-banner position-relative overflow-hidden">
-                    <div className="banner-slide">
-                        <img 
-                            src={currentBanner.image} 
-                            alt={`Banner ${currentBanner.id}`} 
-                            className="banner-image" 
-                        />
+                <section className="landing-section landing-pains">
+                    <Container>
+                        <Row className="align-items-center g-5">
+                            <Col lg={5}>
+                                <span className="landing-section__label">Dores reais do ecossistema TEA</span>
+                                <h2>Você enfrenta algum destes desafios?</h2>
+                                <p>
+                                    Em mais de 100 entrevistas com profissionais e famílias, os mesmos bloqueios apareceram:
+                                    informação dispersa, excesso de ferramentas e pouca integração entre quem acompanha o paciente.
+                                </p>
+                            </Col>
+                            <Col lg={7}>
+                                <Row className="g-3">
+                                    {painPoints.map((pain) => (
+                                        <Col md={6} key={pain}>
+                                            <Card className="landing-card landing-pain-card h-100">
+                                                <Card.Body>
+                                                    <ExclamationTriangle size={24} />
+                                                    <strong>{pain}</strong>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+                            </Col>
+                        </Row>
 
-                        {currentBanner.showButton && (
-                            <div className="banner-button-container">
-                                <a 
-                                    href={currentBanner.buttonLink} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                >
-                                    <Button variant="light" size="lg" className="px-5 py-3 fw-bold shadow">
-                                        Agendar Demonstração
-                                    </Button>
-                                </a>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Setas */}
-                    <button onClick={prevSlide} className="banner-nav banner-nav-left">
-                        <ArrowLeft size={28} />
-                    </button>
-                    <button onClick={nextSlide} className="banner-nav banner-nav-right">
-                        <ArrowRight size={28} />
-                    </button>
-
-                    {/* Indicadores */}
-                    <div className="banner-indicators">
-                        {bannerSlides.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => goToSlide(index)}
-                                className={`indicator ${index === currentSlide ? 'active' : ''}`}
-                            />
-                        ))}
-                    </div>
+                        <Row className="landing-compare g-4">
+                            <Col md={6}>
+                                <div className="landing-compare__column landing-compare__column--before">
+                                    <span>Antes</span>
+                                    <h3>Rotina fragmentada</h3>
+                                    <p>Planilhas, mensagens, agenda, documentos e evolução clínica em lugares diferentes.</p>
+                                </div>
+                            </Col>
+                            <Col md={6}>
+                                <div className="landing-compare__column landing-compare__column--after">
+                                    <span>Depois</span>
+                                    <h3>Gestão centralizada</h3>
+                                    <p>Pacientes, famílias, histórico, indicadores e comunicação conectados em uma plataforma.</p>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Container>
                 </section>
 
-                {/* ==================== RECURSOS EXCLUSIVOS ==================== */}
-                <section className="features-inovadoras py-5 bg-white" id="section-features">
+                <section className="landing-section bg-white">
                     <Container>
-                        <div className="text-center mb-5">
-                            <h2 className="display-4 fw-bold mb-3">Recursos Exclusivos e Inovadores</h2>
-                            <p className="lead text-muted">Tecnologia de ponta a serviço da inclusão e do desenvolvimento</p>
+                        <div className="landing-section__heading">
+                            <span className="landing-section__label">Solução</span>
+                            <h2>Como o AutisConnect resolve isso?</h2>
                         </div>
-
-                        <Row className="g-5 justify-content-center">
-                            {features.map((feature) => (
-                                <Col key={feature.id} lg={4} md={6}>
-                                    <Card className="h-100 border-0 shadow-sm text-center p-4 hover-lift position-relative overflow-hidden">
-                                        <div className="position-absolute start-0 top-0 bottom-0" style={{ width: '8px', backgroundColor: feature.color, borderRadius: '8px 0 0 8px' }} />
-                                        <div className="mb-4">
-                                            <div className="icon-circle text-white mx-auto d-flex align-items-center justify-content-center shadow-lg"
-                                                style={{ width: '90px', height: '90px', borderRadius: '50%', background: `linear-gradient(135deg, ${feature.color}, ${feature.color}dd)` }}>
-                                                {React.cloneElement(feature.icon, { size: 42 })}
-                                            </div>
-                                        </div>
-                                        <h4 className="fw-bold mb-3">{feature.title}</h4>
-                                        <p className="text-muted small lh-lg">{feature.description}</p>
-                                        <Link to={feature.link}>
-                                            <Button variant="outline-primary" size="sm" className="mt-3">
-                                                Explorar Recurso <ArrowRight className="ms-2" size={16} />
-                                            </Button>
-                                        </Link>
+                        <Row className="g-4">
+                            {solutionPillars.map((pillar) => (
+                                <Col md={4} key={pillar.title}>
+                                    <Card className="landing-card landing-pillar-card h-100">
+                                        <Card.Body>
+                                            <div className="landing-card__icon">{pillar.icon}</div>
+                                            <h3>{pillar.title}</h3>
+                                            <p>{pillar.text}</p>
+                                        </Card.Body>
                                     </Card>
                                 </Col>
                             ))}
@@ -267,95 +489,284 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* ==================== PROFISSIONAIS E CLÍNICAS ==================== */}
-                <section className="py-5" style={{ backgroundColor: '#f0f5ff' }}>
+                <section className="landing-section landing-emotional">
                     <Container>
-                        <div className="text-center mb-5">
-                            <h2 className="display-5 fw-bold mb-4">
-                                Feito para <span className="text-primary">Profissionais e Clínicas</span> que Transformam Vidas
-                            </h2>
-                            <p className="lead text-muted col-lg-9 mx-auto">
-                                Controle total de pacientes, relatórios científicos automáticos, agenda e financeiro em um só lugar.
-                            </p>
-                            <div className="mt-4">
-                                <h3 className="display-6 fw-bold text-primary">
-                                    A partir de apenas <span className="text-dark">R$ 139,90/mês</span>
-                                </h3>
-                                <p className="text-muted fs-5">Plano Analisar 50 – o mais escolhido</p>
-                            </div>
-                        </div>
-
-                        <Row className="g-5 justify-content-center">
-                            {/* Seus 6 cards aqui - mantidos iguais */}
-                            {/* ... (você pode colar seus cards originais aqui) ... */}
+                        <Row className="align-items-center g-5">
+                            <Col lg={6}>
+                                <span className="landing-section__label">Diferencial competitivo</span>
+                                <h2>Monitoramento Emocional Inteligente</h2>
+                                <p>
+                                    Transforme sinais emocionais em informações que apoiam o acompanhamento e a tomada de decisão.
+                                </p>
+                                <div className="landing-emotional__grid">
+                                    {emotionalSignals.map((signal) => (
+                                        <span key={signal}><Star size={16} /> {signal}</span>
+                                    ))}
+                                </div>
+                            </Col>
+                            <Col lg={6}>
+                                <div className="landing-emotional__panel">
+                                    <div className="landing-emotional__timeline">
+                                        <span>Manhã</span>
+                                        <div><i style={{ width: '56%' }} /></div>
+                                        <strong>Estável</strong>
+                                    </div>
+                                    <div className="landing-emotional__timeline">
+                                        <span>Tarde</span>
+                                        <div><i style={{ width: '78%' }} /></div>
+                                        <strong>Atenção</strong>
+                                    </div>
+                                    <div className="landing-emotional__timeline">
+                                        <span>Noite</span>
+                                        <div><i style={{ width: '42%' }} /></div>
+                                        <strong>Regulado</strong>
+                                    </div>
+                                    <div className="landing-emotional__insight">
+                                        <Heart size={24} />
+                                        <p>Indicadores emocionais ajudam profissionais e famílias a enxergar padrões ao longo do acompanhamento.</p>
+                                    </div>
+                                </div>
+                            </Col>
                         </Row>
                     </Container>
                 </section>
 
-                {/* ==================== AGENDE DEMONSTRAÇÃO ==================== */}
-                <section className="demo-section py-5" id="section-services">
+                <section className="landing-section bg-white" id="recursos">
                     <Container>
-                        <div className="text-center mb-5">
-                            <h2 className="display-4 fw-bold mb-3">Agende uma Demonstração Exclusiva</h2>
-                            <p className="lead text-muted col-lg-8 mx-auto">
-                                Escolha o perfil que melhor representa você e agende um atendimento individualizado.
-                            </p>
+                        <div className="landing-section__heading">
+                            <span className="landing-section__label">Recursos</span>
+                            <h2>Uma plataforma para transformar rotina em acompanhamento.</h2>
+                            <p>Menos descrição técnica, mais benefício direto para profissionais, clínicas e famílias.</p>
                         </div>
+                        <Row className="g-4">
+                            {features.map((feature) => (
+                                <Col key={feature.id} lg={4} md={6}>
+                                    <Card className="landing-card landing-feature-card h-100">
+                                        <Card.Body>
+                                            <div className="landing-feature-card__icon" style={{ color: feature.color }}>
+                                                {feature.icon}
+                                            </div>
+                                            <h3>{feature.title}</h3>
+                                            <p>{feature.description}</p>
+                                            <Link
+                                                to={feature.link}
+                                                onClick={() => trackEvent(TRACKING_EVENTS.featureClick, { feature: feature.title })}
+                                            >
+                                                Explorar recurso <ArrowRight size={16} />
+                                            </Link>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Container>
+                </section>
 
+                <section className="landing-section landing-benefits">
+                    <Container>
+                        <div className="landing-section__heading">
+                            <span className="landing-section__label">Benefícios</span>
+                            <h2>Resultados para sua rotina.</h2>
+                        </div>
+                        <Row className="g-3">
+                            {routineBenefits.map((benefit) => (
+                                <Col lg={4} md={6} key={benefit}>
+                                    <div className="landing-benefit-item">
+                                        <CheckCircle size={22} />
+                                        <span>{benefit}</span>
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Container>
+                </section>
+
+                <section className="landing-section bg-white">
+                    <Container>
+                        <div className="landing-section__heading">
+                            <span className="landing-section__label">Para quem é</span>
+                            <h2>Escolha o caminho mais próximo da sua realidade.</h2>
+                        </div>
+                        <Row className="g-4">
+                            {audienceCards.map((audience) => (
+                                <Col lg={4} md={6} key={audience.title}>
+                                    <Card className="landing-card landing-audience-card h-100">
+                                        <div className="landing-audience-card__image">
+                                            <Card.Img src={audience.image} alt={audience.title} />
+                                        </div>
+                                        <Card.Body>
+                                            <h3>{audience.title}</h3>
+                                            <p>{audience.text}</p>
+                                            <a
+                                                href={DEMO_URL}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: `publico_${audience.title}` })}
+                                            >
+                                                <Button variant="primary" className="w-100">
+                                                    {audience.cta} <ArrowRight size={17} />
+                                                </Button>
+                                            </a>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Container>
+                </section>
+
+                <section className="landing-section landing-proof">
+                    <Container>
+                        <Row className="align-items-center g-4">
+                            <Col lg={5}>
+                                <span className="landing-section__label">Prova social</span>
+                                <h2>Construído com escuta real do ecossistema TEA.</h2>
+                                <p>Área preparada para receber depoimentos, logos de parceiros e casos de sucesso.</p>
+                            </Col>
+                            <Col lg={7}>
+                                <Row className="g-3">
+                                    <Col md={6}>
+                                        <Card className="landing-card h-100">
+                                            <Card.Body>
+                                                <Award size={34} />
+                                                <h3>Porto Digital</h3>
+                                                <p>Startup incubada pelo Porto Digital.</p>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Card className="landing-card h-100">
+                                            <Card.Body>
+                                                <People size={34} />
+                                                <h3>+50 entrevistas</h3>
+                                                <p>Pesquisa com profissionais e famílias do ecossistema TEA.</p>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <section className="landing-section bg-white" id="planos">
+                    <Container>
+                        <div className="landing-section__heading">
+                            <span className="landing-section__label">Planos</span>
+                            <h2>Planos pensados para acompanhar sua fase.</h2>
+                            <p>Escolha pela necessidade de gestão, volume de pacientes e nível de acompanhamento.</p>
+                        </div>
                         <Row className="g-4 justify-content-center">
-                            <Col lg={4} md={6}>
-                                <Card className="demo-card h-100 shadow-sm border-0 overflow-hidden">
-                                    <div className="image-container">
-                                        <Card.Img variant="top" src={servico1} alt="Pais e Responsáveis" />
-                                    </div>
-                                    <Card.Body className="d-flex flex-column p-4">
-                                        <Card.Title className="fw-bold mb-3">Pais e Responsáveis</Card.Title>
-                                        <Card.Text className="flex-grow-1 text-muted">
-                                            Acompanhe o desenvolvimento do seu filho e descubra como a plataforma pode ajudar.
-                                        </Card.Text>
-                                        <a href="https://calendar.app.google/WYc6Lm5gzHqqir7q7" target="_blank" rel="noopener noreferrer" className="mt-auto">
-                                            <Button variant="primary" className="w-100">
-                                                Agendar Demonstração <ArrowRight className="ms-2" size={18} />
-                                            </Button>
-                                        </a>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
+                            {pricingPlans.map((plan) => (
+                                <Col key={plan.name} xl={plan.highlight ? 4 : undefined} lg={4} md={6}>
+                                    <Card className={`landing-card landing-plan-card h-100 ${plan.highlight ? 'landing-plan-card--highlight' : ''}`}>
+                                        <Card.Body>
+                                            {plan.highlight && <Badge className="landing-plan-card__badge">Mais escolhido</Badge>}
+                                            <h3>{plan.name}</h3>
+                                            <p>{plan.benefit}</p>
+                                            <div className="landing-plan-card__price">
+                                                <strong>{plan.price}</strong>
+                                                <span>{plan.period}</span>
+                                            </div>
+                                            <ul>
+                                                {plan.features.map((feature) => (
+                                                    <li key={feature}>
+                                                        <CheckCircle size={17} /> {feature}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <Link
+                                                to="/signup"
+                                                onClick={() => trackEvent(TRACKING_EVENTS.pricingClick, { plan: plan.name })}
+                                            >
+                                                <Button variant={plan.highlight ? 'primary' : 'outline-primary'} className="w-100">
+                                                    {plan.cta}
+                                                </Button>
+                                            </Link>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Container>
+                </section>
 
-                            <Col lg={4} md={6}>
-                                <Card className="demo-card h-100 shadow-sm border-0 overflow-hidden">
-                                    <div className="image-container">
-                                        <Card.Img variant="top" src={servico2} alt="Profissionais da Área" />
-                                    </div>
-                                    <Card.Body className="d-flex flex-column p-4">
-                                        <Card.Title className="fw-bold mb-3">Profissionais da Área</Card.Title>
-                                        <Card.Text className="flex-grow-1 text-muted">
-                                            Conheça o dashboard completo com ferramentas de IA e gestão de pacientes.
-                                        </Card.Text>
-                                        <a href="https://calendar.app.google/WYc6Lm5gzHqqir7q7" target="_blank" rel="noopener noreferrer" className="mt-auto">
-                                            <Button variant="primary" className="w-100">
-                                                Agendar Demonstração <ArrowRight className="ms-2" size={18} />
-                                            </Button>
-                                        </a>
-                                    </Card.Body>
-                                </Card>
+                <section className="landing-section landing-lead">
+                    <Container>
+                        <Row className="align-items-center g-5">
+                            <Col lg={5}>
+                                <span className="landing-section__label">Captação de leads</span>
+                                <h2>Solicite uma demonstração personalizada.</h2>
+                                <p>
+                                    Conte seu perfil e abriremos uma conversa com o comercial para direcionar a melhor apresentação.
+                                </p>
                             </Col>
-
-                            <Col lg={4} md={6}>
-                                <Card className="demo-card h-100 shadow-sm border-0 overflow-hidden">
-                                    <div className="image-container">
-                                        <Card.Img variant="top" src={servico3} alt="Serviços e Rede TEA" />
-                                    </div>
-                                    <Card.Body className="d-flex flex-column p-4">
-                                        <Card.Title className="fw-bold mb-3">Serviços e Rede TEA</Card.Title>
-                                        <Card.Text className="flex-grow-1 text-muted">
-                                            Integre sua clínica ou serviço à maior rede de apoio para o TEA.
-                                        </Card.Text>
-                                        <a href="https://calendar.app.google/WYc6Lm5gzHqqir7q7" target="_blank" rel="noopener noreferrer" className="mt-auto">
-                                            <Button variant="primary" className="w-100">
-                                                Agendar Demonstração <ArrowRight className="ms-2" size={18} />
-                                            </Button>
-                                        </a>
+                            <Col lg={7}>
+                                <Card className="landing-card landing-form-card">
+                                    <Card.Body>
+                                        <Form onSubmit={handleLeadSubmit}>
+                                            <Row className="g-3">
+                                                <Col md={6}>
+                                                    <Form.Group controlId="leadName">
+                                                        <Form.Label>Nome</Form.Label>
+                                                        <Form.Control
+                                                            name="name"
+                                                            value={leadForm.name}
+                                                            onChange={handleLeadChange}
+                                                            placeholder="Seu nome"
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={6}>
+                                                    <Form.Group controlId="leadEmail">
+                                                        <Form.Label>E-mail</Form.Label>
+                                                        <Form.Control
+                                                            type="email"
+                                                            name="email"
+                                                            value={leadForm.email}
+                                                            onChange={handleLeadChange}
+                                                            placeholder="voce@email.com"
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={6}>
+                                                    <Form.Group controlId="leadPhone">
+                                                        <Form.Label>Telefone</Form.Label>
+                                                        <Form.Control
+                                                            name="phone"
+                                                            value={leadForm.phone}
+                                                            onChange={handleLeadChange}
+                                                            placeholder="(00) 00000-0000"
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={6}>
+                                                    <Form.Group controlId="leadProfile">
+                                                        <Form.Label>Perfil</Form.Label>
+                                                        <Form.Select name="profile" value={leadForm.profile} onChange={handleLeadChange} required>
+                                                            <option value="">Selecione</option>
+                                                            <option value="Profissional">Profissional</option>
+                                                            <option value="Clínica">Clínica</option>
+                                                            <option value="Pai/Mãe">Pai/Mãe</option>
+                                                            <option value="Serviço TEA">Serviço TEA</option>
+                                                        </Form.Select>
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col xs={12}>
+                                                    <Button type="submit" variant="success" size="lg" className="w-100">
+                                                        Solicitar Demonstração <ArrowRight size={18} />
+                                                    </Button>
+                                                </Col>
+                                            </Row>
+                                        </Form>
+                                        {leadSent && (
+                                            <p className="landing-form-card__success">
+                                                Solicitação registrada. O WhatsApp foi aberto com seus dados para agilizar o atendimento.
+                                            </p>
+                                        )}
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -363,24 +774,43 @@ const Home = () => {
                     </Container>
                 </section>
 
-                {/* CTA Final */}
-                <section className="cta-section py-5 bg-primary text-white text-center">
+                <section className="landing-final-cta">
                     <Container>
-                        <h2 className="display-4 fw-bold mb-4">Junte-se à Nossa Comunidade Inclusiva</h2>
-                        <p className="lead mb-5 col-lg-8 mx-auto">
-                            Faça parte da maior rede de apoio para famílias de pessoas autistas no Brasil.
-                        </p>
-                        <Link to="/signup">
-                            <Button variant="light" size="lg" className="px-5">
-                                <CheckCircle className="me-2" size={20} /> Cadastre-se Agora
-                            </Button>
-                        </Link>
+                        <h2>Pronto para transformar a forma como você acompanha o TEA?</h2>
+                        <p>Centralize informações, reduza retrabalho e acompanhe a evolução em uma única plataforma.</p>
+                        <div className="landing-final-cta__actions">
+                            <a
+                                href={DEMO_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: 'final_cta' })}
+                            >
+                                <Button variant="light" size="lg">Agendar Demonstração</Button>
+                            </a>
+                            <a
+                                href={getWhatsAppUrl('Olá! Quero testar gratuitamente o AutisConnect.')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => {
+                                    trackEvent(TRACKING_EVENTS.trialClick, { location: 'final_cta' });
+                                    trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'final_cta_trial' });
+                                }}
+                            >
+                                <Button variant="success" size="lg">Teste Gratuitamente</Button>
+                            </a>
+                            <a
+                                href={getWhatsAppUrl()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'final_cta' })}
+                            >
+                                <Button variant="outline-light" size="lg"><Whatsapp size={18} /> WhatsApp</Button>
+                            </a>
+                        </div>
                     </Container>
                 </section>
+            </main>
 
-            </div>
-
-            {/* RODAPÉ */}
             <footer className="footer-section py-5">
                 <Container>
                     <Row className="justify-content-between align-items-center text-center text-md-start">
@@ -400,7 +830,13 @@ const Home = () => {
                                     <Envelope size={16} className="me-2" /> autisconnect@gmail.com
                                 </a>
                                 <br />
-                                <a href="https://wa.me/5581982540904" target="_blank" rel="noopener noreferrer" className="text-white-50 d-inline-flex align-items-center mb-1">
+                                <a
+                                    href={WHATSAPP_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-white-50 d-inline-flex align-items-center mb-1"
+                                    onClick={() => trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'footer' })}
+                                >
                                     <Whatsapp size={16} className="me-2" /> WhatsApp: 81 98254-0904
                                 </a>
                                 <br />

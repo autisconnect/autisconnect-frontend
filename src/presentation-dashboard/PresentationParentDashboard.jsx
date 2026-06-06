@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstrap';
 import { FaCalendar, FaComments, FaGamepad, FaHeartbeat, FaStore, FaUserMd } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import logohori from '../assets/logohoriz.jpg'; // Ajuste o caminho
+import logonovo from '../assets/logonovo.png';
 import '../App.css';
 
 function PresentationParentDashboard() {
@@ -29,7 +29,7 @@ function PresentationParentDashboard() {
                 <Container>
                     <Navbar.Brand>
                         <img
-                            src={logohori}
+                            src={logonovo}
                             alt="AutisConnect Logo"
                             className="d-inline-block align-top logo"
                         />

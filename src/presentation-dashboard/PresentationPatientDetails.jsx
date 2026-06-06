@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Container, Navbar, Row, Col, Card, Button, Image } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'react-bootstrap-icons';
-import logohori from '../assets/logo.png';
+import logonovo from '../assets/logonovo.png';
 
 // IMAGENS — todas já estão em src/assets/
 import dp00 from '../assets/dp 00.png'; // hero principal
@@ -31,7 +31,7 @@ function PresentationPatientDetails() {
         <Navbar bg="light" variant="light" expand="lg" fixed="top" className="mb-4 service-navbar">
             <Container>
             <Navbar.Brand>
-                <img src={logohori} alt="AutisConnect Logo" className="d-inline-block align-top logo" />
+                <img src={logonovo} alt="AutisConnect Logo" className="d-inline-block align-top logo" />
             </Navbar.Brand>
             <div className="ms-auto">
                 <Button
