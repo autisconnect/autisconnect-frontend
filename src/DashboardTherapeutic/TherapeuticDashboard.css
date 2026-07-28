@@ -1,0 +1,7 @@
+.therapeutic-dashboard { background: #f5fbfb; min-height: 100vh; margin: 0 auto; max-width: 1440px; padding: 2rem; }
+.therapeutic-dashboard .card { border: 1px solid rgba(22, 50, 54, 0.08); border-radius: 20px; box-shadow: 0 16px 35px rgba(15, 23, 42, 0.06); }
+.therapeutic-dashboard .card-body { min-height: 170px; }
+.therapeutic-dashboard h2, .therapeutic-dashboard .card-title { color: #163236; font-weight: 700; }
+.therapeutic-dashboard .table thead th { background: #163236; color: #fff; }
+.therapeutic-dashboard .table-hover tbody tr:hover { background: rgba(15, 118, 110, 0.06); }
+@media (max-width: 767.98px) { .therapeutic-dashboard { padding: 1.25rem; } }

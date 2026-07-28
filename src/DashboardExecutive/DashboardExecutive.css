@@ -1,0 +1,77 @@
+.executive-layout {
+  background: #f5fbfb;
+  display: flex;
+  min-height: 100vh;
+}
+
+.executive-sidebar {
+  background: #163236;
+  color: #fff;
+  padding: 1.5rem 1rem;
+  width: 270px;
+}
+
+.executive-sidebar-brand {
+  align-items: center;
+  display: flex;
+  font-size: 1.1rem;
+  font-weight: 700;
+  gap: 0.7rem;
+  margin: 0 0 2rem;
+  padding: 0 0.7rem;
+}
+
+.executive-sidebar-link {
+  align-items: center;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  font-weight: 600;
+  gap: 0.75rem;
+  padding: 0.85rem 0.7rem;
+  text-decoration: none;
+}
+
+.executive-sidebar-link.active,
+.executive-sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.executive-layout-content { flex: 1; min-width: 0; }
+
+.executive-header {
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid rgba(22, 50, 54, 0.08);
+  display: flex;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+}
+
+.executive-eyebrow { color: #0f766e; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.executive-header h1 { color: #163236; font-size: 1.6rem; font-weight: 800; margin: 0.2rem 0 0; }
+.executive-header-actions { align-items: center; display: flex; gap: 1rem; }
+.executive-user-name { color: #587177; font-size: 0.92rem; font-weight: 600; }
+.executive-main { margin: 0 auto; max-width: 1440px; padding: 2rem; width: 100%; }
+.executive-subtitle { color: #587177; margin-bottom: 1.5rem; }
+
+.executive-metric-card {
+  border: 1px solid rgba(22, 50, 54, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.06);
+}
+
+.executive-metric-card .card-body { min-height: 170px; }
+.executive-metric-card h2 { color: #163236; font-size: 1rem; font-weight: 700; margin: 1.1rem 0 0.5rem; }
+.executive-metric-icon { align-items: center; background: rgba(15, 118, 110, 0.12); border-radius: 12px; color: #0f766e; display: inline-flex; font-size: 1.3rem; height: 42px; justify-content: center; width: 42px; }
+.executive-empty-value { color: #9aabad; font-size: 2rem; font-weight: 700; }
+
+@media (max-width: 767.98px) {
+  .executive-layout { display: block; }
+  .executive-sidebar { padding: 1rem; width: 100%; }
+  .executive-sidebar-brand { margin-bottom: 0.75rem; }
+  .executive-header { align-items: flex-start; gap: 1rem; padding: 1rem; }
+  .executive-header-actions { align-items: flex-end; flex-direction: column; gap: 0.4rem; }
+  .executive-main { padding: 1.25rem; }
+}

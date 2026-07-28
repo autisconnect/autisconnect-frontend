@@ -20,6 +20,30 @@ const DashboardCard = ({ title, children, isLoading }) => (
     </Card>
 );
 
+const emptyPatientForm = {
+    name: '',
+    birthDate: '',
+    phone: '',
+    email: '',
+    diagnosis: '',
+    notes: '',
+    professionalId: ''
+};
+
+const emptyAppointmentForm = {
+    patientId: '',
+    professionalId: '',
+    appointment_date: '',
+    appointment_time: '',
+    appointment_type: 'Consulta Regular',
+    status: 'Agendada',
+    value: '',
+    payment_method: 'Pix',
+    payment_details: '',
+    payment_status: 'Pendente',
+    notes: ''
+};
+
 const SecretaryDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -30,6 +54,7 @@ const SecretaryDashboard = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [patients, setPatients] = useState([]);
+    const [professionals, setProfessionals] = useState([]);
     const [professional, setProfessional] = useState(null);
     const [appointments, setAppointments] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -39,15 +64,16 @@ const SecretaryDashboard = () => {
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
     const [showCommunicationModal, setShowCommunicationModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
-    const [newPatient, setNewPatient] = useState({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
+    const [newPatient, setNewPatient] = useState(emptyPatientForm);
     const [editingPatient, setEditingPatient] = useState(null);
-    const [newAppointment, setNewAppointment] = useState({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
+    const [newAppointment, setNewAppointment] = useState(emptyAppointmentForm);
     const [newMessage, setNewMessage] = useState({ recipientId: '', content: '' });
     const [newNote, setNewNote] = useState({ title: '', content: '' });
     const [activeTab, setActiveTab] = useState('overview');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [filters, setFilters] = useState({ date: '', patientId: '', status: '' });
+    const [filters, setFilters] = useState({ date: '', patientId: '', professionalId: '', status: '' });
+    const isClinicSecretary = Boolean(user?.clinic_id);
 //ok
     // --- FUNÇÕES DE API ---
     const handleApiError = (err, context) => {
@@ -67,10 +93,21 @@ const SecretaryDashboard = () => {
                 apiClient.get('/secretary/appointments'),
                 apiClient.get('/secretary/messages')
             ]);
+            const loadedProfessionals = Array.isArray(profRes.data) ? profRes.data : [];
             setPatients(Array.isArray(patientsRes.data) ? patientsRes.data : []);
-            setProfessional(profRes.data[0] || null);
+            setProfessionals(loadedProfessionals);
+            setProfessional(loadedProfessionals[0] || null);
             setAppointments(Array.isArray(appointmentsRes.data) ? appointmentsRes.data : []);
             setMessages(Array.isArray(messagesRes.data) ? messagesRes.data : []);
+            const defaultProfessionalId = loadedProfessionals.length === 1 ? String(loadedProfessionals[0].id) : '';
+            setNewPatient(prev => ({
+                ...prev,
+                professionalId: prev.professionalId || defaultProfessionalId
+            }));
+            setNewAppointment(prev => ({
+                ...prev,
+                professionalId: prev.professionalId || defaultProfessionalId
+            }));
         } catch (err) {
             handleApiError(err, 'carregar os dados do dashboard');
         } finally {
@@ -81,15 +118,21 @@ const SecretaryDashboard = () => {
     const handleAddAppointment = async (e) => {
         e.preventDefault();
         if (!user) { setError('Usuário não autenticado.'); return; }
-        if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
-            setError('Paciente, data, hora e valor são obrigatórios.');
+        if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || (!isClinicSecretary && !newAppointment.value) || (isClinicSecretary && !newAppointment.professionalId)) {
+            setError(isClinicSecretary ? 'Profissional, paciente, data e hora sao obrigatorios.' : 'Profissional, paciente, data, hora e valor sao obrigatorios.');
             return;
         }
         try {
-            await apiClient.post('/secretary/appointments', newAppointment);
+            const appointmentPayload = isClinicSecretary
+                ? { ...newAppointment, value: 0, payment_method: null, payment_details: null, payment_status: 'Pendente' }
+                : newAppointment;
+            await apiClient.post('/secretary/appointments', appointmentPayload);
             setSuccessMessage('Consulta registrada com sucesso!');
             setShowAppointmentModal(false);
-            setNewAppointment({ patientId: '', appointment_date: '', appointment_time: '', value: '' });
+            setNewAppointment({
+                ...emptyAppointmentForm,
+                professionalId: professionals.length === 1 ? String(professionals[0].id) : ''
+            });
             fetchAllData();
         } catch (err) {
             handleApiError(err, 'registrar a consulta');
@@ -125,11 +168,18 @@ const SecretaryDashboard = () => {
     const handleAddPatient = async (e) => {
         e.preventDefault();
         if (!user) return;
+        if (isClinicSecretary && !newPatient.professionalId) {
+            setError('Selecione o profissional responsavel pelo paciente.');
+            return;
+        }
         try {
             await apiClient.post('/secretary/patients', newPatient);
             setSuccessMessage('Paciente adicionado com sucesso!');
             setShowPatientModal(false);
-            setNewPatient({ name: '', birthDate: '', phone: '', email: '', diagnosis: '', notes: '' });
+            setNewPatient({
+                ...emptyPatientForm,
+                professionalId: professionals.length === 1 ? String(professionals[0].id) : ''
+            });
             fetchAllData(); // Simplificado para buscar todos os dados novamente
         } catch (err) {
             handleApiError(err, 'adicionar paciente');
@@ -173,7 +223,8 @@ const SecretaryDashboard = () => {
                 phone: editingPatient.phone,
                 email: editingPatient.email,
                 diagnosis: editingPatient.diagnosis,
-                notes: editingPatient.observacoes
+                notes: editingPatient.observacoes,
+                professionalId: editingPatient.professionalId || editingPatient.professional_id
             };
             // USA O apiClient E A ROTA CORRETA
             await apiClient.put(`/secretary/patients/${editingPatient.id}`, payload);
@@ -238,9 +289,25 @@ const SecretaryDashboard = () => {
             const nameMatch = patient.name?.toLowerCase().includes(searchTermLower);
             const diagnosisMatch = patient.diagnosis ? patient.diagnosis.toLowerCase().includes(searchTermLower) : false;
             const statusMatch = !statusFilter || patient.status === statusFilter;
-            return (nameMatch || diagnosisMatch) && statusMatch;
+            const patientProfessionalId = patient.professionalId ?? patient.professional_id;
+            const professionalMatch = !isClinicSecretary || !filters.professionalId || String(patientProfessionalId) === filters.professionalId;
+            return (nameMatch || diagnosisMatch) && statusMatch && professionalMatch;
         });
-    }, [patients, searchTerm, statusFilter]);
+    }, [patients, searchTerm, statusFilter, filters.professionalId, isClinicSecretary]);
+
+    const availableAppointmentPatients = useMemo(() => {
+        if (!Array.isArray(patients)) return [];
+        if (!newAppointment.professionalId) return patients;
+        return patients.filter(patient => {
+            const patientProfessionalId = patient.professionalId ?? patient.professional_id;
+            return !patientProfessionalId || String(patientProfessionalId) === String(newAppointment.professionalId);
+        });
+    }, [patients, newAppointment.professionalId]);
+
+    const getProfessionalName = useCallback((professionalId) => {
+        const matchedProfessional = professionals.find(item => String(item.id) === String(professionalId));
+        return matchedProfessional?.name || 'N/A';
+    }, [professionals]);
 
 
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
@@ -256,9 +323,12 @@ const SecretaryDashboard = () => {
         return appointments.filter(app => {
             const appointmentDate = app.appointment_date ? app.appointment_date.split('T')[0] : '';
             const matchesDate = !filters.date || appointmentDate === filters.date;
-            const matchesPatient = !filters.patientId || app.patient_id.toString() === filters.patientId;
+            const appPatientId = app.patient_id ?? app.patientId;
+            const appProfessionalId = app.professional_id ?? app.professionalId;
+            const matchesPatient = !filters.patientId || String(appPatientId) === filters.patientId;
+            const matchesProfessional = !filters.professionalId || String(appProfessionalId) === filters.professionalId;
             const matchesStatus = !filters.status || app.status === filters.status;
-            return matchesDate && matchesPatient && matchesStatus;
+            return matchesDate && matchesPatient && matchesProfessional && matchesStatus;
         });
     }, [appointments, filters]);
 
@@ -368,7 +438,9 @@ return (
                                 <div className="hero-content-box p-4 rounded-4">
                                     <h2 className="display-6 fw-bold mb-2 text-white">Dashboard da Secretaria</h2>
                                     <p className="text-white-90 mb-1">
-                                        Organizando a clinica de {professional?.name || '...' }.
+                                        {isClinicSecretary
+                                            ? 'Organizando a agenda operacional da clinica.'
+                                            : `Organizando a clinica de ${professional?.name || '...'}.`}
                                     </p>
                                     <p className="text-white-90 mb-0">
                                         Gestao de pacientes, consultas e comunicacao em um so lugar.
@@ -460,19 +532,35 @@ return (
                   </div>
                 </Col>
                 <Col lg={4}>
-                  <DashboardCard title="Pagamentos Pendentes" isLoading={loading}>
-                    <Table striped hover responsive size="sm">
-                      <thead><tr><th>Paciente</th><th>Valor</th></tr></thead>
-                      <tbody>
-                        {pendingPayments.length > 0 ? pendingPayments.map(app => (
-                          <tr key={app.id}>
-                            <td>{app.patient_name}</td>
-                            <td>R$ {parseFloat(app.value).toFixed(2)}</td>
-                          </tr>
-                        )) : <tr><td colSpan="2" className="text-center text-muted">Nenhum pagamento pendente.</td></tr>}
-                      </tbody>
-                    </Table>
-                  </DashboardCard>
+                  {isClinicSecretary ? (
+                    <DashboardCard title="Profissionais da Clinica" isLoading={loading}>
+                      <Table striped hover responsive size="sm">
+                        <thead><tr><th>Nome</th><th>Especialidade</th></tr></thead>
+                        <tbody>
+                          {professionals.length > 0 ? professionals.map(item => (
+                            <tr key={item.id}>
+                              <td>{item.name}</td>
+                              <td>{item.especialidade || item.specialty || 'N/A'}</td>
+                            </tr>
+                          )) : <tr><td colSpan="2" className="text-center text-muted">Nenhum profissional encontrado.</td></tr>}
+                        </tbody>
+                      </Table>
+                    </DashboardCard>
+                  ) : (
+                    <DashboardCard title="Pagamentos Pendentes" isLoading={loading}>
+                      <Table striped hover responsive size="sm">
+                        <thead><tr><th>Paciente</th><th>Valor</th></tr></thead>
+                        <tbody>
+                          {pendingPayments.length > 0 ? pendingPayments.map(app => (
+                            <tr key={app.id}>
+                              <td>{app.patient_name}</td>
+                              <td>R$ {parseFloat(app.value).toFixed(2)}</td>
+                            </tr>
+                          )) : <tr><td colSpan="2" className="text-center text-muted">Nenhum pagamento pendente.</td></tr>}
+                        </tbody>
+                      </Table>
+                    </DashboardCard>
+                  )}
                 </Col>
               </Row>
             </Tab.Pane>
@@ -510,24 +598,26 @@ return (
                     </Row>*/}
                 <Card.Body>
                   <Row className="mb-3">
-                    <Col md={4}><Form.Group><Form.Label>Filtrar por Data</Form.Label><Form.Control type="date" name="date" value={filters.date} onChange={handleFilterChange} /></Form.Group></Col>
-                    <Col md={4}><Form.Group><Form.Label>Filtrar por Paciente</Form.Label><Form.Select name="patientId" value={filters.patientId} onChange={handleFilterChange}><option value="">Todos</option>{Array.isArray(patients) && patients.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</Form.Select></Form.Group></Col>
-                    <Col md={4}><Form.Group><Form.Label>Filtrar por Status</Form.Label><Form.Select name="status" value={filters.status} onChange={handleFilterChange}><option value="">Todos</option><option value="Agendada">Agendada</option><option value="Confirmada">Confirmada</option><option value="Realizada">Realizada</option><option value="Cancelada">Cancelada</option><option value="Não Realizada">Não Realizada</option></Form.Select></Form.Group></Col>
+                    <Col md={isClinicSecretary ? 3 : 4}><Form.Group><Form.Label>Filtrar por Data</Form.Label><Form.Control type="date" name="date" value={filters.date} onChange={handleFilterChange} /></Form.Group></Col>
+                    {isClinicSecretary && <Col md={3}><Form.Group><Form.Label>Filtrar por Profissional</Form.Label><Form.Select name="professionalId" value={filters.professionalId} onChange={handleFilterChange}><option value="">Todos</option>{Array.isArray(professionals) && professionals.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</Form.Select></Form.Group></Col>}
+                    <Col md={isClinicSecretary ? 3 : 4}><Form.Group><Form.Label>Filtrar por Paciente</Form.Label><Form.Select name="patientId" value={filters.patientId} onChange={handleFilterChange}><option value="">Todos</option>{Array.isArray(patients) && patients.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</Form.Select></Form.Group></Col>
+                    <Col md={isClinicSecretary ? 3 : 4}><Form.Group><Form.Label>Filtrar por Status</Form.Label><Form.Select name="status" value={filters.status} onChange={handleFilterChange}><option value="">Todos</option><option value="Agendada">Agendada</option><option value="Confirmada">Confirmada</option><option value="Realizada">Realizada</option><option value="Cancelada">Cancelada</option><option value="Não Realizada">Não Realizada</option></Form.Select></Form.Group></Col>
                   </Row>
                   <Table striped bordered hover responsive>
-                    <thead><tr><th>Data/Hora</th><th>Paciente</th><th>Valor (R$)</th><th>Status</th><th>Forma Pag.</th><th>Detalhes</th><th>Status Pag.</th></tr></thead>
+                    <thead><tr><th>Data/Hora</th>{isClinicSecretary && <th>Profissional</th>}<th>Paciente</th>{!isClinicSecretary && <th>Valor (R$)</th>}<th>Status</th>{!isClinicSecretary && <th>Forma Pag.</th>}{!isClinicSecretary && <th>Detalhes</th>}{!isClinicSecretary && <th>Status Pag.</th>}</tr></thead>
                     <tbody>
                       {filteredAppointments.length > 0 ? filteredAppointments.map((app) => (
                         <tr key={app.id}>
                           <td>{`${formatDate(app.appointment_date)} ${formatTime(app.appointment_time)}`}</td>
+                          {isClinicSecretary && <td>{app.professional_name || getProfessionalName(app.professional_id ?? app.professionalId)}</td>}
                           <td>{app.patient_name || 'N/A'}</td>
-                          <td>{app.value ? parseFloat(app.value).toFixed(2) : '0.00'}</td>
+                          {!isClinicSecretary && <td>{app.value ? parseFloat(app.value).toFixed(2) : '0.00'}</td>}
                           <td><Form.Select size="sm" value={app.status} onChange={(e) => handleFieldUpdate(app.id, 'status', e.target.value)}><option value="Agendada">Agendada</option><option value="Confirmada">Confirmada</option><option value="Realizada">Realizada</option><option value="Cancelada">Cancelada</option><option value="Não Realizada">Não Realizada</option></Form.Select></td>
-                          <td><Form.Select size="sm" value={app.payment_method || ''} onChange={(e) => handleFieldUpdate(app.id, 'payment_method', e.target.value)}><option value="">N/A</option><option value="Pix">Pix</option><option value="Crédito">Crédito</option><option value="Débito">Débito</option><option value="Dinheiro">Dinheiro</option><option value="Plano de Saúde">Plano de Saúde</option><option value="Outros">Outros</option></Form.Select></td>
-                          <td>{(app.payment_method === 'Plano de Saúde' || app.payment_method === 'Outros') && (<Form.Control type="text" size="sm" defaultValue={app.payment_details || ''} onBlur={(e) => handleFieldUpdate(app.id, 'payment_details', e.target.value)} />)}</td>
-                          <td><Form.Select size="sm" value={app.payment_status} onChange={(e) => handleFieldUpdate(app.id, 'payment_status', e.target.value)}><option value="Pendente">Pendente</option><option value="Pago">Pago</option><option value="Atrasado">Atrasado</option><option value="Isento">Isento</option></Form.Select></td>
+                          {!isClinicSecretary && <td><Form.Select size="sm" value={app.payment_method || ''} onChange={(e) => handleFieldUpdate(app.id, 'payment_method', e.target.value)}><option value="">N/A</option><option value="Pix">Pix</option><option value="Crédito">Crédito</option><option value="Débito">Débito</option><option value="Dinheiro">Dinheiro</option><option value="Plano de Saúde">Plano de Saúde</option><option value="Outros">Outros</option></Form.Select></td>}
+                          {!isClinicSecretary && <td>{(app.payment_method === 'Plano de Saúde' || app.payment_method === 'Outros') && (<Form.Control type="text" size="sm" defaultValue={app.payment_details || ''} onBlur={(e) => handleFieldUpdate(app.id, 'payment_details', e.target.value)} />)}</td>}
+                          {!isClinicSecretary && <td><Form.Select size="sm" value={app.payment_status} onChange={(e) => handleFieldUpdate(app.id, 'payment_status', e.target.value)}><option value="Pendente">Pendente</option><option value="Pago">Pago</option><option value="Atrasado">Atrasado</option><option value="Isento">Isento</option></Form.Select></td>}
                         </tr>
-                      )) : <tr><td colSpan="7" className="text-center">Nenhuma consulta encontrada.</td></tr>}
+                      )) : <tr><td colSpan={isClinicSecretary ? 4 : 7} className="text-center">Nenhuma consulta encontrada.</td></tr>}
                     </tbody>
                   </Table>
                 </Card.Body>
@@ -536,7 +626,7 @@ return (
             
             <Tab.Pane eventKey="patients">
                 <Row className="mb-3">
-                    <Col md={6}>
+                    <Col md={isClinicSecretary ? 4 : 6}>
                         <Form.Control
                             type="text"
                             placeholder="Buscar pacientes por nome ou diagnóstico..."
@@ -544,6 +634,14 @@ return (
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </Col>
+                    {isClinicSecretary && (
+                        <Col md={2}>
+                            <Form.Select value={filters.professionalId} onChange={(e) => setFilters(prev => ({ ...prev, professionalId: e.target.value }))}>
+                                <option value="">Todos os profissionais</option>
+                                {professionals.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+                            </Form.Select>
+                        </Col>
+                    )}
                     <Col md={3}>
                         <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                             <option value="">Todos os Status</option>
@@ -570,6 +668,7 @@ return (
                                         <thead>
                                             <tr>
                                                 <th>Nome</th>
+                                                {isClinicSecretary && <th>Profissional</th>}
                                                 <th>Telefone</th>
                                                 <th>Diagnóstico</th>
                                                 <th>Status</th>
@@ -579,6 +678,7 @@ return (
                                             {filteredPatients.map(patient => (
                                                 <tr key={patient.id} onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
                                                     <td>{patient.name}</td>
+                                                    {isClinicSecretary && <td>{patient.professionalName || getProfessionalName(patient.professionalId ?? patient.professional_id)}</td>}
                                                     <td>{patient.phone || 'N/A'}</td>
                                                     <td>{patient.diagnosis || 'N/A'}</td>
                                                     <td><Badge bg={patient.status === 'ativo' ? 'success' : 'secondary'}>{patient.status}</Badge></td>
@@ -613,6 +713,7 @@ return (
                         </Button>
                         <Card.Body>
                             <h5>{selectedPatient.name}</h5>
+                            {isClinicSecretary && <p><strong>Profissional:</strong> {selectedPatient.professionalName || getProfessionalName(selectedPatient.professionalId ?? selectedPatient.professional_id)}</p>}
                             <p><strong>Telefone:</strong> {selectedPatient.phone || 'N/A'}</p>
                             <p><strong>Email:</strong> {selectedPatient.email || 'N/A'}</p>
                             <p><strong>Diagnóstico:</strong> {selectedPatient.diagnosis || 'N/A'}</p>
@@ -697,7 +798,8 @@ return (
           <Form onSubmit={handleAddAppointment}>
             <Modal.Body>
               <Row>
-                <Col md={12}><Form.Group className="mb-3"><Form.Label>Paciente *</Form.Label><Form.Select name="patientId" value={newAppointment.patientId} onChange={(e) => setNewAppointment({ ...newAppointment, patientId: e.target.value })} required><option value="">Selecione um paciente</option>{Array.isArray(patients) && patients.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</Form.Select></Form.Group></Col>
+                {isClinicSecretary && <Col md={6}><Form.Group className="mb-3"><Form.Label>Profissional *</Form.Label><Form.Select name="professionalId" value={newAppointment.professionalId} onChange={(e) => setNewAppointment({ ...newAppointment, professionalId: e.target.value, patientId: '' })} required><option value="">Selecione um profissional</option>{professionals.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</Form.Select></Form.Group></Col>}
+                <Col md={isClinicSecretary ? 6 : 12}><Form.Group className="mb-3"><Form.Label>Paciente *</Form.Label><Form.Select name="patientId" value={newAppointment.patientId} onChange={(e) => setNewAppointment({ ...newAppointment, patientId: e.target.value })} required><option value="">Selecione um paciente</option>{availableAppointmentPatients.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</Form.Select></Form.Group></Col>
               </Row>
               <Row>
                 <Col md={6}><Form.Group className="mb-3"><Form.Label>Data da Consulta *</Form.Label><Form.Control type="date" name="appointment_date" value={newAppointment.appointment_date} onChange={(e) => setNewAppointment({ ...newAppointment, appointment_date: e.target.value })} required /></Form.Group></Col>
@@ -707,6 +809,7 @@ return (
                 <Col md={6}><Form.Group className="mb-3"><Form.Label>Tipo de Consulta</Form.Label><Form.Select name="appointment_type" value={newAppointment.appointment_type} onChange={(e) => setNewAppointment({ ...newAppointment, appointment_type: e.target.value })}><option value="Consulta Regular">Consulta Regular</option><option value="Consulta Inicial">Consulta Inicial</option><option value="Acompanhamento">Acompanhamento</option><option value="Avaliação">Avaliação</option><option value="Terapia">Terapia</option></Form.Select></Form.Group></Col>
                 <Col md={6}><Form.Group className="mb-3"><Form.Label>Status da Consulta</Form.Label><Form.Select name="status" value={newAppointment.status} onChange={(e) => setNewAppointment({ ...newAppointment, status: e.target.value })}><option value="Agendada">Agendada</option><option value="Confirmada">Confirmada</option><option value="Realizada">Realizada</option><option value="Cancelada">Cancelada</option><option value="Não Realizada">Não Realizada</option></Form.Select></Form.Group></Col>
               </Row>
+              {!isClinicSecretary && <>
               <Row>
                 <Col md={6}><Form.Group className="mb-3"><Form.Label>Valor da Consulta (R$) *</Form.Label><Form.Control type="number" step="0.01" name="value" placeholder="Ex: 150.00" value={newAppointment.value} onChange={(e) => setNewAppointment({ ...newAppointment, value: e.target.value })} required /></Form.Group></Col>
                 <Col md={6}><Form.Group className="mb-3"><Form.Label>Status do Pagamento</Form.Label><Form.Select name="payment_status" value={newAppointment.payment_status} onChange={(e) => setNewAppointment({ ...newAppointment, payment_status: e.target.value })}><option value="Pendente">Pendente</option><option value="Pago">Pago</option><option value="Atrasado">Atrasado</option><option value="Isento">Isento</option></Form.Select></Form.Group></Col>
@@ -717,6 +820,7 @@ return (
                 <Col md={6}><Form.Group className="mb-3"><Form.Label>Forma de Pagamento</Form.Label><Form.Select name="payment_method" value={newAppointment.payment_method} onChange={(e) => setNewAppointment({ ...newAppointment, payment_method: e.target.value })}><option value="Pix">Pix</option><option value="Crédito">Cartão de Crédito</option><option value="Débito">Cartão de Débito</option><option value="Dinheiro">Dinheiro</option><option value="Plano de Saúde">Plano de Saúde</option><option value="Outros">Outros</option></Form.Select></Form.Group></Col>
                 {(newAppointment.payment_method === 'Plano de Saúde' || newAppointment.payment_method === 'Outros') && <Col md={6}><Form.Group className="mb-3"><Form.Label>Especifique</Form.Label><Form.Control type="text" name="payment_details" placeholder="Ex: Unimed ou Transferência" value={newAppointment.payment_details} onChange={(e) => setNewAppointment({ ...newAppointment, payment_details: e.target.value })} /></Form.Group></Col>}
               </Row>
+              </>}
               <Form.Group className="mb-3"><Form.Label>Observações</Form.Label><Form.Control as="textarea" rows={3} name="notes" value={newAppointment.notes} onChange={(e) => setNewAppointment({ ...newAppointment, notes: e.target.value })} /></Form.Group>
             </Modal.Body>
             <Modal.Footer><Button variant="secondary" onClick={() => setShowAppointmentModal(false)}>Cancelar</Button><Button variant="primary" type="submit">Salvar Consulta</Button></Modal.Footer>
@@ -731,7 +835,7 @@ return (
                 <Form.Label>Destinatário *</Form.Label>
                 <Form.Select value={newMessage.recipientId} onChange={(e) => setNewMessage({ ...newMessage, recipientId: e.target.value })} required>
                   <option value="">Selecione um destinatário</option>
-                  {professional && <option value={professional.id}>{professional.name}</option>}
+                  {professionals.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
@@ -753,6 +857,21 @@ return (
                             </Modal.Header>
                             <Form onSubmit={handleAddPatient}>
                                 <Modal.Body>
+                                    {isClinicSecretary && (
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Profissional responsavel *</Form.Label>
+                                            <Form.Select
+                                                value={newPatient.professionalId}
+                                                onChange={(e) => setNewPatient({...newPatient, professionalId: e.target.value})}
+                                                required
+                                            >
+                                                <option value="">Selecione um profissional</option>
+                                                {professionals.map((item) => (
+                                                    <option key={item.id} value={item.id}>{item.name}</option>
+                                                ))}
+                                            </Form.Select>
+                                        </Form.Group>
+                                    )}
                                     <Row>
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
@@ -856,6 +975,21 @@ return (
                                                 <Modal.Body>
                                                     {editingPatient && (
                                                         <>
+                                                            {isClinicSecretary && (
+                                                                <Form.Group className="mb-3">
+                                                                    <Form.Label>Profissional responsavel *</Form.Label>
+                                                                    <Form.Select
+                                                                        value={editingPatient.professionalId || editingPatient.professional_id || ''}
+                                                                        onChange={(e) => setEditingPatient({...editingPatient, professionalId: e.target.value})}
+                                                                        required
+                                                                    >
+                                                                        <option value="">Selecione um profissional</option>
+                                                                        {professionals.map((item) => (
+                                                                            <option key={item.id} value={item.id}>{item.name}</option>
+                                                                        ))}
+                                                                    </Form.Select>
+                                                                </Form.Group>
+                                                            )}
                                                             <Row>
                                                                 <Col md={12}>
                                                                     <Form.Group className="mb-3">

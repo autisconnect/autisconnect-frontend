@@ -1,0 +1,13 @@
+import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Nav, Spinner } from 'react-bootstrap';
+import apiClient from '../services/api';
+
+const tabs = { insight: 'Insights', prediction: 'Previsões', indicator: 'Indicadores', alert: 'Alertas' };
+export default function ExecutiveAIResults() {
+  const [active, setActive] = useState('insight'); const [results, setResults] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [saving, setSaving] = useState(false);
+  const load = async () => { setLoading(true); try { const response = await apiClient.get('/executive/ai/results'); setResults(Array.isArray(response.data) ? response.data : []); } catch (e) { setError(e.response?.data?.error || 'Não foi possível carregar as análises.'); } finally { setLoading(false); } };
+  useEffect(() => { load(); }, []);
+  const recalculate = async () => { setSaving(true); setError(''); try { await apiClient.post('/executive/ai/recalculate'); await load(); } catch (e) { setError(e.response?.data?.error || 'Não foi possível atualizar as análises.'); } finally { setSaving(false); } };
+  const items = results.filter((item) => String(item.type).toLowerCase() === active);
+  return <><div className="d-flex justify-content-between flex-wrap gap-2 mb-3"><div><h2 className="h4 mb-1">Inteligência Executiva</h2><p className="text-muted mb-0">Resultados calculados com dados reais da clínica.</p></div><Button onClick={recalculate} disabled={saving}>{saving ? 'Atualizando...' : 'Atualizar análises'}</Button></div>{error && <Alert variant="danger">{error}</Alert>}{loading ? <div className="text-center py-5"><Spinner animation="border" /></div> : <><Nav variant="tabs" activeKey={active} onSelect={(key) => setActive(key)} className="mb-3">{Object.entries(tabs).map(([key, label]) => <Nav.Item key={key}><Nav.Link eventKey={key}>{label}</Nav.Link></Nav.Item>)}</Nav>{items.length ? items.map((item) => <Card className="mb-3" key={item.id}><Card.Body><div className="d-flex justify-content-between"><Card.Title className="h6">{item.title}</Card.Title><Badge bg={item.severity === 'CRITICAL' ? 'danger' : item.severity === 'WARNING' ? 'warning' : 'info'}>{item.severity}</Badge></div><Card.Text>{item.description}</Card.Text><small className="text-muted">Confiança: {Number(item.confidence || 0).toLocaleString('pt-BR')}%</small></Card.Body></Card>) : <Card><Card.Body className="text-center text-muted py-5">Ainda não existem dados suficientes para gerar análises inteligentes.<br />À medida que a clínica utilizar o sistema, os insights aparecerão automaticamente.</Card.Body></Card>}</>}</>;
+}

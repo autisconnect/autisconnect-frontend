@@ -44,7 +44,9 @@ export const AuthProvider = ({ children }) => {
               id: apiUser.userId,
               username: apiUser.username,
               tipo_usuario: apiUser.tipo_usuario,
-              nome_completo: apiUser.nome_completo
+              nome_completo: apiUser.nome_completo,
+              clinic_id: apiUser.clinic_id,
+              executive_access: Boolean(apiUser.executive_access)
             };
             setUser(appUser);
 
@@ -53,8 +55,10 @@ export const AuthProvider = ({ children }) => {
               switch (appUser.tipo_usuario) {
                 case 'medicos_terapeutas': navigate(`/professional-dashboard/${appUser.id}`); break;
                 case 'pais_responsavel': navigate(`/parent-dashboard/${appUser.id}`); break;
-                case 'secretaria': navigate(`/secretary-dashboard/${appUser.id}`); break;
-                case 'clinica': navigate(`/clinic-dashboard/${appUser.id}`); break;
+                case 'secretaria':
+                  navigate(`/secretary-dashboard/${appUser.id}`);
+                  break;
+                case 'clinica': navigate(appUser.executive_access ? '/dashboard-executivo' : `/clinic-dashboard/${appUser.id}`); break;
                 case 'servicos_locais': navigate(`/service-dashboard/${appUser.id}`); break;
                 default: navigate('/');
               }
@@ -89,7 +93,9 @@ export const AuthProvider = ({ children }) => {
           id: apiUserData.userId,
           username: apiUserData.username,
           tipo_usuario: apiUserData.tipo_usuario,
-          nome_completo: apiUserData.nome_completo
+          nome_completo: apiUserData.nome_completo,
+          clinic_id: apiUserData.clinic_id,
+          executive_access: Boolean(apiUserData.executive_access)
       };
       setUser(appUserData);
 
@@ -106,7 +112,7 @@ export const AuthProvider = ({ children }) => {
               navigate(`/secretary-dashboard/${appUserData.id}`);
               break;
           case 'clinica':
-              navigate(`/clinic-dashboard/${appUserData.id}`);
+              navigate(appUserData.executive_access ? '/dashboard-executivo' : `/clinic-dashboard/${appUserData.id}`);
               break;
           case 'servicos_locais':
               navigate(`/service-dashboard/${appUserData.id}`);

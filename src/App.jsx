@@ -12,6 +12,7 @@ import FinancialDashboard from './FinancialDashboard';
 import SecretaryDashboard from './SecretaryDashboard';
 import DashboardABA from './DashboardABA';
 import ServiceDashboard from './ServiceDashboard';
+import PublicServiceProfile from './PublicServiceProfile';
 import ServiceDashboard01 from './service_dashboard/ServiceDashboard01';
 import ServiceDashboard17 from './service_dashboard/ServiceDashboard17';
 import ServiceDashboard18 from './service_dashboard/ServiceDashboard18';
@@ -29,6 +30,8 @@ import Game1Page from './games/game1/Game1Page';
 import Game2Page from './games/game2/Game2Page';
 import Game3Page from './games/game3/Game3Page';
 import Game4Page from './games/game4/Game4Page';
+import DashboardExecutive from './DashboardExecutive/DashboardExecutive';
+import TherapeuticDashboard from './DashboardTherapeutic/TherapeuticDashboard';
 
 // ABA Module Imports
 import AbaPatient from './pages/AbaPatient';
@@ -88,10 +91,12 @@ const PublicServiceDashboard = () => {
   switch (id) {
     case '18':
       return <ServiceDashboard18 />;
+    case '17':
+      return <ServiceDashboard17 />;
     case '1':
       return <ServiceDashboard01 />;
     default:
-      return <ServiceDashboard />;
+      return <PublicServiceProfile />;
   }
 };
 
@@ -152,11 +157,67 @@ function App() {
         <Route
           path="/clinic-dashboard/:id"
           element={
-            <ProtectedRoute allowedUserTypes={['clinica', 'medicos_terapeutas', 'secretaria']}>
+            <ProtectedRoute allowedUserTypes={['clinica', 'medicos_terapeutas', 'servicos_locais', 'administrador_clinica']}>
               <ClinicDashboard />
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/therapeutic-dashboard"
+          element={
+            <ProtectedRoute allowedUserTypes={['clinica']}>
+              <TherapeuticDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard-executivo"
+          element={
+            <ProtectedRoute allowedUserTypes={['clinica']}>
+              <DashboardExecutive />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard-executivo/financeiro"
+          element={
+            <ProtectedRoute allowedUserTypes={['clinica']}>
+              <DashboardExecutive />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard-executivo/financeiro/configuracoes"
+          element={
+            <ProtectedRoute allowedUserTypes={['clinica']}>
+              <DashboardExecutive />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/dashboard-executivo/financeiro/plano-de-contas" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/financeiro/rateios" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/financeiro/dre" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/financeiro/balanco-patrimonial" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/financeiro/exportacoes" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route
+          path="/dashboard-executivo/profissionais"
+          element={
+            <ProtectedRoute allowedUserTypes={['clinica']}>
+              <DashboardExecutive />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/dashboard-executivo/profissionais/:id/financeiro" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/relatorios" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/ia" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/auditoria" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/assinatura" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/uso" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/alertas" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/indicadores-executivos" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/solucoes" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/saude" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
 
         <Route
           path="/patient-details/:patientId"
@@ -247,11 +308,7 @@ function App() {
         />
         <Route
           path="/service-dashboard/:id"
-          element={
-            <ProtectedRoute allowedUserTypes={['servicos_locais', 'pais_responsavel']}>
-              <PublicServiceDashboard />
-            </ProtectedRoute>
-          }
+          element={<PublicServiceDashboard />}
         />
 
         {/* Ferramentas de monitoramento (permitidas para pais e profissionais) */}

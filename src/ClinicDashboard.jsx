@@ -7,6 +7,7 @@ import {
     Col,
     Container,
     Form,
+    Modal,
     Nav,
     ProgressBar,
     Row,
@@ -24,8 +25,10 @@ import {
     ClockHistory,
     Funnel,
     GraphUpArrow,
+    PencilSquare,
     PeopleFill,
     PersonWorkspace,
+    PlusCircle,
     ShieldCheck,
     Wallet2
 } from 'react-bootstrap-icons';
@@ -144,6 +147,34 @@ const emptyPatientForm = {
     data_nascimento: '',
     professional_id: ''
 };
+
+const emptyStaffForm = {
+    nome_completo: '',
+    email: '',
+    password: '',
+    telefone: '',
+    cpf: ''
+};
+
+const buildEmptyAppointmentForm = () => ({
+    patient_id: '',
+    professional_id: '',
+    appointment_date: new Date().toISOString().split('T')[0],
+    appointment_time: '',
+    appointment_type: 'Consulta Regular',
+    status: 'Agendada',
+    notes: '',
+    value: '',
+    payment_method: '',
+    payment_status: 'Pendente'
+});
+
+const normalizeSearchText = (value) => `${value || ''}`.trim().toLowerCase();
+
+const isAppointmentBlock = (appointment) =>
+    normalizeSearchText(`${appointment?.status || ''} ${appointment?.appointment_type || appointment?.type || ''}`).includes(
+        'bloque'
+    );
 
 const getStatusVariant = (status) => {
     const normalized = `${status || ''}`.toLowerCase();
@@ -271,23 +302,43 @@ const ClinicDashboard = () => {
     });
     const [professionalRecords, setProfessionalRecords] = useState([]);
     const [patientRecords, setPatientRecords] = useState([]);
+    const [staffRecords, setStaffRecords] = useState([]);
     const [registryLoading, setRegistryLoading] = useState({
         professionals: false,
-        patients: false
+        patients: false,
+        staff: false
     });
     const [submitting, setSubmitting] = useState({
         professional: false,
-        patient: false
+        patient: false,
+        appointment: false,
+        staff: false
     });
     const [managementFeedback, setManagementFeedback] = useState(null);
     const [professionalForm, setProfessionalForm] = useState(emptyProfessionalForm);
     const [patientForm, setPatientForm] = useState(emptyPatientForm);
+    const [staffForm, setStaffForm] = useState(emptyStaffForm);
+    const [appointmentForm, setAppointmentForm] = useState(buildEmptyAppointmentForm);
+    const [appointmentModal, setAppointmentModal] = useState({
+        show: false,
+        mode: 'create',
+        appointmentId: null
+    });
+    const [appointmentSearch, setAppointmentSearch] = useState({
+        patient: '',
+        professional: ''
+    });
     const [financeProfessionalId, setFinanceProfessionalId] = useState('all');
     const [statusUpdatingProfessionalId, setStatusUpdatingProfessionalId] = useState(null);
+    const [statusUpdatingStaffId, setStatusUpdatingStaffId] = useState(null);
 
-    const allowedTypes = ['medicos_terapeutas', 'secretaria', 'servicos_locais', 'clinica', 'administrador_clinica'];
-    const canManageProfessionals = ['secretaria', 'servicos_locais', 'clinica'].includes(user?.tipo_usuario);
+    const allowedTypes = ['medicos_terapeutas', 'servicos_locais', 'clinica', 'administrador_clinica'];
+    const canManageProfessionals = ['servicos_locais', 'clinica'].includes(user?.tipo_usuario);
     const canManagePatients = canManageProfessionals;
+    const canManageStaff = ['servicos_locais', 'clinica', 'administrador_clinica'].includes(user?.tipo_usuario);
+    const canManageAppointments = ['servicos_locais', 'clinica', 'administrador_clinica'].includes(
+        user?.tipo_usuario
+    );
 
     const loadDashboard = async (showRefresh = false) => {
         if (!user) return;
@@ -321,16 +372,24 @@ const ClinicDashboard = () => {
         try {
             setRegistryLoading({
                 professionals: true,
-                patients: true
+                patients: true,
+                staff: true
             });
 
-            const [professionalsResponse, patientsResponse] = await Promise.all([
+            const staffRequest =
+                user.tipo_usuario === 'medicos_terapeutas'
+                    ? Promise.resolve({ data: [] })
+                    : apiClient.get(`/clinic/${user.id}/staff`);
+
+            const [professionalsResponse, patientsResponse, staffResponse] = await Promise.all([
                 apiClient.get(`/clinic/${user.id}/professionals`),
-                apiClient.get(`/clinic/${user.id}/patients`)
+                apiClient.get(`/clinic/${user.id}/patients`),
+                staffRequest
             ]);
 
             setProfessionalRecords(normalizeRegistryList(professionalsResponse.data, ['professionals']));
             setPatientRecords(normalizeRegistryList(patientsResponse.data, ['patients']));
+            setStaffRecords(normalizeRegistryList(staffResponse.data, ['staff', 'employees']));
         } catch (err) {
             console.error('Erro ao carregar cadastros da clinica:', err.response?.data, err.message);
             setManagementFeedback({
@@ -343,7 +402,8 @@ const ClinicDashboard = () => {
         } finally {
             setRegistryLoading({
                 professionals: false,
-                patients: false
+                patients: false,
+                staff: false
             });
         }
     };
@@ -351,7 +411,7 @@ const ClinicDashboard = () => {
     useEffect(() => {
         if (!user) return;
 
-        const allowedTypes = ['medicos_terapeutas', 'secretaria', 'servicos_locais', 'clinica', 'administrador_clinica'];
+        const allowedTypes = ['medicos_terapeutas', 'servicos_locais', 'clinica', 'administrador_clinica'];
         if (!allowedTypes.includes(user.tipo_usuario)) {
             navigate('/');
             return;
@@ -439,6 +499,57 @@ const ClinicDashboard = () => {
         }
     }, [dashboard.professionals, financeProfessionalId, professionalRecords]);
 
+    const professionalDirectory =
+        professionalRecords.length > 0
+            ? professionalRecords
+            : dashboard.professionals.map((professional) => ({
+                  id: professional.id,
+                  name: professional.name,
+                  specialty: professional.specialty,
+                  phone: professional.phone,
+                  status: professional.status || 'ativo'
+              }));
+
+    const activeProfessionalDirectory = professionalDirectory.filter(
+        (professional) => (professional.status || 'ativo') === 'ativo'
+    );
+
+    const appointmentPatientOptions = patientRecords.filter((patient) => {
+        const query = normalizeSearchText(appointmentSearch.patient);
+        if (!query) return true;
+        return [patient.name, patient.cpf, patient.professionalName]
+            .map(normalizeSearchText)
+            .some((value) => value.includes(query));
+    });
+
+    const appointmentProfessionalOptions = activeProfessionalDirectory.filter((professional) => {
+        const query = normalizeSearchText(appointmentSearch.professional);
+        if (!query) return true;
+        return [professional.name, professional.specialty, professional.license]
+            .map(normalizeSearchText)
+            .some((value) => value.includes(query));
+    });
+
+    const selectedAppointmentPatient = patientRecords.find(
+        (patient) => patient.id?.toString() === appointmentForm.patient_id?.toString()
+    );
+    const visibleAppointmentPatients =
+        selectedAppointmentPatient &&
+        !appointmentPatientOptions.some((patient) => patient.id?.toString() === selectedAppointmentPatient.id?.toString())
+            ? [selectedAppointmentPatient, ...appointmentPatientOptions]
+            : appointmentPatientOptions;
+    const selectedAppointmentProfessional = activeProfessionalDirectory.find(
+        (professional) => professional.id?.toString() === appointmentForm.professional_id?.toString()
+    );
+    const visibleAppointmentProfessionals =
+        selectedAppointmentProfessional &&
+        !appointmentProfessionalOptions.some(
+            (professional) => professional.id?.toString() === selectedAppointmentProfessional.id?.toString()
+        )
+            ? [selectedAppointmentProfessional, ...appointmentProfessionalOptions]
+            : appointmentProfessionalOptions;
+    const isAppointmentBlockForm = isAppointmentBlock(appointmentForm);
+
     const selectedProfessionalName =
         filters.professionalId === 'all'
             ? 'Todos os profissionais'
@@ -471,21 +582,6 @@ const ClinicDashboard = () => {
         return item.professionalId?.toString() === filters.professionalId;
     });
 
-    const professionalDirectory =
-        professionalRecords.length > 0
-            ? professionalRecords
-            : dashboard.professionals.map((professional) => ({
-                  id: professional.id,
-                  name: professional.name,
-                  specialty: professional.specialty,
-                  phone: professional.phone,
-                  status: professional.status || 'ativo'
-              }));
-
-    const activeProfessionalDirectory = professionalDirectory.filter(
-        (professional) => (professional.status || 'ativo') === 'ativo'
-    );
-
     const syncClinicData = async (showRefresh = true) => {
         await Promise.allSettled([loadDashboard(showRefresh), loadRegistryData()]);
     };
@@ -502,6 +598,194 @@ const ClinicDashboard = () => {
             ...current,
             [field]: value
         }));
+    };
+
+    const handleStaffFormChange = (field, value) => {
+        setStaffForm((current) => ({
+            ...current,
+            [field]: value
+        }));
+    };
+
+    const resetAppointmentModal = () => {
+        setAppointmentForm(buildEmptyAppointmentForm());
+        setAppointmentSearch({ patient: '', professional: '' });
+        setAppointmentModal({
+            show: false,
+            mode: 'create',
+            appointmentId: null
+        });
+    };
+
+    const openCreateAppointmentModal = (overrides = {}) => {
+        const nextForm = {
+            ...buildEmptyAppointmentForm(),
+            ...overrides
+        };
+        if (filters.date) {
+            nextForm.appointment_date = filters.date;
+        }
+        if (
+            filters.professionalId !== 'all' &&
+            activeProfessionalDirectory.some(
+                (professional) => professional.id?.toString() === filters.professionalId.toString()
+            )
+        ) {
+            nextForm.professional_id = filters.professionalId.toString();
+            const selectedProfessional = activeProfessionalDirectory.find(
+                (professional) => professional.id?.toString() === filters.professionalId.toString()
+            );
+            setAppointmentSearch({
+                patient: '',
+                professional: selectedProfessional?.name || ''
+            });
+        } else {
+            setAppointmentSearch({ patient: '', professional: '' });
+        }
+
+        setAppointmentForm(nextForm);
+        setAppointmentModal({
+            show: true,
+            mode: 'create',
+            appointmentId: null
+        });
+    };
+
+    const openCreateBlockedSlotModal = () => {
+        openCreateAppointmentModal({
+            patient_id: '',
+            appointment_type: 'Bloqueio',
+            status: 'Bloqueio',
+            notes: 'Bloqueio operacional',
+            value: 0,
+            payment_status: 'Cancelado'
+        });
+    };
+
+    const openCreateWaitlistModal = () => {
+        openCreateAppointmentModal({
+            appointment_type: 'Encaixe',
+            status: 'Fila de espera',
+            notes: 'Aguardando abertura de vaga',
+            value: 0,
+            payment_status: 'Pendente'
+        });
+    };
+
+    const openEditAppointmentModal = (appointment) => {
+        if (!appointment) return;
+
+        setAppointmentForm({
+            patient_id: appointment.patientId?.toString() || '',
+            professional_id: appointment.professionalId?.toString() || '',
+            appointment_date: appointment.date || new Date().toISOString().split('T')[0],
+            appointment_time: appointment.time ? appointment.time.slice(0, 5) : '',
+            appointment_type: appointment.type || 'Consulta Regular',
+            status: appointment.status || 'Agendada',
+            notes: appointment.notes || '',
+            value: appointment.value ?? '',
+            payment_method:
+                appointment.paymentMethod && appointment.paymentMethod !== 'Nao informado'
+                    ? appointment.paymentMethod
+                    : '',
+            payment_status: appointment.paymentStatus || 'Pendente'
+        });
+        setAppointmentSearch({
+            patient: appointment.patientName || '',
+            professional: appointment.professionalName || ''
+        });
+        setAppointmentModal({
+            show: true,
+            mode: 'edit',
+            appointmentId: appointment.id
+        });
+    };
+
+    const handleAppointmentFormChange = (field, value) => {
+        setAppointmentForm((current) => {
+            const next = {
+                ...current,
+                [field]: value
+            };
+
+            if (field === 'patient_id') {
+                const selectedPatient = patientRecords.find(
+                    (patient) => patient.id?.toString() === value?.toString()
+                );
+                if (selectedPatient?.professionalId && !next.professional_id) {
+                    next.professional_id = selectedPatient.professionalId.toString();
+                }
+            }
+
+            if ((field === 'status' || field === 'appointment_type') && isAppointmentBlock(next)) {
+                next.patient_id = '';
+                next.value = 0;
+                next.payment_status = 'Cancelado';
+            }
+
+            return next;
+        });
+    };
+
+    const handleAppointmentSubmit = async (event) => {
+        event.preventDefault();
+
+        const isBlockedPayload = isAppointmentBlock(appointmentForm);
+        const payload = {
+            patient_id: isBlockedPayload ? null : appointmentForm.patient_id,
+            professional_id: appointmentForm.professional_id,
+            appointment_date: appointmentForm.appointment_date,
+            appointment_time: appointmentForm.appointment_time,
+            appointment_type: appointmentForm.appointment_type || 'Consulta Regular',
+            status: appointmentForm.status || 'Agendada',
+            notes: appointmentForm.notes || null,
+            value: isBlockedPayload || appointmentForm.value === '' ? 0 : Number(appointmentForm.value),
+            payment_method: appointmentForm.payment_method || null,
+            payment_status: isBlockedPayload ? 'Cancelado' : appointmentForm.payment_status || 'Pendente'
+        };
+
+        try {
+            setSubmitting((current) => ({
+                ...current,
+                appointment: true
+            }));
+
+            if (appointmentModal.mode === 'edit' && appointmentModal.appointmentId) {
+                await apiClient.put(`/clinic/${user.id}/appointments/${appointmentModal.appointmentId}`, payload);
+            } else {
+                await apiClient.post(`/clinic/${user.id}/appointments`, payload);
+            }
+
+            setFilters((current) => ({
+                ...current,
+                professionalId: payload.professional_id?.toString() || current.professionalId,
+                status: 'all',
+                date: payload.appointment_date || current.date
+            }));
+            resetAppointmentModal();
+            await syncClinicData(true);
+            setManagementFeedback({
+                variant: 'success',
+                text:
+                    appointmentModal.mode === 'edit'
+                        ? 'Consulta atualizada com sucesso na agenda da clinica.'
+                        : 'Consulta agendada com sucesso na agenda da clinica.'
+            });
+        } catch (err) {
+            console.error('Erro ao salvar agendamento:', err.response?.data, err.message);
+            setManagementFeedback({
+                variant: 'danger',
+                text:
+                    err.response?.data?.details ||
+                    err.response?.data?.error ||
+                    'Nao foi possivel salvar este agendamento.'
+            });
+        } finally {
+            setSubmitting((current) => ({
+                ...current,
+                appointment: false
+            }));
+        }
     };
 
     const handleProfessionalSubmit = async (event) => {
@@ -608,6 +892,87 @@ const ClinicDashboard = () => {
                 ...current,
                 patient: false
             }));
+        }
+    };
+
+    const handleStaffSubmit = async (event) => {
+        event.preventDefault();
+
+        try {
+            setSubmitting((current) => ({
+                ...current,
+                staff: true
+            }));
+
+            const response = await apiClient.post(`/clinic/${user.id}/staff`, staffForm);
+            const createdEmployee = response?.data?.employee || null;
+
+            if (createdEmployee && createdEmployee.id) {
+                setStaffRecords((current) => {
+                    const exists = current.some(
+                        (employee) => employee.id?.toString() === createdEmployee.id.toString()
+                    );
+                    if (exists) return current;
+                    return [...current, createdEmployee].sort((first, second) =>
+                        `${first.name || ''}`.localeCompare(`${second.name || ''}`, 'pt-BR')
+                    );
+                });
+            }
+
+            setStaffForm(emptyStaffForm);
+            await syncClinicData(true);
+            setManagementFeedback({
+                variant: 'success',
+                text: 'Recepcionista cadastrada com sucesso. Ela ja pode fazer login e acessar a agenda da clinica.'
+            });
+        } catch (err) {
+            console.error('Erro ao cadastrar funcionario:', err.response?.data, err.message);
+            setManagementFeedback({
+                variant: 'danger',
+                text:
+                    err.response?.data?.details ||
+                    err.response?.data?.error ||
+                    'Nao foi possivel cadastrar o funcionario.'
+            });
+        } finally {
+            setSubmitting((current) => ({
+                ...current,
+                staff: false
+            }));
+        }
+    };
+
+    const handleStaffStatusToggle = async (employee) => {
+        const nextStatus = (employee.status || 'ativo') === 'ativo' ? 'inativo' : 'ativo';
+
+        try {
+            setStatusUpdatingStaffId(employee.id);
+            await apiClient.put(`/clinic/${user.id}/staff/${employee.id}/status`, {
+                status: nextStatus
+            });
+            setStaffRecords((current) =>
+                current.map((item) =>
+                    item.id?.toString() === employee.id?.toString()
+                        ? { ...item, status: nextStatus }
+                        : item
+                )
+            );
+            await syncClinicData(true);
+            setManagementFeedback({
+                variant: 'success',
+                text: `Funcionario ${nextStatus === 'ativo' ? 'ativado' : 'desativado'} com sucesso.`
+            });
+        } catch (err) {
+            console.error('Erro ao atualizar funcionario:', err.response?.data, err.message);
+            setManagementFeedback({
+                variant: 'danger',
+                text:
+                    err.response?.data?.details ||
+                    err.response?.data?.error ||
+                    'Nao foi possivel atualizar o funcionario.'
+            });
+        } finally {
+            setStatusUpdatingStaffId(null);
         }
     };
 
@@ -1011,6 +1376,18 @@ const ClinicDashboard = () => {
                                         Pacientes
                                     </Nav.Link>
                                 </Nav.Item>
+                                <Nav.Item>
+                                    <Nav.Link eventKey="staff">
+                                        <PeopleFill className="me-2" />
+                                        Funcionarios
+                                    </Nav.Link>
+                                </Nav.Item>
+                                {user?.tipo_usuario === 'clinica' && user?.executive_access === true && <Nav.Item>
+                                    <Nav.Link onClick={() => navigate('/dashboard-executivo')}>
+                                        <GraphUpArrow className="me-2" />
+                                        Dashboard Executivo
+                                    </Nav.Link>
+                                </Nav.Item>}
                             </Nav>
 
                             <Tab.Content>
@@ -1199,10 +1576,33 @@ const ClinicDashboard = () => {
                                                             <h3>Agenda filtrada</h3>
                                                             <p>Visão de consultas, encaixes, bloqueios e andamento do dia.</p>
                                                         </div>
-                                                        <Badge bg="primary">
-                                                            {formatNumber(filteredAppointments.length)} itens
-                                                        </Badge>
+                                                        <div className="clinic-panel-actions">
+                                                            <Button
+                                                                className="clinic-refresh-button"
+                                                                onClick={() => openCreateAppointmentModal()}
+                                                                disabled={
+                                                                    !canManageAppointments ||
+                                                                    activeProfessionalDirectory.length === 0 ||
+                                                                    patientRecords.length === 0
+                                                                }
+                                                            >
+                                                                <PlusCircle className="me-2" />
+                                                                Nova consulta
+                                                            </Button>
+                                                            <Badge bg="primary">
+                                                                {formatNumber(filteredAppointments.length)} itens
+                                                            </Badge>
+                                                        </div>
                                                     </div>
+                                                    {!canManageAppointments ? (
+                                                        <Alert variant="secondary" className="clinic-inline-alert">
+                                                            Este perfil visualiza a agenda, mas nao cadastra novas consultas.
+                                                        </Alert>
+                                                    ) : activeProfessionalDirectory.length === 0 || patientRecords.length === 0 ? (
+                                                        <Alert variant="warning" className="clinic-inline-alert">
+                                                            Cadastre ao menos um profissional e um paciente vinculados a clinica para liberar o agendamento.
+                                                        </Alert>
+                                                    ) : null}
                                                     <div className="table-responsive">
                                                         <Table hover className="clinic-table">
                                                             <thead>
@@ -1212,6 +1612,7 @@ const ClinicDashboard = () => {
                                                                     <th>Horário</th>
                                                                     <th>Tipo</th>
                                                                     <th>Status</th>
+                                                                    <th>Acoes</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -1227,11 +1628,25 @@ const ClinicDashboard = () => {
                                                                                             {appointment.status}
                                                                                 </Badge>
                                                                             </td>
+                                                                            <td>
+                                                                                {canManageAppointments ? (
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        variant="outline-dark"
+                                                                                        onClick={() => openEditAppointmentModal(appointment)}
+                                                                                    >
+                                                                                        <PencilSquare className="me-1" />
+                                                                                        Editar
+                                                                                    </Button>
+                                                                                ) : (
+                                                                                    <span className="clinic-muted-inline">Somente leitura</span>
+                                                                                )}
+                                                                            </td>
                                                                         </tr>
                                                                     ))
                                                                 ) : (
                                                                     <tr>
-                                                                        <td colSpan={5}>
+                                                                        <td colSpan={6}>
                                                                             <div className="clinic-empty-state">
                                                                                 Não há consultas para este recorte.
                                                                             </div>
@@ -1261,6 +1676,24 @@ const ClinicDashboard = () => {
                                                                     <strong>{item.patientName}</strong>
                                                                     <span>{item.professionalName}</span>
                                                                     <small>{formatDateTime(item.date, item.time)}</small>
+                                                                    {canManageAppointments ? (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline-dark"
+                                                                            onClick={() =>
+                                                                                openEditAppointmentModal(
+                                                                                    dashboard.appointments.find(
+                                                                                        (appointment) =>
+                                                                                            appointment.id?.toString() ===
+                                                                                            item.id?.toString()
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <PencilSquare className="me-1" />
+                                                                            Editar consulta
+                                                                        </Button>
+                                                                    ) : null}
                                                                 </div>
                                                             ))
                                                         ) : (
@@ -1288,6 +1721,24 @@ const ClinicDashboard = () => {
                                                                     <strong>{item.patientName}</strong>
                                                                     <span>{item.professionalName}</span>
                                                                     <small>{item.reason || 'Aguardando abertura de vaga'}</small>
+                                                                    {canManageAppointments ? (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline-dark"
+                                                                            onClick={() =>
+                                                                                openEditAppointmentModal(
+                                                                                    dashboard.appointments.find(
+                                                                                        (appointment) =>
+                                                                                            appointment.id?.toString() ===
+                                                                                            item.id?.toString()
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <PencilSquare className="me-1" />
+                                                                            Editar consulta
+                                                                        </Button>
+                                                                    ) : null}
                                                                 </div>
                                                             ))
                                                         ) : (
@@ -1507,8 +1958,27 @@ const ClinicDashboard = () => {
                                                             <h3>Bloqueios de agenda</h3>
                                                             <p>Períodos reservados para reuniões, pausas e compromissos internos.</p>
                                                         </div>
-                                                        <PersonWorkspace />
+                                                        <div className="clinic-panel-actions">
+                                                            <Button
+                                                                className="clinic-refresh-button"
+                                                                onClick={openCreateBlockedSlotModal}
+                                                                disabled={!canManageAppointments || activeProfessionalDirectory.length === 0}
+                                                            >
+                                                                <PlusCircle className="me-2" />
+                                                                Novo bloqueio
+                                                            </Button>
+                                                            <PersonWorkspace />
+                                                        </div>
                                                     </div>
+                                                    {!canManageAppointments ? (
+                                                        <Alert variant="secondary" className="clinic-inline-alert">
+                                                            Este perfil visualiza bloqueios, mas nao altera a operacao da agenda.
+                                                        </Alert>
+                                                    ) : activeProfessionalDirectory.length === 0 ? (
+                                                        <Alert variant="warning" className="clinic-inline-alert">
+                                                            Cadastre um profissional ativo para criar bloqueios de agenda.
+                                                        </Alert>
+                                                    ) : null}
                                                     <div className="clinic-side-list">
                                                         {filteredBlockedSlots.length > 0 ? (
                                                             filteredBlockedSlots.map((slot) => (
@@ -1516,6 +1986,24 @@ const ClinicDashboard = () => {
                                                                     <strong>{slot.professionalName}</strong>
                                                                     <span>{slot.reason || slot.type || 'Bloqueio operacional'}</span>
                                                                     <small>{formatDateTime(slot.date, slot.time)}</small>
+                                                                    {canManageAppointments ? (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline-dark"
+                                                                            onClick={() =>
+                                                                                openEditAppointmentModal(
+                                                                                    dashboard.appointments.find(
+                                                                                        (appointment) =>
+                                                                                            appointment.id?.toString() ===
+                                                                                            slot.id?.toString()
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <PencilSquare className="me-1" />
+                                                                            Editar bloqueio
+                                                                        </Button>
+                                                                    ) : null}
                                                                 </div>
                                                             ))
                                                         ) : (
@@ -1563,6 +2051,110 @@ const ClinicDashboard = () => {
                                                             {dashboard.meta.assumptions[0]}
                                                         </Alert>
                                                     ) : null}
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col xs={12} xl={6}>
+                                            <Card className="clinic-panel-card h-100">
+                                                <Card.Body>
+                                                    <div className="clinic-panel-header">
+                                                        <div>
+                                                            <h3>Fila de espera operacional</h3>
+                                                            <p>Pacientes aguardando encaixe, remarcacao ou prioridade da recepcao.</p>
+                                                        </div>
+                                                        <div className="clinic-panel-actions">
+                                                            <Button
+                                                                className="clinic-refresh-button"
+                                                                onClick={openCreateWaitlistModal}
+                                                                disabled={
+                                                                    !canManageAppointments ||
+                                                                    activeProfessionalDirectory.length === 0 ||
+                                                                    patientRecords.length === 0
+                                                                }
+                                                            >
+                                                                <PlusCircle className="me-2" />
+                                                                Nova fila
+                                                            </Button>
+                                                            <ClockHistory />
+                                                        </div>
+                                                    </div>
+                                                    <div className="clinic-side-list">
+                                                        {filteredWaitlist.length > 0 ? (
+                                                            filteredWaitlist.map((item) => (
+                                                                <div key={item.id} className="clinic-side-item">
+                                                                    <strong>{item.patientName}</strong>
+                                                                    <span>{item.professionalName}</span>
+                                                                    <small>{item.reason || 'Aguardando abertura de vaga'}</small>
+                                                                    {canManageAppointments ? (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline-dark"
+                                                                            onClick={() =>
+                                                                                openEditAppointmentModal(
+                                                                                    dashboard.appointments.find(
+                                                                                        (appointment) =>
+                                                                                            appointment.id?.toString() ===
+                                                                                            item.id?.toString()
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <PencilSquare className="me-1" />
+                                                                            Editar fila
+                                                                        </Button>
+                                                                    ) : null}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="clinic-empty-state">Sem fila de espera ativa.</div>
+                                                        )}
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col xs={12} xl={6}>
+                                            <Card className="clinic-panel-card h-100">
+                                                <Card.Body>
+                                                    <div className="clinic-panel-header">
+                                                        <div>
+                                                            <h3>Confirmacoes pendentes</h3>
+                                                            <p>Consultas futuras que ainda precisam de confirmacao de presenca.</p>
+                                                        </div>
+                                                        <Funnel />
+                                                    </div>
+                                                    <div className="clinic-side-list">
+                                                        {filteredConfirmations.length > 0 ? (
+                                                            filteredConfirmations.map((item) => (
+                                                                <div key={item.id} className="clinic-side-item">
+                                                                    <strong>{item.patientName}</strong>
+                                                                    <span>{item.professionalName}</span>
+                                                                    <small>{formatDateTime(item.date, item.time)}</small>
+                                                                    {canManageAppointments ? (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline-dark"
+                                                                            onClick={() =>
+                                                                                openEditAppointmentModal(
+                                                                                    dashboard.appointments.find(
+                                                                                        (appointment) =>
+                                                                                            appointment.id?.toString() ===
+                                                                                            item.id?.toString()
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <PencilSquare className="me-1" />
+                                                                            Confirmar ou editar
+                                                                        </Button>
+                                                                    ) : null}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="clinic-empty-state">
+                                                                Nenhuma confirmacao pendente neste filtro.
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
@@ -1903,11 +2495,421 @@ const ClinicDashboard = () => {
                                         </Col>
                                     </Row>
                                 </Tab.Pane>
+
+                                <Tab.Pane eventKey="staff">
+                                    <Row className="g-4">
+                                        <Col xs={12} xl={5}>
+                                            <Card className="clinic-panel-card h-100">
+                                                <Card.Body>
+                                                    <div className="clinic-panel-header">
+                                                        <div>
+                                                            <h3>Cadastro de funcionarios</h3>
+                                                            <p>Recepcionistas entram como secretaria da clinica e acessam a agenda multi-profissional.</p>
+                                                        </div>
+                                                        <Badge bg="light" text="dark">
+                                                            {formatNumber(staffRecords.length)} cadastrados
+                                                        </Badge>
+                                                    </div>
+                                                    {!canManageStaff ? (
+                                                        <Alert variant="secondary" className="mb-0">
+                                                            Este perfil pode operar a agenda, mas a criacao de funcionarios fica com a administracao da clinica.
+                                                        </Alert>
+                                                    ) : (
+                                                        <Form onSubmit={handleStaffSubmit} className="clinic-management-form">
+                                                            <Row className="g-3">
+                                                                <Col xs={12}>
+                                                                    <Form.Label>Nome completo</Form.Label>
+                                                                    <Form.Control
+                                                                        value={staffForm.nome_completo}
+                                                                        onChange={(e) =>
+                                                                            handleStaffFormChange('nome_completo', e.target.value)
+                                                                        }
+                                                                        placeholder="Nome da recepcionista"
+                                                                        required
+                                                                    />
+                                                                </Col>
+                                                                <Col xs={12}>
+                                                                    <Form.Label>Email de login</Form.Label>
+                                                                    <Form.Control
+                                                                        type="email"
+                                                                        value={staffForm.email}
+                                                                        onChange={(e) =>
+                                                                            handleStaffFormChange('email', e.target.value)
+                                                                        }
+                                                                        placeholder="recepcao@clinica.com"
+                                                                        required
+                                                                    />
+                                                                </Col>
+                                                                <Col xs={12}>
+                                                                    <Form.Label>Senha inicial</Form.Label>
+                                                                    <Form.Control
+                                                                        type="password"
+                                                                        minLength={6}
+                                                                        value={staffForm.password}
+                                                                        onChange={(e) =>
+                                                                            handleStaffFormChange('password', e.target.value)
+                                                                        }
+                                                                        placeholder="Minimo de 6 caracteres"
+                                                                        required
+                                                                    />
+                                                                </Col>
+                                                                <Col xs={12} md={6}>
+                                                                    <Form.Label>Telefone</Form.Label>
+                                                                    <Form.Control
+                                                                        value={staffForm.telefone}
+                                                                        onChange={(e) =>
+                                                                            handleStaffFormChange('telefone', e.target.value)
+                                                                        }
+                                                                        placeholder="(85) 99999-9999"
+                                                                    />
+                                                                </Col>
+                                                                <Col xs={12} md={6}>
+                                                                    <Form.Label>CPF</Form.Label>
+                                                                    <Form.Control
+                                                                        value={staffForm.cpf}
+                                                                        onChange={(e) =>
+                                                                            handleStaffFormChange('cpf', e.target.value)
+                                                                        }
+                                                                        placeholder="000.000.000-00"
+                                                                    />
+                                                                </Col>
+                                                                <Col xs={12}>
+                                                                    <Button
+                                                                        type="submit"
+                                                                        className="clinic-refresh-button w-100"
+                                                                        disabled={submitting.staff}
+                                                                    >
+                                                                        {submitting.staff ? 'Salvando funcionario...' : 'Cadastrar recepcionista'}
+                                                                    </Button>
+                                                                </Col>
+                                                            </Row>
+                                                        </Form>
+                                                    )}
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                        <Col xs={12} xl={7}>
+                                            <Card className="clinic-panel-card h-100">
+                                                <Card.Body>
+                                                    <div className="clinic-panel-header">
+                                                        <div>
+                                                            <h3>Administracao dos funcionarios</h3>
+                                                            <p>Controle de acesso das recepcionistas vinculadas ao mesmo clinic_id.</p>
+                                                        </div>
+                                                        <PeopleFill />
+                                                    </div>
+                                                    {registryLoading.staff ? (
+                                                        <div className="clinic-empty-state">Carregando funcionarios...</div>
+                                                    ) : staffRecords.length > 0 ? (
+                                                        <div className="table-responsive">
+                                                            <Table hover className="clinic-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Funcionario</th>
+                                                                        <th>Cargo</th>
+                                                                        <th>Contato</th>
+                                                                        <th>CPF</th>
+                                                                        <th>Status</th>
+                                                                        <th>Acoes</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {staffRecords.map((employee) => (
+                                                                        <tr key={employee.id}>
+                                                                            <td>
+                                                                                <strong>{employee.name}</strong>
+                                                                            </td>
+                                                                            <td>{employee.role || 'Recepcionista'}</td>
+                                                                            <td>
+                                                                                <div className="clinic-table-stack">
+                                                                                    <span>{employee.email || 'Sem email'}</span>
+                                                                                    <small>{employee.phone || 'Sem telefone'}</small>
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>{employee.cpf || 'Nao informado'}</td>
+                                                                            <td>
+                                                                                <Badge
+                                                                                    bg={
+                                                                                        (employee.status || 'ativo') === 'ativo'
+                                                                                            ? 'success'
+                                                                                            : 'secondary'
+                                                                                    }
+                                                                                >
+                                                                                    {(employee.status || 'ativo') === 'ativo'
+                                                                                        ? 'Ativo'
+                                                                                        : 'Inativo'}
+                                                                                </Badge>
+                                                                            </td>
+                                                                            <td>
+                                                                                {canManageStaff ? (
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        variant={
+                                                                                            (employee.status || 'ativo') === 'ativo'
+                                                                                                ? 'outline-danger'
+                                                                                                : 'outline-success'
+                                                                                        }
+                                                                                        disabled={statusUpdatingStaffId === employee.id}
+                                                                                        onClick={() => handleStaffStatusToggle(employee)}
+                                                                                    >
+                                                                                        {statusUpdatingStaffId === employee.id
+                                                                                            ? 'Salvando...'
+                                                                                            : (employee.status || 'ativo') === 'ativo'
+                                                                                              ? 'Desativar'
+                                                                                              : 'Ativar'}
+                                                                                    </Button>
+                                                                                ) : (
+                                                                                    <span className="clinic-muted-inline">
+                                                                                        Somente administracao
+                                                                                    </span>
+                                                                                )}
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </Table>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="clinic-empty-state">Nenhum funcionario cadastrado para esta clinica.</div>
+                                                    )}
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    </Row>
+                                </Tab.Pane>
                             </Tab.Content>
                         </>
                     </Tab.Container>
                 )}
             </Container>
+            <Modal
+                show={appointmentModal.show}
+                onHide={resetAppointmentModal}
+                centered
+                size="lg"
+                className="clinic-appointment-modal"
+            >
+                <Form onSubmit={handleAppointmentSubmit}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>
+                            {isAppointmentBlockForm
+                                ? appointmentModal.mode === 'edit'
+                                    ? 'Editar bloqueio'
+                                    : 'Novo bloqueio'
+                                : appointmentModal.mode === 'edit'
+                                  ? 'Editar consulta'
+                                  : 'Nova consulta'}
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Row className="g-3">
+                            {activeProfessionalDirectory.length === 0 ||
+                            (!isAppointmentBlockForm && patientRecords.length === 0) ? (
+                                <Col xs={12}>
+                                    <Alert variant="warning" className="clinic-inline-alert mb-0">
+                                        {isAppointmentBlockForm
+                                            ? 'Cadastre ao menos um profissional ativo para criar bloqueios de agenda.'
+                                            : 'Cadastre profissionais e pacientes vinculados a clinica antes de agendar consultas.'}
+                                    </Alert>
+                                </Col>
+                            ) : null}
+                            <Col xs={12} md={6}>
+                                <Form.Label>Buscar paciente</Form.Label>
+                                <Form.Control
+                                    value={appointmentSearch.patient}
+                                    onChange={(event) =>
+                                        setAppointmentSearch((current) => ({
+                                            ...current,
+                                            patient: event.target.value
+                                        }))
+                                    }
+                                    placeholder={
+                                        isAppointmentBlockForm
+                                            ? 'Bloqueio nao exige paciente'
+                                            : 'Nome, CPF ou profissional'
+                                    }
+                                    disabled={isAppointmentBlockForm}
+                                />
+                            </Col>
+                            <Col xs={12} md={6}>
+                                <Form.Label>Paciente da clinica</Form.Label>
+                                <Form.Select
+                                    value={appointmentForm.patient_id}
+                                    onChange={(event) => handleAppointmentFormChange('patient_id', event.target.value)}
+                                    required={!isAppointmentBlockForm}
+                                    disabled={isAppointmentBlockForm}
+                                >
+                                    <option value="">
+                                        {isAppointmentBlockForm ? 'Nao necessario para bloqueio' : 'Selecione um paciente'}
+                                    </option>
+                                    {visibleAppointmentPatients.map((patient) => (
+                                        <option key={patient.id} value={patient.id}>
+                                            {patient.name}
+                                            {patient.professionalName ? ` - ${patient.professionalName}` : ''}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </Col>
+                            <Col xs={12} md={6}>
+                                <Form.Label>Buscar profissional</Form.Label>
+                                <Form.Control
+                                    value={appointmentSearch.professional}
+                                    onChange={(event) =>
+                                        setAppointmentSearch((current) => ({
+                                            ...current,
+                                            professional: event.target.value
+                                        }))
+                                    }
+                                    placeholder="Nome, especialidade ou registro"
+                                />
+                            </Col>
+                            <Col xs={12} md={6}>
+                                <Form.Label>Profissional da clinica</Form.Label>
+                                <Form.Select
+                                    value={appointmentForm.professional_id}
+                                    onChange={(event) =>
+                                        handleAppointmentFormChange('professional_id', event.target.value)
+                                    }
+                                    required
+                                >
+                                    <option value="">Selecione um profissional</option>
+                                    {visibleAppointmentProfessionals.map((professional) => (
+                                        <option key={professional.id} value={professional.id}>
+                                            {professional.name}
+                                            {professional.specialty ? ` - ${professional.specialty}` : ''}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </Col>
+                            <Col xs={12} md={4}>
+                                <Form.Label>Data</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    value={appointmentForm.appointment_date}
+                                    onChange={(event) =>
+                                        handleAppointmentFormChange('appointment_date', event.target.value)
+                                    }
+                                    required
+                                />
+                            </Col>
+                            <Col xs={12} md={4}>
+                                <Form.Label>Hora</Form.Label>
+                                <Form.Control
+                                    type="time"
+                                    value={appointmentForm.appointment_time}
+                                    onChange={(event) =>
+                                        handleAppointmentFormChange('appointment_time', event.target.value)
+                                    }
+                                    required
+                                />
+                            </Col>
+                            <Col xs={12} md={4}>
+                                <Form.Label>Tipo</Form.Label>
+                                <Form.Select
+                                    value={appointmentForm.appointment_type}
+                                    onChange={(event) =>
+                                        handleAppointmentFormChange('appointment_type', event.target.value)
+                                    }
+                                >
+                                    <option value="Consulta Regular">Consulta Regular</option>
+                                    <option value="Avaliacao">Avaliacao</option>
+                                    <option value="Retorno">Retorno</option>
+                                    <option value="Teleconsulta">Teleconsulta</option>
+                                    <option value="Encaixe">Encaixe</option>
+                                    <option value="Procedimento">Procedimento</option>
+                                </Form.Select>
+                            </Col>
+                            <Col xs={12} md={4}>
+                                <Form.Label>Status da consulta</Form.Label>
+                                <Form.Select
+                                    value={appointmentForm.status}
+                                    onChange={(event) => handleAppointmentFormChange('status', event.target.value)}
+                                >
+                                    <option value="Agendada">Agendada</option>
+                                    <option value="Confirmada">Confirmada</option>
+                                    <option value="Realizada">Realizada</option>
+                                    <option value="Cancelada">Cancelada</option>
+                                    <option value="Fila de espera">Fila de espera</option>
+                                    <option value="Bloqueio">Bloqueio</option>
+                                </Form.Select>
+                            </Col>
+                            <Col xs={12} md={4}>
+                                <Form.Label>Valor</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={appointmentForm.value}
+                                    onChange={(event) => handleAppointmentFormChange('value', event.target.value)}
+                                    placeholder="0,00"
+                                />
+                            </Col>
+                            <Col xs={12} md={4}>
+                                <Form.Label>Status do pagamento</Form.Label>
+                                <Form.Select
+                                    value={appointmentForm.payment_status}
+                                    onChange={(event) =>
+                                        handleAppointmentFormChange('payment_status', event.target.value)
+                                    }
+                                >
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Pago">Pago</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                    <option value="Estornado">Estornado</option>
+                                </Form.Select>
+                            </Col>
+                            <Col xs={12} md={6}>
+                                <Form.Label>Forma de pagamento</Form.Label>
+                                <Form.Select
+                                    value={appointmentForm.payment_method}
+                                    onChange={(event) =>
+                                        handleAppointmentFormChange('payment_method', event.target.value)
+                                    }
+                                >
+                                    <option value="">Nao informado</option>
+                                    <option value="Pix">Pix</option>
+                                    <option value="Cartao">Cartao</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Convenio">Convenio</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                </Form.Select>
+                            </Col>
+                            <Col xs={12} md={6}>
+                                <Form.Label>Observacoes</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    value={appointmentForm.notes}
+                                    onChange={(event) => handleAppointmentFormChange('notes', event.target.value)}
+                                    placeholder="Orientacoes, motivo do encaixe ou observacoes internas"
+                                />
+                            </Col>
+                        </Row>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="outline-secondary" onClick={resetAppointmentModal} disabled={submitting.appointment}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            className="clinic-refresh-button"
+                            disabled={
+                                submitting.appointment ||
+                                activeProfessionalDirectory.length === 0 ||
+                                (!isAppointmentBlockForm && patientRecords.length === 0)
+                            }
+                        >
+                            {submitting.appointment
+                                ? 'Salvando...'
+                                : isAppointmentBlockForm
+                                  ? 'Salvar bloqueio'
+                                  : appointmentModal.mode === 'edit'
+                                  ? 'Salvar edicao'
+                                  : 'Agendar consulta'}
+                        </Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal>
         </div>
     );
 };

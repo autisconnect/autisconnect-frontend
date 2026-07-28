@@ -73,6 +73,17 @@ const ProfessionalDashboard = () => {
         weekAppointments: 0
     });
     const [newAssistant, setNewAssistant] = useState({ nome: '', cpf: '', email: '', password: '', status: 'ativo', telefone: '' });
+    const [clinicInvitations, setClinicInvitations] = useState([]);
+    const [invitationLoading, setInvitationLoading] = useState(false);
+
+    const loadClinicInvitations = async () => {
+        try { const response = await apiClient.get('/professional/invitations'); setClinicInvitations(response.data || []); } catch { setClinicInvitations([]); }
+    };
+    const respondClinicInvitation = async (invitationId, action) => {
+        setInvitationLoading(true);
+        try { await apiClient.post(`/professional/invitations/${invitationId}/${action}`); setSuccessMessage(action === 'accept' ? 'Convite aceito. Vínculo com a clínica realizado.' : 'Convite recusado.'); await loadClinicInvitations(); } catch (requestError) { setError(requestError.response?.data?.error || 'Não foi possível responder ao convite.'); } finally { setInvitationLoading(false); }
+    };
+    useEffect(() => { if (user?.tipo_usuario === 'medicos_terapeutas') loadClinicInvitations(); }, [user?.id]);
 
     const [newPatient, setNewPatient] = useState({
         name: '',
@@ -857,6 +868,7 @@ const ProfessionalDashboard = () => {
                             {error}
                         </Alert>
                     )}
+                    {clinicInvitations.length > 0 && <Card className="mb-4"><Card.Body><Card.Title>Convites recebidos</Card.Title>{clinicInvitations.map((invitation) => <div className="d-flex justify-content-between align-items-center border-top pt-2 mt-2" key={invitation.id}><span>{invitation.clinic_name || 'Clínica'}<small className="d-block text-muted">Expira em {String(invitation.expires_at || '').slice(0, 10) || 'data não informada'}</small></span><div className="d-flex gap-2"><Button size="sm" disabled={invitationLoading} onClick={() => respondClinicInvitation(invitation.id, 'accept')}>Aceitar</Button><Button size="sm" variant="outline-danger" disabled={invitationLoading} onClick={() => respondClinicInvitation(invitation.id, 'decline')}>Recusar</Button></div></div>)}</Card.Body></Card>}
 
                     {/* Alertas para feedback */}
                     {successMessage && (
