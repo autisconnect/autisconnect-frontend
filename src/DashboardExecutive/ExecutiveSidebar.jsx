@@ -25,6 +25,7 @@ const ExecutiveSidebar = ({ executiveEnabled, modules = {} }) => {
           <CashStack aria-hidden="true" />
           Financeiro
         </NavLink>}
+        {modules[CLINIC_MODULES.FISCAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/fiscal" className="executive-sidebar-link"><CashStack aria-hidden="true" />Gestão Fiscal</NavLink>}
         {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/configuracoes" className="executive-sidebar-link">
           <CashStack aria-hidden="true" />
           Configurações Financeiras

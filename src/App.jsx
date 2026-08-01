@@ -218,6 +218,7 @@ function App() {
         <Route path="/dashboard-executivo/indicadores-executivos" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
         <Route path="/dashboard-executivo/solucoes" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
         <Route path="/dashboard-executivo/saude" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
+        <Route path="/dashboard-executivo/fiscal" element={<ProtectedRoute allowedUserTypes={['clinica']}><DashboardExecutive /></ProtectedRoute>} />
 
         <Route
           path="/patient-details/:patientId"

@@ -1,0 +1,14 @@
+﻿import { useEffect, useState } from 'react';
+import { Alert, Badge, Button, Card, Spinner } from 'react-bootstrap';
+import apiClient from '../services/api';
+const formatDateTime = (value) => value ? new Date(value).toLocaleString('pt-BR') : 'Não informado';
+const repairText = (value) => { const text = String(value || ''); if (!/[Ãâ]/.test(text)) return text; try { return decodeURIComponent(escape(text)); } catch { return text; } };
+export default function FiscalInsightsPanel({ competence }) {
+  const [items, setItems] = useState([]); const [loading, setLoading] = useState(false); const [generating, setGenerating] = useState(false); const [error, setError] = useState(''); const [success, setSuccess] = useState('');
+  const load = async () => { setLoading(true); try { const { data } = await apiClient.get('/executive/fiscal/ai/results'); setItems(Array.isArray(data) ? data : []); setError(''); } catch (requestError) { setError(requestError.response?.data?.error || 'Não foi possível carregar os insights fiscais.'); } finally { setLoading(false); } };
+  useEffect(() => { load(); }, []);
+  const generate = async () => { setGenerating(true); setError(''); setSuccess(''); try { const { data } = await apiClient.post('/executive/fiscal/ai/recalculate', { competence }); setSuccess(data.summary || 'Insight fiscal atualizado.'); await load(); } catch (requestError) { setError(requestError.response?.data?.error || 'Não foi possível gerar o insight fiscal.'); } finally { setGenerating(false); } };
+  return <Card className="mt-4"><Card.Body><div className="d-flex justify-content-between flex-wrap gap-2"><div><Card.Title className="h5">Resultados e insights fiscais</Card.Title><p className="small text-muted mb-0">Análise local baseada nos cálculos fiscais já registrados. Não usa dados clínicos nem substitui orientação contábil.</p></div><Button size="sm" onClick={generate} disabled={generating}>{generating ? 'Gerando...' : 'Atualizar insights'}</Button></div>{error && <Alert variant="danger" className="mt-3 mb-0">{error}</Alert>}{success && <Alert variant="success" className="mt-3 mb-0" dismissible onClose={() => setSuccess('')}>{success}</Alert>}{loading ? <div className="text-center py-3"><Spinner size="sm" animation="border" /></div> : <div className="mt-3">{items.length ? items.slice(0, 6).map((item) => <Card key={item.id} className="mb-2 border"><Card.Body className="py-3"><div className="d-flex justify-content-between gap-2"><strong>{repairText(item.title)}</strong><Badge bg="secondary">Motor local</Badge></div><p className="mb-1 mt-2">{repairText(item.content || item.summary)}</p><small className="text-muted">Competência: {String(item.competence).slice(0, 7)} · Gerado em {formatDateTime(item.generated_at)}</small></Card.Body></Card>) : <Alert variant="info" className="mb-0">Ainda não há insights gerados. Selecione uma competência e clique em “Atualizar insights”.</Alert>}</div>}</Card.Body></Card>;
+}
+
+
