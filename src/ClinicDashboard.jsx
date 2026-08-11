@@ -6,26 +6,38 @@ import {
     Card,
     Col,
     Container,
+    Dropdown,
     Form,
     Modal,
     Nav,
+    Offcanvas,
+    OverlayTrigger,
     ProgressBar,
     Row,
     Spinner,
     Tab,
-    Table
+    Table,
+    Tooltip
 } from 'react-bootstrap';
 import {
+    ArrowRight,
     Bell,
+    BoxArrowRight,
     Calendar2Check,
     Calendar2Week,
     CashCoin,
     Check2Circle,
+    ChevronLeft,
+    ChevronRight,
     Clipboard2Pulse,
     ClockHistory,
     Funnel,
+    Gear,
     GraphUpArrow,
+    HouseDoor,
+    List,
     PencilSquare,
+    PersonCircle,
     PeopleFill,
     PersonWorkspace,
     PlusCircle,
@@ -43,7 +55,7 @@ import {
     LinearScale,
     PointElement,
     Title,
-    Tooltip
+    Tooltip as ChartTooltip
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -59,7 +71,7 @@ ChartJS.register(
     BarElement,
     ArcElement,
     Title,
-    Tooltip,
+    ChartTooltip,
     Legend,
     Filler
 );
@@ -285,6 +297,59 @@ const normalizeDashboardPayload = (payload) => ({
     }
 });
 
+const CLINIC_SIDEBAR_STORAGE_KEY = 'ac-clinic-sidebar-collapsed';
+
+const getInitials = (value) => {
+    const source = `${value || ''}`.trim();
+    if (!source) return 'AC';
+    const parts = source.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] || ''}${parts[1][0] || ''}`.toUpperCase();
+};
+
+const LoadingShell = () => (
+    <div className="clinic-dashboard-page clinic-dashboard-page--loading">
+        <aside className="clinic-sidebar-shell">
+            <div className="clinic-sidebar">
+                <div className="clinic-sidebar__brand-block">
+                    <div className="clinic-skeleton clinic-skeleton--logo" />
+                    <div className="clinic-sidebar__brand-ribbon" />
+                </div>
+                <div className="clinic-sidebar__nav-group">
+                    {[...Array(6)].map((_, index) => (
+                        <div key={index} className="clinic-skeleton clinic-skeleton--nav" />
+                    ))}
+                </div>
+            </div>
+        </aside>
+        <div className="clinic-shell">
+            <header className="clinic-header">
+                <div className="clinic-skeleton clinic-skeleton--header-title" />
+                <div className="clinic-skeleton clinic-skeleton--header-actions" />
+            </header>
+            <main className="clinic-main">
+                <section className="clinic-page-header">
+                    <div className="clinic-page-header__copy">
+                        <div className="clinic-skeleton clinic-skeleton--eyebrow" />
+                        <div className="clinic-skeleton clinic-skeleton--title" />
+                        <div className="clinic-skeleton clinic-skeleton--paragraph" />
+                    </div>
+                    <div className="clinic-skeleton clinic-skeleton--selector" />
+                </section>
+                <div className="clinic-skeleton-grid">
+                    {[...Array(4)].map((_, index) => (
+                        <div key={index} className="clinic-skeleton clinic-skeleton--kpi" />
+                    ))}
+                </div>
+                <div className="clinic-skeleton-grid clinic-skeleton-grid--content">
+                    <div className="clinic-skeleton clinic-skeleton--panel" />
+                    <div className="clinic-skeleton clinic-skeleton--panel" />
+                </div>
+            </main>
+        </div>
+    </div>
+);
+
 const ClinicDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -331,6 +396,14 @@ const ClinicDashboard = () => {
     const [financeProfessionalId, setFinanceProfessionalId] = useState('all');
     const [statusUpdatingProfessionalId, setStatusUpdatingProfessionalId] = useState(null);
     const [statusUpdatingStaffId, setStatusUpdatingStaffId] = useState(null);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.sessionStorage.getItem(CLINIC_SIDEBAR_STORAGE_KEY) === 'true';
+    });
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [showProfessionalModal, setShowProfessionalModal] = useState(false);
+    const [showPatientModal, setShowPatientModal] = useState(false);
+    const [showStaffModal, setShowStaffModal] = useState(false);
 
     const allowedTypes = ['medicos_terapeutas', 'servicos_locais', 'clinica', 'administrador_clinica'];
     const canManageProfessionals = ['servicos_locais', 'clinica'].includes(user?.tipo_usuario);
@@ -467,6 +540,15 @@ const ClinicDashboard = () => {
             }));
         }
     }, [dashboard.professionals, patientForm.professional_id, professionalRecords]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.sessionStorage.setItem(CLINIC_SIDEBAR_STORAGE_KEY, String(isSidebarCollapsed));
+    }, [isSidebarCollapsed]);
+
+    useEffect(() => {
+        setIsMobileSidebarOpen(false);
+    }, [activeTab]);
 
     useEffect(() => {
         if (filters.professionalId === 'all') return;
@@ -986,7 +1068,7 @@ const ClinicDashboard = () => {
         labels: Object.keys(statusBuckets),
         datasets: [
             {
-                label: 'Consultas',
+                label: 'Atendimentos',
                 data: Object.values(statusBuckets),
                 backgroundColor: overviewColors,
                 borderRadius: 12
@@ -1140,9 +1222,9 @@ const ClinicDashboard = () => {
             icon: <Clipboard2Pulse />
         },
         {
-            title: 'Consultas do dia',
+            title: 'Atendimentos hoje',
             value: formatNumber(dashboard.summary.appointmentsToday),
-            caption: `${formatNumber(dashboard.summary.pendingConfirmations)} pendentes de confirmação`,
+            caption: `${formatNumber(dashboard.summary.pendingConfirmations)} pendentes de confirmacao`,
             icon: <Calendar2Check />
         },
         {
@@ -1153,6 +1235,278 @@ const ClinicDashboard = () => {
         }
     ];
 
+    const secondarySummaryCards = [
+        {
+            title: 'Taxa de comparecimento',
+            value: `${Math.round(dashboard.summary.attendanceRate || 0)}%`
+        },
+        {
+            title: 'Fila de espera',
+            value: formatNumber(dashboard.summary.waitingListCount)
+        },
+        {
+            title: 'Bloqueios',
+            value: formatNumber(dashboard.summary.blockedSlots)
+        },
+        {
+            title: 'Confirmacoes pendentes',
+            value: formatNumber(dashboard.summary.pendingConfirmations)
+        },
+        {
+            title: 'Ticket medio',
+            value: formatCurrency(dashboard.summary.averageTicket)
+        },
+        {
+            title: 'Atendimentos pagos',
+            value: formatNumber(dashboard.summary.paidAppointments)
+        }
+    ];
+
+    const clinicDisplayName = dashboard.clinic.name || user?.nome_completo || 'AutisConnect Clinics';
+    const clinicAccessLabel =
+        dashboard.clinic.accessProfile || accessProfileLabels[user?.tipo_usuario] || 'Acesso clinico';
+    const hasExecutiveAccess = user?.tipo_usuario === 'clinica' && user?.executive_access === true;
+
+    const activeSection = {
+        overview: {
+            breadcrumb: 'Clinica / Visao geral',
+            title: 'Visao geral',
+            subtitle: 'Visao consolidada da operacao, agenda e financeiro.'
+        },
+        agenda: {
+            breadcrumb: 'Clinica / Agenda',
+            title: 'Agenda',
+            subtitle: 'Gerencie atendimentos, encaixes e horarios da equipe.'
+        },
+        finance: {
+            breadcrumb: 'Clinica / Financeiro',
+            title: 'Financeiro',
+            subtitle: 'Leitura consolidada das entradas, recebiveis e desempenho por profissional.'
+        },
+        operations: {
+            breadcrumb: 'Clinica / Operacao & Governanca',
+            title: 'Operacao & Governanca',
+            subtitle: 'Bloqueios, fila de espera, confirmacoes e perfis de acesso da operacao.'
+        },
+        professionals: {
+            breadcrumb: 'Clinica / Profissionais',
+            title: 'Profissionais',
+            subtitle: 'Gerencie a equipe clinica e seus vinculos.'
+        },
+        patients: {
+            breadcrumb: 'Clinica / Pacientes',
+            title: 'Pacientes',
+            subtitle: 'Gerencie pacientes vinculados a clinica e seus profissionais responsaveis.'
+        },
+        staff: {
+            breadcrumb: 'Clinica / Recepcao & Equipe',
+            title: 'Recepcao & Equipe',
+            subtitle: 'Organize a equipe de recepcao e os acessos operacionais da clinica.'
+        }
+    }[activeTab] || {
+        breadcrumb: 'Clinica',
+        title: 'Visao geral',
+        subtitle: 'Central operacional premium da clinica.'
+    };
+
+    const sidebarGroups = [
+        {
+            label: 'Visao',
+            items: [{ key: 'overview', label: 'Visao geral', icon: HouseDoor }]
+        },
+        {
+            label: 'Operacao',
+            items: [
+                { key: 'agenda', label: 'Agenda', icon: Calendar2Week },
+                { key: 'operations', label: 'Bloqueios & Confirmacoes', icon: ClockHistory }
+            ]
+        },
+        {
+            label: 'Gestao',
+            items: [
+                { key: 'professionals', label: 'Profissionais', icon: PersonWorkspace },
+                { key: 'patients', label: 'Pacientes', icon: Clipboard2Pulse },
+                { key: 'staff', label: 'Equipe', icon: PeopleFill }
+            ]
+        },
+        {
+            label: 'Financeiro',
+            items: [{ key: 'finance', label: 'Financeiro', icon: CashCoin }]
+        },
+        {
+            label: 'Administracao',
+            items: [
+                { key: 'operations', label: 'Operacao & Acesso', icon: ShieldCheck },
+                ...(hasExecutiveAccess
+                    ? [
+                          {
+                              key: 'executive',
+                              label: 'Dashboard Executivo',
+                              icon: GraphUpArrow,
+                              action: () => navigate('/dashboard-executivo')
+                          }
+                      ]
+                    : [])
+            ]
+        },
+        {
+            label: 'Conta',
+            items: [
+                { key: 'settings', label: 'Configuracoes', icon: Gear, action: () => setActiveTab('operations') },
+                { key: 'logout', label: 'Sair', icon: BoxArrowRight, action: () => logout() }
+            ]
+        }
+    ];
+
+    const handleRefreshDashboard = async () => {
+        try {
+            await loadDashboard(true);
+        } catch (err) {
+            console.error('Erro ao atualizar dashboard clinico:', err);
+        }
+    };
+
+    const renderFeedbackStack = () => {
+        const items = [];
+
+        if (error) {
+            items.push(
+                <Alert
+                    key="dashboard-error"
+                    variant="danger"
+                    className="clinic-feedback"
+                    dismissible
+                    onClose={() => setError('')}
+                >
+                    {error}
+                </Alert>
+            );
+        }
+
+        if (managementFeedback) {
+            items.push(
+                <Alert
+                    key="management-feedback"
+                    variant={managementFeedback.variant}
+                    className="clinic-feedback"
+                    dismissible
+                    onClose={() => setManagementFeedback(null)}
+                >
+                    {managementFeedback.text}
+                </Alert>
+            );
+        }
+
+        return items.length ? <div className="clinic-feedback-stack">{items}</div> : null;
+    };
+
+    const renderSidebarNavItem = (item, mobile = false) => {
+        const Icon = item.icon;
+        const collapsed = isSidebarCollapsed && !mobile;
+        const isActive = !item.action && activeTab === item.key;
+        const className = `clinic-sidebar__item${isActive ? ' is-active' : ''}`;
+
+        const handleClick = () => {
+            if (item.action) {
+                item.action();
+                return;
+            }
+            setActiveTab(item.key);
+        };
+
+        const content = (
+            <button
+                type="button"
+                className={className}
+                onClick={handleClick}
+                title={item.label}
+                aria-current={isActive ? 'page' : undefined}
+            >
+                <span className="clinic-sidebar__item-icon">
+                    <Icon />
+                </span>
+                <span className="clinic-sidebar__item-label">{item.label}</span>
+                {item.action && !collapsed ? (
+                    <span className="clinic-sidebar__item-arrow">
+                        <ArrowRight />
+                    </span>
+                ) : null}
+            </button>
+        );
+
+        if (collapsed) {
+            return (
+                <OverlayTrigger
+                    key={item.key}
+                    placement="right"
+                    overlay={<Tooltip id={`clinic-tooltip-${item.key}`}>{item.label}</Tooltip>}
+                >
+                    {content}
+                </OverlayTrigger>
+            );
+        }
+
+        return <React.Fragment key={item.key}>{content}</React.Fragment>;
+    };
+
+    const renderSidebar = (mobile = false) => (
+        <div className={`clinic-sidebar${isSidebarCollapsed && !mobile ? ' clinic-sidebar--collapsed' : ''}`}>
+            <div className="clinic-sidebar__brand-block">
+                <div className="clinic-sidebar__brand-row">
+                    <div className="clinic-sidebar__brand-copy">
+                        <span className="clinic-sidebar__eyebrow">AutisConnect</span>
+                        <strong>{clinicDisplayName}</strong>
+                    </div>
+                    {!mobile ? (
+                        <button
+                            type="button"
+                            className="clinic-sidebar__collapse"
+                            onClick={() => setIsSidebarCollapsed((current) => !current)}
+                            aria-label={isSidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+                        >
+                            {isSidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
+                        </button>
+                    ) : null}
+                </div>
+                <div className="clinic-sidebar__brand-ribbon" />
+            </div>
+
+            <div className="clinic-sidebar__nav">
+                {sidebarGroups.map((group) => (
+                    <div className="clinic-sidebar__nav-group" key={group.label}>
+                        {!isSidebarCollapsed || mobile ? (
+                            <span className="clinic-sidebar__group-label">{group.label}</span>
+                        ) : null}
+                        <div className="clinic-sidebar__group-items">
+                            {group.items.map((item) => renderSidebarNavItem(item, mobile))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="clinic-sidebar__footer">
+                {!isSidebarCollapsed || mobile ? (
+                    <div className="clinic-sidebar__user">
+                        <div className="clinic-sidebar__user-avatar">{getInitials(clinicDisplayName)}</div>
+                        <div>
+                            <strong>{clinicDisplayName}</strong>
+                            <span>{clinicAccessLabel}</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="clinic-sidebar__user-avatar clinic-sidebar__user-avatar--solo">
+                        {getInitials(clinicDisplayName)}
+                    </div>
+                )}
+
+                <button type="button" className="clinic-sidebar__logout" onClick={() => logout()}>
+                    <BoxArrowRight />
+                    {!isSidebarCollapsed || mobile ? <span>Sair</span> : null}
+                </button>
+            </div>
+        </div>
+    );
+
     if (!user) {
         return (
             <Container className="py-5">
@@ -1161,9 +1515,98 @@ const ClinicDashboard = () => {
         );
     }
 
+    if (loading) {
+        return <LoadingShell />;
+    }
+
     return (
-        <div className="clinic-dashboard-page">
-            <Container fluid="xl" className="py-4 py-lg-5">
+        <div className={`clinic-dashboard-page${isSidebarCollapsed ? ' clinic-dashboard-page--collapsed' : ''}`}>
+            <aside className="clinic-sidebar-shell">{renderSidebar()}</aside>
+
+            <Offcanvas
+                show={isMobileSidebarOpen}
+                onHide={() => setIsMobileSidebarOpen(false)}
+                placement="start"
+                className="clinic-offcanvas"
+            >
+                <Offcanvas.Header closeButton closeVariant="white">
+                    <Offcanvas.Title>{clinicDisplayName}</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>{renderSidebar(true)}</Offcanvas.Body>
+            </Offcanvas>
+
+            <div className="clinic-shell">
+                <header className="clinic-header">
+                    <div className="clinic-header__context">
+                        <button
+                            type="button"
+                            className="clinic-header__menu-toggle"
+                            onClick={() => setIsMobileSidebarOpen(true)}
+                            aria-label="Abrir menu"
+                        >
+                            <List />
+                        </button>
+                        <div>
+                            <span className="clinic-header__breadcrumb">{activeSection.breadcrumb}</span>
+                            <h1>{activeSection.title}</h1>
+                        </div>
+                    </div>
+
+                    <div className="clinic-header__actions">
+                        <button
+                            type="button"
+                            className="clinic-icon-button"
+                            onClick={() => setActiveTab('operations')}
+                            aria-label="Alertas operacionais"
+                        >
+                            <Bell />
+                            {dashboard.insights.length > 0 ? (
+                                <span className="clinic-icon-button__badge">{dashboard.insights.length}</span>
+                            ) : null}
+                        </button>
+
+                        <button
+                            type="button"
+                            className="clinic-icon-button"
+                            onClick={handleRefreshDashboard}
+                            aria-label="Atualizar dados"
+                            disabled={refreshing}
+                        >
+                            <ClockHistory />
+                        </button>
+
+                        <Dropdown align="end">
+                            <Dropdown.Toggle variant="light" className="clinic-profile-toggle">
+                                <span className="clinic-profile-toggle__avatar">
+                                    <PersonCircle />
+                                </span>
+                                <span className="clinic-profile-toggle__content">
+                                    <strong>{clinicDisplayName}</strong>
+                                    <small>{clinicAccessLabel}</small>
+                                </span>
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu className="clinic-dropdown">
+                                <Dropdown.Header>{clinicDisplayName}</Dropdown.Header>
+                                <div className="clinic-dropdown__meta">
+                                    <strong>{clinicAccessLabel}</strong>
+                                    <small>Escopo: {dashboard.clinic.scopeDescription || 'Toda a clinica'}</small>
+                                </div>
+                                <Dropdown.Item as="button" onClick={handleRefreshDashboard}>
+                                    <ClockHistory className="me-2" />
+                                    Atualizar dados
+                                </Dropdown.Item>
+                                <Dropdown.Item as="button" onClick={() => logout()}>
+                                    <BoxArrowRight className="me-2" />
+                                    Sair
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </div>
+                </header>
+
+                <main className="clinic-main">
+                    <Container fluid="xl" className="clinic-workspace">
+                        {renderFeedbackStack()}
                 <section className="clinic-hero mb-4">
                     <div>
                         <span className="clinic-eyebrow">Gestão Clínica Integrada</span>
@@ -1217,9 +1660,6 @@ const ClinicDashboard = () => {
                     </div>
                 </section>
 
-                {error ? <Alert variant="danger">{error}</Alert> : null}
-                {managementFeedback ? <Alert variant={managementFeedback.variant}>{managementFeedback.text}</Alert> : null}
-
                 {dashboard.clinic.scopeMode === 'clinic_pending_setup' ? (
                     <Alert variant="warning" className="clinic-inline-alert">
                         Esta clinica ainda nao possui equipe propria carregada. Cadastre os profissionais neste
@@ -1244,6 +1684,19 @@ const ClinicDashboard = () => {
                                     </div>
                                     <div className="clinic-stat-value">{card.value}</div>
                                     <div className="clinic-stat-caption">{card.caption}</div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+
+                <Row className="g-3 mb-4">
+                    {secondarySummaryCards.map((card) => (
+                        <Col key={card.title} xs={12} sm={6} xl={2}>
+                            <Card className="clinic-stat-card clinic-stat-card--secondary">
+                                <Card.Body>
+                                    <span className="clinic-metric-label">{card.title}</span>
+                                    <div className="clinic-metric-value">{card.value}</div>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -1277,7 +1730,7 @@ const ClinicDashboard = () => {
                                         setFilters((current) => ({ ...current, status: e.target.value }))
                                     }
                                 >
-                                    <option value="all">Todos</option>
+                                    <option value="all">Todos os status</option>
                                     {[...new Set(dashboard.appointments.map((appointment) => appointment.status).filter(Boolean))].map(
                                         (status) => (
                                             <option key={status} value={status}>
@@ -1298,7 +1751,7 @@ const ClinicDashboard = () => {
                             <Col xs={12} md={2}>
                                 <Button
                                     className="w-100 clinic-refresh-button"
-                                    disabled={refreshing || loading}
+                                    disabled={refreshing}
                                     onClick={async () => {
                                         try {
                                             setRefreshing(true);
@@ -1349,7 +1802,7 @@ const ClinicDashboard = () => {
                                 <Nav.Item>
                                     <Nav.Link eventKey="agenda">
                                         <Calendar2Week className="me-2" />
-                                        Agendamento
+                                        Agenda
                                     </Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
@@ -1379,7 +1832,7 @@ const ClinicDashboard = () => {
                                 <Nav.Item>
                                     <Nav.Link eventKey="staff">
                                         <PeopleFill className="me-2" />
-                                        Funcionarios
+                                        Equipe
                                     </Nav.Link>
                                 </Nav.Item>
                                 {user?.tipo_usuario === 'clinica' && user?.executive_access === true && <Nav.Item>
@@ -1398,11 +1851,11 @@ const ClinicDashboard = () => {
                                                 <Card.Body>
                                                     <div className="clinic-panel-header">
                                                         <div>
-                                                            <h3>Tração da clínica</h3>
-                                                            <p>Receita consolidada e leitura rápida de capacidade semanal.</p>
+                                                            <h3>Desempenho da clinica</h3>
+                                                            <p>Receita consolidada e leitura clara da operacao semanal.</p>
                                                         </div>
                                                         <Badge bg="success">
-                                                            {formatNumber(dashboard.summary.appointmentsWeek)} consultas na semana
+                                                            {formatNumber(dashboard.summary.appointmentsWeek)} atendimentos na semana
                                                         </Badge>
                                                     </div>
                                                     {revenueChartData.labels.length > 0 ? (
@@ -1447,7 +1900,7 @@ const ClinicDashboard = () => {
                                                             }}
                                                         />
                                                     ) : (
-                                                        <div className="clinic-empty-state">Nenhuma consulta no filtro atual.</div>
+                                                        <div className="clinic-empty-state">Nenhum atendimento no filtro atual.</div>
                                                     )}
                                                 </Card.Body>
                                             </Card>
@@ -1460,7 +1913,7 @@ const ClinicDashboard = () => {
                                                 <Card.Body>
                                                     <div className="clinic-panel-header">
                                                         <div>
-                                                            <h3>Perfis profissionais</h3>
+                                                            <h3>Desempenho da equipe</h3>
                                                             <p>Carga assistencial, agenda de hoje e faturamento por profissional.</p>
                                                         </div>
                                                         <Badge bg="light" text="dark">
@@ -1526,7 +1979,7 @@ const ClinicDashboard = () => {
                                                 <Card.Body>
                                                     <div className="clinic-panel-header">
                                                         <div>
-                                                            <h3>Alertas operacionais</h3>
+                                                            <h3>Atencao da operacao</h3>
                                                             <p>Pontos que merecem atenção imediata da recepção e gestão.</p>
                                                         </div>
                                                         <Bell />
@@ -1574,7 +2027,7 @@ const ClinicDashboard = () => {
                                                     <div className="clinic-panel-header">
                                                         <div>
                                                             <h3>Agenda filtrada</h3>
-                                                            <p>Visão de consultas, encaixes, bloqueios e andamento do dia.</p>
+                                                            <p>Visao de atendimentos, encaixes, bloqueios e andamento do dia.</p>
                                                         </div>
                                                         <div className="clinic-panel-actions">
                                                             <Button
@@ -1587,7 +2040,7 @@ const ClinicDashboard = () => {
                                                                 }
                                                             >
                                                                 <PlusCircle className="me-2" />
-                                                                Nova consulta
+                                                                Novo Atendimento
                                                             </Button>
                                                             <Badge bg="primary">
                                                                 {formatNumber(filteredAppointments.length)} itens
@@ -1596,7 +2049,7 @@ const ClinicDashboard = () => {
                                                     </div>
                                                     {!canManageAppointments ? (
                                                         <Alert variant="secondary" className="clinic-inline-alert">
-                                                            Este perfil visualiza a agenda, mas nao cadastra novas consultas.
+                                                            Este perfil visualiza a agenda, mas nao cadastra novos atendimentos.
                                                         </Alert>
                                                     ) : activeProfessionalDirectory.length === 0 || patientRecords.length === 0 ? (
                                                         <Alert variant="warning" className="clinic-inline-alert">
@@ -1648,7 +2101,7 @@ const ClinicDashboard = () => {
                                                                     <tr>
                                                                         <td colSpan={6}>
                                                                             <div className="clinic-empty-state">
-                                                                                Não há consultas para este recorte.
+                                                                                Nao ha atendimentos para este recorte.
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -1691,7 +2144,7 @@ const ClinicDashboard = () => {
                                                                             }
                                                                         >
                                                                             <PencilSquare className="me-1" />
-                                                                            Editar consulta
+                                                                            Editar atendimento
                                                                         </Button>
                                                                     ) : null}
                                                                 </div>
@@ -1736,7 +2189,7 @@ const ClinicDashboard = () => {
                                                                             }
                                                                         >
                                                                             <PencilSquare className="me-1" />
-                                                                            Editar consulta
+                                                                            Editar atendimento
                                                                         </Button>
                                                                     ) : null}
                                                                 </div>
@@ -1789,7 +2242,7 @@ const ClinicDashboard = () => {
                                                     <div className="clinic-metric-value">
                                                         {formatCurrency(financeCashInMonth)}
                                                     </div>
-                                                    <small>Consultas efetivamente pagas.</small>
+                                                    <small>Atendimentos efetivamente pagos.</small>
                                                 </Card.Body>
                                             </Card>
                                         </Col>
@@ -1818,7 +2271,7 @@ const ClinicDashboard = () => {
                                         <Col xs={12} md={6} xl={3}>
                                             <Card className="clinic-stat-card">
                                                 <Card.Body>
-                                                    <span className="clinic-metric-label">Consultas pagas</span>
+                                                    <span className="clinic-metric-label">Atendimentos pagos</span>
                                                     <div className="clinic-metric-value">
                                                         {formatNumber(financePaidAppointments.length)}
                                                     </div>
@@ -2073,7 +2526,7 @@ const ClinicDashboard = () => {
                                                                 }
                                                             >
                                                                 <PlusCircle className="me-2" />
-                                                                Nova fila
+                                                                Adicionar a fila
                                                             </Button>
                                                             <ClockHistory />
                                                         </div>
@@ -2118,7 +2571,7 @@ const ClinicDashboard = () => {
                                                     <div className="clinic-panel-header">
                                                         <div>
                                                             <h3>Confirmacoes pendentes</h3>
-                                                            <p>Consultas futuras que ainda precisam de confirmacao de presenca.</p>
+                                                            <p>Atendimentos futuros que ainda precisam de confirmacao de presenca.</p>
                                                         </div>
                                                         <Funnel />
                                                     </div>
@@ -2503,7 +2956,7 @@ const ClinicDashboard = () => {
                                                 <Card.Body>
                                                     <div className="clinic-panel-header">
                                                         <div>
-                                                            <h3>Cadastro de funcionarios</h3>
+                                                            <h3>Cadastro da equipe</h3>
                                                             <p>Recepcionistas entram como secretaria da clinica e acessam a agenda multi-profissional.</p>
                                                         </div>
                                                         <Badge bg="light" text="dark">
@@ -2593,7 +3046,7 @@ const ClinicDashboard = () => {
                                                 <Card.Body>
                                                     <div className="clinic-panel-header">
                                                         <div>
-                                                            <h3>Administracao dos funcionarios</h3>
+                                                            <h3>Administracao da equipe</h3>
                                                             <p>Controle de acesso das recepcionistas vinculadas ao mesmo clinic_id.</p>
                                                         </div>
                                                         <PeopleFill />
@@ -2681,7 +3134,9 @@ const ClinicDashboard = () => {
                         </>
                     </Tab.Container>
                 )}
-            </Container>
+                    </Container>
+                </main>
+            </div>
             <Modal
                 show={appointmentModal.show}
                 onHide={resetAppointmentModal}
@@ -2697,8 +3152,8 @@ const ClinicDashboard = () => {
                                     ? 'Editar bloqueio'
                                     : 'Novo bloqueio'
                                 : appointmentModal.mode === 'edit'
-                                  ? 'Editar consulta'
-                                  : 'Nova consulta'}
+                                  ? 'Editar atendimento'
+                                  : 'Novo atendimento'}
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
@@ -2820,7 +3275,7 @@ const ClinicDashboard = () => {
                                 </Form.Select>
                             </Col>
                             <Col xs={12} md={4}>
-                                <Form.Label>Status da consulta</Form.Label>
+                                    <Form.Label>Status do atendimento</Form.Label>
                                 <Form.Select
                                     value={appointmentForm.status}
                                     onChange={(event) => handleAppointmentFormChange('status', event.target.value)}
@@ -2905,7 +3360,7 @@ const ClinicDashboard = () => {
                                   ? 'Salvar bloqueio'
                                   : appointmentModal.mode === 'edit'
                                   ? 'Salvar edicao'
-                                  : 'Agendar consulta'}
+                                  : 'Agendar atendimento'}
                         </Button>
                     </Modal.Footer>
                 </Form>

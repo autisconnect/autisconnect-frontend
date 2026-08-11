@@ -5,6 +5,8 @@ import AuthRoute from './AuthRoute';
 import Home from './Home';
 import Login from './Login';
 import Signup from './Signup';
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 import ParentDashboard from './ParentDashboard';
 import ProfessionalDashboard from './ProfessionalDashboard';
 import ClinicDashboard from './ClinicDashboard';
@@ -112,6 +114,8 @@ function App() {
       <Routes>
         {/* Rota Home Pública */}
         <Route index element={<Home />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Rotas de Autenticação (somente se NÃO logado) */}
         <Route element={<AuthRoute />}>

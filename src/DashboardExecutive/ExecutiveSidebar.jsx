@@ -1,53 +1,155 @@
-import { Activity, BarChartLine, Bell, CashStack, ClipboardCheck, Cpu, CreditCard2Front, FileEarmarkBarGraph, HouseDoor, People } from 'react-bootstrap-icons';
-import { NavLink } from 'react-router-dom';
 import { useContext } from 'react';
-import { CLINIC_MODULES } from './clinicModules';
+import { BarChartLine, BoxArrowRight, ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
+import { NavLink } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import logonovo from '../assets/logonovo.png';
+import { getExecutiveNavigationGroups } from './executiveNavigation';
 
-const ExecutiveSidebar = ({ executiveEnabled, modules = {} }) => {
-  const { user } = useContext(AuthContext);
+const getInitials = (value) => String(value || 'AutisConnect')
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((chunk) => chunk[0]?.toUpperCase() || '')
+  .join('');
+
+const ExecutiveSidebar = ({
+  executiveEnabled,
+  modules = {},
+  collapsed = false,
+  mobile = false,
+  onToggleCollapse,
+  onNavigate
+}) => {
+  const { user, logout } = useContext(AuthContext);
+
   if (!executiveEnabled) return null;
 
+  const { groups, footerItems } = getExecutiveNavigationGroups({ modules, user });
+  const userLabel = user?.nome_completo || 'Clinica';
+  const userRole = user?.tipo_usuario === 'clinica' ? 'perfil clinica' : 'perfil executivo';
+
   return (
-    <aside className="executive-sidebar" aria-label="Navegação do Dashboard Executivo">
-      <div className="executive-sidebar-brand">
-        <BarChartLine aria-hidden="true" />
-        <span>AutisConnect</span>
+    <aside
+      className={`executive-sidebar${collapsed ? ' executive-sidebar--collapsed' : ''}${
+        mobile ? ' executive-sidebar--mobile' : ''
+      }`}
+      aria-label="Navegacao do Dashboard Executivo"
+    >
+      <div className="executive-sidebar__brand-block">
+        <div className="executive-sidebar__brand-row">
+          <div className="executive-sidebar__brand-copy">
+            <span className="executive-sidebar__eyebrow">Camada premium</span>
+            <img
+              src={logonovo}
+              alt="AutisConnect"
+              className="executive-sidebar__brand-image"
+            />
+            <strong>Gestao estrategica da operacao</strong>
+          </div>
+
+          <span className="executive-sidebar__brand-mark" aria-hidden="true">
+            <BarChartLine size={22} />
+          </span>
+
+          {!mobile && (
+            <button
+              type="button"
+              className="executive-sidebar__collapse"
+              onClick={onToggleCollapse}
+              aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            >
+              {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+          )}
+        </div>
+
+        <div className="executive-sidebar__brand-ribbon" aria-hidden="true" />
       </div>
-      <nav>
-        <NavLink to="/dashboard-executivo" className="executive-sidebar-link">
-          <HouseDoor aria-hidden="true" />
-          Dashboard Executivo
-        </NavLink>
-        {user?.tipo_usuario === 'clinica' && <NavLink to={`/clinic-dashboard/${user.id}`} className="executive-sidebar-link"><HouseDoor aria-hidden="true" />Voltar ao Dashboard Clínica</NavLink>}
-        <NavLink to="/dashboard-executivo/solucoes" className="executive-sidebar-link"><BarChartLine aria-hidden="true" />Soluções AutisConnect</NavLink>
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro" className="executive-sidebar-link">
-          <CashStack aria-hidden="true" />
-          Financeiro
-        </NavLink>}
-        {modules[CLINIC_MODULES.FISCAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/fiscal" className="executive-sidebar-link"><CashStack aria-hidden="true" />Gestão Fiscal</NavLink>}
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/configuracoes" className="executive-sidebar-link">
-          <CashStack aria-hidden="true" />
-          Configurações Financeiras
-        </NavLink>}
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/plano-de-contas" className="executive-sidebar-link"><CashStack aria-hidden="true" />Plano de Contas</NavLink>}
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/rateios" className="executive-sidebar-link"><CashStack aria-hidden="true" />Rateios</NavLink>}
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/dre" className="executive-sidebar-link"><CashStack aria-hidden="true" />DRE Gerencial</NavLink>}
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/balanco-patrimonial" className="executive-sidebar-link"><CashStack aria-hidden="true" />Balanço Patrimonial</NavLink>}
-        {modules[CLINIC_MODULES.FINANCIAL_MANAGEMENT]?.allowed && <NavLink to="/dashboard-executivo/financeiro/exportacoes" className="executive-sidebar-link"><CashStack aria-hidden="true" />Exportações Financeiras</NavLink>}
-        <NavLink to="/dashboard-executivo/profissionais" className="executive-sidebar-link">
-          <People aria-hidden="true" />
-          Gestão dos Profissionais
-        </NavLink>
-        {modules[CLINIC_MODULES.EXECUTIVE_REPORTS]?.allowed && <NavLink to="/dashboard-executivo/relatorios" className="executive-sidebar-link"><FileEarmarkBarGraph aria-hidden="true" />Relatórios</NavLink>}
-        {modules[CLINIC_MODULES.EXECUTIVE_AI]?.allowed && <NavLink to="/dashboard-executivo/ia" className="executive-sidebar-link"><Cpu aria-hidden="true" />IA</NavLink>}
-        {modules[CLINIC_MODULES.EXECUTIVE_AUDIT]?.allowed && <NavLink to="/dashboard-executivo/auditoria" className="executive-sidebar-link"><ClipboardCheck aria-hidden="true" />Auditoria</NavLink>}
-        <NavLink to="/dashboard-executivo/assinatura" className="executive-sidebar-link"><CreditCard2Front aria-hidden="true" />Assinatura</NavLink>
-        <NavLink to="/dashboard-executivo/uso" className="executive-sidebar-link"><BarChartLine aria-hidden="true" />Uso da Plataforma</NavLink>
-        <NavLink to="/dashboard-executivo/alertas" className="executive-sidebar-link"><Bell aria-hidden="true" />Alertas Executivos</NavLink>
-        <NavLink to="/dashboard-executivo/indicadores-executivos" className="executive-sidebar-link"><BarChartLine aria-hidden="true" />Indicadores Executivos</NavLink>
-        {modules[CLINIC_MODULES.SYSTEM_HEALTH]?.allowed && <NavLink to="/dashboard-executivo/saude" className="executive-sidebar-link"><Activity aria-hidden="true" />Saúde Operacional</NavLink>}
+
+      <nav className="executive-sidebar__nav">
+        {groups.map((group) => (
+          <div key={group.key} className="executive-sidebar__nav-group">
+            <span className="executive-sidebar__group-label">{group.label}</span>
+            <div className="executive-sidebar__group-items">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.key}
+                    to={item.to}
+                    end={item.exact}
+                    title={item.label}
+                    className={({ isActive }) =>
+                      `executive-sidebar__item${isActive ? ' is-active' : ''}`
+                    }
+                    onClick={onNavigate}
+                  >
+                    <span className="executive-sidebar__item-icon" aria-hidden="true">
+                      <Icon size={18} />
+                    </span>
+
+                    {!collapsed && (
+                      <>
+                        <span className="executive-sidebar__item-copy">
+                          <span className="executive-sidebar__item-label">{item.label}</span>
+                          <span className="executive-sidebar__item-desc">
+                            {item.description}
+                          </span>
+                        </span>
+                        <span className="executive-sidebar__item-arrow" aria-hidden="true">
+                          <ChevronRight size={14} />
+                        </span>
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
+
+      <div className="executive-sidebar__footer">
+        {footerItems.length > 0 && (
+          <div className="executive-sidebar__footer-links">
+            {footerItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.key}
+                  to={item.to}
+                  title={item.label}
+                  className="executive-sidebar__footer-link"
+                  onClick={onNavigate}
+                >
+                  <Icon size={16} aria-hidden="true" />
+                  {!collapsed && <span>{item.label}</span>}
+                </NavLink>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="executive-sidebar__account">
+          <span className="executive-sidebar__account-avatar">{getInitials(userLabel)}</span>
+          {!collapsed && (
+            <div className="executive-sidebar__account-copy">
+              <strong>{userLabel}</strong>
+              <span>{userRole}</span>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          className="executive-sidebar__logout"
+          onClick={logout}
+          title="Sair"
+        >
+          <BoxArrowRight size={16} aria-hidden="true" />
+          {!collapsed && <span>Sair</span>}
+        </button>
+      </div>
     </aside>
   );
 };

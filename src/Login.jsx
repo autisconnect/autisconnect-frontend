@@ -1,24 +1,23 @@
-﻿import React, { useState, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Spinner, Form } from 'react-bootstrap';
-import { ArrowLeft } from 'react-bootstrap-icons';
-import { useNavigate } from 'react-router-dom';
-import logohori from './assets/logonovo.png';
+import React, { useContext, useState } from 'react';
+import { Alert, Form, Spinner } from 'react-bootstrap';
+import { Envelope, Eye, EyeSlash, Lock } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
+import AuthScaffold from './AuthScaffold';
 import { AuthContext } from './context/AuthContext.jsx';
 import apiClient from './services/api.js';
 import './App.css';
+import './Login.css';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useContext(AuthContext);
 
-    const handleBackToHome = () => navigate('/');
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
+    const handleLogin = async (event) => {
+        event.preventDefault();
         setLoading(true);
         setError('');
 
@@ -43,105 +42,98 @@ function Login() {
     };
 
     return (
-        <div className="App auth-page">
-            <nav className="top-bar fixed-top shadow-sm">
-                <Container>
-                    <Row className="align-items-center py-3">
-                        <Col md={7} className="text-center text-md-start">
-                            <img
-                                src={logohori}
-                                alt="AutisConnect"
-                                className="top-bar-logo"
+        <AuthScaffold
+            backTo="/"
+            backLabel="Voltar para o inicio"
+            eyebrow="Acesso seguro"
+            title="Bem-vindo de volta"
+            subtitle="Acesse sua conta AutisConnect"
+            footer={
+                <>
+                    <span>Nao possui uma conta?</span>
+                    <Link to="/signup" className="ac-login-inline-link ac-login-inline-link--strong">
+                        Criar conta
+                    </Link>
+                </>
+            }
+        >
+            {error ? (
+                <Alert variant="danger" className="ac-login-alert" role="alert" aria-live="polite">
+                    {error}
+                </Alert>
+            ) : null}
+
+            <Form className="ac-login-form" onSubmit={handleLogin}>
+                <Form.Group className="ac-login-field" controlId="formUsername">
+                    <Form.Label className="ac-login-label">E-mail</Form.Label>
+                    <div className="ac-login-input-shell">
+                        <span className="ac-login-input-icon">
+                            <Envelope />
+                        </span>
+                        <Form.Control
+                            className="ac-login-input"
+                            type="email"
+                            placeholder="voce@autisconnect.com.br"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            autoComplete="username"
+                            required
+                        />
+                    </div>
+                </Form.Group>
+
+                <Form.Group className="ac-login-field" controlId="formPassword">
+                    <div className="ac-login-field-row">
+                        <Form.Label className="ac-login-label">Senha</Form.Label>
+                        <Link to="/forgot-password" className="ac-login-inline-link">
+                            Esqueci minha senha
+                        </Link>
+                    </div>
+
+                    <div className="ac-login-input-shell">
+                        <span className="ac-login-input-icon">
+                            <Lock />
+                        </span>
+                        <Form.Control
+                            className="ac-login-input"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Digite sua senha"
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            autoComplete="current-password"
+                            required
+                        />
+                        <button
+                            type="button"
+                            className="ac-login-input-action"
+                            onClick={() => setShowPassword((current) => !current)}
+                            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                            aria-pressed={showPassword}
+                        >
+                            {showPassword ? <EyeSlash /> : <Eye />}
+                        </button>
+                    </div>
+                </Form.Group>
+
+                <button type="submit" className="ac-login-button" disabled={loading}>
+                    {loading ? (
+                        <>
+                            <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                className="ac-login-button__spinner"
                             />
-                        </Col>
-                        <Col md={5} className="text-center text-md-end">
-                            <ArrowLeft
-                                size={30}
-                                onClick={handleBackToHome}
-                                style={{ cursor: 'pointer', color: '#ffffff' }}
-                                title="Voltar para a Home"
-                            />
-                        </Col>
-                    </Row>
-                </Container>
-            </nav>
-
-            <div className="home-page" style={{ paddingTop: '85px' }}>
-                <section className="hero-section hero-short">
-                    <Container>
-                        <Row className="align-items-center">
-                            <Col lg={5} className="mb-4 mb-lg-0">
-                                <div className="hero-content-box p-4 rounded-4">
-                                    <h2 className="display-5 fw-bold mb-3 text-white">Bem-vindo de volta!</h2>
-                                    <p className="text-white-90 mb-0">
-                                        Faça login para acessar sua conta e acompanhar o desenvolvimento do seu paciente.
-                                    </p>
-                                </div>
-                            </Col>
-                            <Col lg={7}>
-                                <Card className="shadow-sm border-0">
-                                    <Card.Body>
-                                        <Card.Title className="text-center mb-4">Login</Card.Title>
-
-                                        {error && <Alert variant="danger">{error}</Alert>}
-
-                                        <Form onSubmit={handleLogin}>
-                                            <Form.Group className="mb-3" controlId="formUsername">
-                                                <Form.Label>Usuario</Form.Label>
-                                                <Form.Control
-                                                    type="email"
-                                                    placeholder="Digite seu email"
-                                                    value={email}
-                                                    onChange={(e) => setEmail(e.target.value)}
-                                                    required
-                                                />
-                                            </Form.Group>
-
-                                            <Form.Group className="mb-3" controlId="formPassword">
-                                                <Form.Label>Senha</Form.Label>
-                                                <Form.Control
-                                                    type="password"
-                                                    placeholder="Digite sua senha"
-                                                    value={password}
-                                                    onChange={(e) => setPassword(e.target.value)}
-                                                    required
-                                                />
-                                            </Form.Group>
-
-                                            <Button
-                                                variant="primary"
-                                                type="submit"
-                                                className="w-100 mb-3"
-                                                disabled={loading}
-                                            >
-                                                {loading ? <Spinner animation="border" size="sm" /> : 'Entrar'}
-                                            </Button>
-
-                                            <div className="text-center">
-                                                <a href="/signup">Nao tem uma conta? Cadastre-se</a>
-                                            </div>
-                                        </Form>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Container>
-                </section>
-
-                <footer className="footer-section py-4">
-                    <Container>
-                        <Row className="align-items-center">
-                            <Col md={6} className="footer-left text-start">
-                                <p className="mb-0">
-                                    {'\u00a9'} 2026 Nf Representações Comerciais Ltda.<br />
-                                    <small>Todos os direitos reservados.</small>
-                                </p>
-                            </Col>
-                        </Row>
-                    </Container>
-                </footer>
-            </div>
-        </div>
+                            <span>Entrando...</span>
+                        </>
+                    ) : (
+                        'Entrar'
+                    )}
+                </button>
+            </Form>
+        </AuthScaffold>
     );
 }
 

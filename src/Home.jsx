@@ -8,7 +8,6 @@ import {
     Calendar2Check,
     CheckCircle,
     Envelope,
-    ExclamationTriangle,
     FileEarmarkText,
     GeoAlt,
     GraphUp,
@@ -27,9 +26,10 @@ import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
 
 import logonovo from './assets/logonovo.png';
-import servico1 from './assets/servico1.jpeg';
-import servico2 from './assets/servico2.jpeg';
-import heroImage from './assets/img1.png';
+import servico1 from './assets/servico01.png';
+import servico2 from './assets/servico02.png';
+import img01 from './assets/img01.png';
+import img02 from './assets/img02.png';
 import game1Image from './assets/game1.png';
 import game2Image from './assets/game2.jpg';
 import game3Image from './assets/game3.png';
@@ -46,61 +46,82 @@ const TRACKING_EVENTS = {
     ecosystemClick: 'click_ecossistema',
     whatsappClick: 'click_whatsapp',
     featureClick: 'click_recurso_home',
-    gameClick: 'click_game_terapeutico',
-    dashboardClick: 'click_dashboard_home'
+    serviceClick: 'click_servico_rede_tea',
+    serviceSearch: 'busca_servicos_rede_tea',
+    dashboardClick: 'click_dashboard_home',
+    platformClick: 'click_conhecer_plataforma'
 };
 
 const seoConfig = {
-    title: 'AutisConnect | Plataforma inteligente para acompanhamento TEA',
+    title: 'AutisConnect | Ecossistema inteligente para acompanhamento TEA',
     description:
-        'Plataforma inteligente para monitoramento emocional, análise de vocalizações, atividades terapêuticas, jogos inteligentes e acompanhamento de pessoas com TEA.',
+        'Plataforma inteligente que conecta famílias, profissionais, clínicas, dados, monitoramento emocional, atividades ABA, jogos terapêuticos e gestão em torno da jornada da pessoa com TEA.',
     keywords:
-        'plataforma para autismo, monitoramento emocional TEA, acompanhamento TEA, jogos terapêuticos autismo, atividades ABA, desenvolvimento TEA, análise de vocalizações TEA'
+        'plataforma para autismo, software para autismo, sistema para clínicas TEA, gestão de pacientes TEA, prontuário TEA, monitoramento emocional TEA, acompanhamento TEA, jogos terapêuticos autismo, atividades ABA, análise de vocalizações TEA, rede de serviços TEA'
 };
 
-const problemCards = [
-    'Emoções difíceis de monitorar',
-    'Evolução pouco mensurável',
-    'Falta de integração entre casa e terapia',
-    'Poucos dados para tomada de decisão',
-    'Informações dispersas'
+const ecosystemGroups = [
+    {
+        title: 'Família',
+        description: 'Acompanhamento, participação e informações do dia a dia.',
+        icon: <Heart size={30} />,
+        items: ['Evolução', 'Atividades', 'Comunicação']
+    },
+    {
+        title: 'Profissionais',
+        description: 'Pacientes, atendimentos, evolução e ferramentas terapêuticas.',
+        icon: <People size={30} />,
+        items: ['Atendimentos', 'ABA', 'Relatórios']
+    },
+    {
+        title: 'Clínica',
+        description: 'Pacientes, equipe, agenda, operação e financeiro.',
+        icon: <Calendar2Check size={30} />,
+        items: ['Agenda', 'Equipe', 'Operação']
+    },
+    {
+        title: 'Gestão',
+        description: 'Indicadores, produtividade, relatórios e inteligência gerencial.',
+        icon: <GraphUp size={30} />,
+        items: ['Indicadores', 'Alertas', 'Decisão']
+    }
 ];
 
-const ecosystemFeatures = [
+const beyondManagementPillars = [
     {
-        title: 'Monitoramento Emocional',
-        description: 'Acompanhe padrões emocionais ao longo do tempo através de indicadores inteligentes.',
-        icon: <Heart size={38} />,
-        color: '#d9486e',
-        link: '/presentation-dashboard/PresentationEmotionDetector'
+        title: 'Monitoramento de Emoções',
+        description: 'Registros visuais para acompanhar sinais emocionais ao longo da jornada.',
+        icon: <Heart size={30} />,
+        link: '/presentation-dashboard/PresentationEmotionDetector',
+        bars: [62, 78, 54]
     },
     {
         title: 'Análise de Vocalizações',
-        description: 'Registre e acompanhe vocalizações relevantes durante o desenvolvimento.',
-        icon: <FileEarmarkText size={38} />,
-        color: '#2563eb',
-        link: '/presentation-dashboard/PresentationTriggerRecorder'
+        description: 'Acompanhamento estruturado de vocalizações relevantes para o desenvolvimento.',
+        icon: <FileEarmarkText size={30} />,
+        link: '/presentation-dashboard/PresentationTriggerRecorder',
+        bars: [44, 68, 82]
     },
     {
         title: 'Atividades ABA',
-        description: 'Planejamento, execução e acompanhamento digital das atividades.',
-        icon: <Calendar2Check size={38} />,
-        color: '#0f9f8f',
-        link: '/presentation-dashboard/PresentationPatientDetails'
+        description: 'Planejamento, execução e evolução das atividades terapêuticas.',
+        icon: <Calendar2Check size={30} />,
+        link: '/presentation-dashboard/PresentationPatientDetails',
+        bars: [72, 58, 86]
     },
     {
         title: 'Games Terapêuticos',
-        description: 'Jogos desenvolvidos para estimular habilidades cognitivas, emocionais e comportamentais.',
-        icon: <Star size={38} />,
-        color: '#7c3aed',
-        link: '#games-terapeuticos'
+        description: 'Experiências digitais para estimular habilidades cognitivas e socioemocionais.',
+        icon: <Star size={30} />,
+        link: '#games-terapeuticos',
+        bars: [52, 74, 64]
     },
     {
-        title: 'Inteligência de Dados',
-        description: 'Transforme registros em informações visuais para apoiar decisões.',
-        icon: <GraphUp size={38} />,
-        color: '#f97316',
-        link: '/PresentationProfessionalDashboard'
+        title: 'Inteligência Artificial',
+        description: 'Organização de dados para apoiar leitura de padrões e insights de acompanhamento.',
+        icon: <Sliders size={30} />,
+        link: '/PresentationProfessionalDashboard',
+        bars: [66, 46, 88]
     }
 ];
 
@@ -131,7 +152,50 @@ const games = [
     }
 ];
 
-const emotionalInsights = ['Linha do tempo emocional', 'Indicadores', 'Tendências', 'Alertas', 'Insights'];
+const architectureLayers = [
+    {
+        title: 'Pais / Responsáveis',
+        description: 'Participação da família na jornada.',
+        items: ['Evolução', 'Indicadores', 'Atividades', 'Comunicação', 'Atendimentos', 'Serviços']
+    },
+    {
+        title: 'Profissionais',
+        description: 'Atendimento e acompanhamento terapêutico.',
+        items: ['Pacientes', 'Atendimentos', 'ABA', 'Monitoramentos', 'Relatórios', 'Inteligência']
+    },
+    {
+        title: 'Clínica',
+        description: 'Gestão integrada da operação.',
+        items: ['Pacientes', 'Profissionais', 'Funcionários', 'Agenda', 'Financeiro', 'Operação']
+    },
+    {
+        title: 'Executivo',
+        description: 'Inteligência estratégica da organização.',
+        items: ['DRE', 'Fluxo de caixa', 'Alertas', 'Fiscal', 'Produtividade', 'Insights']
+    }
+];
+
+const clinicFeatures = [
+    'Visão geral',
+    'Agendamentos',
+    'Profissionais',
+    'Pacientes',
+    'Funcionários',
+    'Financeiro',
+    'Operações'
+];
+
+const executiveFeatures = [
+    'Receita',
+    'Custos',
+    'Fluxo de caixa',
+    'DRE',
+    'Indicadores',
+    'Produtividade',
+    'Alertas',
+    'Gestão Fiscal Inteligente',
+    'IA e insights'
+];
 
 const professionalBenefits = [
     'Monitoramento contínuo',
@@ -149,36 +213,20 @@ const familyBenefits = [
     'Participar do processo terapêutico'
 ];
 
-const managementTools = [
-    { title: 'Agenda', icon: <Calendar size={28} /> },
-    { title: 'Pacientes', icon: <People size={28} /> },
-    { title: 'Financeiro', icon: <Wallet2 size={28} /> },
-    { title: 'Relatórios', icon: <GraphUp size={28} /> },
-    { title: 'Portal dos Pais', icon: <Sliders size={28} /> }
-];
-
-const dashboardHighlights = [
-    {
-        title: 'Dashboard Clínica',
-        description: 'Uma visão operacional para clínicas acompanharem pacientes, profissionais, agenda, vínculos e rotina de atendimento em um único ambiente.',
-        icon: <Sliders size={34} />,
-        bullets: ['Operação clínica integrada', 'Equipe, pacientes e agenda', 'Base para gestão terapêutica'],
-        cta: 'Conhecer Dashboard Clínica'
-    },
-    {
-        title: 'Dashboard Executivo',
-        description: 'Uma camada estratégica para transformar dados da operação em indicadores, relatórios, alertas e visão gerencial da clínica.',
-        icon: <GraphUp size={34} />,
-        bullets: ['Indicadores executivos', 'Receita, ocupação e alertas', 'Relatórios e saúde operacional'],
-        cta: 'Conhecer Dashboard Executivo'
-    }
-];
-
-const proofItems = [
-    'Startup incubada pelo Porto Digital.',
+const validationItems = [
+    'Startup incubada pelo Porto Digital do Recife.',
     'Mais de 50 entrevistas realizadas com profissionais e famílias.',
     'Plataforma desenvolvida especificamente para o ecossistema TEA.',
-    'Preparada para clínicas, profissionais e famílias.'
+    'Preparada para clínicas, profissionais, famílias e rede de serviços.'
+];
+
+const footerTrustItems = [
+    'Tecnologia inteligente',
+    'Cuidado humano',
+    'Dados e ciência',
+    'Segurança',
+    'Inclusão',
+    'Evolução constante'
 ];
 
 const SERVICE_TYPE_OPTIONS = [
@@ -279,7 +327,7 @@ const normalizeList = (value) => {
     if (Array.isArray(value)) return value.filter(Boolean);
     if (typeof value === 'string') {
         return value
-            .split(',')
+            .split(/[,;|]/)
             .map((item) => item.trim())
             .filter(Boolean);
     }
@@ -345,6 +393,54 @@ const buildServiceSearchParams = (filters) => {
     return params.toString();
 };
 
+const DataLine = ({ width = 60 }) => (
+    <span className="ecosystem-data-line">
+        <i style={{ width: `${width}%` }} />
+    </span>
+);
+
+const MiniDashboard = ({ title, eyebrow, lines = [52, 72, 44], variant = 'blue' }) => (
+    <div className={`ecosystem-mini-dashboard ecosystem-mini-dashboard--${variant}`}>
+        <div className="ecosystem-mini-dashboard__top">
+            <span>{eyebrow}</span>
+            <strong>{title}</strong>
+        </div>
+        <div className="ecosystem-mini-dashboard__grid">
+            {lines.map((line, index) => (
+                <DataLine key={`${title}-${line}-${index}`} width={line} />
+            ))}
+        </div>
+    </div>
+);
+
+const FeatureLink = ({ feature }) => {
+    const content = (
+        <>
+            Conhecer recurso <ArrowRight size={16} />
+        </>
+    );
+
+    if (feature.link.startsWith('#')) {
+        return (
+            <a
+                href={feature.link}
+                onClick={() => trackEvent(TRACKING_EVENTS.featureClick, { feature: feature.title })}
+            >
+                {content}
+            </a>
+        );
+    }
+
+    return (
+        <Link
+            to={feature.link}
+            onClick={() => trackEvent(TRACKING_EVENTS.featureClick, { feature: feature.title })}
+        >
+            {content}
+        </Link>
+    );
+};
+
 const Home = () => {
     const { loading } = useContext(AuthContext);
     const [servicesLoading, setServicesLoading] = useState(false);
@@ -378,7 +474,12 @@ const Home = () => {
             applicationCategory: 'HealthApplication',
             operatingSystem: 'Web',
             description: seoConfig.description,
-            keywords: seoConfig.keywords
+            keywords: seoConfig.keywords,
+            audience: [
+                { '@type': 'Audience', audienceType: 'Famílias de pessoas com TEA' },
+                { '@type': 'Audience', audienceType: 'Profissionais de saúde e terapias' },
+                { '@type': 'Audience', audienceType: 'Clínicas e organizações de cuidado' }
+            ]
         });
     }, []);
 
@@ -423,7 +524,7 @@ const Home = () => {
                 page: Number(payload.page || filters.page || 1),
                 pageSize: Number(payload.pageSize || payload.limit || filters.limit || 12)
             });
-            trackEvent(TRACKING_EVENTS.featureClick, { feature: 'Busca Serviços Rede TEA' });
+            trackEvent(TRACKING_EVENTS.serviceSearch, { source: 'home_rede_tea' });
         } catch (err) {
             console.warn('Erro ao buscar serviços na Home.', err);
             setServices([]);
@@ -478,6 +579,7 @@ const Home = () => {
 
     const openServiceDetails = (serviceId) => {
         const resolvedId = serviceId || 18;
+        trackEvent(TRACKING_EVENTS.serviceClick, { serviceId: resolvedId, source: 'home_rede_tea' });
         window.open(`/service-dashboard/${resolvedId}`, '_blank', 'noopener,noreferrer');
     };
 
@@ -493,154 +595,233 @@ const Home = () => {
 
     return (
         <>
-            <nav className="top-bar fixed-top shadow-sm autis-home-nav">
+            <nav className="top-bar fixed-top autis-home-nav ecosystem-nav">
                 <Container>
                     <Row className="align-items-center gy-3 py-3">
-                        <Col lg={3} md={4} className="text-center text-md-start">
-                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
+                        <Col xl={2} lg={2} md={4} className="text-center text-md-start">
+                            <a href="#topo" aria-label="AutisConnect Home">
+                                <img src={logonovo} alt="AutisConnect" className="top-bar-logo ecosystem-nav__logo" />
+                            </a>
                         </Col>
-                        <Col lg={9} md={8}>
-                            <div className="autis-home-nav__actions">
-                                <a href="#ecossistema" className="autis-home-nav__link">Ecossistema</a>
-                                <a href="#games-terapeuticos" className="autis-home-nav__link">Games</a>
-                                <a href="#monitoramento-emocional" className="autis-home-nav__link">Monitoramento</a>
+                        <Col xl={10} lg={10} md={8}>
+                            <div className="autis-home-nav__actions ecosystem-nav__actions">
+                                <a href="#plataforma" className="autis-home-nav__link">Plataforma</a>
+                                <a href="#solucoes" className="autis-home-nav__link">Soluções</a>
+                                <a href="#clinicas" className="autis-home-nav__link">Para Clínicas</a>
+                                <a href="#profissionais" className="autis-home-nav__link">Para Profissionais</a>
+                                <a href="#familias" className="autis-home-nav__link">Para Famílias</a>
                                 <a href="#servicos-rede-tea" className="autis-home-nav__link">Rede TEA</a>
-                                <a href="#gestao-integrada" className="autis-home-nav__link">Gestão</a>
-                                <a
+                                <Button
+                                    as="a"
                                     href={DEMO_URL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-decoration-none"
+                                    variant="primary"
+                                    className="ecosystem-btn ecosystem-btn--primary"
                                     onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: 'nav' })}
                                 >
-                                    <Button variant="light" size="md" className="px-4 py-2">
-                                        Agendar Demonstração
-                                    </Button>
-                                </a>
-                                <Link
+                                    Agendar demonstração
+                                </Button>
+                                <Button
+                                    as={Link}
                                     to="/login"
-                                    className="text-decoration-none"
+                                    variant="outline-light"
+                                    className="ecosystem-btn ecosystem-btn--ghost"
                                     onClick={() => {
                                         localStorage.removeItem('token');
                                         localStorage.removeItem('user');
                                     }}
                                 >
-                                    <Button variant="outline-light" size="md" className="px-4 py-2">
-                                        Fazer Login
-                                    </Button>
-                                </Link>
+                                    Entrar
+                                </Button>
                             </div>
                         </Col>
                     </Row>
                 </Container>
             </nav>
 
-            <main className="home-page landing-home autisconnect-intelligence-home">
-                <section
-                    className="landing-hero intelligence-hero"
-                    style={{ backgroundImage: `linear-gradient(90deg, rgba(8, 25, 43, 0.92), rgba(8, 25, 43, 0.72), rgba(8, 25, 43, 0.38)), url(${heroImage})` }}
-                >
+            <main id="topo" className="home-page landing-home autisconnect-intelligence-home ecosystem-home">
+                <section className="ecosystem-hero">
                     <Container>
-                        <Row className="align-items-center">
-                            <Col lg={8} xl={7}>
-                                <p className="intelligence-hero__kicker">Plataforma Inteligente para Monitoramento, Desenvolvimento e Acompanhamento de Pessoas com TEA.</p>
-                                <h1>Tecnologia para compreender, monitorar e apoiar a evolução de pessoas com TEA.</h1>
-                                <p className="landing-hero__subtitle">
-                                    Monitoramento emocional, análise de vocalizações, atividades terapêuticas, jogos inteligentes e gestão integrada em uma única plataforma.
+                        <Row className="align-items-center g-5">
+                            <Col xl={6} lg={6}>
+                                <Badge className="ecosystem-eyebrow">Plataforma inteligente HealthTech para TEA</Badge>
+                                <h1>Tecnologia que conecta toda a jornada da pessoa com TEA.</h1>
+                                <p className="ecosystem-hero__subtitle">
+                                    Uma plataforma inteligente que integra famílias, profissionais, clínicas, acompanhamento terapêutico, dados e gestão em um único ecossistema.
                                 </p>
-                                <div className="landing-hero__actions">
-                                    <a
+                                <div className="ecosystem-hero__actions">
+                                    <Button
+                                        as="a"
+                                        href="#plataforma"
+                                        size="lg"
+                                        className="ecosystem-btn ecosystem-btn--primary"
+                                        onClick={() => trackEvent(TRACKING_EVENTS.platformClick, { location: 'hero' })}
+                                    >
+                                        Conhecer o AutisConnect <ArrowRight size={18} />
+                                    </Button>
+                                    <Button
+                                        as="a"
                                         href={DEMO_URL}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        size="lg"
+                                        variant="outline-light"
+                                        className="ecosystem-btn ecosystem-btn--light"
                                         onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: 'hero' })}
                                     >
-                                        <Button variant="light" size="lg">
-                                            Agendar Demonstração <ArrowRight size={18} />
-                                        </Button>
-                                    </a>
-                                    <a
-                                        href="#ecossistema"
-                                        onClick={() => trackEvent(TRACKING_EVENTS.ecosystemClick, { location: 'hero' })}
+                                        Agendar demonstração
+                                    </Button>
+                                    <Link
+                                        to="/login"
+                                        className="ecosystem-hero__login"
+                                        onClick={() => {
+                                            localStorage.removeItem('token');
+                                            localStorage.removeItem('user');
+                                        }}
                                     >
-                                        <Button variant="outline-light" size="lg">
-                                            Conhecer o Ecossistema AutisConnect
-                                        </Button>
-                                    </a>
+                                        Entrar na plataforma
+                                    </Link>
                                 </div>
-                                <div className="intelligence-hero__signals">
-                                    <span><strong>Dashboard emocional</strong><small>padrões e alertas</small></span>
-                                    <span><strong>Gráficos de evolução</strong><small>desenvolvimento ao longo do tempo</small></span>
-                                    <span><strong>Indicadores clínicos</strong><small>apoio à decisão</small></span>
+                                <div className="ecosystem-hero__trust">
+                                    <span>Tecnologia inteligente</span>
+                                    <span>Cuidado contínuo</span>
+                                    <span>Dados e ciência</span>
+                                </div>
+                            </Col>
+                            <Col xl={6} lg={6} className="hero-ecosystem-col">
+                                <div className="hero-ecosystem-visual">
+                                    <img
+                                        src={img01}
+                                        alt="Ecossistema AutisConnect com a pessoa com TEA no centro, conectando família, profissionais, clínica, gestão e ferramentas de acompanhamento"
+                                        className="hero-ecosystem-image"
+                                        width="1150"
+                                        height="1368"
+                                        loading="eager"
+                                        fetchPriority="high"
+                                        decoding="async"
+                                    />
                                 </div>
                             </Col>
                         </Row>
                     </Container>
                 </section>
 
-                <section className="landing-section intelligence-problem">
+                <section className="ecosystem-section ecosystem-problem">
                     <Container>
                         <Row className="align-items-center g-5">
                             <Col lg={5}>
-                                <span className="landing-section__label">Problema</span>
-                                <h2>Os maiores desafios não estão na agenda.</h2>
+                                <span className="landing-section__label">O problema</span>
+                                <h2>Muitos profissionais. Muitos registros. Pouca integração.</h2>
                                 <p>
-                                    Profissionais e famílias enfrentam dificuldades para acompanhar emoções, comportamentos, vocalizações e evolução terapêutica ao longo do tempo.
+                                    A jornada da pessoa com TEA pode envolver família, psicologia, fonoaudiologia, terapia ocupacional, ABA, clínicas e outros profissionais.
                                 </p>
                                 <p>
-                                    Grande parte dessas informações permanece subjetiva, dificultando decisões mais assertivas.
+                                    O problema é que grande parte dessas informações permanece fragmentada, dificultando uma visão contínua do desenvolvimento.
                                 </p>
                             </Col>
                             <Col lg={7}>
-                                <Row className="g-3">
-                                    {problemCards.map((problem) => (
-                                        <Col md={6} key={problem}>
-                                            <Card className="landing-card landing-pain-card h-100">
-                                                <Card.Body>
-                                                    <ExclamationTriangle size={24} />
-                                                    <strong>{problem}</strong>
-                                                </Card.Body>
-                                            </Card>
-                                        </Col>
-                                    ))}
-                                </Row>
+                                <div className="problem-visual">
+                                    <img
+                                        src={img02}
+                                        alt="Ecossistema integrado AutisConnect conectando pessoa com TEA, pais e responsáveis, profissionais, clínica, gestão e inteligência de dados"
+                                        className="problem-ecosystem-image"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                </div>
                             </Col>
                         </Row>
                     </Container>
                 </section>
 
-                <section className="landing-section bg-white" id="ecossistema">
+                <section className="ecosystem-question">
+                    <Container>
+                        <div className="ecosystem-question__panel">
+                            <span className="landing-section__label">A grande virada</span>
+                            <h2>E se a pessoa com TEA fosse o centro de tudo?</h2>
+                            <p>
+                                O AutisConnect organiza diferentes perspectivas em torno da mesma jornada: família, profissionais, clínica, dados e inteligência trabalhando de forma conectada.
+                            </p>
+                            <div className="ecosystem-question__flow">
+                                {['Família', 'Profissionais', 'Clínica', 'Dados', 'Inteligência'].map((item) => (
+                                    <span key={item}>{item}</span>
+                                ))}
+                            </div>
+                        </div>
+                    </Container>
+                </section>
+
+                <section className="ecosystem-section ecosystem-platform" id="plataforma">
                     <Container>
                         <div className="landing-section__heading">
-                            <span className="landing-section__label">Diferencial AutisConnect</span>
-                            <h2>Transformando sinais em informações.</h2>
-                            <p>O AutisConnect ajuda profissionais e famílias a identificar padrões que normalmente passariam despercebidos.</p>
+                            <span className="landing-section__label">AutisConnect — o ecossistema</span>
+                            <h2>Um ecossistema. Uma jornada. Uma visão integrada.</h2>
+                            <p>
+                                Cada público acessa ferramentas adequadas à sua rotina, mas todos trabalham sobre partes de uma mesma jornada.
+                            </p>
                         </div>
-                        <Row className="g-4 justify-content-center">
-                            {ecosystemFeatures.map((feature) => (
-                                <Col key={feature.title} lg={4} md={6}>
-                                    <Card className="landing-card landing-feature-card intelligence-feature-card h-100">
+                        <div className="ecosystem-connected-board">
+                            <div className="ecosystem-connected-board__person">
+                                <Heart size={34} />
+                                <strong>Pessoa com TEA</strong>
+                                <span>Acompanhamento, desenvolvimento e evolução</span>
+                            </div>
+                            <Row className="g-4">
+                                {ecosystemGroups.map((group) => (
+                                    <Col key={group.title} lg={3} md={6}>
+                                        <Card className="landing-card ecosystem-group-card h-100">
+                                            <Card.Body>
+                                                <div className="ecosystem-group-card__icon">{group.icon}</div>
+                                                <h3>{group.title}</h3>
+                                                <p>{group.description}</p>
+                                                <div className="ecosystem-group-card__tags">
+                                                    {group.items.map((item) => (
+                                                        <span key={item}>{item}</span>
+                                                    ))}
+                                                </div>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
+                        </div>
+                    </Container>
+                </section>
+
+                <section className="ecosystem-section ecosystem-beyond" id="solucoes">
+                    <Container>
+                        <Row className="align-items-end g-4 mb-4">
+                            <Col lg={7}>
+                                <span className="landing-section__label">Fomos além da gestão</span>
+                                <h2>Dados que ajudam a compreender a evolução.</h2>
+                                <p>
+                                    Monitoramentos, atividades e inteligência organizam sinais relevantes para apoiar profissionais e famílias, sem substituir avaliação clínica ou tomada de decisão profissional.
+                                </p>
+                            </Col>
+                            <Col lg={5}>
+                                <div className="ecosystem-beyond__insight">
+                                    <GraphUp size={26} />
+                                    <span>Uma leitura mais contínua da jornada, com dados visuais e contexto compartilhado.</span>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row className="g-4">
+                            {beyondManagementPillars.map((pillar) => (
+                                <Col key={pillar.title} xl={4} md={6}>
+                                    <Card className="landing-card ecosystem-pillar-card h-100">
                                         <Card.Body>
-                                            <div className="landing-feature-card__icon" style={{ color: feature.color }}>
-                                                {feature.icon}
+                                            <div className="ecosystem-pillar-card__top">
+                                                <div className="ecosystem-pillar-card__icon">{pillar.icon}</div>
+                                                <div className="ecosystem-pillar-card__signal">
+                                                    {pillar.bars.map((bar, index) => (
+                                                        <DataLine key={`${pillar.title}-${bar}-${index}`} width={bar} />
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <h3>{feature.title}</h3>
-                                            <p>{feature.description}</p>
-                                            {feature.link.startsWith('#') ? (
-                                                <a
-                                                    href={feature.link}
-                                                    onClick={() => trackEvent(TRACKING_EVENTS.featureClick, { feature: feature.title })}
-                                                >
-                                                    Conhecer recurso <ArrowRight size={16} />
-                                                </a>
-                                            ) : (
-                                                <Link
-                                                    to={feature.link}
-                                                    onClick={() => trackEvent(TRACKING_EVENTS.featureClick, { feature: feature.title })}
-                                                >
-                                                    Conhecer recurso <ArrowRight size={16} />
-                                                </Link>
-                                            )}
+                                            <h3>{pillar.title}</h3>
+                                            <p>{pillar.description}</p>
+                                            <FeatureLink feature={pillar} />
                                         </Card.Body>
                                     </Card>
                                 </Col>
@@ -649,24 +830,24 @@ const Home = () => {
                     </Container>
                 </section>
 
-                <section className="landing-section intelligence-games" id="games-terapeuticos">
+                <section className="ecosystem-section ecosystem-games" id="games-terapeuticos">
                     <Container>
                         <div className="landing-section__heading">
-                            <span className="landing-section__label">Games Terapêuticos</span>
+                            <span className="landing-section__label">Games terapêuticos</span>
                             <h2>Aprender também pode ser divertido.</h2>
                             <p>Jogos digitais com foco em habilidades cognitivas, emocionais e comportamentais.</p>
                         </div>
                         <Row className="g-4">
                             {games.map((game) => (
                                 <Col key={game.title} lg={3} md={6}>
-                                    <Card className="landing-card intelligence-game-card h-100">
-                                        <div className="intelligence-game-card__image">
+                                    <Card className="landing-card ecosystem-game-card h-100">
+                                        <div className="ecosystem-game-card__image">
                                             <Card.Img src={game.image} alt={game.title} />
                                         </div>
                                         <Card.Body>
                                             <h3>{game.title}</h3>
                                             <p>{game.benefit}</p>
-                                            <div className="intelligence-game-card__objective">
+                                            <div className="ecosystem-game-card__objective">
                                                 <span>Objetivo comportamental</span>
                                                 <strong>{game.objective}</strong>
                                             </div>
@@ -678,68 +859,63 @@ const Home = () => {
                     </Container>
                 </section>
 
-                <section className="landing-section landing-emotional intelligence-emotional" id="monitoramento-emocional">
+                <section className="ecosystem-section ecosystem-architecture">
                     <Container>
-                        <Row className="align-items-center g-5">
-                            <Col lg={6}>
-                                <span className="landing-section__label">Monitoramento Emocional</span>
-                                <h2>O diferencial que torna o AutisConnect único.</h2>
-                                <p className="intelligence-emotional__quote">
-                                    Quando emoções se tornam dados, decisões se tornam mais seguras.
-                                </p>
-                                <p>
-                                    Acompanhe sinais emocionais, visualize tendências e transforme registros em insights para apoiar intervenções mais contextualizadas.
-                                </p>
-                                <div className="landing-emotional__grid">
-                                    {emotionalInsights.map((signal) => (
-                                        <span key={signal}><Star size={16} /> {signal}</span>
-                                    ))}
-                                </div>
-                            </Col>
-                            <Col lg={6}>
-                                <div className="landing-emotional__panel intelligence-emotional__panel">
-                                    <div className="landing-emotional__timeline">
-                                        <span>Semana 1</span>
-                                        <div><i style={{ width: '52%' }} /></div>
-                                        <strong>Base</strong>
-                                    </div>
-                                    <div className="landing-emotional__timeline">
-                                        <span>Semana 2</span>
-                                        <div><i style={{ width: '71%' }} /></div>
-                                        <strong>Atenção</strong>
-                                    </div>
-                                    <div className="landing-emotional__timeline">
-                                        <span>Semana 3</span>
-                                        <div><i style={{ width: '48%' }} /></div>
-                                        <strong>Regulação</strong>
-                                    </div>
-                                    <div className="intelligence-emotional__insight-grid">
-                                        <span><strong>Alertas</strong><small>mudanças relevantes</small></span>
-                                        <span><strong>Insights</strong><small>padrões recorrentes</small></span>
-                                        <span><strong>Tendências</strong><small>evolução longitudinal</small></span>
-                                    </div>
-                                </div>
-                            </Col>
-                        </Row>
+                        <div className="landing-section__heading">
+                            <span className="landing-section__label">Arquitetura da plataforma</span>
+                            <h2>Uma plataforma. Diferentes níveis de inteligência.</h2>
+                            <p>Da jornada da pessoa com TEA à decisão estratégica, sem tirar a pessoa acompanhada do centro.</p>
+                        </div>
+                        <div className="ecosystem-architecture__canvas">
+                            <div className="ecosystem-architecture__center">
+                                <img src={logonovo} alt="" />
+                                <strong>Pessoa com TEA</strong>
+                                <span>Uma pessoa. Uma jornada. Diferentes perspectivas conectadas.</span>
+                            </div>
+                            <Row className="g-4">
+                                {architectureLayers.map((layer) => (
+                                    <Col key={layer.title} lg={3} md={6}>
+                                        <Card className="landing-card ecosystem-layer-card h-100">
+                                            <Card.Body>
+                                                <h3>{layer.title}</h3>
+                                                <p>{layer.description}</p>
+                                                <div className="ecosystem-layer-card__items">
+                                                    {layer.items.map((item) => (
+                                                        <span key={item}>{item}</span>
+                                                    ))}
+                                                </div>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
+                            <div className="ecosystem-dashboard-strip">
+                                <MiniDashboard title="Paciente" eyebrow="Jornada" lines={[58, 78, 64]} variant="white" />
+                                <MiniDashboard title="Pais" eyebrow="Participação" lines={[70, 52, 82]} variant="cyan" />
+                                <MiniDashboard title="Profissional" eyebrow="Acompanhamento" lines={[62, 76, 50]} variant="white" />
+                                <MiniDashboard title="Clínica" eyebrow="Operação" lines={[84, 56, 72]} variant="blue" />
+                                <MiniDashboard title="Executivo" eyebrow="Decisão" lines={[46, 68, 88]} variant="cyan" />
+                            </div>
+                        </div>
                     </Container>
                 </section>
 
-                <section className="landing-section bg-white intelligence-audience">
+                <section className="ecosystem-section ecosystem-professionals" id="profissionais">
                     <Container>
                         <Row className="align-items-center g-5">
                             <Col lg={5}>
-                                <img src={servico2} alt="Profissional analisando indicadores" className="intelligence-audience__image" />
+                                <img src={servico2} alt="Profissional analisando indicadores" className="ecosystem-photo-card" />
                             </Col>
                             <Col lg={7}>
-                                <span className="landing-section__label">Para Profissionais</span>
-                                <h2>Mais do que gestão.</h2>
+                                <span className="landing-section__label">Para profissionais</span>
+                                <h2>Mais contexto para acompanhar cada pessoa.</h2>
                                 <p>
                                     Tenha acesso a ferramentas que ajudam a compreender o desenvolvimento dos seus pacientes de forma mais ampla e estruturada.
                                 </p>
                                 <Row className="g-3">
                                     {professionalBenefits.map((benefit) => (
                                         <Col md={6} key={benefit}>
-                                            <div className="landing-benefit-item">
+                                            <div className="ecosystem-benefit-item">
                                                 <CheckCircle size={22} />
                                                 <span>{benefit}</span>
                                             </div>
@@ -751,19 +927,19 @@ const Home = () => {
                     </Container>
                 </section>
 
-                <section className="landing-section intelligence-family">
+                <section className="ecosystem-section ecosystem-families" id="familias">
                     <Container>
                         <Row className="align-items-center g-5">
                             <Col lg={7}>
-                                <span className="landing-section__label">Para Famílias</span>
-                                <h2>Participação ativa no desenvolvimento.</h2>
+                                <span className="landing-section__label">Famílias</span>
+                                <h2>A família também faz parte da jornada.</h2>
                                 <p>
-                                    Famílias deixam de acompanhar apenas por relatos soltos e passam a participar do processo com registros, indicadores e atividades conectadas.
+                                    Famílias deixam de acompanhar apenas por relatos soltos e passam a participar do processo com registros, indicadores, atividades e comunicação conectada.
                                 </p>
                                 <Row className="g-3">
                                     {familyBenefits.map((benefit) => (
                                         <Col md={6} key={benefit}>
-                                            <div className="landing-benefit-item">
+                                            <div className="ecosystem-benefit-item">
                                                 <CheckCircle size={22} />
                                                 <span>{benefit}</span>
                                             </div>
@@ -772,34 +948,142 @@ const Home = () => {
                                 </Row>
                             </Col>
                             <Col lg={5}>
-                                <img src={servico1} alt="Família acompanhando desenvolvimento" className="intelligence-audience__image" />
+                                <img src={servico1} alt="Família acompanhando desenvolvimento" className="ecosystem-photo-card" />
                             </Col>
                         </Row>
                     </Container>
                 </section>
 
-                <section className="landing-section bg-white intelligence-service-search" id="servicos-rede-tea">
+                <section className="ecosystem-section ecosystem-clinic" id="clinicas">
+                    <Container>
+                        <Row className="align-items-center g-5">
+                            <Col lg={5}>
+                                <span className="landing-section__label">Dashboard Clínica</span>
+                                <h2>A operação da clínica conectada ao cuidado.</h2>
+                                <p>
+                                    A gestão clínica aparece como uma camada operacional do ecossistema: organiza equipe, agenda, pacientes e financeiro sem deslocar a pessoa com TEA do centro.
+                                </p>
+                                <div className="ecosystem-feature-list">
+                                    {clinicFeatures.map((feature) => (
+                                        <span key={feature}><CheckCircle size={16} /> {feature}</span>
+                                    ))}
+                                </div>
+                                <Button
+                                    as="a"
+                                    href={DEMO_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ecosystem-btn ecosystem-btn--primary mt-4"
+                                    onClick={() => trackEvent(TRACKING_EVENTS.dashboardClick, { dashboard: 'Dashboard Clínica' })}
+                                >
+                                    Conhecer Dashboard Clínica <ArrowRight size={17} />
+                                </Button>
+                            </Col>
+                            <Col lg={7}>
+                                <div className="ecosystem-desktop-mockup ecosystem-desktop-mockup--clinic">
+                                    <div className="ecosystem-desktop-mockup__bar">
+                                        <span />
+                                        <span />
+                                        <span />
+                                    </div>
+                                    <div className="ecosystem-desktop-mockup__body">
+                                        <aside>
+                                            {['Visão', 'Agenda', 'Pacientes', 'Equipe', 'Fin.'].map((item) => (
+                                                <i key={item}>{item}</i>
+                                            ))}
+                                        </aside>
+                                        <main>
+                                            <div className="ecosystem-mockup-header">
+                                                <strong>Operação conectada</strong>
+                                                <small>cuidado + rotina clínica</small>
+                                            </div>
+                                            <div className="ecosystem-mockup-cards">
+                                                <MiniDashboard title="Agenda" eyebrow="Hoje" lines={[74, 54, 82]} variant="white" />
+                                                <MiniDashboard title="Equipe" eyebrow="Atendimentos" lines={[58, 72, 66]} variant="cyan" />
+                                                <MiniDashboard title="Financeiro" eyebrow="Resumo" lines={[44, 68, 78]} variant="blue" />
+                                            </div>
+                                            <div className="ecosystem-mockup-table">
+                                                {['Paciente acompanhado', 'Profissional responsável', 'Status terapêutico'].map((item) => (
+                                                    <span key={item}>{item}<DataLine width={70} /></span>
+                                                ))}
+                                            </div>
+                                        </main>
+                                    </div>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <section className="ecosystem-section ecosystem-executive">
+                    <Container>
+                        <Row className="align-items-center g-5">
+                            <Col lg={7}>
+                                <div className="ecosystem-desktop-mockup ecosystem-desktop-mockup--executive">
+                                    <div className="ecosystem-desktop-mockup__bar">
+                                        <span />
+                                        <span />
+                                        <span />
+                                    </div>
+                                    <div className="ecosystem-executive-grid">
+                                        <MiniDashboard title="Receita" eyebrow="Indicadores" lines={[68, 82, 56]} variant="white" />
+                                        <MiniDashboard title="DRE" eyebrow="Gestão" lines={[44, 64, 78]} variant="cyan" />
+                                        <MiniDashboard title="Fluxo" eyebrow="Caixa" lines={[72, 52, 88]} variant="blue" />
+                                        <MiniDashboard title="Alertas" eyebrow="IA" lines={[50, 70, 60]} variant="white" />
+                                    </div>
+                                </div>
+                            </Col>
+                            <Col lg={5}>
+                                <span className="landing-section__label">Dashboard Executivo</span>
+                                <h2>Da operação à decisão estratégica.</h2>
+                                <p>
+                                    O AutisConnect também ajuda a organização que sustenta o atendimento a acompanhar indicadores, produtividade, alertas e inteligência gerencial.
+                                </p>
+                                <div className="ecosystem-feature-list">
+                                    {executiveFeatures.map((feature) => (
+                                        <span key={feature}><CheckCircle size={16} /> {feature}</span>
+                                    ))}
+                                </div>
+                                <Button
+                                    as="a"
+                                    href={DEMO_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    variant="outline-light"
+                                    className="ecosystem-btn ecosystem-btn--light mt-4"
+                                    onClick={() => trackEvent(TRACKING_EVENTS.dashboardClick, { dashboard: 'Dashboard Executivo' })}
+                                >
+                                    Conhecer Dashboard Executivo <ArrowRight size={17} />
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Container>
+                </section>
+
+                <section className="ecosystem-section ecosystem-service-search" id="servicos-rede-tea">
                     <Container>
                         <div className="landing-section__heading">
-                            <span className="landing-section__label">Serviços & Rede TEA</span>
-                            <h2>Encontre serviços que atendem TEA na sua região.</h2>
-                            <p>Busque clínicas, terapias, profissionais, atividades e serviços de apoio por cidade, especialidade, modalidade, faixa etária e tipo de atendimento.</p>
+                            <span className="landing-section__label">Rede TEA</span>
+                            <h2>Um ecossistema que também conecta pessoas a serviços.</h2>
+                            <p>
+                                Busque clínicas, terapias, profissionais, atividades e serviços de apoio por cidade, região, especialidade, modalidade, faixa etária, tipo de atendimento e localização.
+                            </p>
                         </div>
 
-                        <Card className="landing-card intelligence-service-search__panel">
+                        <Card className="landing-card ecosystem-service-search__panel">
                             <Card.Body>
                                 <Form onSubmit={handleServiceSearch}>
                                     <Row className="g-3 align-items-end">
                                         <Col lg={5} md={12}>
-                                            <Form.Label>Buscar por nome ou palavra-chave</Form.Label>
-                                            <div className="d-flex gap-2 flex-wrap flex-md-nowrap">
+                                            <Form.Label>Especialidade, serviço ou palavra-chave</Form.Label>
+                                            <div className="ecosystem-service-search__main-field">
                                                 <Form.Control
                                                     type="text"
                                                     placeholder="Ex: ABA, fonoaudiologia, terapia, clínica"
                                                     value={serviceFilters.search}
                                                     onChange={(event) => updateServiceFilter('search', event.target.value)}
                                                 />
-                                                <Button type="submit" variant="primary">
+                                                <Button type="submit" className="ecosystem-btn ecosystem-btn--primary">
                                                     <Search size={17} /> Buscar
                                                 </Button>
                                             </div>
@@ -820,7 +1104,7 @@ const Home = () => {
                                                 <Form.Label>Região</Form.Label>
                                                 <Form.Control
                                                     type="text"
-                                                    placeholder="Região"
+                                                    placeholder="Bairro ou região"
                                                     value={serviceFilters.region}
                                                     onChange={(event) => updateServiceFilter('region', event.target.value)}
                                                 />
@@ -842,8 +1126,8 @@ const Home = () => {
 
                                     <Row className="g-3 mt-3">
                                         <Col lg={6}>
-                                            <Form.Label>Tipo de serviço</Form.Label>
-                                            <div className="intelligence-service-search__checks">
+                                            <Form.Label>Tipo de atendimento</Form.Label>
+                                            <div className="ecosystem-service-search__checks">
                                                 {SERVICE_TYPE_OPTIONS.map((option) => (
                                                     <Form.Check
                                                         key={option.value}
@@ -858,7 +1142,7 @@ const Home = () => {
                                         </Col>
                                         <Col lg={3}>
                                             <Form.Label>Nível de suporte</Form.Label>
-                                            <div className="intelligence-service-search__checks">
+                                            <div className="ecosystem-service-search__checks">
                                                 {SERVICE_SUPPORT_LEVEL_OPTIONS.map((option) => (
                                                     <Form.Check
                                                         key={option.value}
@@ -917,12 +1201,12 @@ const Home = () => {
                                             </Form.Group>
                                         </Col>
                                         <Col md={4}>
-                                            <div className="d-flex gap-2 flex-wrap">
+                                            <div className="ecosystem-service-search__actions">
                                                 <Button type="button" variant="outline-primary" onClick={handleUseMyLocation}>
                                                     <GeoAlt size={17} /> Usar localização
                                                 </Button>
                                                 <Button type="button" variant="outline-secondary" onClick={handleServiceClear}>
-                                                    Limpar
+                                                    Limpar filtros
                                                 </Button>
                                             </div>
                                             {serviceGeoStatus && <small className="text-muted d-block mt-2">{serviceGeoStatus}</small>}
@@ -932,8 +1216,8 @@ const Home = () => {
                             </Card.Body>
                         </Card>
 
-                        <div className="intelligence-service-search__toolbar">
-                            <div className="text-muted">
+                        <div className="ecosystem-service-search__toolbar">
+                            <div>
                                 {servicesLoading
                                     ? 'Carregando serviços...'
                                     : `${serviceMeta.total || services.length} serviços encontrados`}
@@ -977,15 +1261,12 @@ const Home = () => {
 
                                     return (
                                         <Col key={service.id || service.name} md={6} lg={4}>
-                                            <Card className="landing-card intelligence-service-card h-100">
+                                            <Card className="landing-card ecosystem-service-card h-100">
                                                 <Card.Body>
-                                                    <div className="d-flex justify-content-between align-items-start gap-3">
+                                                    <div className="ecosystem-service-card__head">
                                                         <div>
+                                                            <span>Serviço cadastrado</span>
                                                             <h3>{service.name}</h3>
-                                                            <div className="intelligence-service-card__location">
-                                                                <GeoAlt size={15} />
-                                                                {locationText || 'Localização não informada'}
-                                                            </div>
                                                         </div>
                                                         {service.distanceKm !== null && service.distanceKm !== undefined ? (
                                                             <Badge bg="light" text="dark">
@@ -993,8 +1274,11 @@ const Home = () => {
                                                             </Badge>
                                                         ) : null}
                                                     </div>
-
-                                                    <div className="intelligence-service-card__badges">
+                                                    <div className="ecosystem-service-card__location">
+                                                        <GeoAlt size={15} />
+                                                        {locationText || 'Localização não informada'}
+                                                    </div>
+                                                    <div className="ecosystem-service-card__badges">
                                                         {specialties.length > 0 ? (
                                                             specialties.map((specialty) => (
                                                                 <Badge key={specialty} bg="primary" className="bg-opacity-10 text-primary">
@@ -1007,8 +1291,7 @@ const Home = () => {
                                                             </Badge>
                                                         )}
                                                     </div>
-
-                                                    <div className="intelligence-service-card__rating">
+                                                    <div className="ecosystem-service-card__rating">
                                                         {service.rating > 0 ? (
                                                             <>
                                                                 <StarFill className="text-warning" size={16} />
@@ -1019,7 +1302,6 @@ const Home = () => {
                                                             <span>Sem avaliações</span>
                                                         )}
                                                     </div>
-
                                                     <Button variant="outline-primary" size="sm" onClick={() => openServiceDetails(service.id)}>
                                                         Ver detalhes <ArrowRight size={15} />
                                                     </Button>
@@ -1030,85 +1312,30 @@ const Home = () => {
                                 })}
                             </Row>
                         ) : (
-                            <Alert variant="info" className="border-0 shadow-sm">
+                            <Alert variant="info" className="border-0 shadow-sm ecosystem-service-search__empty">
                                 Use os filtros acima para encontrar serviços especializados que atendem TEA.
                             </Alert>
                         )}
                     </Container>
                 </section>
 
-                <section className="landing-section bg-white" id="gestao-integrada">
-                    <Container>
-                        <div className="landing-section__heading">
-                            <span className="landing-section__label">Gestão Clínica</span>
-                            <h2>Tudo isso com a gestão integrada que sua operação precisa.</h2>
-                            <p>A gestão continua disponível como base operacional para organizar rotinas, equipes e relacionamento com famílias.</p>
-                        </div>
-                        <Row className="g-3 justify-content-center">
-                            {managementTools.map((tool) => (
-                                <Col key={tool.title} lg={2} md={4} sm={6}>
-                                    <div className="intelligence-management-item">
-                                        {tool.icon}
-                                        <strong>{tool.title}</strong>
-                                    </div>
-                                </Col>
-                            ))}
-                        </Row>
-                        <Row className="g-4 mt-4 justify-content-center">
-                            {dashboardHighlights.map((dashboard) => (
-                                <Col key={dashboard.title} lg={6}>
-                                    <Card className="landing-card intelligence-dashboard-card h-100">
-                                        <Card.Body>
-                                            <div className="intelligence-dashboard-card__header">
-                                                <div className="intelligence-dashboard-card__icon">
-                                                    {dashboard.icon}
-                                                </div>
-                                                <div>
-                                                    <span>Nova funcionalidade integrada</span>
-                                                    <h3>{dashboard.title}</h3>
-                                                </div>
-                                            </div>
-                                            <p>{dashboard.description}</p>
-                                            <ul>
-                                                {dashboard.bullets.map((bullet) => (
-                                                    <li key={bullet}>
-                                                        <CheckCircle size={17} /> {bullet}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                            <a
-                                                href={DEMO_URL}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={() => trackEvent(TRACKING_EVENTS.dashboardClick, { dashboard: dashboard.title })}
-                                            >
-                                                <Button variant="primary">
-                                                    {dashboard.cta} <ArrowRight size={17} />
-                                                </Button>
-                                            </a>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
-                    </Container>
-                </section>
-
-                <section className="landing-section landing-proof">
+                <section className="ecosystem-section ecosystem-validation">
                     <Container>
                         <Row className="align-items-center g-4">
                             <Col lg={5}>
-                                <span className="landing-section__label">Prova social</span>
-                                <h2>Desenvolvido para o ecossistema TEA.</h2>
-                                <p>Uma plataforma criada a partir de escuta, tecnologia e foco no desenvolvimento humano.</p>
+                                <span className="landing-section__label">Validação e credibilidade</span>
+                                <h2>Construído com escuta do ecossistema TEA.</h2>
+                                <p>
+                                    Uma base institucional discreta, sem promessas infladas: foco em tecnologia, cuidado humano e evolução contínua.
+                                </p>
                             </Col>
                             <Col lg={7}>
                                 <Row className="g-3">
-                                    {proofItems.map((item, index) => (
+                                    {validationItems.map((item, index) => (
                                         <Col md={6} key={item}>
-                                            <Card className="landing-card h-100">
+                                            <Card className="landing-card ecosystem-validation-card h-100">
                                                 <Card.Body>
-                                                    {index === 0 ? <Award size={34} /> : <People size={34} />}
+                                                    {index === 0 ? <Award size={32} /> : <People size={32} />}
                                                     <p>{item}</p>
                                                 </Card.Body>
                                             </Card>
@@ -1120,37 +1347,59 @@ const Home = () => {
                     </Container>
                 </section>
 
-                <section className="landing-final-cta intelligence-final-cta">
+                <section className="landing-final-cta ecosystem-final-cta">
                     <Container>
-                        <h2>O futuro do acompanhamento TEA será orientado por dados.</h2>
-                        <p>
-                            Conheça como o AutisConnect está transformando emoções, comportamentos e interações em informações que apoiam o desenvolvimento de pessoas com TEA.
-                        </p>
+                        <img src={logonovo} alt="AutisConnect" className="ecosystem-final-cta__logo" />
+                        <h2>O futuro do acompanhamento do TEA é integrado, contínuo e orientado por dados.</h2>
+                        <p>Estamos construindo esse futuro.</p>
                         <div className="landing-final-cta__actions">
-                            <a
+                            <Button
+                                as="a"
                                 href={DEMO_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                variant="light"
+                                size="lg"
                                 onClick={() => trackEvent(TRACKING_EVENTS.demoClick, { location: 'final_cta' })}
                             >
-                                <Button variant="light" size="lg">Agendar Demonstração</Button>
-                            </a>
-                            <a
+                                Agendar demonstração
+                            </Button>
+                            <Button
+                                as="a"
+                                href="#plataforma"
+                                variant="outline-light"
+                                size="lg"
+                                onClick={() => trackEvent(TRACKING_EVENTS.platformClick, { location: 'final_cta' })}
+                            >
+                                Conhecer a plataforma
+                            </Button>
+                            <Button
+                                as="a"
                                 href={getWhatsAppUrl()}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                variant="outline-light"
+                                size="lg"
                                 onClick={() => trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'final_cta' })}
                             >
-                                <Button variant="outline-light" size="lg"><Whatsapp size={18} /> Falar com Especialista</Button>
-                            </a>
+                                <Whatsapp size={18} /> Falar com especialista
+                            </Button>
                         </div>
                     </Container>
                 </section>
             </main>
 
-            <footer className="footer-section py-5">
+            <footer className="footer-section ecosystem-footer py-4">
                 <Container>
-                    <Row className="justify-content-between align-items-center text-center text-md-start">
+                    <div className="ecosystem-footer__top">
+                        <img src={logonovo} alt="AutisConnect" className="footer-logo" />
+                        <div className="ecosystem-footer__trust">
+                            {footerTrustItems.map((item) => (
+                                <span key={item}>{item}</span>
+                            ))}
+                        </div>
+                    </div>
+                    <Row className="justify-content-between align-items-center text-center text-md-start mt-4">
                         <Col md={4} className="mb-4 mb-md-0 footer-left">
                             <p className="mb-0">
                                 {'\u00a9'} {new Date().getFullYear()} Nf Representações Comerciais Ltda.<br />
@@ -1158,33 +1407,30 @@ const Home = () => {
                             </p>
                         </Col>
                         <Col md={4} className="mb-4 mb-md-0 text-center">
-                            <img src={logonovo} alt="AutisConnect" className="footer-logo" />
+                            <strong>Conectamos hoje para transformar amanhã.</strong>
                         </Col>
                         <Col md={4} className="text-md-end text-white-50">
-                            <p className="mb-0">
-                                <strong>Contato:</strong><br />
-                                <a href="mailto:autisconnect@gmail.com" className="text-white-50 d-inline-flex align-items-center mb-1">
-                                    <Envelope size={16} className="me-2" /> autisconnect@gmail.com
-                                </a>
-                                <br />
-                                <a
-                                    href={WHATSAPP_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-white-50 d-inline-flex align-items-center mb-1"
-                                    onClick={() => trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'footer' })}
-                                >
-                                    <Whatsapp size={16} className="me-2" /> WhatsApp: 81 98254-0904
-                                </a>
-                                <br />
-                                <a href="https://instagram.com/autisconnect" target="_blank" rel="noopener noreferrer" className="text-white-50 d-inline-flex align-items-center mb-1">
-                                    <Instagram size={18} className="me-2" /> @autisconnect
-                                </a>
-                                <br />
-                                <a href="https://youtube.com/@autisconnect" target="_blank" rel="noopener noreferrer" className="text-white-50 d-inline-flex align-items-center">
-                                    <Youtube size={18} className="me-2" /> YouTube: @autisconnect
-                                </a>
-                            </p>
+                            <a href="mailto:autisconnect@gmail.com" className="text-white-50 d-inline-flex align-items-center mb-1">
+                                <Envelope size={16} className="me-2" /> autisconnect@gmail.com
+                            </a>
+                            <br />
+                            <a
+                                href={WHATSAPP_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-white-50 d-inline-flex align-items-center mb-1"
+                                onClick={() => trackEvent(TRACKING_EVENTS.whatsappClick, { location: 'footer' })}
+                            >
+                                <Whatsapp size={16} className="me-2" /> WhatsApp: 81 98254-0904
+                            </a>
+                            <br />
+                            <a href="https://instagram.com/autisconnect" target="_blank" rel="noopener noreferrer" className="text-white-50 d-inline-flex align-items-center mb-1">
+                                <Instagram size={18} className="me-2" /> @autisconnect
+                            </a>
+                            <br />
+                            <a href="https://youtube.com/@autisconnect" target="_blank" rel="noopener noreferrer" className="text-white-50 d-inline-flex align-items-center">
+                                <Youtube size={18} className="me-2" /> YouTube: @autisconnect
+                            </a>
                         </Col>
                     </Row>
                 </Container>

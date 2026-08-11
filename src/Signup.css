@@ -1,0 +1,749 @@
+.ac-signup-page {
+    background:
+        radial-gradient(circle at top left, rgba(56, 96, 248, 0.09), transparent 28%),
+        linear-gradient(180deg, #eef6ff 0%, #f8fafc 44%, #f8fafc 100%);
+}
+
+.ac-signup-layout {
+    grid-template-columns: minmax(320px, 0.82fr) minmax(0, 1.18fr);
+}
+
+.ac-signup-showcase {
+    padding-right: 3rem;
+}
+
+.ac-signup-benefit-list {
+    display: grid;
+    gap: 14px;
+    max-width: 540px;
+}
+
+.ac-signup-benefit {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.05rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.38);
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.ac-signup-benefit__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(37, 99, 235, 0.18);
+    color: #7dd3fc;
+    box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.18);
+}
+
+.ac-signup-benefit__icon svg,
+.ac-signup-profile-card__icon svg,
+.ac-signup-step__marker svg,
+.ac-signup-alert__icon svg,
+.ac-signup-chip__check svg,
+.ac-signup-plan__features svg,
+.ac-signup-input-shell__icon svg,
+.ac-signup-input-shell__action svg,
+.ac-signup-autofill-tag svg,
+.ac-signup-password-strength__criteria svg,
+.ac-signup-field-hint svg {
+    width: 18px;
+    height: 18px;
+}
+
+.ac-signup-panel__content {
+    width: min(100%, 940px);
+}
+
+.ac-signup-backlink {
+    cursor: pointer;
+}
+
+.ac-signup-backlink:hover,
+.ac-signup-backlink:focus-visible {
+    text-decoration: none;
+}
+
+.ac-signup-card {
+    gap: 1.35rem;
+}
+
+.ac-signup-stage-header {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.ac-signup-stage-header .ac-login-card__title,
+.ac-signup-stage-header .ac-login-card__subtitle {
+    margin: 0;
+}
+
+.ac-signup-stepper {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.ac-signup-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #f8fafc;
+    color: #64748b;
+    transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.ac-signup-step.is-active {
+    border-color: rgba(37, 99, 235, 0.34);
+    background: rgba(239, 246, 255, 0.96);
+    color: #2563eb;
+}
+
+.ac-signup-step.is-complete {
+    border-color: rgba(22, 163, 74, 0.26);
+    background: rgba(240, 253, 244, 0.96);
+    color: #15803d;
+}
+
+.ac-signup-step__marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.9);
+}
+
+.ac-signup-step__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.ac-signup-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1rem 1.05rem;
+    border-radius: 18px;
+    border: 1px solid transparent;
+}
+
+.ac-signup-alert strong,
+.ac-signup-alert p {
+    display: block;
+}
+
+.ac-signup-alert strong {
+    font-size: 0.95rem;
+}
+
+.ac-signup-alert p {
+    margin: 0.3rem 0 0;
+    line-height: 1.65;
+}
+
+.ac-signup-alert__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    flex: 0 0 40px;
+}
+
+.ac-signup-alert--error {
+    background: rgba(254, 242, 242, 0.92);
+    border-color: rgba(239, 68, 68, 0.18);
+    color: #991b1b;
+}
+
+.ac-signup-alert--error .ac-signup-alert__icon {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.ac-signup-alert--success {
+    background: rgba(236, 253, 245, 0.94);
+    border-color: rgba(16, 185, 129, 0.18);
+    color: #166534;
+}
+
+.ac-signup-alert--success .ac-signup-alert__icon {
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.ac-signup-profile-stage,
+.ac-signup-form,
+.ac-signup-plan-stage {
+    display: grid;
+    gap: 1.35rem;
+}
+
+.ac-signup-profile-stage__header,
+.ac-signup-plan-stage__header {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.ac-signup-profile-stage__header h3,
+.ac-signup-plan-stage__header h3 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+}
+
+.ac-signup-profile-stage__header p,
+.ac-signup-plan-stage__header p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.ac-signup-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ac-signup-profile-card {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    min-height: 210px;
+    padding: 1.2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.ac-signup-profile-card:hover,
+.ac-signup-profile-card:focus-within {
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.08);
+    transform: translateY(-1px);
+}
+
+.ac-signup-profile-card.is-selected {
+    border-color: #2563eb;
+    background: rgba(239, 246, 255, 0.92);
+    box-shadow: 0 18px 36px rgba(37, 99, 235, 0.12);
+}
+
+.ac-signup-profile-card__input,
+.ac-signup-chip__input {
+    position: absolute;
+    opacity: 0.001;
+    pointer-events: none;
+}
+
+.ac-signup-profile-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+}
+
+.ac-signup-profile-card__copy strong,
+.ac-signup-profile-card__copy p {
+    display: block;
+}
+
+.ac-signup-profile-card__copy strong {
+    color: #0f172a;
+    font-size: 1rem;
+}
+
+.ac-signup-profile-card__copy p {
+    margin: 0.45rem 0 0;
+    color: #64748b;
+    line-height: 1.75;
+}
+
+.ac-signup-profile-card__check {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.12);
+    color: #2563eb;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.ac-signup-profile-card.is-selected .ac-signup-profile-card__check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.ac-signup-section {
+    display: grid;
+    gap: 1rem;
+    padding: 1.35rem;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04);
+}
+
+.ac-signup-section__header h3 {
+    margin: 0.7rem 0 0.35rem;
+    color: #0f172a;
+    font-size: 1.16rem;
+    font-weight: 700;
+}
+
+.ac-signup-section__header p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.65;
+}
+
+.ac-signup-section__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.34rem 0.68rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ac-signup-section__body,
+.ac-signup-field {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.ac-signup-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.ac-signup-grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ac-signup-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ac-signup-grid--compact-first {
+    grid-template-columns: minmax(180px, 0.65fr) minmax(0, 1.35fr);
+}
+
+.ac-signup-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0 0.95rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ac-signup-input-shell:focus-within {
+    border-color: rgba(37, 99, 235, 0.72);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.ac-signup-input-shell__icon,
+.ac-signup-input-shell__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.ac-signup-input-shell__action {
+    background: transparent;
+    border: 0;
+}
+
+.ac-signup-input-shell .form-control {
+    min-height: 50px;
+    border: 0 !important;
+    background: transparent;
+    box-shadow: none !important;
+    padding-inline: 0;
+}
+
+.ac-signup-field .form-control,
+.ac-signup-field .form-select {
+    min-height: 50px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.ac-signup-field textarea.form-control {
+    min-height: 128px;
+}
+
+.ac-signup-field .form-control:focus,
+.ac-signup-field .form-select:focus {
+    border-color: rgba(37, 99, 235, 0.72);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.ac-signup-input--autofill {
+    background: #f8fafc !important;
+}
+
+.ac-signup-feedback-inline,
+.ac-signup-autofill-tag,
+.ac-signup-field-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: fit-content;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.ac-signup-feedback-inline--loading {
+    color: #0f172a;
+}
+
+.ac-signup-feedback-inline--success {
+    color: #15803d;
+}
+
+.ac-signup-feedback-inline--error {
+    color: #b91c1c;
+}
+
+.ac-signup-autofill-tag {
+    margin-left: 0.45rem;
+    color: #2563eb;
+}
+
+.ac-signup-field-hint {
+    color: #64748b;
+}
+
+.ac-signup-password-strength {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.ac-signup-password-strength__bar {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.ac-signup-password-strength__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 180ms ease, background 180ms ease;
+}
+
+.ac-signup-password-strength__fill--danger {
+    background: #dc2626;
+}
+
+.ac-signup-password-strength__fill--warning {
+    background: #f59e0b;
+}
+
+.ac-signup-password-strength__fill--success {
+    background: #16a34a;
+}
+
+.ac-signup-password-strength__status strong {
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.ac-signup-password-strength__criteria {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.ac-signup-password-strength__criteria span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.ac-signup-password-strength__criteria span.is-valid {
+    border-color: rgba(22, 163, 74, 0.24);
+    background: rgba(240, 253, 244, 0.96);
+    color: #166534;
+}
+
+.ac-signup-password-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: #64748b;
+}
+
+.ac-signup-password-note small {
+    line-height: 1.6;
+}
+
+.ac-signup-password-note__summary {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.ac-signup-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.ac-signup-chip-grid--inline {
+    gap: 0.65rem;
+}
+
+.ac-signup-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.72rem 0.9rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.ac-signup-chip:hover,
+.ac-signup-chip:focus-within {
+    border-color: rgba(37, 99, 235, 0.32);
+    transform: translateY(-1px);
+}
+
+.ac-signup-chip.is-selected {
+    border-color: rgba(37, 99, 235, 0.52);
+    background: rgba(239, 246, 255, 0.92);
+    color: #1d4ed8;
+}
+
+.ac-signup-chip__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    color: transparent;
+    transition: color 180ms ease;
+}
+
+.ac-signup-chip.is-selected .ac-signup-chip__check {
+    color: inherit;
+}
+
+.ac-signup-form__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    padding-top: 0.35rem;
+}
+
+.ac-signup-form__actions--single {
+    justify-content: flex-end;
+}
+
+.ac-signup-plan-stage__header {
+    max-width: 620px;
+}
+
+.ac-signup-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ac-signup-plan-grid.is-single {
+    grid-template-columns: minmax(280px, 420px);
+    justify-content: center;
+}
+
+.ac-signup-plan {
+    display: grid;
+    gap: 1.2rem;
+    padding: 1.45rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.ac-signup-plan:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+}
+
+.ac-signup-plan.is-selected {
+    border-color: #2563eb;
+    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.12);
+}
+
+.ac-signup-plan__header h3,
+.ac-signup-plan__header p,
+.ac-signup-plan__header span {
+    display: block;
+}
+
+.ac-signup-plan__header h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.ac-signup-plan__header p {
+    margin: 0.7rem 0 0.1rem;
+    color: #2563eb;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.ac-signup-plan__header span {
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.ac-signup-plan__features {
+    display: grid;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ac-signup-plan__features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.ac-signup-plan__features svg {
+    color: #16a34a;
+    margin-top: 0.12rem;
+}
+
+.ac-signup-footer {
+    margin-top: 0.3rem;
+}
+
+@media (max-width: 1399px) {
+    .ac-signup-plan-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1199px) {
+    .ac-signup-layout {
+        grid-template-columns: minmax(280px, 0.74fr) minmax(0, 1.26fr);
+    }
+
+    .ac-signup-profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991px) {
+    .ac-signup-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-signup-showcase {
+        display: none;
+    }
+
+    .ac-signup-panel__content {
+        width: min(100%, 860px);
+    }
+
+    .ac-signup-stepper {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .ac-signup-card {
+        padding: 1.4rem;
+    }
+
+    .ac-signup-profile-grid,
+    .ac-signup-grid--2,
+    .ac-signup-grid--3,
+    .ac-signup-grid--compact-first,
+    .ac-signup-plan-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-signup-form__actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .ac-signup-form__actions--single {
+        flex-direction: column;
+    }
+
+    .ac-signup-form__actions .btn {
+        width: 100%;
+    }
+
+    .ac-signup-password-note {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

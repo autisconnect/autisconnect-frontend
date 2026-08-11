@@ -1,0 +1,549 @@
+.ac-login-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(56, 96, 248, 0.08), transparent 30%),
+        linear-gradient(180deg, #eff6ff 0%, #f8fafc 48%, #f8fafc 100%);
+    color: #1e293b;
+    font-family: Inter, "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.ac-login-page *,
+.ac-login-page *::before,
+.ac-login-page *::after {
+    box-sizing: border-box;
+}
+
+.ac-login-layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.ac-login-showcase {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    padding: 48px 56px 36px;
+    background: linear-gradient(145deg, #020617 0%, #071b3a 46%, #0f172a 100%);
+    color: #ffffff;
+}
+
+.ac-login-showcase__grid,
+.ac-login-showcase__glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.ac-login-showcase__grid {
+    background-image:
+        linear-gradient(rgba(148, 163, 184, 0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.09) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(circle at 28% 24%, rgba(0, 0, 0, 0.95), transparent 85%);
+    opacity: 0.55;
+}
+
+.ac-login-showcase__glow {
+    background:
+        radial-gradient(circle at 18% 24%, rgba(56, 96, 248, 0.28), transparent 28%),
+        radial-gradient(circle at 84% 12%, rgba(6, 182, 212, 0.2), transparent 22%),
+        radial-gradient(circle at 56% 100%, rgba(37, 99, 235, 0.16), transparent 28%);
+}
+
+.ac-login-showcase__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    gap: 2rem;
+}
+
+.ac-login-brand {
+    display: inline-flex;
+    align-self: flex-start;
+    width: min(100%, 840px);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.ac-login-brand:hover {
+    opacity: 0.96;
+    transform: translateY(-1px);
+}
+
+.ac-login-brand:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.38);
+    outline-offset: 6px;
+    border-radius: 18px;
+}
+
+.ac-login-brand__logo {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 28px rgba(2, 6, 23, 0.18));
+}
+
+.ac-login-copy {
+    display: grid;
+    gap: 1rem;
+    max-width: 620px;
+}
+
+.ac-login-kicker {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.34);
+    color: #cbd5e1;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ac-login-title {
+    margin: 0;
+    color: #f8fafc;
+    font-family: Inter, "Montserrat", system-ui, sans-serif;
+    font-size: clamp(2.5rem, 3vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+}
+
+.ac-login-title span {
+    display: block;
+    margin-top: 0.35rem;
+    color: #67e8f9;
+}
+
+.ac-login-description {
+    margin: 0;
+    max-width: 560px;
+    color: rgba(226, 232, 240, 0.88);
+    font-size: 1.03rem;
+    line-height: 1.8;
+}
+
+.ac-login-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    max-width: 580px;
+}
+
+.ac-login-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.05rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(16px);
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.ac-login-feature__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(37, 99, 235, 0.18);
+    color: #7dd3fc;
+    box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.18);
+}
+
+.ac-login-feature__icon svg,
+.ac-login-input-icon svg,
+.ac-login-input-action svg,
+.ac-login-backlink svg {
+    width: 20px;
+    height: 20px;
+}
+
+.ac-login-ribbon,
+.ac-login-mobile-ribbon {
+    width: min(100%, 720px);
+    height: 72px;
+    margin-top: auto;
+    background: url('./assets/logonovo.png') center bottom / 115% auto no-repeat;
+    opacity: 0.84;
+    filter: saturate(0.92) drop-shadow(0 16px 32px rgba(6, 182, 212, 0.18));
+}
+
+.ac-login-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+}
+
+.ac-login-panel__content {
+    width: min(100%, 480px);
+    display: grid;
+    gap: 1.25rem;
+}
+
+.ac-login-mobile-brand {
+    display: none;
+}
+
+.ac-login-backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: fit-content;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #475569;
+    font-weight: 700;
+    transition: color 180ms ease, transform 180ms ease;
+}
+
+.ac-login-backlink:hover {
+    color: #2563eb;
+    transform: translateX(-1px);
+}
+
+.ac-login-backlink:focus-visible,
+.ac-login-input-action:focus-visible,
+.ac-login-inline-link:focus-visible,
+.ac-login-button:focus-visible {
+    outline: 2px solid rgba(37, 99, 235, 0.24);
+    outline-offset: 4px;
+    border-radius: 12px;
+}
+
+.ac-login-card {
+    padding: 2rem;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 3px 12px rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(18px);
+}
+
+.ac-login-card__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.95rem;
+    padding: 0.45rem 0.78rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.79rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ac-login-card__title {
+    margin: 0;
+    color: #0f172a;
+    font-family: Inter, "Montserrat", system-ui, sans-serif;
+    font-size: clamp(1.95rem, 2.2vw, 2.45rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+}
+
+.ac-login-card__subtitle {
+    margin: 0.7rem 0 0;
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.ac-login-alert {
+    margin: 1.35rem 0 0;
+    padding: 0.95rem 1rem;
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.ac-login-alert.alert-danger {
+    border: 1px solid rgba(248, 113, 113, 0.22);
+    background: rgba(254, 242, 242, 0.9);
+    color: #991b1b;
+}
+
+.ac-login-alert.alert-success {
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    background: rgba(236, 253, 245, 0.95);
+    color: #166534;
+}
+
+.ac-login-alert.alert-warning {
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    background: rgba(255, 251, 235, 0.95);
+    color: #92400e;
+}
+
+.ac-login-form {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.ac-login-field {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.ac-login-field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.ac-login-label {
+    margin: 0;
+    color: #1e293b;
+    font-size: 0.94rem;
+    font-weight: 700;
+}
+
+.ac-login-inline-link {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 180ms ease;
+}
+
+.ac-login-inline-link:hover {
+    color: #3860f8;
+}
+
+.ac-login-inline-link--strong {
+    font-weight: 800;
+}
+
+.ac-login-input-shell {
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ac-login-input-shell:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.ac-login-input-icon,
+.ac-login-input-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 48px;
+    color: #64748b;
+}
+
+.ac-login-input.form-control {
+    min-height: 50px;
+    border: 0;
+    padding: 0;
+    color: #1e293b;
+    background: transparent;
+    box-shadow: none;
+}
+
+.ac-login-input.form-control:focus {
+    background: transparent;
+    box-shadow: none;
+}
+
+.ac-login-input.form-control::placeholder {
+    color: #94a3b8;
+}
+
+.ac-login-input-action {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: color 180ms ease;
+}
+
+.ac-login-input-action:hover {
+    color: #2563eb;
+}
+
+.ac-login-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    width: 100%;
+    min-height: 52px;
+    padding: 0.95rem 1.2rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb 0%, #3860f8 100%);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.24);
+    transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+.ac-login-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 22px 42px rgba(37, 99, 235, 0.28);
+}
+
+.ac-login-button:disabled {
+    opacity: 0.82;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.ac-login-button--secondary {
+    border-color: #e2e8f0;
+    background: #ffffff;
+    color: #1e293b;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.ac-login-button--secondary:hover:not(:disabled) {
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+}
+
+.ac-login-button__spinner {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
+.ac-login-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 1.35rem;
+    color: #64748b;
+    text-align: center;
+}
+
+.ac-login-legal {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.ac-login-message-group,
+.ac-login-link-stack {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.ac-login-support-note {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 1180px) {
+    .ac-login-showcase {
+        padding-inline: 40px;
+    }
+
+    .ac-login-ribbon {
+        width: min(100%, 620px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .ac-login-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-login-showcase {
+        display: none;
+    }
+
+    .ac-login-mobile-brand {
+        display: grid;
+        justify-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .ac-login-brand--mobile {
+        width: min(100%, 280px);
+    }
+
+    .ac-login-mobile-ribbon {
+        width: min(100%, 250px);
+        height: 30px;
+        background-size: 170% auto;
+        opacity: 0.78;
+        filter: saturate(0.95);
+    }
+
+    .ac-login-panel {
+        min-height: 100vh;
+        padding: 1.6rem 1.25rem 2rem;
+    }
+
+    .ac-login-panel__content {
+        width: min(100%, 520px);
+    }
+
+    .ac-login-card {
+        padding: 1.75rem 1.35rem;
+        border-radius: 22px;
+    }
+}
+
+@media (max-width: 640px) {
+    .ac-login-panel {
+        padding-inline: 1rem;
+    }
+
+    .ac-login-panel__content {
+        gap: 1rem;
+    }
+
+    .ac-login-backlink {
+        font-size: 0.94rem;
+    }
+
+    .ac-login-card {
+        padding: 1.5rem 1.1rem;
+        border-radius: 20px;
+    }
+
+    .ac-login-card__title {
+        font-size: 1.8rem;
+    }
+
+    .ac-login-field-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+}

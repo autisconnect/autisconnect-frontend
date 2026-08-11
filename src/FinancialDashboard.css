@@ -1,0 +1,220 @@
+.ac-fin-dashboard .ac-prof-main {
+    max-width: 1520px;
+}
+
+.ac-fin-page-header__meta {
+    display: inline-block;
+    margin-top: 0.95rem;
+    color: #64748b;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.ac-fin-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.ac-fin-kpi-card {
+    grid-column: span 2;
+}
+
+.ac-fin-kpi-card--featured {
+    grid-column: span 4;
+    background:
+        radial-gradient(circle at top right, rgba(6, 182, 212, 0.14), transparent 28%),
+        linear-gradient(145deg, #0f172a 0%, #13264a 58%, #1d4ed8 100%) !important;
+    color: #f8fafc;
+}
+
+.ac-fin-kpi-card--featured .ac-prof-kpi-card__label,
+.ac-fin-kpi-card--featured small {
+    color: rgba(226, 232, 240, 0.84);
+}
+
+.ac-fin-kpi-card--featured strong {
+    color: #ffffff;
+}
+
+.ac-fin-kpi-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.ac-fin-kpi-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+}
+
+.ac-fin-kpi-card__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.ac-fin-kpi-card--featured .ac-fin-kpi-card__icon {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.ac-fin-kpi-card .badge {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.ac-fin-analytics-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.95fr);
+    gap: 1.25rem;
+}
+
+.ac-fin-chart-card--wide .ac-prof-chart {
+    min-height: 380px;
+}
+
+.ac-fin-doughnut {
+    min-height: 260px;
+}
+
+.ac-fin-payment-summary {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.ac-fin-payment-summary__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    border-radius: 14px;
+    background: #f8fafc;
+}
+
+.ac-fin-payment-summary__label {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-weight: 600;
+}
+
+.ac-fin-payment-summary__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    flex: 0 0 10px;
+}
+
+.ac-fin-payment-summary__item strong {
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.ac-fin-filter-bar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1.15rem;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.96));
+}
+
+.ac-fin-filter-bar__field {
+    min-width: 0;
+}
+
+.ac-fin-filter-bar__actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.ac-fin-table {
+    table-layout: fixed;
+}
+
+.ac-fin-table__money-head,
+.ac-fin-table__money {
+    text-align: right;
+}
+
+.ac-fin-table__money {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+@media (max-width: 1400px) {
+    .ac-fin-kpi-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .ac-fin-kpi-card,
+    .ac-fin-kpi-card--featured {
+        grid-column: span 2;
+    }
+
+    .ac-fin-kpi-card--featured {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 1199px) {
+    .ac-fin-analytics-grid,
+    .ac-fin-filter-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-fin-filter-bar__actions {
+        justify-content: stretch;
+    }
+}
+
+@media (max-width: 991px) {
+    .ac-fin-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ac-fin-kpi-card,
+    .ac-fin-kpi-card--featured {
+        grid-column: span 1;
+    }
+
+    .ac-fin-kpi-card--featured {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 767px) {
+    .ac-fin-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-fin-kpi-card,
+    .ac-fin-kpi-card--featured {
+        grid-column: auto;
+    }
+
+    .ac-fin-filter-bar__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ac-fin-table__money-head,
+    .ac-fin-table__money {
+        text-align: left;
+    }
+}

@@ -1,19 +1,65 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Table, Form, Nav, Tab, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
-import { Calendar2Check, People, GraphUp, Wallet2, PlusCircle, FileEarmarkText, Bell } from 'react-bootstrap-icons'; // Ícones adicionados
-import { Line, Bar, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+    Alert,
+    Badge,
+    Button,
+    Card,
+    Col,
+    Container,
+    Dropdown,
+    Form,
+    Modal,
+    Offcanvas,
+    OverlayTrigger,
+    Row,
+    Spinner,
+    Table,
+    Tooltip
+} from 'react-bootstrap';
+import {
+    ArrowRight,
+    Bell,
+    BoxArrowRight,
+    Calendar2Check,
+    ChevronLeft,
+    ChevronRight,
+    FileEarmarkText,
+    GraphUp,
+    List,
+    People,
+    PersonCircle,
+    PlusCircle,
+    Search,
+    Wallet2
+} from 'react-bootstrap-icons';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Filler,
+    Legend,
+    LineElement,
+    LinearScale,
+    PointElement,
+    Title,
+    Tooltip as ChartTooltip
+} from 'chart.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
 import logonovo from './assets/logonovo.png';
 import './App.css';
+import './ProfessionalDashboard.css';
 
-// Registrar componentes do Chart.js
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler );
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, ChartTooltip, Legend, Filler);
 
+const SIDEBAR_STORAGE_KEY = 'ac-professional-sidebar-collapsed';
+const PROFESSIONAL_TAB_STORAGE_KEY = 'ac-professional-dashboard-tab';
+const diagnosisPalette = ['#2563EB', '#06B6D4', '#38BDF8', '#0F172A', '#94A3B8'];
+const appointmentPalette = ['#2563EB', '#3860F8', '#06B6D4', '#0F172A', '#60A5FA'];
 
-// Componente ErrorBoundary
 class ErrorBoundary extends React.Component {
     state = { hasError: false, error: null };
 
@@ -35,8 +81,63 @@ class ErrorBoundary extends React.Component {
                 </Container>
             );
         }
+
         return this.props.children;
     }
+}
+
+function EmptyState({ title, description, actionLabel, onAction, compact = false }) {
+    return (
+        <div className={`ac-prof-empty-state${compact ? ' ac-prof-empty-state--compact' : ''}`}>
+            <div className="ac-prof-empty-state__icon">
+                <GraphUp />
+            </div>
+            <div>
+                <h3>{title}</h3>
+                <p>{description}</p>
+            </div>
+            {actionLabel && onAction ? (
+                <Button variant="outline-primary" onClick={onAction}>
+                    {actionLabel}
+                </Button>
+            ) : null}
+        </div>
+    );
+}
+
+function LoadingShell() {
+    return (
+        <div className="ac-prof-dashboard ac-prof-dashboard--loading">
+            <aside className="ac-prof-sidebar">
+                <div className="ac-prof-sidebar__brand-block">
+                    <div className="ac-prof-skeleton ac-prof-skeleton--logo" />
+                    <div className="ac-prof-sidebar__brand-ribbon" />
+                </div>
+                <div className="ac-prof-sidebar__nav-group">
+                    {[...Array(5)].map((_, index) => (
+                        <div key={index} className="ac-prof-skeleton ac-prof-skeleton--nav" />
+                    ))}
+                </div>
+            </aside>
+            <div className="ac-prof-shell">
+                <header className="ac-prof-header">
+                    <div className="ac-prof-skeleton ac-prof-skeleton--header-title" />
+                    <div className="ac-prof-skeleton ac-prof-skeleton--header-actions" />
+                </header>
+                <main className="ac-prof-main">
+                    <div className="ac-prof-skeleton-grid">
+                        {[...Array(4)].map((_, index) => (
+                            <div key={index} className="ac-prof-skeleton ac-prof-skeleton--kpi" />
+                        ))}
+                    </div>
+                    <div className="ac-prof-skeleton-grid ac-prof-skeleton-grid--content">
+                        <div className="ac-prof-skeleton ac-prof-skeleton--panel" />
+                        <div className="ac-prof-skeleton ac-prof-skeleton--panel" />
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
 }
 
 const ProfessionalDashboard = () => {
@@ -44,8 +145,12 @@ const ProfessionalDashboard = () => {
     const navigate = useNavigate();
     const { id: dashboardId } = useParams();
 
-    // Estados
-    const [activeTab, setActiveTab] = useState('overview');
+    const [activeTab, setActiveTab] = useState(() => {
+        if (typeof window === 'undefined') return 'overview';
+        const storedTab = window.sessionStorage.getItem(PROFESSIONAL_TAB_STORAGE_KEY);
+        const allowedTabs = ['overview', 'patients', 'appointments', 'reports', 'assistants'];
+        return allowedTabs.includes(storedTab) ? storedTab : 'overview';
+    });
     const [patients, setPatients] = useState([]);
     const [consultations, setConsultations] = useState([]);
     const [notifications] = useState([]);
@@ -53,11 +158,13 @@ const ProfessionalDashboard = () => {
     const [showAppointmentModal, setShowAppointmentModal] = useState(false);
     const [showPatientModal, setShowPatientModal] = useState(false);
     const [showEditPatientModal, setShowEditPatientModal] = useState(false);
+    const [showAssistantModal, setShowAssistantModal] = useState(false);
     const [editingPatient, setEditingPatient] = useState(null);
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('todos');
+    const [assistantStatusFilter, setAssistantStatusFilter] = useState('todos');
     const [newNote, setNewNote] = useState({ title: '', content: '' });
     const [loading, setLoading] = useState(true);
     const [loadingCharts, setLoadingCharts] = useState(false);
@@ -65,6 +172,11 @@ const ProfessionalDashboard = () => {
     const [loadingConsultations] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.sessionStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+    });
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [professionalInfo, setProfessionalInfo] = useState({
         name: '',
         specialty: '',
@@ -72,19 +184,16 @@ const ProfessionalDashboard = () => {
         todayAppointments: 0,
         weekAppointments: 0
     });
-    const [newAssistant, setNewAssistant] = useState({ nome: '', cpf: '', email: '', password: '', status: 'ativo', telefone: '' });
+    const [newAssistant, setNewAssistant] = useState({
+        nome: '',
+        cpf: '',
+        email: '',
+        password: '',
+        status: 'ativo',
+        telefone: ''
+    });
     const [clinicInvitations, setClinicInvitations] = useState([]);
     const [invitationLoading, setInvitationLoading] = useState(false);
-
-    const loadClinicInvitations = async () => {
-        try { const response = await apiClient.get('/professional/invitations'); setClinicInvitations(response.data || []); } catch { setClinicInvitations([]); }
-    };
-    const respondClinicInvitation = async (invitationId, action) => {
-        setInvitationLoading(true);
-        try { await apiClient.post(`/professional/invitations/${invitationId}/${action}`); setSuccessMessage(action === 'accept' ? 'Convite aceito. Vínculo com a clínica realizado.' : 'Convite recusado.'); await loadClinicInvitations(); } catch (requestError) { setError(requestError.response?.data?.error || 'Não foi possível responder ao convite.'); } finally { setInvitationLoading(false); }
-    };
-    useEffect(() => { if (user?.tipo_usuario === 'medicos_terapeutas') loadClinicInvitations(); }, [user?.id]);
-
     const [newPatient, setNewPatient] = useState({
         name: '',
         birthDate: '',
@@ -114,48 +223,55 @@ const ProfessionalDashboard = () => {
         datasets: [
             {
                 data: [],
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 206, 86, 1)',
-                ],
-                borderWidth: 1,
-            },
-        ],
+                backgroundColor: diagnosisPalette,
+                borderColor: '#FFFFFF',
+                borderWidth: 2,
+                hoverOffset: 8
+            }
+        ]
     });
     const [appointmentTypeData, setAppointmentTypeData] = useState({
         labels: [],
         datasets: [
             {
-                label: 'Tipos de Consulta',
+                label: 'Tipos de Atendimento',
                 data: [],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                ],
-                borderWidth: 1,
-            },
-        ],
+                backgroundColor: appointmentPalette,
+                borderRadius: 12,
+                borderSkipped: false,
+                maxBarThickness: 42
+            }
+        ]
     });
 
-    // Funções de API
-//ok
-    // Função genérica para tratar erros de API
+    const loadClinicInvitations = async () => {
+        try {
+            const response = await apiClient.get('/professional/invitations');
+            setClinicInvitations(response.data || []);
+        } catch {
+            setClinicInvitations([]);
+        }
+    };
+
+    const respondClinicInvitation = async (invitationId, action) => {
+        setInvitationLoading(true);
+        try {
+            await apiClient.post(`/professional/invitations/${invitationId}/${action}`);
+            setSuccessMessage(action === 'accept' ? 'Convite aceito. Vínculo com a clínica realizado.' : 'Convite recusado.');
+            await loadClinicInvitations();
+        } catch (requestError) {
+            setError(requestError.response?.data?.error || 'Não foi possível responder ao convite.');
+        } finally {
+            setInvitationLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user?.tipo_usuario === 'medicos_terapeutas') {
+            loadClinicInvitations();
+        }
+    }, [user?.id]);
+
     const handleApiError = (err, context) => {
         console.error(`Erro ao ${context}:`, err.response?.data, err.message);
         const message = err.response?.data?.details
@@ -163,9 +279,10 @@ const ProfessionalDashboard = () => {
             : err.response?.data?.error || err.response?.data?.message || `Erro ao ${context}. Tente novamente.`;
         setError(message);
     };
-//ok
+
     const fetchAssistants = async () => {
         if (!user) return;
+
         try {
             const response = await apiClient.get(`/professional/${user.id}/assistants`);
             setAssistants(Array.isArray(response.data) ? response.data : []);
@@ -173,62 +290,56 @@ const ProfessionalDashboard = () => {
             handleApiError(err, 'buscar colaboradores');
         }
     };
-//ok
-    const handleAddAssistant = async (e) => {
-        e.preventDefault();
+
+    const handleAddAssistant = async (event) => {
+        event.preventDefault();
         if (!user) return;
+
         try {
             await apiClient.post(`/professional/${user.id}/assistants`, newAssistant);
             setSuccessMessage('Colaborador adicionado com sucesso!');
             setNewAssistant({ nome: '', cpf: '', email: '', password: '', status: 'ativo', telefone: '' });
+            setShowAssistantModal(false);
             fetchAssistants();
         } catch (err) {
             handleApiError(err, 'adicionar colaborador');
         }
     };
-//ok
+
     const handleToggleStatus = async (assistantId, currentStatus) => {
-        if (!user) return; // Verificação de segurança
+        if (!user) return;
 
         const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
-        
+
         try {
-            // URL relativa. O corpo da requisição é o segundo argumento.
-            await apiClient.put(
-                `/professional/${user.id}/assistants/${assistantId}/status`,
-                { status: newStatus }
-            );
-
+            await apiClient.put(`/professional/${user.id}/assistants/${assistantId}/status`, { status: newStatus });
             setSuccessMessage('Status do colaborador atualizado!');
-            
-            // Atualiza a lista de colaboradores na interface.
             fetchAssistants();
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'atualizar o status do colaborador');
         }
     };
-//ok
+
     const fetchDashboardData = async () => {
         try {
             const response = await apiClient.get(`/professional/dashboard/${user.id}`);
             const data = response.data;
             setProfessionalInfo({
-            name: data.professional.name,
-            specialty: data.professional.specialty,
-            totalPatients: data.stats.totalPatients,
-            todayAppointments: data.stats.todayAppointments,
-            weekAppointments: data.stats.weekAppointments
+                name: data.professional.name,
+                specialty: data.professional.specialty,
+                totalPatients: data.stats.totalPatients,
+                todayAppointments: data.stats.todayAppointments,
+                weekAppointments: data.stats.weekAppointments
             });
         } catch (err) {
             console.error('Erro ao buscar dados do dashboard:', err.response?.data, err.message);
             handleApiError(err, 'buscar dados do dashboard');
         }
     };
-//ok
+
     const fetchPatients = async () => {
         if (!user) return;
+
         try {
             const query = statusFilter && statusFilter !== 'todos' ? `?status=${statusFilter}` : '';
             const response = await apiClient.get(`/professional/${user.id}/patients${query}`);
@@ -237,10 +348,11 @@ const ProfessionalDashboard = () => {
             handleApiError(err, 'buscar pacientes');
         }
     };
-//ok
-    const handleUpdatePatient = async (e) => {
-        e.preventDefault();
+
+    const handleUpdatePatient = async (event) => {
+        event.preventDefault();
         if (!editingPatient || !user) return;
+
         try {
             const payload = {
                 name: editingPatient.name,
@@ -250,18 +362,20 @@ const ProfessionalDashboard = () => {
                 diagnosis: editingPatient.diagnosis,
                 notes: editingPatient.observacoes
             };
+
             await apiClient.put(`/professional/${user.id}/patients/${editingPatient.id}`, payload);
             setSuccessMessage('Paciente atualizado com sucesso!');
             setShowEditPatientModal(false);
             fetchPatients();
-            setSelectedPatient(prev => ({ ...prev, ...editingPatient }));
+            setSelectedPatient((previous) => ({ ...previous, ...editingPatient }));
         } catch (err) {
             handleApiError(err, 'atualizar paciente');
         }
     };
-//ok
+
     const fetchConsultations = async () => {
         if (!user) return;
+
         try {
             const response = await apiClient.get(`/appointments/professional/${user.id}`);
             setConsultations(Array.isArray(response.data) ? response.data : []);
@@ -269,149 +383,126 @@ const ProfessionalDashboard = () => {
             handleApiError(err, 'buscar consultas');
         }
     };
-//ok
+
     const fetchPatientProgress = async () => {
-        if (!user) return; // Verificação de segurança
+        if (!user) return;
 
         try {
-            // URL relativa, o apiClient cuida do resto.
             const response = await apiClient.get(`/professional/${user.id}/patient-progress`);
             const data = Array.isArray(response.data) ? response.data : [];
-
-            // A lógica para processar os dados e montar o gráfico permanece a mesma.
-            const labels = [...new Set(data.map(item => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
+            const labels = [...new Set(data.map((item) => new Date(item.recorded_date).toLocaleDateString('pt-BR')))];
             const metrics = ['Comunicacao', 'Interacao_Social', 'Comportamento'];
-            const datasets = metrics.map(metric => ({
-                label: metric,
-                data: labels.map(label => {
-                    const item = data.find(d =>
-                        new Date(d.recorded_date).toLocaleDateString('pt-BR') === label &&
-                        d.metric_type === metric
+            const colors = {
+                Comunicacao: { border: '#2563EB', fill: 'rgba(37, 99, 235, 0.10)' },
+                Interacao_Social: { border: '#06B6D4', fill: 'rgba(6, 182, 212, 0.12)' },
+                Comportamento: { border: '#22C55E', fill: 'rgba(34, 197, 94, 0.10)' }
+            };
+
+            const datasets = metrics.map((metric) => ({
+                label: metric.replace('_', ' '),
+                data: labels.map((label) => {
+                    const item = data.find(
+                        (entry) =>
+                            new Date(entry.recorded_date).toLocaleDateString('pt-BR') === label &&
+                            entry.metric_type === metric
                     );
                     return item ? item.score : null;
                 }),
-                borderColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 1)' :
-                            metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 1)' :
-                            'rgba(255, 99, 132, 1)',
-                backgroundColor: metric === 'Comunicacao' ? 'rgba(75, 192, 192, 0.2)' :
-                                metric === 'Interacao_Social' ? 'rgba(54, 162, 235, 0.2)' :
-                                'rgba(255, 99, 132, 0.2)',
+                borderColor: colors[metric].border,
+                backgroundColor: colors[metric].fill,
+                pointBackgroundColor: colors[metric].border,
+                pointBorderWidth: 0,
+                pointRadius: 3,
+                pointHoverRadius: 5,
                 fill: true,
-                tension: 0.4
+                tension: 0.36
             }));
 
             setPatientProgressData({ labels, datasets });
-
         } catch (err) {
             if (err.response?.status !== 404) {
-                // Usa a função genérica para exibir o erro.
                 handleApiError(err, 'buscar o progresso dos pacientes');
             }
-            // Zera os dados do gráfico em caso de erro/404.
             setPatientProgressData({ labels: [], datasets: [] });
         }
     };
-//ok
+
     const fetchDiagnosisDistribution = async () => {
         if (!user) return;
+
         setLoadingCharts(true);
         try {
             const response = await apiClient.get(`/professional/${user.id}/diagnosis-distribution`);
             const data = response.data;
+
             setDiagnosisDistribution({
-            labels: data.labels,
-            datasets: [
-                {
-                data: data.data,
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(255, 206, 86, 1)',
-                ],
-                borderWidth: 1,
-                },
-            ],
+                labels: data.labels,
+                datasets: [
+                    {
+                        data: data.data,
+                        backgroundColor: diagnosisPalette.slice(0, Math.max(data.data?.length || 0, 1)),
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }
+                ]
             });
         } catch (err) {
             console.error('Erro ao buscar a distribuição de diagnósticos:', err.response?.data, err.message);
             handleApiError(err, 'buscar a distribuição de diagnósticos');
             setDiagnosisDistribution({
-            labels: [],
-            datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+                labels: [],
+                datasets: [{ data: [], backgroundColor: [], borderColor: '#FFFFFF', borderWidth: 2, hoverOffset: 0 }]
             });
         } finally {
             setLoadingCharts(false);
         }
     };
-//ok
+
     const fetchAppointmentTypes = async () => {
         if (!user) return;
+
         setLoadingCharts(true);
         try {
             const response = await apiClient.get(`/professional/${user.id}/appointment-types`);
             const data = response.data || {};
+
             setAppointmentTypeData({
                 labels: Array.isArray(data.labels) ? data.labels : [],
                 datasets: [
                     {
-                        label: 'Tipos de Consulta',
+                        label: 'Tipos de Atendimento',
                         data: Array.isArray(data.data) ? data.data : [],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                        ],
-                        borderWidth: 1,
-                    },
-                ],
+                        backgroundColor: appointmentPalette,
+                        borderRadius: 12,
+                        borderSkipped: false,
+                        maxBarThickness: 42
+                    }
+                ]
             });
         } catch (err) {
             if (err.response?.status === 404) {
                 try {
                     const fallbackResponse = await apiClient.get(`/appointments/professional/${user.id}`);
                     const list = Array.isArray(fallbackResponse.data) ? fallbackResponse.data : [];
-                    const counts = list.reduce((acc, item) => {
+                    const counts = list.reduce((accumulator, item) => {
                         const key = item.appointment_type || 'Consulta Regular';
-                        acc[key] = (acc[key] || 0) + 1;
-                        return acc;
+                        accumulator[key] = (accumulator[key] || 0) + 1;
+                        return accumulator;
                     }, {});
-                    const labels = Object.keys(counts);
-                    const data = Object.values(counts);
+
                     setAppointmentTypeData({
-                        labels,
+                        labels: Object.keys(counts),
                         datasets: [
                             {
-                                label: 'Tipos de Consulta',
-                                data,
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.6)',
-                                    'rgba(54, 162, 235, 0.6)',
-                                    'rgba(255, 206, 86, 0.6)',
-                                    'rgba(75, 192, 192, 0.6)',
-                                ],
-                                borderColor: [
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)',
-                                    'rgba(255, 206, 86, 1)',
-                                    'rgba(75, 192, 192, 1)',
-                                ],
-                                borderWidth: 1,
-                            },
-                        ],
+                                label: 'Tipos de Atendimento',
+                                data: Object.values(counts),
+                                backgroundColor: appointmentPalette,
+                                borderRadius: 12,
+                                borderSkipped: false,
+                                maxBarThickness: 42
+                            }
+                        ]
                     });
                     return;
                 } catch (fallbackErr) {
@@ -423,18 +514,20 @@ const ProfessionalDashboard = () => {
                 console.error('Erro ao buscar tipos de consulta:', err.response?.data, err.message);
                 handleApiError(err, 'buscar tipos de consulta');
             }
+
             setAppointmentTypeData({
                 labels: [],
-                datasets: [{ label: 'Tipos de Consulta', data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }],
+                datasets: [{ label: 'Tipos de Atendimento', data: [], backgroundColor: [], borderRadius: 12, borderSkipped: false }]
             });
         } finally {
             setLoadingCharts(false);
         }
     };
-//ok
-    const handleAddPatient = async (e) => {
-        e.preventDefault();
+
+    const handleAddPatient = async (event) => {
+        event.preventDefault();
         if (!user) return;
+
         try {
             await apiClient.post(`/professional/${user.id}/patients`, { ...newPatient, status: 'ativo' });
             setSuccessMessage('Paciente adicionado com sucesso!');
@@ -446,15 +539,15 @@ const ProfessionalDashboard = () => {
             handleApiError(err, 'adicionar paciente');
         }
     };
-//ok
-    const handleAddAppointment = async (e) => {
-        e.preventDefault();
 
-        // Verificação de segurança e validação dos campos
+    const handleAddAppointment = async (event) => {
+        event.preventDefault();
+
         if (!user) {
             setError('Usuário não autenticado.');
             return;
         }
+
         if (!newAppointment.patientId || !newAppointment.appointment_date || !newAppointment.appointment_time || !newAppointment.value) {
             setError('Paciente, data, hora e valor são obrigatórios.');
             return;
@@ -462,7 +555,7 @@ const ProfessionalDashboard = () => {
 
         try {
             const payload = {
-                patientId: newAppointment.patientId, // O backend espera 'patientId'
+                patientId: newAppointment.patientId,
                 appointment_date: newAppointment.appointment_date,
                 appointment_time: newAppointment.appointment_time,
                 appointment_type: newAppointment.appointment_type,
@@ -471,17 +564,13 @@ const ProfessionalDashboard = () => {
                 payment_details: newAppointment.payment_details,
                 payment_status: newAppointment.payment_status,
                 value: newAppointment.value,
-                notes: newAppointment.notes,
-                // O professional_id é adicionado pelo backend a partir do token, não precisa enviar.
+                notes: newAppointment.notes
             };
 
-            // A URL é relativa. O payload é o segundo argumento.
             await apiClient.post('/appointments', payload);
 
-            setSuccessMessage('Consulta registrada com sucesso!');
+            setSuccessMessage('Atendimento registrado com sucesso!');
             setShowAppointmentModal(false);
-
-            // Limpa o formulário para o próximo agendamento
             setNewAppointment({
                 patientId: '',
                 appointment_date: '',
@@ -494,108 +583,69 @@ const ProfessionalDashboard = () => {
                 value: '',
                 notes: ''
             });
-            
-            // Atualiza os dados relevantes no dashboard
+
             fetchConsultations();
             fetchDashboardData();
             fetchAppointmentTypes();
-
-            // Limpa a mensagem de sucesso após 3 segundos
             setTimeout(() => setSuccessMessage(''), 3000);
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
-            handleApiError(err, 'registrar a consulta');
+            handleApiError(err, 'registrar o atendimento');
         }
     };
-//ok
-    const handleAddNote = async (e) => {
-        e.preventDefault();
-        
-        // Verificações de segurança
+
+    const handleAddNote = async (event) => {
+        event.preventDefault();
+
         if (!user || !selectedPatient) {
             setError('Usuário ou paciente não selecionado.');
             return;
         }
 
         try {
-            // A URL é relativa. O corpo da requisição (newNote) é o segundo argumento.
-            await apiClient.post(
-                `/professional/${user.id}/patients/${selectedPatient.id}/notes`, 
-                newNote
-            );
-
+            await apiClient.post(`/professional/${user.id}/patients/${selectedPatient.id}/notes`, newNote);
             setSuccessMessage('Nota adicionada com sucesso!');
-            
-            // Limpa o formulário e fecha o modal
             setNewNote({ title: '', content: '' });
             setShowNoteModal(false);
-            
-            // Atualiza a lista de notas do paciente selecionado
             fetchPatientNotes(selectedPatient.id);
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'adicionar nota');
         }
     };
-//ok
+
     const fetchPatientNotes = async (patientId) => {
-        // Verificações de segurança iniciais
         if (!user || !patientId) {
             setError('Não foi possível buscar as notas: ID do usuário ou do paciente está faltando.');
             return;
         }
 
         try {
-            // A URL é relativa, o apiClient cuida da base e do token.
             const response = await apiClient.get(`/professional/${user.id}/patients/${patientId}/notes`);
-
-            // Com Axios (usado pelo apiClient), os dados já vêm em response.data
             const notes = response.data;
-
-            // Atualiza o estado do paciente selecionado com as notas recebidas.
-            setSelectedPatient(prev => ({
-                ...prev,
-                notes: Array.isArray(notes) ? notes : [] // Garante que 'notes' seja sempre um array.
+            setSelectedPatient((previous) => ({
+                ...previous,
+                notes: Array.isArray(notes) ? notes : []
             }));
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'buscar as notas do paciente');
-            
-            // Em caso de erro, garante que o painel de notas fique vazio.
-            setSelectedPatient(prev => ({
-                ...prev,
+            setSelectedPatient((previous) => ({
+                ...previous,
                 notes: []
             }));
         }
     };
-//ok
+
     const handleUpdateStatus = async (patientId, newStatus) => {
-        if (!user) return; // Adiciona uma verificação de segurança
+        if (!user) return;
 
         try {
-            // A URL agora é relativa e o apiClient cuida do resto (URL base, token).
-            // O método é PUT e o corpo da requisição é o segundo argumento.
-            await apiClient.put(
-                `/professional/${user.id}/patients/${patientId}/status`, 
-                { status: newStatus }
-            );
-
+            await apiClient.put(`/professional/${user.id}/patients/${patientId}/status`, { status: newStatus });
             setSuccessMessage('Status do paciente atualizado!');
+            await fetchPatients();
 
-            // Atualiza a lista de pacientes na interface para refletir a mudança.
-            await fetchPatients(); 
-
-            // Se o paciente atualizado for o que está selecionado no painel de detalhes,
-            // atualiza o status dele lá também.
             if (selectedPatient && selectedPatient.id === patientId) {
-                setSelectedPatient(prev => ({ ...prev, status: newStatus }));
+                setSelectedPatient((previous) => ({ ...previous, status: newStatus }));
             }
-
         } catch (err) {
-            // Usa a função genérica para exibir o erro.
             handleApiError(err, 'atualizar status do paciente');
         }
     };
@@ -608,11 +658,12 @@ const ProfessionalDashboard = () => {
                 setSelectedPatient(null);
                 return;
             }
+
             setSelectedPatient({ ...patient, notes: [] });
             await fetchPatientNotes(patient.id);
         } catch (err) {
             console.error('Erro ao selecionar paciente:', err);
-            setError('Erro ao carregar detalhes do paciente: ' + err.message);
+            setError(`Erro ao carregar detalhes do paciente: ${err.message}`);
             setSelectedPatient(null);
         }
     };
@@ -631,12 +682,11 @@ const ProfessionalDashboard = () => {
             window.open(`/patient-details/${patient.id}`, '_blank', 'noopener,noreferrer');
         } catch (err) {
             console.error('Erro ao selecionar paciente:', err);
-            setError('Erro ao carregar detalhes do paciente: ' + err.message);
+            setError(`Erro ao carregar detalhes do paciente: ${err.message}`);
             setSelectedPatient(null);
         }
     };
 
-    // Funções auxiliares
     const formatDate = (dateString) => {
         return dateString ? new Date(dateString).toLocaleDateString('pt-BR') : 'N/A';
     };
@@ -646,31 +696,51 @@ const ProfessionalDashboard = () => {
     };
 
     const getStatusBadge = (status) => {
-        return status === 'Realizada' ? 'success' : 'secondary';
+        const normalizedStatus = (status || '').toString().toLowerCase();
+
+        if (['realizada', 'concluído', 'concluída', 'ativo', 'aceito', 'pago'].includes(normalizedStatus)) return 'success';
+        if (['agendada', 'confirmada', 'pendente'].includes(normalizedStatus)) return 'warning';
+        if (['cancelada', 'cancelado', 'inativo', 'recusado', 'atrasado', 'não realizada', 'nao realizada'].includes(normalizedStatus)) return 'danger';
+        return 'neutral';
     };
 
     const getTodayAppointments = () => {
         const today = new Date();
-        return consultations.filter(consultation => {
+
+        return consultations.filter((consultation) => {
             const appointmentDate = new Date(consultation.appointment_date);
-            return appointmentDate.getDate() === today.getDate() &&
+            return (
+                appointmentDate.getDate() === today.getDate() &&
                 appointmentDate.getMonth() === today.getMonth() &&
-                appointmentDate.getFullYear() === today.getFullYear();
+                appointmentDate.getFullYear() === today.getFullYear()
+            );
         });
     };
 
+    const getInitials = (name) => {
+        if (!name) return 'AC';
+        return name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part.charAt(0).toUpperCase())
+            .join('');
+    };
+
     const normalizedSearch = (searchTerm || '').toLowerCase();
-    const filteredPatients = patients.filter(patient => {
+    const filteredPatients = patients.filter((patient) => {
         if (!patient) return false;
+
         const name = (patient.name ?? '').toString().toLowerCase();
         const diagnosis = (patient.diagnosis ?? '').toString().toLowerCase();
         const matchesSearch = name.includes(normalizedSearch) || diagnosis.includes(normalizedSearch);
         const matchesFilter = statusFilter === '' || statusFilter === 'todos' || (patient.status ?? '') === statusFilter;
+
         return matchesSearch && matchesFilter;
     });
 
-    const filteredAssistants = assistants.filter(assistant => {
-        return statusFilter === '' || statusFilter === 'todos' || assistant.status === statusFilter;
+    const filteredAssistants = assistants.filter((assistant) => {
+        return assistantStatusFilter === '' || assistantStatusFilter === 'todos' || assistant.status === assistantStatusFilter;
     });
 
     const handleLogout = () => {
@@ -678,56 +748,208 @@ const ProfessionalDashboard = () => {
         navigate('/');
     };
 
-    // Opções para gráficos
     const lineOptions = {
         responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
         plugins: {
-            legend: { position: 'top' },
-            title: { display: true, text: 'Progresso dos Pacientes' }
+            legend: {
+                position: 'top',
+                labels: {
+                    color: '#475569',
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    padding: 18
+                }
+            },
+            title: { display: false },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                titleColor: '#F8FAFC',
+                bodyColor: '#E2E8F0',
+                borderColor: 'rgba(37, 99, 235, 0.20)',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 12
+            }
         },
         scales: {
+            x: {
+                grid: { display: false, drawBorder: false },
+                ticks: { color: '#64748B' }
+            },
             y: {
                 beginAtZero: true,
                 max: 5,
-                title: { display: true, text: 'Nível (1-5)' }
+                ticks: { color: '#64748B', stepSize: 1 },
+                grid: { color: 'rgba(148, 163, 184, 0.16)', drawBorder: false },
+                title: { display: true, text: 'Escala de evolução', color: '#64748B' }
             }
         }
     };
 
-    const pieOptions = {
+    const doughnutOptions = {
         responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
         plugins: {
-            legend: { position: 'right' },
-            title: { display: true, text: 'Distribuição de Diagnósticos' }
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#475569',
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    padding: 18
+                }
+            },
+            title: { display: false },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                titleColor: '#F8FAFC',
+                bodyColor: '#E2E8F0',
+                padding: 12,
+                cornerRadius: 12
+            }
         }
     };
 
     const barOptions = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { display: false },
-            title: { display: true, text: 'Tipos de Consulta' }
+            title: { display: false },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                titleColor: '#F8FAFC',
+                bodyColor: '#E2E8F0',
+                padding: 12,
+                cornerRadius: 12
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false, drawBorder: false },
+                ticks: { color: '#64748B' }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(148, 163, 184, 0.16)', drawBorder: false },
+                ticks: { color: '#64748B' }
+            }
         }
     };
 
+    const todayAppointments = [...getTodayAppointments()].sort((a, b) =>
+        `${a.appointment_time || ''}`.localeCompare(`${b.appointment_time || ''}`)
+    );
+
+    const upcomingAppointments = [...consultations]
+        .filter((consultation) => {
+            const timestamp = new Date(`${consultation.appointment_date}T${consultation.appointment_time || '00:00'}`);
+            return !Number.isNaN(timestamp.getTime()) && timestamp >= new Date();
+        })
+        .sort((a, b) => {
+            const first = new Date(`${a.appointment_date}T${a.appointment_time || '00:00'}`).getTime();
+            const second = new Date(`${b.appointment_date}T${b.appointment_time || '00:00'}`).getTime();
+            return first - second;
+        });
+
+    const nextAppointment = upcomingAppointments[0] || null;
+    const unreadNotifications = notifications.filter((item) => !item.read).length;
+
+    const sectionMeta = {
+        overview: {
+            title: 'Visão geral',
+            breadcrumb: 'Dashboard / Visão geral',
+            subtitle: 'Central de trabalho com agenda, pacientes e indicadores do seu acompanhamento.'
+        },
+        patients: {
+            title: 'Pacientes',
+            breadcrumb: 'Dashboard / Pacientes',
+            subtitle: 'Gerencie seus pacientes e acompanhe suas informações clínicas com agilidade.'
+        },
+        appointments: {
+            title: 'Atendimentos',
+            breadcrumb: 'Dashboard / Atendimentos',
+            subtitle: 'Visualize e gerencie o histórico dos seus atendimentos.'
+        },
+        reports: {
+            title: 'Relatórios e indicadores',
+            breadcrumb: 'Dashboard / Relatórios',
+            subtitle: 'Visualize dados consolidados dos seus pacientes e atendimentos.'
+        },
+        assistants: {
+            title: 'Equipe',
+            breadcrumb: 'Dashboard / Colaboradores',
+            subtitle: 'Gerencie profissionais e colaboradores vinculados à sua conta.'
+        }
+    };
+
+    const activeSection = sectionMeta[activeTab] || sectionMeta.overview;
+
+    const navigationGroups = [
+        {
+            label: 'Principal',
+            items: [{ key: 'overview', label: 'Visão geral', icon: GraphUp }]
+        },
+        {
+            label: 'Gestão',
+            items: [
+                { key: 'patients', label: 'Pacientes', icon: People },
+                { key: 'appointments', label: 'Atendimentos', icon: Calendar2Check },
+                { key: 'reports', label: 'Relatórios', icon: FileEarmarkText },
+                { key: 'assistants', label: 'Colaboradores', icon: People },
+                {
+                    key: 'finance',
+                    label: 'Financeiro',
+                    icon: Wallet2,
+                    href: `/financial-dashboard/${user?.id}`,
+                    target: '_blank'
+                }
+            ]
+        }
+    ];
+
     useEffect(() => {
-        // --- CLÁUSULA DE GUARDA ---
-        // Se o 'user' do AuthContext ainda não foi carregado, não faça nada.
+        if (typeof window === 'undefined') return;
+        window.sessionStorage.setItem(SIDEBAR_STORAGE_KEY, String(isSidebarCollapsed));
+    }, [isSidebarCollapsed]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.sessionStorage.removeItem(PROFESSIONAL_TAB_STORAGE_KEY);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return undefined;
+
+        const handleResize = () => {
+            if (window.innerWidth >= 992) {
+                setIsMobileSidebarOpen(false);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        setIsMobileSidebarOpen(false);
+    }, [activeTab]);
+
+    useEffect(() => {
         if (!user) {
-            console.log("ProfessionalDashboard: Aguardando dados do usuário...");
-            return; // Sai do useEffect e espera a próxima renderização.
+            console.log('ProfessionalDashboard: Aguardando dados do usuário...');
+            return;
         }
 
-        // A partir daqui, 'user' existe e é seguro usá-lo.
-        
-        // --- LÓGICA DE VALIDAÇÃO (AGORA SEGURA) ---
         if (user.tipo_usuario !== 'medicos_terapeutas' || (dashboardId && dashboardId !== user.id.toString())) {
-            console.warn(`Acesso negado ou ID da URL incorreto. Redirecionando...`);
+            console.warn('Acesso negado ou ID da URL incorreto. Redirecionando...');
             navigate(`/professional-dashboard/${user.id}`);
-            return; // Para a execução para evitar chamadas de API desnecessárias
+            return;
         }
 
-        // --- LÓGICA PARA BUSCAR DADOS ---
         const fetchAllData = async () => {
             setLoading(true);
             setError('');
@@ -741,694 +963,1028 @@ const ProfessionalDashboard = () => {
                     fetchDiagnosisDistribution(),
                     fetchAppointmentTypes()
                 ]);
-            } catch (err) {
-                setError("Ocorreu um erro ao carregar os dados do dashboard.");
+            } catch {
+                setError('Ocorreu um erro ao carregar os dados do dashboard.');
             } finally {
                 setLoading(false);
             }
         };
 
         fetchAllData();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, navigate, dashboardId]);
 
     useEffect(() => {
         if (!user || loading) return;
         fetchPatients();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusFilter]);
+
+    const renderSidebarNavItem = (item, mobile = false) => {
+        const Icon = item.icon;
+        const collapsed = isSidebarCollapsed && !mobile;
+        const isActive = activeTab === item.key;
+        const className = `ac-prof-sidebar__item${isActive ? ' is-active' : ''}${item.href ? ' is-external' : ''}`;
+
+        const content = item.href ? (
+            <a
+                href={item.href}
+                target={item.target}
+                rel="noopener noreferrer"
+                className={className}
+                title={item.label}
+            >
+                <span className="ac-prof-sidebar__item-icon">
+                    <Icon />
+                </span>
+                <span className="ac-prof-sidebar__item-label">{item.label}</span>
+                {!collapsed ? (
+                    <span className="ac-prof-sidebar__item-arrow">
+                        <ArrowRight />
+                    </span>
+                ) : null}
+            </a>
+        ) : (
+            <button
+                type="button"
+                className={className}
+                onClick={() => setActiveTab(item.key)}
+                title={item.label}
+                aria-current={isActive ? 'page' : undefined}
+            >
+                <span className="ac-prof-sidebar__item-icon">
+                    <Icon />
+                </span>
+                <span className="ac-prof-sidebar__item-label">{item.label}</span>
+            </button>
+        );
+
+        if (collapsed) {
+            return (
+                <OverlayTrigger key={item.key} placement="right" overlay={<Tooltip id={`tooltip-${item.key}`}>{item.label}</Tooltip>}>
+                    {content}
+                </OverlayTrigger>
+            );
+        }
+
+        return <React.Fragment key={item.key}>{content}</React.Fragment>;
+    };
+
+    const renderSidebar = (mobile = false) => (
+        <div className={`ac-prof-sidebar${isSidebarCollapsed && !mobile ? ' ac-prof-sidebar--collapsed' : ''}`}>
+            <div className="ac-prof-sidebar__brand-block">
+                <div className="ac-prof-sidebar__brand-row">
+                    <img src={logonovo} alt="AutisConnect" className="ac-prof-sidebar__logo" />
+                    {!mobile ? (
+                        <button
+                            type="button"
+                            className="ac-prof-sidebar__collapse"
+                            onClick={() => setIsSidebarCollapsed((current) => !current)}
+                            aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
+                        >
+                            {isSidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
+                        </button>
+                    ) : null}
+                </div>
+                <div className="ac-prof-sidebar__brand-ribbon" />
+            </div>
+
+            <div className="ac-prof-sidebar__nav">
+                {navigationGroups.map((group) => (
+                    <div className="ac-prof-sidebar__nav-group" key={group.label}>
+                        {!isSidebarCollapsed || mobile ? (
+                            <span className="ac-prof-sidebar__group-label">{group.label}</span>
+                        ) : null}
+                        <div className="ac-prof-sidebar__group-items">
+                            {group.items.map((item) => renderSidebarNavItem(item, mobile))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="ac-prof-sidebar__footer">
+                {!isSidebarCollapsed || mobile ? (
+                    <div className="ac-prof-sidebar__user">
+                        <div className="ac-prof-sidebar__user-avatar">{getInitials(professionalInfo.name || user?.nome_completo || user?.username)}</div>
+                        <div>
+                            <strong>{professionalInfo.name || user?.nome_completo || user?.username || 'Profissional'}</strong>
+                            <span>{professionalInfo.specialty || 'Profissional AutisConnect'}</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="ac-prof-sidebar__user-avatar ac-prof-sidebar__user-avatar--solo">
+                        {getInitials(professionalInfo.name || user?.nome_completo || user?.username)}
+                    </div>
+                )}
+
+                <button type="button" className="ac-prof-sidebar__logout" onClick={handleLogout}>
+                    <BoxArrowRight />
+                    {!isSidebarCollapsed || mobile ? <span>Sair</span> : null}
+                </button>
+            </div>
+        </div>
+    );
+
+    const renderFeedback = () => {
+        if (!successMessage && !error) return null;
+
+        return (
+            <div className="ac-prof-feedback-stack">
+                {successMessage ? (
+                    <Alert variant="success" className="ac-prof-feedback" dismissible onClose={() => setSuccessMessage('')}>
+                        {successMessage}
+                    </Alert>
+                ) : null}
+                {error ? (
+                    <Alert variant="danger" className="ac-prof-feedback" dismissible onClose={() => setError('')}>
+                        {error}
+                    </Alert>
+                ) : null}
+            </div>
+        );
+    };
+
+    const renderInvitations = () => {
+        if (!clinicInvitations.length) return null;
+
+        return (
+            <section className="ac-prof-invitations">
+                <div className="ac-prof-section-heading">
+                    <div>
+                        <span className="ac-prof-section-heading__eyebrow">Convites recebidos</span>
+                        <h2>Clínicas aguardando sua resposta</h2>
+                    </div>
+                </div>
+                <div className="ac-prof-invitations__grid">
+                    {clinicInvitations.map((invitation) => (
+                        <Card className="ac-prof-card ac-prof-invitation-card" key={invitation.id}>
+                            <Card.Body>
+                                <div className="ac-prof-invitation-card__header">
+                                    <div>
+                                        <span className="ac-prof-status ac-prof-status--warning">Pendente</span>
+                                        <h3>{invitation.clinic_name || 'Clínica AutisConnect'}</h3>
+                                    </div>
+                                    <small>Expira em {formatDate(invitation.expires_at)}</small>
+                                </div>
+                                <p>
+                                    {invitation.clinic_name || 'A clínica'} convidou você para fazer parte da equipe e ampliar o
+                                    acompanhamento dos pacientes.
+                                </p>
+                                <div className="ac-prof-invitation-card__actions">
+                                    <Button
+                                        variant="outline-secondary"
+                                        disabled={invitationLoading}
+                                        onClick={() => respondClinicInvitation(invitation.id, 'decline')}
+                                    >
+                                        Recusar
+                                    </Button>
+                                    <Button disabled={invitationLoading} onClick={() => respondClinicInvitation(invitation.id, 'accept')}>
+                                        {invitationLoading ? 'Processando...' : 'Aceitar'}
+                                    </Button>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    ))}
+                </div>
+            </section>
+        );
+    };
+
+    const renderPageActions = () => {
+        if (activeTab === 'overview') {
+            return (
+                <div className="ac-prof-page-header__actions">
+                    <Button onClick={() => setShowPatientModal(true)}>
+                        <PlusCircle className="me-2" />
+                        Novo paciente
+                    </Button>
+                    <Button variant="outline-primary" onClick={() => setShowAppointmentModal(true)}>
+                        <Calendar2Check className="me-2" />
+                        Novo atendimento
+                    </Button>
+                </div>
+            );
+        }
+
+        if (activeTab === 'patients') {
+            return (
+                <div className="ac-prof-page-header__actions">
+                    <Button onClick={() => setShowPatientModal(true)}>
+                        <PlusCircle className="me-2" />
+                        Adicionar paciente
+                    </Button>
+                </div>
+            );
+        }
+
+        if (activeTab === 'appointments') {
+            return (
+                <div className="ac-prof-page-header__actions">
+                    <Button onClick={() => setShowAppointmentModal(true)}>
+                        <PlusCircle className="me-2" />
+                        Novo atendimento
+                    </Button>
+                </div>
+            );
+        }
+
+        if (activeTab === 'assistants') {
+            return (
+                <div className="ac-prof-page-header__actions">
+                    <Button onClick={() => setShowAssistantModal(true)}>
+                        <PlusCircle className="me-2" />
+                        Adicionar colaborador
+                    </Button>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
+    const renderOverview = () => (
+        <div className="ac-prof-section-stack">
+            <div className="ac-prof-kpi-grid">
+                <Card className="ac-prof-card ac-prof-kpi-card">
+                    <Card.Body>
+                        <span className="ac-prof-kpi-card__label">Pacientes ativos</span>
+                        <strong>{professionalInfo.totalPatients || 0}</strong>
+                        <small>Pessoas em acompanhamento na sua carteira atual.</small>
+                    </Card.Body>
+                </Card>
+                <Card className="ac-prof-card ac-prof-kpi-card">
+                    <Card.Body>
+                        <span className="ac-prof-kpi-card__label">Atendimentos hoje</span>
+                        <strong>{professionalInfo.todayAppointments || todayAppointments.length || 0}</strong>
+                        <small>Compromissos programados para o dia de hoje.</small>
+                    </Card.Body>
+                </Card>
+                <Card className="ac-prof-card ac-prof-kpi-card">
+                    <Card.Body>
+                        <span className="ac-prof-kpi-card__label">Atendimentos na semana</span>
+                        <strong>{professionalInfo.weekAppointments || 0}</strong>
+                        <small>Resumo operacional da sua agenda semanal.</small>
+                    </Card.Body>
+                </Card>
+                <Card className="ac-prof-card ac-prof-kpi-card">
+                    <Card.Body>
+                        <span className="ac-prof-kpi-card__label">Próximo horário</span>
+                        <strong>{nextAppointment ? formatTime(nextAppointment.appointment_time) : 'Livre'}</strong>
+                        <small>
+                            {nextAppointment
+                                ? `${nextAppointment.patient_name || 'Paciente'} • ${formatDate(nextAppointment.appointment_date)}`
+                                : 'Sua agenda está livre no momento.'}
+                        </small>
+                    </Card.Body>
+                </Card>
+            </div>
+
+            <div className="ac-prof-overview-grid">
+                <Card className="ac-prof-card ac-prof-card--wide">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Agenda</span>
+                                <h3>Atendimentos de hoje</h3>
+                                <p>Organize a rotina do dia com status e pacientes prioritários.</p>
+                            </div>
+                            <Button variant="link" className="ac-prof-link-btn" onClick={() => setActiveTab('appointments')}>
+                                Ver agenda
+                                <ArrowRight className="ms-2" />
+                            </Button>
+                        </div>
+
+                        {loadingConsultations ? (
+                            <div className="ac-prof-loading-inline">
+                                <Spinner animation="border" size="sm" />
+                                <span>Carregando atendimentos...</span>
+                            </div>
+                        ) : todayAppointments.length > 0 ? (
+                            <div className="table-responsive">
+                                <Table className="ac-prof-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Horário</th>
+                                            <th>Paciente</th>
+                                            <th>Tipo</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {todayAppointments.map((consultation) => (
+                                            <tr key={consultation.id}>
+                                                <td data-label="Horário">{formatTime(consultation.appointment_time)}</td>
+                                                <td data-label="Paciente">{consultation.patient_name || 'N/A'}</td>
+                                                <td data-label="Tipo">{consultation.appointment_type || 'N/A'}</td>
+                                                <td data-label="Status">
+                                                    <span className={`ac-prof-status ac-prof-status--${getStatusBadge(consultation.status)}`}>
+                                                        {consultation.status || 'N/A'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <EmptyState
+                                compact
+                                title="Nenhum atendimento hoje"
+                                description="Sua agenda está livre no momento."
+                                actionLabel="Registrar novo atendimento"
+                                onAction={() => setShowAppointmentModal(true)}
+                            />
+                        )}
+                    </Card.Body>
+                </Card>
+
+                <Card className="ac-prof-card">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Atenção</span>
+                                <h3>Notificações recentes</h3>
+                                <p>Alertas importantes do seu ambiente de trabalho.</p>
+                            </div>
+                            {unreadNotifications > 0 ? <Badge bg="primary">{unreadNotifications}</Badge> : null}
+                        </div>
+
+                        {notifications.length ? (
+                            <div className="ac-prof-notification-list">
+                                {notifications.slice(0, 5).map((notification) => (
+                                    <div key={notification.id} className="ac-prof-notification">
+                                        <div className={`ac-prof-notification__dot ac-prof-notification__dot--${notification.read ? 'neutral' : 'primary'}`} />
+                                        <div>
+                                            <strong>{notification.message}</strong>
+                                            <small>{formatDate(notification.date)}</small>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyState compact title="Nenhuma notificação" description="Você está em dia." />
+                        )}
+                    </Card.Body>
+                </Card>
+            </div>
+
+            <div className="ac-prof-analytics-grid">
+                <Card className="ac-prof-card ac-prof-chart-card ac-prof-chart-card--wide">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Evolução</span>
+                                <h3>Progresso dos pacientes</h3>
+                                <p>Visão consolidada da evolução clínica registrada no sistema.</p>
+                            </div>
+                        </div>
+                        <div className="ac-prof-chart">
+                            {loadingCharts ? (
+                                <div className="ac-prof-loading-inline">
+                                    <Spinner animation="border" size="sm" />
+                                    <span>Carregando dados...</span>
+                                </div>
+                            ) : patientProgressData.labels.length === 0 ? (
+                                <EmptyState compact title="Sem dados de evolução" description="Ainda não há registros suficientes para este gráfico." />
+                            ) : (
+                                <Line data={patientProgressData} options={lineOptions} />
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+
+                <Card className="ac-prof-card ac-prof-chart-card">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Análises</span>
+                                <h3>Distribuição de diagnósticos</h3>
+                                <p>Panorama atual dos perfis acompanhados.</p>
+                            </div>
+                        </div>
+                        <div className="ac-prof-chart">
+                            {loadingCharts ? (
+                                <div className="ac-prof-loading-inline">
+                                    <Spinner animation="border" size="sm" />
+                                    <span>Carregando dados...</span>
+                                </div>
+                            ) : diagnosisDistribution.labels.length === 0 ? (
+                                <EmptyState compact title="Sem distribuição disponível" description="Não há dados suficientes para esta análise." />
+                            ) : (
+                                <Doughnut data={diagnosisDistribution} options={doughnutOptions} />
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+
+                <Card className="ac-prof-card ac-prof-chart-card">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Operação</span>
+                                <h3>Tipos de atendimento</h3>
+                                <p>Distribuição dos atendimentos por modalidade registrada.</p>
+                            </div>
+                        </div>
+                        <div className="ac-prof-chart">
+                            {loadingCharts ? (
+                                <div className="ac-prof-loading-inline">
+                                    <Spinner animation="border" size="sm" />
+                                    <span>Carregando dados...</span>
+                                </div>
+                            ) : appointmentTypeData.labels.length === 0 ? (
+                                <EmptyState compact title="Sem tipos cadastrados" description="Os dados aparecerão conforme os atendimentos forem registrados." />
+                            ) : (
+                                <Bar data={appointmentTypeData} options={barOptions} />
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+            </div>
+        </div>
+    );
+
+    const renderPatients = () => (
+        <div className="ac-prof-section-stack">
+            <Card className="ac-prof-card">
+                <Card.Body>
+                    <div className="ac-prof-toolbar">
+                        <div className="ac-prof-toolbar__search">
+                            <Search />
+                            <Form.Control
+                                type="text"
+                                placeholder="Buscar paciente por nome ou diagnóstico..."
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                            />
+                        </div>
+                        <Form.Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                            <option value="todos">Todos</option>
+                            <option value="ativo">Ativos</option>
+                            <option value="inativo">Inativos</option>
+                        </Form.Select>
+                    </div>
+                </Card.Body>
+            </Card>
+
+            <div className="ac-prof-patient-layout">
+                <Card className="ac-prof-card">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Cadastro clínico</span>
+                                <h3>Pacientes</h3>
+                                <p>Selecione um paciente para ver o painel detalhado ao lado.</p>
+                            </div>
+                        </div>
+
+                        {loadingPatients ? (
+                            <div className="ac-prof-loading-inline">
+                                <Spinner animation="border" />
+                                <span>Carregando pacientes...</span>
+                            </div>
+                        ) : filteredPatients.length > 0 ? (
+                            <div className="table-responsive">
+                                <Table className="ac-prof-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Paciente</th>
+                                            <th>Nascimento</th>
+                                            <th>Diagnóstico</th>
+                                            <th>Status</th>
+                                            <th>Último atendimento</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredPatients.map((patient) => (
+                                            <tr key={patient.id}>
+                                                <td data-label="Paciente" onClick={() => handlePatientRowClick(patient)} className="ac-prof-cell-clickable">
+                                                    <div className="ac-prof-patient-cell">
+                                                        <span className="ac-prof-avatar">{getInitials(patient.name)}</span>
+                                                        <div>
+                                                            <strong>{patient.name}</strong>
+                                                            <small>{patient.email || 'Sem e-mail cadastrado'}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td data-label="Nascimento" onClick={() => handlePatientRowClick(patient)} className="ac-prof-cell-clickable">
+                                                    {formatDate(patient.birthDate)}
+                                                </td>
+                                                <td data-label="Diagnóstico" onClick={() => handlePatientRowClick(patient)} className="ac-prof-cell-clickable">
+                                                    {patient.diagnosis || 'N/A'}
+                                                </td>
+                                                <td data-label="Status" onClick={() => handlePatientRowClick(patient)} className="ac-prof-cell-clickable">
+                                                    <span className={`ac-prof-status ac-prof-status--${getStatusBadge(patient.status)}`}>
+                                                        {patient.status || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Último atendimento" onClick={() => handlePatientRowClick(patient)} className="ac-prof-cell-clickable">
+                                                    {formatDate(patient.registrationDate)}
+                                                </td>
+                                                <td data-label="Ações">
+                                                    <Button variant="outline-primary" size="sm" onClick={() => handlePatientSelect(patient)}>
+                                                        Ver detalhes
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            </div>
+                        ) : (
+                            <EmptyState
+                                title="Nenhum paciente encontrado"
+                                description="Tente ajustar os filtros ou adicione um novo paciente."
+                                actionLabel="Adicionar paciente"
+                                onAction={() => setShowPatientModal(true)}
+                            />
+                        )}
+                    </Card.Body>
+                </Card>
+
+                <Card className="ac-prof-card ac-prof-patient-panel">
+                    <Card.Body>
+                        {selectedPatient && selectedPatient.id ? (
+                            <>
+                                <div className="ac-prof-patient-panel__hero">
+                                    <div className="ac-prof-patient-panel__avatar">{getInitials(selectedPatient.name)}</div>
+                                    <div>
+                                        <h3>{selectedPatient.name || 'Paciente'}</h3>
+                                        <span className={`ac-prof-status ac-prof-status--${getStatusBadge(selectedPatient.status)}`}>
+                                            {selectedPatient.status || 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="ac-prof-patient-panel__section">
+                                    <span className="ac-prof-card__eyebrow">Informações</span>
+                                    <dl className="ac-prof-info-list">
+                                        <div>
+                                            <dt>Nascimento</dt>
+                                            <dd>{selectedPatient.birthDate ? new Date(selectedPatient.birthDate).toLocaleDateString('pt-BR') : 'N/A'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Diagnóstico</dt>
+                                            <dd>{selectedPatient.diagnosis || 'N/A'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Telefone</dt>
+                                            <dd>{selectedPatient.phone || 'N/A'}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>E-mail</dt>
+                                            <dd>{selectedPatient.email || 'N/A'}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+
+                                <div className="ac-prof-patient-panel__section">
+                                    <span className="ac-prof-card__eyebrow">Observações</span>
+                                    <p className="ac-prof-patient-panel__notes-text">
+                                        {selectedPatient.observacoes || 'Nenhuma observação registrada.'}
+                                    </p>
+                                </div>
+
+                                <div className="ac-prof-patient-panel__actions">
+                                    <Button variant="outline-primary" onClick={() => handlePatientSelect(selectedPatient)}>
+                                        Abrir prontuário
+                                    </Button>
+                                    <Button
+                                        variant="outline-secondary"
+                                        onClick={() => {
+                                            setEditingPatient(selectedPatient);
+                                            setShowEditPatientModal(true);
+                                        }}
+                                    >
+                                        Editar
+                                    </Button>
+                                    <Button
+                                        variant={selectedPatient.status === 'ativo' ? 'outline-secondary' : 'primary'}
+                                        onClick={() =>
+                                            handleUpdateStatus(selectedPatient.id, selectedPatient.status === 'ativo' ? 'inativo' : 'ativo')
+                                        }
+                                    >
+                                        {selectedPatient.status === 'ativo' ? 'Desativar' : 'Ativar'}
+                                    </Button>
+                                    <Button variant="primary" onClick={() => setShowNoteModal(true)}>
+                                        Adicionar nota
+                                    </Button>
+                                </div>
+
+                                <div className="ac-prof-patient-panel__section">
+                                    <div className="ac-prof-card__header ac-prof-card__header--compact">
+                                        <div>
+                                            <h3>Notas do paciente</h3>
+                                            <p>Histórico clínico complementar registrado para acompanhamento.</p>
+                                        </div>
+                                    </div>
+                                    {selectedPatient.notes && Array.isArray(selectedPatient.notes) && selectedPatient.notes.length > 0 ? (
+                                        <div className="ac-prof-note-list">
+                                            {selectedPatient.notes.map((note) =>
+                                                note && note.id ? (
+                                                    <div key={note.id} className="ac-prof-note-card">
+                                                        <strong>{note.title || 'Sem título'}</strong>
+                                                        <p>{note.content || 'Sem conteúdo'}</p>
+                                                        <small>{note.createdAt ? new Date(note.createdAt).toLocaleDateString('pt-BR') : 'N/A'}</small>
+                                                    </div>
+                                                ) : null
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <EmptyState compact title="Nenhuma nota registrada" description="Adicione uma nota para manter o histórico do paciente atualizado." />
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <EmptyState
+                                title="Selecione um paciente"
+                                description="Ao escolher um registro da tabela, o painel lateral exibirá informações, status e notas."
+                            />
+                        )}
+                    </Card.Body>
+                </Card>
+            </div>
+        </div>
+    );
+
+    const renderAppointments = () => (
+        <div className="ac-prof-section-stack">
+            <div className="ac-prof-overview-grid ac-prof-overview-grid--compact">
+                <Card className="ac-prof-card ac-prof-kpi-card">
+                    <Card.Body>
+                        <span className="ac-prof-kpi-card__label">Total de registros</span>
+                        <strong>{consultations.length}</strong>
+                        <small>Atendimentos disponíveis no histórico carregado.</small>
+                    </Card.Body>
+                </Card>
+                <Card className="ac-prof-card ac-prof-kpi-card">
+                    <Card.Body>
+                        <span className="ac-prof-kpi-card__label">Hoje</span>
+                        <strong>{todayAppointments.length}</strong>
+                        <small>Atendimentos mapeados para a agenda atual.</small>
+                    </Card.Body>
+                </Card>
+            </div>
+
+            <Card className="ac-prof-card">
+                <Card.Body>
+                    <div className="ac-prof-card__header">
+                        <div>
+                            <span className="ac-prof-card__eyebrow">Histórico</span>
+                            <h3>Atendimentos</h3>
+                            <p>Visualize os registros e acompanhe o andamento de cada atendimento.</p>
+                        </div>
+                    </div>
+
+                    {loadingConsultations ? (
+                        <div className="ac-prof-loading-inline">
+                            <Spinner animation="border" />
+                            <span>Carregando atendimentos...</span>
+                        </div>
+                    ) : consultations.length > 0 ? (
+                        <div className="table-responsive">
+                            <Table className="ac-prof-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Horário</th>
+                                        <th>Paciente</th>
+                                        <th>Tipo</th>
+                                        <th>Status</th>
+                                        <th>Observações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {consultations.map((consultation) => (
+                                        <tr key={consultation.id}>
+                                            <td data-label="Data">{formatDate(consultation.appointment_date)}</td>
+                                            <td data-label="Horário">{formatTime(consultation.appointment_time)}</td>
+                                            <td data-label="Paciente">{consultation.patient_name || 'N/A'}</td>
+                                            <td data-label="Tipo">{consultation.appointment_type || 'N/A'}</td>
+                                            <td data-label="Status">
+                                                <span className={`ac-prof-status ac-prof-status--${getStatusBadge(consultation.status)}`}>
+                                                    {consultation.status || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td data-label="Observações">{consultation.notes || 'N/A'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </div>
+                    ) : (
+                        <EmptyState
+                            title="Nenhum atendimento encontrado"
+                            description="Registre um novo atendimento para começar a preencher o histórico."
+                            actionLabel="Novo atendimento"
+                            onAction={() => setShowAppointmentModal(true)}
+                        />
+                    )}
+                </Card.Body>
+            </Card>
+        </div>
+    );
+
+    const renderReports = () => (
+        <div className="ac-prof-section-stack">
+            <div className="ac-prof-analytics-grid">
+                <Card className="ac-prof-card ac-prof-chart-card ac-prof-chart-card--wide">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Analytics</span>
+                                <h3>Progresso dos pacientes</h3>
+                                <p>Série histórica dos principais indicadores clínicos monitorados.</p>
+                            </div>
+                        </div>
+                        <div className="ac-prof-chart">
+                            {loadingCharts ? (
+                                <div className="ac-prof-loading-inline">
+                                    <Spinner animation="border" size="sm" />
+                                    <span>Carregando dados...</span>
+                                </div>
+                            ) : patientProgressData.labels.length === 0 ? (
+                                <EmptyState compact title="Sem progresso disponível" description="Os dados aparecerão conforme os registros forem lançados." />
+                            ) : (
+                                <Line data={patientProgressData} options={lineOptions} />
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+
+                <Card className="ac-prof-card ac-prof-chart-card">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Distribuição</span>
+                                <h3>Diagnósticos</h3>
+                                <p>Visão consolidada dos diagnósticos registrados.</p>
+                            </div>
+                        </div>
+                        <div className="ac-prof-chart">
+                            {loadingCharts ? (
+                                <div className="ac-prof-loading-inline">
+                                    <Spinner animation="border" size="sm" />
+                                    <span>Carregando dados...</span>
+                                </div>
+                            ) : diagnosisDistribution.labels.length === 0 ? (
+                                <EmptyState compact title="Sem diagnósticos consolidados" description="Ainda não há dados suficientes para compor esta distribuição." />
+                            ) : (
+                                <Doughnut data={diagnosisDistribution} options={doughnutOptions} />
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+
+                <Card className="ac-prof-card ac-prof-chart-card">
+                    <Card.Body>
+                        <div className="ac-prof-card__header">
+                            <div>
+                                <span className="ac-prof-card__eyebrow">Operação</span>
+                                <h3>Atendimentos por tipo</h3>
+                                <p>Distribuição das modalidades registradas na sua rotina.</p>
+                            </div>
+                        </div>
+                        <div className="ac-prof-chart">
+                            {loadingCharts ? (
+                                <div className="ac-prof-loading-inline">
+                                    <Spinner animation="border" size="sm" />
+                                    <span>Carregando dados...</span>
+                                </div>
+                            ) : appointmentTypeData.labels.length === 0 ? (
+                                <EmptyState compact title="Sem tipos de atendimento" description="Os dados aparecerão conforme os atendimentos forem registrados." />
+                            ) : (
+                                <Bar data={appointmentTypeData} options={barOptions} />
+                            )}
+                        </div>
+                    </Card.Body>
+                </Card>
+            </div>
+        </div>
+    );
+
+    const renderAssistants = () => (
+        <div className="ac-prof-section-stack">
+            <Card className="ac-prof-card">
+                <Card.Body>
+                    <div className="ac-prof-toolbar">
+                        <Form.Select value={assistantStatusFilter} onChange={(event) => setAssistantStatusFilter(event.target.value)}>
+                            <option value="todos">Todos os status</option>
+                            <option value="ativo">Apenas ativos</option>
+                            <option value="inativo">Apenas inativos</option>
+                        </Form.Select>
+                        <Button onClick={() => setShowAssistantModal(true)}>
+                            <PlusCircle className="me-2" />
+                            Adicionar colaborador
+                        </Button>
+                    </div>
+                </Card.Body>
+            </Card>
+
+            <Card className="ac-prof-card">
+                <Card.Body>
+                    <div className="ac-prof-card__header">
+                        <div>
+                            <span className="ac-prof-card__eyebrow">Equipe</span>
+                            <h3>Colaboradores vinculados</h3>
+                            <p>Gerencie acessos, contatos e status dos colaboradores associados à sua conta.</p>
+                        </div>
+                    </div>
+
+                    {filteredAssistants.length > 0 ? (
+                        <div className="table-responsive">
+                            <Table className="ac-prof-table">
+                                <thead>
+                                    <tr>
+                                        <th>Colaborador</th>
+                                        <th>Contato</th>
+                                        <th>E-mail</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredAssistants.map((assistant) => (
+                                        <tr key={assistant.id}>
+                                            <td data-label="Colaborador">
+                                                <div className="ac-prof-patient-cell">
+                                                    <span className="ac-prof-avatar">{getInitials(assistant.nome)}</span>
+                                                    <div>
+                                                        <strong>{assistant.nome}</strong>
+                                                        <small>{assistant.cpf || 'CPF não informado'}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td data-label="Contato">{assistant.telefone || 'N/A'}</td>
+                                            <td data-label="E-mail">{assistant.email || 'N/A'}</td>
+                                            <td data-label="Status">
+                                                <span className={`ac-prof-status ac-prof-status--${getStatusBadge(assistant.status)}`}>
+                                                    {assistant.status || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td data-label="Ações">
+                                                <Button
+                                                    variant={assistant.status === 'ativo' ? 'outline-secondary' : 'primary'}
+                                                    size="sm"
+                                                    onClick={() => handleToggleStatus(assistant.id, assistant.status)}
+                                                >
+                                                    {assistant.status === 'ativo' ? 'Desativar' : 'Ativar'}
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </div>
+                    ) : (
+                        <EmptyState
+                            title="Nenhum colaborador cadastrado"
+                            description="Adicione um novo colaborador para ampliar a operação da sua equipe."
+                            actionLabel="Adicionar colaborador"
+                            onAction={() => setShowAssistantModal(true)}
+                        />
+                    )}
+                </Card.Body>
+            </Card>
+        </div>
+    );
+
+    const renderActiveContent = () => {
+        switch (activeTab) {
+            case 'patients':
+                return renderPatients();
+            case 'appointments':
+                return renderAppointments();
+            case 'reports':
+                return renderReports();
+            case 'assistants':
+                return renderAssistants();
+            case 'overview':
+            default:
+                return renderOverview();
+        }
+    };
 
     if (loading) {
         return (
-            <Container className="text-center mt-5">
-                <Spinner animation="border" />
-                <p>Carregando dashboard...</p>
-            </Container>
+            <ErrorBoundary>
+                <LoadingShell />
+            </ErrorBoundary>
         );
     }
 
     return (
-        <div className="App bg-light min-vh-100">
-            <nav className="top-bar fixed-top shadow-sm">
-                <Container>
-                    <Row className="align-items-center py-3">
-                        <Col md={4} className="text-center text-md-start">
-                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
-                        </Col>
-                        <Col md={4} className="text-center d-none d-md-block">
-                            <span className="text-white fw-semibold">Dashboard Profissional</span>
-                        </Col>
-                        <Col md={4} className="text-center text-md-end">
-                            <Button variant="outline-light" size="sm" onClick={handleLogout}>Sair</Button>
-                        </Col>
-                    </Row>
-                </Container>
-            </nav>
+        <ErrorBoundary>
+            <div className={`ac-prof-dashboard${isSidebarCollapsed ? ' ac-prof-dashboard--collapsed' : ''}`}>
+                <aside className="ac-prof-sidebar-shell">{renderSidebar()}</aside>
 
-            <div className="home-page" style={{ paddingTop: '85px' }}>
-                <section className="hero-section hero-short">
-                    <Container>
-                        <Row className="align-items-center">
-                            <Col lg={7} className="mb-4 mb-lg-0">
-                                <div className="hero-content-box p-4 rounded-4">
-                                    <h2 className="display-6 fw-bold mb-2 text-white">Dashboard Profissional</h2>
-                                    <p className="text-white-90 mb-1">
+                <Offcanvas
+                    show={isMobileSidebarOpen}
+                    onHide={() => setIsMobileSidebarOpen(false)}
+                    placement="start"
+                    className="ac-prof-offcanvas"
+                >
+                    <Offcanvas.Header closeButton closeVariant="white">
+                        <Offcanvas.Title>AutisConnect</Offcanvas.Title>
+                    </Offcanvas.Header>
+                    <Offcanvas.Body>{renderSidebar(true)}</Offcanvas.Body>
+                </Offcanvas>
+
+                <div className="ac-prof-shell">
+                    <header className="ac-prof-header">
+                        <div className="ac-prof-header__context">
+                            <button
+                                type="button"
+                                className="ac-prof-header__menu-toggle"
+                                onClick={() => setIsMobileSidebarOpen(true)}
+                                aria-label="Abrir menu"
+                            >
+                                <List />
+                            </button>
+                            <div>
+                                <span className="ac-prof-header__breadcrumb">{activeSection.breadcrumb}</span>
+                                <h1>{activeSection.title}</h1>
+                            </div>
+                        </div>
+
+                        <div className="ac-prof-header__actions">
+                            <button type="button" className="ac-prof-icon-button" onClick={() => setActiveTab('overview')} aria-label="Notificações">
+                                <Bell />
+                                {unreadNotifications > 0 ? <span className="ac-prof-icon-button__badge">{unreadNotifications}</span> : null}
+                            </button>
+
+                            <Dropdown align="end">
+                                <Dropdown.Toggle variant="light" className="ac-prof-profile-toggle">
+                                    <span className="ac-prof-profile-toggle__avatar">
+                                        <PersonCircle />
+                                    </span>
+                                    <span className="ac-prof-profile-toggle__content">
+                                        <strong>{professionalInfo.name || user?.nome_completo || user?.username || 'Profissional'}</strong>
+                                        <small>{professionalInfo.specialty || 'Profissional AutisConnect'}</small>
+                                    </span>
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu className="ac-prof-dropdown">
+                                    <Dropdown.Header>
                                         {professionalInfo.name || user?.nome_completo || user?.username || 'Profissional'}
-                                    </p>
-                                    <p className="text-white-90 mb-0">
-                                        Especialidade: {professionalInfo.specialty || 'N/A'}
-                                    </p>
-                                </div>
-                            </Col>
-                            <Col lg={5}>
-                                <Card className="shadow-sm border-0">
-                                    <Card.Body>
-                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
-                                        <div className="d-flex align-items-center justify-content-between mb-2">
-                                            <span className="text-muted">Pacientes ativos</span>
-                                            <span className="fw-semibold">{professionalInfo.totalPatients || 0}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center justify-content-between mb-2">
-                                            <span className="text-muted">Consultas hoje</span>
-                                            <span className="fw-semibold">{professionalInfo.todayAppointments || 0}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center justify-content-between mb-3">
-                                            <span className="text-muted">Consultas na semana</span>
-                                            <span className="fw-semibold">{professionalInfo.weekAppointments || 0}</span>
-                                        </div>
-                                        <div className="d-flex flex-wrap gap-2">
-                                            <Badge bg="info">Painel ativo</Badge>
-                                            <Badge bg="secondary">Clinica</Badge>
-                                        </div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Container>
-                </section>
+                                    </Dropdown.Header>
+                                    <Dropdown.Item as="button" onClick={handleLogout}>
+                                        <BoxArrowRight className="me-2" />
+                                        Sair
+                                    </Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
+                    </header>
 
-                <main className="dashboard-section py-4">
-                    <Container fluid className="professional-dashboard">
-                        <style>
-                {`
-                    @media print {
-                        body * { visibility: hidden; }
-                        .printable-prescription, .printable-prescription * { visibility: visible; }
-                        .printable-prescription { position: absolute; top: 0; left: 0; width: 100%; }
-                        .print-header, .print-footer { margin: 20px 0; }
-                        .print-header h4, .print-footer p { margin: 5px 0; }
-                        .print-footer .signature-line { border-top: 1px solid #000; width: 200px; margin-top: 20px; }
-                        .no-print { display: none; }
-                        .prescription-observations { margin-top: 10px; margin-bottom: 20px; font-size: 14px; }
-                    }
-                `}
-            </style>
+                    <main className="ac-prof-main">
+                        {renderFeedback()}
+                        {renderInvitations()}
 
-            {successMessage && (
-                <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
-                    {successMessage}
-                </Alert>
-            )}
+                        <section className="ac-prof-page-header">
+                            <div className="ac-prof-page-header__copy">
+                                <span className="ac-prof-page-header__eyebrow">AutisConnect Professional</span>
+                                <h2>
+                                    {activeTab === 'overview'
+                                        ? `Bom dia, ${professionalInfo.name || user?.nome_completo || user?.username || 'Profissional'}`
+                                        : activeSection.title}
+                                </h2>
+                                <p>
+                                    {activeTab === 'overview'
+                                        ? `Aqui está o resumo dos seus atendimentos, pacientes e indicadores. ${professionalInfo.specialty ? `Especialidade: ${professionalInfo.specialty}.` : ''}`
+                                        : activeSection.subtitle}
+                                </p>
+                            </div>
+                            {renderPageActions()}
+                        </section>
 
-            
-            <div className="professional-dashboard">
+                        {renderActiveContent()}
+                    </main>
+                </div>
 
-            
-
-                <Container fluid className="py-4 professional-dashboard">
-                    {/* Mensagens de feedback */}
-                    {successMessage && (
-                        <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
-                            {successMessage}
-                        </Alert>
-                    )}
-                    {error && (
-                        <Alert variant="danger" onClose={() => setError('')} dismissible>
-                            {error}
-                        </Alert>
-                    )}
-                    {clinicInvitations.length > 0 && <Card className="mb-4"><Card.Body><Card.Title>Convites recebidos</Card.Title>{clinicInvitations.map((invitation) => <div className="d-flex justify-content-between align-items-center border-top pt-2 mt-2" key={invitation.id}><span>{invitation.clinic_name || 'Clínica'}<small className="d-block text-muted">Expira em {String(invitation.expires_at || '').slice(0, 10) || 'data não informada'}</small></span><div className="d-flex gap-2"><Button size="sm" disabled={invitationLoading} onClick={() => respondClinicInvitation(invitation.id, 'accept')}>Aceitar</Button><Button size="sm" variant="outline-danger" disabled={invitationLoading} onClick={() => respondClinicInvitation(invitation.id, 'decline')}>Recusar</Button></div></div>)}</Card.Body></Card>}
-
-                    {/* Alertas para feedback */}
-                    {successMessage && (
-                        <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
-                            {successMessage}
-                        </Alert>
-                    )}
-                    {error && (
-                        <Alert variant="danger" onClose={() => setError('')} dismissible>
-                            {error}
-                        </Alert>
-                    )}
-
-                    {/* Navegação por Abas */}
-                    <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
-                        <Nav variant="tabs" className="mb-4">
-                            <Nav.Item>
-                                <Nav.Link eventKey="overview"><GraphUp className="me-2" />Visão Geral</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="patients"><People className="me-2" />Pacientes</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="appointments"><Calendar2Check className="me-2" />Consultas</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="reports"><FileEarmarkText className="me-2" />Relatórios</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link eventKey="assistants"><People className="me-2" />Colaboradores</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
-                                <Nav.Link 
-                                    href={`/financial-dashboard/${user.id}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                >
-                                    <Wallet2 className="me-2" />Financeiro
-                                </Nav.Link>
-                            </Nav.Item>
-                        </Nav>
-
-                        <Tab.Content>
-                            {/* Aba Visão Geral */}
-                            <Tab.Pane eventKey="overview">
-                                <Row>
-                                    <Col md={8}>
-                                        <Card className="mb-4">
-                                            <Card.Header><h5>Consultas de Hoje</h5></Card.Header>
-                                            <Card.Body>
-                                                {loadingConsultations ? (
-                                                    <div className="text-center">
-                                                        <Spinner animation="border" size="sm" />
-                                                        <span className="ms-2">Carregando consultas...</span>
-                                                    </div>
-                                                ) : getTodayAppointments().length > 0 ? (
-                                                    <Table responsive>
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Horário</th>
-                                                                <th>Paciente</th>
-                                                                <th>Tipo</th>
-                                                                <th>Status</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {getTodayAppointments().map(consultation => (
-                                                                <tr key={consultation.id}>
-                                                                    <td>{formatTime(consultation.appointment_time)}</td>
-                                                                    <td>{consultation.patient_name}</td>
-                                                                    <td>{consultation.appointment_type}</td>
-                                                                    <td><Badge bg={getStatusBadge(consultation.status)}>{consultation.status}</Badge></td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </Table>
-                                                ) : (
-                                                    <p className="text-muted">Nenhuma consulta agendada para hoje.</p>
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-
-                                        <Row>
-                                            <Col md={6}>
-                                                <Card>
-                                                    <Card.Header><h6>Progresso dos Pacientes</h6></Card.Header>
-                                                    <Card.Body>
-                                                        {loadingCharts ? (
-                                                            <div className="text-center">
-                                                                <Spinner animation="border" size="sm" />
-                                                                <span className="ms-2">Carregando dados...</span>
-                                                            </div>
-                                                        ) : patientProgressData.labels.length === 0 ? (
-                                                            <p className="text-muted">Nenhum dado disponível para progresso dos pacientes.</p>
-                                                        ) : (
-                                                            <Line data={patientProgressData} options={lineOptions} />
-                                                        )}
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                            <Col md={6}>
-                                                <Card>
-                                                    <Card.Header><h6>Tipos de Consulta</h6></Card.Header>
-                                                    <Card.Body>
-                                                        {loadingCharts ? (
-                                                            <div className="text-center">
-                                                                <Spinner animation="border" size="sm" />
-                                                                <span className="ms-2">Carregando dados...</span>
-                                                            </div>
-                                                        ) : appointmentTypeData.labels.length === 0 ? (
-                                                            <p className="text-muted">Nenhum dado disponível para tipos de consulta.</p>
-                                                        ) : (
-                                                            <Bar data={appointmentTypeData} options={barOptions} />
-                                                        )}
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                    <Col md={4}>
-                                        <Card className="mb-4">
-                                            <Card.Header><h6>Distribuição de Diagnósticos</h6></Card.Header>
-                                            <Card.Body>
-                                                {loadingCharts ? (
-                                                    <div className="text-center">
-                                                        <Spinner animation="border" size="sm" />
-                                                        <span className="ms-2">Carregando dados...</span>
-                                                    </div>
-                                                ) : diagnosisDistribution.labels.length === 0 ? (
-                                                    <p className="text-muted">Nenhum dado disponível para distribuição de diagnósticos.</p>
-                                                ) : (
-                                                    <Pie data={diagnosisDistribution} options={pieOptions} />
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-
-                                        <Card>
-                                            <Card.Header><h6>Notificações Recentes</h6></Card.Header>
-                                            <Card.Body>
-                                                {notifications.slice(0, 5).map(notification => (
-                                                    <div key={notification.id} className="d-flex align-items-start mb-3">
-                                                        <Bell className={`me-2 mt-1 ${notification.read ? 'text-muted' : 'text-primary'}`} />
-                                                        <div className="flex-grow-1">
-                                                            <p className={`mb-1 ${notification.read ? 'text-muted' : ''}`}>
-                                                                {notification.message}
-                                                            </p>
-                                                            <small className="text-muted">{formatDate(notification.date)}</small>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                </Row>
-                            </Tab.Pane>
-
-                            {/* Aba Pacientes */}
-                            <Tab.Pane eventKey="patients">
-                                <Row className="mb-3">
-                                    <Col md={6}>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Buscar pacientes..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
-                                    </Col>
-                                    <Col md={3}>
-                                        <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                                            <option value="" disabled>Filtrar por Status</option>
-                                            <option value="todos">Todos</option>
-                                            <option value="ativo">Ativo</option>
-                                            <option value="inativo">Inativo</option>
-                                        </Form.Select>
-                                    </Col>
-                                    <Col md={3}>
-                                        <Button variant="primary" onClick={() => setShowPatientModal(true)} className="w-100">
-                                            Adicionar Paciente
-                                        </Button>
-                                    </Col>
-                                </Row>
-
-                                <Row>
-                                    <Col md={8}>
-                                        <Card>
-                                            <Card.Header><h5>Lista de Pacientes</h5></Card.Header>
-                                            <Card.Body>
-                                                {loadingPatients ? (
-                                                    <div className="text-center">
-                                                        <Spinner animation="border" />
-                                                        <p>Carregando pacientes...</p>
-                                                    </div>
-                                                ) : filteredPatients.length > 0 ? (
-                                                    <Table responsive hover>
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Nome</th>
-                                                                <th>Data de Nascimento</th>
-                                                                <th>Diagnóstico</th>
-                                                                <th>Status</th>
-                                                                <th>Última Consulta</th>
-                                                                <th>Ações</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {filteredPatients.map(patient => (
-                                                                <tr key={patient.id}>
-                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
-                                                                        {patient.name}
-                                                                    </td>
-                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
-                                                                        {formatDate(patient.birthDate)}
-                                                                    </td>
-                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
-                                                                        {patient.diagnosis}
-                                                                    </td>
-                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
-                                                                        {patient.status}
-                                                                    </td>
-                                                                    <td onClick={() => handlePatientRowClick(patient)} style={{ cursor: 'pointer' }}>
-                                                                        {formatDate(patient.registrationDate)}
-                                                                    </td>
-                                                                    <td>
-                                                                        <Button
-                                                                            variant="outline-primary"
-                                                                            size="sm"
-                                                                            onClick={() => handlePatientSelect(patient)}
-                                                                        >
-                                                                            Ver Detalhes
-                                                                        </Button>
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </Table>
-                                                ) : (
-                                                    <p className="text-muted">Nenhum paciente encontrado.</p>
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={4}>
-                                        {selectedPatient && selectedPatient.id ? (
-                                            <Card>
-                                                <Card.Header><h6>Detalhes do Paciente</h6>
-                                                </Card.Header>
-                                                    <Button 
-                                                        variant="outline-secondary" 
-                                                        size="sm"
-                                                        className="m-2" // Adiciona uma pequena margem para espaçamento
-                                                        onClick={() => {
-                                                            console.log("Abrindo modal de edição para o paciente:", selectedPatient);
-                                                            setEditingPatient(selectedPatient);
-                                                            setShowEditPatientModal(true);
-                                                        }}
-                                                    >
-                                                        Editar
-                                                    </Button>
-                                                <Card.Body>
-                                                    <h5>{selectedPatient.name || 'Nome não disponível'}</h5>
-                                                    <p><strong>Data de Nascimento:</strong> {selectedPatient.birthDate ? new Date(selectedPatient.birthDate).toLocaleDateString('pt-BR') : 'N/A'}</p>
-                                                    <p><strong>Telefone:</strong> {selectedPatient.phone || 'N/A'}</p>
-                                                    <p><strong>Email:</strong> {selectedPatient.email || 'N/A'}</p>
-                                                    <p><strong>Diagnóstico:</strong> {selectedPatient.diagnosis || 'N/A'}</p>
-                                                    <p><strong>Observações:</strong> {selectedPatient.observacoes || 'Nenhuma observação.'}</p>
-                                                    <p><strong>Status:</strong> {selectedPatient.status || 'N/A'}</p>
-                                                    <Button
-                                                        variant={selectedPatient.status === 'ativo' ? 'warning' : 'success'}
-                                                        size="sm"
-                                                        onClick={() => handleUpdateStatus(selectedPatient.id, selectedPatient.status === 'ativo' ? 'inativo' : 'ativo')}
-                                                    >
-                                                        {selectedPatient.status === 'ativo' ? 'Desativar' : 'Ativar'}
-                                                    </Button>
-                                                    <hr />
-                                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                                        <h6>Notas</h6>
-                                                        <Button
-                                                            variant="outline-primary"
-                                                            size="sm"
-                                                            onClick={() => setShowNoteModal(true)}
-                                                            disabled={!selectedPatient.id}
-                                                        >
-                                                            Adicionar Nota
-                                                        </Button>
-                                                    </div>
-                                                    {selectedPatient.notes && Array.isArray(selectedPatient.notes) && selectedPatient.notes.length > 0 ? (
-                                                        selectedPatient.notes.map(note => (
-                                                            note && note.id ? (
-                                                                <div key={note.id} className="mb-3 p-2 border rounded">
-                                                                    <h6>{note.title || 'Sem título'}</h6>
-                                                                    <p className="mb-1">{note.content || 'Sem conteúdo'}</p>
-                                                                    <small className="text-muted">
-                                                                        {note.createdAt ? new Date(note.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
-                                                                    </small>
-                                                                </div>
-                                                            ) : null
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-muted">Nenhuma nota registrada.</p>
-                                                    )}
-                                                </Card.Body>
-                                            </Card>
-                                        ) : (
-                                            <Card>
-                                                <Card.Body>
-                                                    <p className="text-muted">Selecione um paciente para ver os detalhes.</p>
-                                                </Card.Body>
-                                            </Card>
-                                        )}
-                                    </Col>
-                                </Row>
-                            </Tab.Pane>
-
-                            {/* Aba Consultas */}
-                            <Tab.Pane eventKey="appointments">
-                                <Card>
-                                    <Card.Header>
-                                        <Row className="align-items-center">
-                                        <Col>
-                                            <h5>Histórico Geral de Consultas</h5>
-                                        </Col>
-                                        </Row>
-                                    </Card.Header>
-                                    <Row className="align-items-center">
-                                        <p></p>
-                                    <Col md={3} className="ms-auto text-end">
-                                        <Button 
-                                        variant="primary" 
-                                        onClick={() => setShowAppointmentModal(true)} 
-                                        className="w-100"
-                                        >
-                                        Agendar Consulta
-                                        </Button>
-                                    </Col>
-                                    </Row>
-                                    <Card.Body>
-                                        {loadingConsultations ? (
-                                            <div className="text-center">
-                                                <Spinner animation="border" />
-                                                <p>Carregando consultas...</p>
-                                            </div>
-                                        ) : consultations.length > 0 ? (
-                                            <Table responsive hover>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Data</th>
-                                                        <th>Hora</th>
-                                                        <th>Paciente</th>
-                                                        <th>Tipo</th>
-                                                        <th>Status</th>
-                                                        <th>Observações</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {consultations.map(consultation => (
-                                                        <tr key={consultation.id}>
-                                                            <td>{formatDate(consultation.appointment_date)}</td>
-                                                            <td>{formatTime(consultation.appointment_time)}</td>
-                                                            <td>{consultation.patient_name || 'N/A'}</td>
-                                                            <td>{consultation.appointment_type || 'N/A'}</td>
-                                                            <td><Badge bg={getStatusBadge(consultation.status)}>{consultation.status || 'N/A'}</Badge></td>
-                                                            <td>{consultation.notes || 'N/A'}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </Table>
-                                        ) : (
-                                            <p className="text-muted">Nenhuma consulta encontrada.</p>
-                                        )}
-                                    </Card.Body>
-                                </Card>
-                            </Tab.Pane>
-
-                            {/* Aba Relatórios */}
-                            <Tab.Pane eventKey="reports">
-                                <Row>
-                                    <Col md={6}>
-                                        <Card className="mb-4">
-                                            <Card.Header><h6>Distribuição de Diagnósticos</h6></Card.Header>
-                                            <Card.Body>
-                                                {loadingCharts ? (
-                                                    <div className="text-center">
-                                                        <Spinner animation="border" size="sm" />
-                                                        <span className="ms-2">Carregando dados...</span>
-                                                    </div>
-                                                ) : diagnosisDistribution.labels.length === 0 ? (
-                                                    <p className="text-muted">Nenhum dado disponível para distribuição de diagnósticos.</p>
-                                                ) : (
-                                                    <Pie data={diagnosisDistribution} options={pieOptions} />
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Card className="mb-4">
-                                            <Card.Header><h6>Tipos de Consulta</h6></Card.Header>
-                                            <Card.Body>
-                                                {loadingCharts ? (
-                                                    <div className="text-center">
-                                                        <Spinner animation="border" size="sm" />
-                                                        <span className="ms-2">Carregando dados...</span>
-                                                    </div>
-                                                ) : appointmentTypeData.labels.length === 0 ? (
-                                                    <p className="text-muted">Nenhum dado disponível para tipos de consulta.</p>
-                                                ) : (
-                                                    <Bar data={appointmentTypeData} options={barOptions} />
-                                                )}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                </Row>
-                            </Tab.Pane>
-
-                            {/* Aba Colaboradores */}
-                            <Tab.Pane eventKey="assistants">
-                                <Card>
-                                    <Card.Header><h5>Gerenciar Colaboradores</h5></Card.Header>
-                                    <Card.Body>
-                                        <Form onSubmit={handleAddAssistant} className="mb-4 p-3 border rounded">
-                                            <h6>Adicionar Novo Colaborador</h6>
-                                            <Row className="align-items-end g-3">
-                                                <Col md={3}>
-                                                    <Form.Group>
-                                                        <Form.Label>Nome</Form.Label>
-                                                        <Form.Control
-                                                            placeholder="Nome completo"
-                                                            value={newAssistant.nome}
-                                                            onChange={e => setNewAssistant({...newAssistant, nome: e.target.value})}
-                                                            required
-                                                        />
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col md={2}>
-                                                    <Form.Group>
-                                                        <Form.Label>CPF</Form.Label>
-                                                        <Form.Control
-                                                            placeholder="CPF (opcional)"
-                                                            value={newAssistant.cpf}
-                                                            onChange={e => setNewAssistant({...newAssistant, cpf: e.target.value})}
-                                                        />
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col md={2}>
-                                                    <Form.Group>
-                                                        <Form.Label>Telefone</Form.Label>
-                                                        <Form.Control
-                                                            placeholder="Telefone"
-                                                            value={newAssistant.telefone || ''}
-                                                            onChange={e => setNewAssistant({...newAssistant, telefone: e.target.value})}
-                                                            required // Torna o campo obrigatório no formulário
-                                                        />
-                                                    </Form.Group>
-                                                </Col>
-  
-                                                <Col md={3}>
-                                                    <Form.Group>
-                                                        <Form.Label>Email (para login)</Form.Label>
-                                                        <Form.Control
-                                                            type="email"
-                                                            placeholder="Email"
-                                                            value={newAssistant.email}
-                                                            onChange={e => setNewAssistant({...newAssistant, email: e.target.value})}
-                                                            required
-                                                        />
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col md={2}>
-                                                    <Form.Group>
-                                                        <Form.Label>Senha</Form.Label>
-                                                        <Form.Control
-                                                            type="password"
-                                                            placeholder="Senha"
-                                                            value={newAssistant.password}
-                                                            onChange={e => setNewAssistant({...newAssistant, password: e.target.value})}
-                                                            required
-                                                        />
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col md={2}>
-                                                    <Button type="submit" className="w-100">Adicionar</Button>
-                                                </Col>
-                                            </Row>
-                                        </Form>
-
-                                        <Row className="mb-3">
-                                            <Col md={4}>
-                                                <Form.Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-                                                    <option value="todos">Todos os status</option>
-                                                    <option value="ativo">Apenas Ativos</option>
-                                                    <option value="inativo">Apenas Inativos</option>
-                                                </Form.Select>
-                                            </Col>
-                                        </Row>
-
-                                        <h6>Colaboradores Cadastrados</h6>
-                                        <Table striped bordered hover responsive>
-                                            <thead>
-                                                <tr>
-                                                    <th>Nome</th>
-                                                    <th>CPF</th>
-                                                    <th>Email</th>
-                                                    <th>Status</th>
-                                                    <th>Ação</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {filteredAssistants.length > 0 ? filteredAssistants.map(a => (
-                                                    <tr key={a.id}>
-                                                        <td>{a.nome}</td>
-                                                        <td>{a.cpf || 'N/A'}</td>
-                                                        <td>{a.email}</td>
-                                                        <td><Badge bg={a.status === 'ativo' ? 'success' : 'secondary'}>{a.status}</Badge></td>
-                                                        <td>
-                                                            <Button
-                                                                variant={a.status === 'ativo' ? 'warning' : 'success'}
-                                                                size="sm"
-                                                                onClick={() => handleToggleStatus(a.id, a.status)}
-                                                            >
-                                                                {a.status === 'ativo' ? 'Desativar' : 'Ativar'}
-                                                            </Button>
-                                                        </td>
-                                                    </tr>
-                                                )) : (
-                                                    <tr><td colSpan="5" className="text-center">Nenhum colaborador cadastrado.</td></tr>
-                                                )}
-                                            </tbody>
-                                        </Table>
-                                    </Card.Body>
-                                </Card>
-                            </Tab.Pane>
-                        </Tab.Content>
-                    </Tab.Container>
-                </Container>
-
-                {/* Modal para Adicionar Paciente */}
-                <Modal show={showPatientModal} onHide={() => setShowPatientModal(false)} size="lg">
+                <Modal show={showPatientModal} onHide={() => setShowPatientModal(false)} size="lg" className="ac-prof-modal">
                     <Modal.Header closeButton>
-                        <Modal.Title>Adicionar Novo Paciente</Modal.Title>
+                        <Modal.Title>Adicionar novo paciente</Modal.Title>
                     </Modal.Header>
                     <Form onSubmit={handleAddPatient}>
                         <Modal.Body>
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Nome Completo *</Form.Label>
+                                        <Form.Label>Nome completo *</Form.Label>
                                         <Form.Control
                                             type="text"
                                             value={newPatient.name}
-                                            onChange={(e) => setNewPatient({...newPatient, name: e.target.value})}
+                                            onChange={(event) => setNewPatient({ ...newPatient, name: event.target.value })}
                                             required
                                         />
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Data de Nascimento</Form.Label>
+                                        <Form.Label>Data de nascimento</Form.Label>
                                         <Form.Control
                                             type="date"
                                             value={newPatient.birthDate}
-                                            onChange={(e) => setNewPatient({...newPatient, birthDate: e.target.value})}
+                                            onChange={(event) => setNewPatient({ ...newPatient, birthDate: event.target.value })}
                                         />
                                     </Form.Group>
                                 </Col>
@@ -1440,7 +1996,7 @@ const ProfessionalDashboard = () => {
                                         <Form.Control
                                             type="tel"
                                             value={newPatient.phone}
-                                            onChange={(e) => setNewPatient({...newPatient, phone: e.target.value})}
+                                            onChange={(event) => setNewPatient({ ...newPatient, phone: event.target.value })}
                                         />
                                     </Form.Group>
                                 </Col>
@@ -1450,38 +2006,37 @@ const ProfessionalDashboard = () => {
                                         <Form.Control
                                             type="email"
                                             value={newPatient.email}
-                                            onChange={(e) => setNewPatient({...newPatient, email: e.target.value})}
+                                            onChange={(event) => setNewPatient({ ...newPatient, email: event.target.value })}
                                         />
                                     </Form.Group>
                                 </Col>
                             </Row>
                             <Form.Group className="mb-3">
                                 <Form.Label>Diagnóstico do Transtorno do Espectro Autista (TEA)</Form.Label>
-                                
-                                {/* Grupo de botões para selecionar o nível */}
-                                <div className="d-flex gap-2">
+                                <div className="d-flex flex-wrap gap-2">
                                     <Button
+                                        type="button"
                                         variant={newPatient.diagnosis === 'Nível 1' ? 'primary' : 'outline-primary'}
-                                        onClick={() => setNewPatient({...newPatient, diagnosis: 'Nível 1'})}
+                                        onClick={() => setNewPatient({ ...newPatient, diagnosis: 'Nível 1' })}
                                     >
                                         Nível 1
                                     </Button>
                                     <Button
+                                        type="button"
                                         variant={newPatient.diagnosis === 'Nível 2' ? 'primary' : 'outline-primary'}
-                                        onClick={() => setNewPatient({...newPatient, diagnosis: 'Nível 2'})}
+                                        onClick={() => setNewPatient({ ...newPatient, diagnosis: 'Nível 2' })}
                                     >
                                         Nível 2
                                     </Button>
                                     <Button
+                                        type="button"
                                         variant={newPatient.diagnosis === 'Nível 3' ? 'primary' : 'outline-primary'}
-                                        onClick={() => setNewPatient({...newPatient, diagnosis: 'Nível 3'})}
+                                        onClick={() => setNewPatient({ ...newPatient, diagnosis: 'Nível 3' })}
                                     >
                                         Nível 3
                                     </Button>
                                 </div>
-                                <Form.Text className="text-muted">
-                                    Selecione o nível de suporte necessário.
-                                </Form.Text>
+                                <Form.Text className="text-muted">Selecione o nível de suporte necessário.</Form.Text>
                             </Form.Group>
                             <Form.Group className="mb-3">
                                 <Form.Label>Observações</Form.Label>
@@ -1489,25 +2044,22 @@ const ProfessionalDashboard = () => {
                                     as="textarea"
                                     rows={3}
                                     value={newPatient.notes}
-                                    onChange={(e) => setNewPatient({...newPatient, notes: e.target.value})}
+                                    onChange={(event) => setNewPatient({ ...newPatient, notes: event.target.value })}
                                 />
                             </Form.Group>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setShowPatientModal(false)}>
+                            <Button variant="outline-secondary" onClick={() => setShowPatientModal(false)}>
                                 Cancelar
                             </Button>
-                            <Button variant="primary" type="submit">
-                                Adicionar Paciente
-                            </Button>
+                            <Button type="submit">Adicionar paciente</Button>
                         </Modal.Footer>
                     </Form>
                 </Modal>
 
-                {/* Modal para Agendar Consulta */}
-                <Modal show={showAppointmentModal} onHide={() => setShowAppointmentModal(false)} size="lg">
+                <Modal show={showAppointmentModal} onHide={() => setShowAppointmentModal(false)} size="lg" className="ac-prof-modal">
                     <Modal.Header closeButton>
-                        <Modal.Title>Registrar Nova Consulta</Modal.Title>
+                        <Modal.Title>Novo atendimento</Modal.Title>
                     </Modal.Header>
                     <Form onSubmit={handleAddAppointment}>
                         <Modal.Body>
@@ -1516,11 +2068,11 @@ const ProfessionalDashboard = () => {
                                 <Form.Select
                                     name="patientId"
                                     value={newAppointment.patientId}
-                                    onChange={(e) => setNewAppointment({...newAppointment, patientId: e.target.value})}
+                                    onChange={(event) => setNewAppointment({ ...newAppointment, patientId: event.target.value })}
                                     required
                                 >
                                     <option value="">Selecione um paciente</option>
-                                    {patients.map(patient => (
+                                    {patients.map((patient) => (
                                         <option key={patient.id} value={patient.id}>
                                             {patient.name}
                                         </option>
@@ -1530,24 +2082,28 @@ const ProfessionalDashboard = () => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="appointmentDate">
-                                        <Form.Label>Data da Consulta *</Form.Label>
+                                        <Form.Label>Data do atendimento *</Form.Label>
                                         <Form.Control
                                             type="date"
                                             name="appointment_date"
                                             value={newAppointment.appointment_date}
-                                            onChange={(e) => setNewAppointment({...newAppointment, appointment_date: e.target.value})}
+                                            onChange={(event) =>
+                                                setNewAppointment({ ...newAppointment, appointment_date: event.target.value })
+                                            }
                                             required
                                         />
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="appointmentTime">
-                                        <Form.Label>Hora da Consulta *</Form.Label>
+                                        <Form.Label>Horário *</Form.Label>
                                         <Form.Control
                                             type="time"
                                             name="appointment_time"
                                             value={newAppointment.appointment_time}
-                                            onChange={(e) => setNewAppointment({...newAppointment, appointment_time: e.target.value})}
+                                            onChange={(event) =>
+                                                setNewAppointment({ ...newAppointment, appointment_time: event.target.value })
+                                            }
                                             required
                                         />
                                     </Form.Group>
@@ -1556,11 +2112,13 @@ const ProfessionalDashboard = () => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="appointmentType">
-                                        <Form.Label>Tipo de Consulta</Form.Label>
+                                        <Form.Label>Tipo de atendimento</Form.Label>
                                         <Form.Select
                                             name="appointment_type"
                                             value={newAppointment.appointment_type}
-                                            onChange={(e) => setNewAppointment({...newAppointment, appointment_type: e.target.value})}
+                                            onChange={(event) =>
+                                                setNewAppointment({ ...newAppointment, appointment_type: event.target.value })
+                                            }
                                         >
                                             <option value="Consulta Regular">Consulta Regular</option>
                                             <option value="Consulta Inicial">Consulta Inicial</option>
@@ -1572,11 +2130,11 @@ const ProfessionalDashboard = () => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="appointmentStatus">
-                                        <Form.Label>Status da Consulta</Form.Label>
+                                        <Form.Label>Status do atendimento</Form.Label>
                                         <Form.Select
                                             name="status"
                                             value={newAppointment.status}
-                                            onChange={(e) => setNewAppointment({...newAppointment, status: e.target.value})}
+                                            onChange={(event) => setNewAppointment({ ...newAppointment, status: event.target.value })}
                                         >
                                             <option value="Realizada">Realizada</option>
                                             <option value="Agendada">Agendada</option>
@@ -1590,25 +2148,27 @@ const ProfessionalDashboard = () => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="appointmentValue">
-                                        <Form.Label>Valor da Consulta (R$) *</Form.Label>
+                                        <Form.Label>Valor do atendimento (R$) *</Form.Label>
                                         <Form.Control
                                             type="number"
                                             step="0.01"
                                             name="value"
                                             placeholder="Ex: 150.00"
                                             value={newAppointment.value}
-                                            onChange={(e) => setNewAppointment({...newAppointment, value: e.target.value})}
+                                            onChange={(event) => setNewAppointment({ ...newAppointment, value: event.target.value })}
                                             required
                                         />
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="paymentStatus">
-                                        <Form.Label>Status do Pagamento</Form.Label>
+                                        <Form.Label>Status do pagamento</Form.Label>
                                         <Form.Select
                                             name="payment_status"
                                             value={newAppointment.payment_status}
-                                            onChange={(e) => setNewAppointment({...newAppointment, payment_status: e.target.value})}
+                                            onChange={(event) =>
+                                                setNewAppointment({ ...newAppointment, payment_status: event.target.value })
+                                            }
                                         >
                                             <option value="Pendente">Pendente</option>
                                             <option value="Pago">Pago</option>
@@ -1619,15 +2179,17 @@ const ProfessionalDashboard = () => {
                                 </Col>
                             </Row>
                             <hr />
-                            <h5>Detalhes do Pagamento</h5>
+                            <h5 className="ac-prof-modal__section-title">Detalhes do pagamento</h5>
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3" controlId="paymentMethod">
-                                        <Form.Label>Forma de Pagamento</Form.Label>
+                                        <Form.Label>Forma de pagamento</Form.Label>
                                         <Form.Select
                                             name="payment_method"
                                             value={newAppointment.payment_method}
-                                            onChange={(e) => setNewAppointment({...newAppointment, payment_method: e.target.value})}
+                                            onChange={(event) =>
+                                                setNewAppointment({ ...newAppointment, payment_method: event.target.value })
+                                            }
                                         >
                                             <option value="Pix">Pix</option>
                                             <option value="Crédito">Cartão de Crédito</option>
@@ -1647,7 +2209,9 @@ const ProfessionalDashboard = () => {
                                                 name="payment_details"
                                                 placeholder="Ex: Unimed ou Transferência"
                                                 value={newAppointment.payment_details}
-                                                onChange={(e) => setNewAppointment({...newAppointment, payment_details: e.target.value})}
+                                                onChange={(event) =>
+                                                    setNewAppointment({ ...newAppointment, payment_details: event.target.value })
+                                                }
                                             />
                                         </Form.Group>
                                     </Col>
@@ -1660,26 +2224,23 @@ const ProfessionalDashboard = () => {
                                     rows={3}
                                     name="notes"
                                     value={newAppointment.notes}
-                                    onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
-                                    placeholder="Digite observações sobre a consulta"
+                                    onChange={(event) => setNewAppointment({ ...newAppointment, notes: event.target.value })}
+                                    placeholder="Digite observações sobre o atendimento"
                                 />
                             </Form.Group>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setShowAppointmentModal(false)}>
+                            <Button variant="outline-secondary" onClick={() => setShowAppointmentModal(false)}>
                                 Cancelar
                             </Button>
-                            <Button variant="primary" type="submit">
-                                Salvar Consulta
-                            </Button>
+                            <Button type="submit">Salvar atendimento</Button>
                         </Modal.Footer>
                     </Form>
                 </Modal>
 
-                {/* Modal para Adicionar Nota */}
-                <Modal show={showNoteModal} onHide={() => setShowNoteModal(false)}>
+                <Modal show={showNoteModal} onHide={() => setShowNoteModal(false)} className="ac-prof-modal">
                     <Modal.Header closeButton>
-                        <Modal.Title>Adicionar Nota</Modal.Title>
+                        <Modal.Title>Adicionar nota</Modal.Title>
                     </Modal.Header>
                     <Form onSubmit={handleAddNote}>
                         <Modal.Body>
@@ -1688,7 +2249,7 @@ const ProfessionalDashboard = () => {
                                 <Form.Control
                                     type="text"
                                     value={newNote.title}
-                                    onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                                    onChange={(event) => setNewNote({ ...newNote, title: event.target.value })}
                                     required
                                 />
                             </Form.Group>
@@ -1698,39 +2259,38 @@ const ProfessionalDashboard = () => {
                                     as="textarea"
                                     rows={5}
                                     value={newNote.content}
-                                    onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                                    onChange={(event) => setNewNote({ ...newNote, content: event.target.value })}
                                     required
                                 />
                             </Form.Group>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setShowNoteModal(false)}>
+                            <Button variant="outline-secondary" onClick={() => setShowNoteModal(false)}>
                                 Cancelar
                             </Button>
-                            <Button variant="primary" type="submit">
-                                Adicionar Nota
-                            </Button>
+                            <Button type="submit">Adicionar nota</Button>
                         </Modal.Footer>
                     </Form>
                 </Modal>
 
-                {/* >>>>> MODAL PARA EDITAR PACIENTE <<<<< */}
-                <Modal show={showEditPatientModal} onHide={() => setShowEditPatientModal(false)} size="lg">
+                <Modal show={showEditPatientModal} onHide={() => setShowEditPatientModal(false)} size="lg" className="ac-prof-modal">
                     <Modal.Header closeButton>
-                        <Modal.Title>Editar Dados do Paciente</Modal.Title>
+                        <Modal.Title>Editar dados do paciente</Modal.Title>
                     </Modal.Header>
                     <Form onSubmit={handleUpdatePatient}>
                         <Modal.Body>
-                            {editingPatient && (
+                            {editingPatient ? (
                                 <>
                                     <Row>
                                         <Col md={12}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Nome Completo *</Form.Label>
+                                                <Form.Label>Nome completo *</Form.Label>
                                                 <Form.Control
                                                     type="text"
                                                     value={editingPatient.name || ''}
-                                                    onChange={(e) => setEditingPatient({...editingPatient, name: e.target.value})}
+                                                    onChange={(event) =>
+                                                        setEditingPatient({ ...editingPatient, name: event.target.value })
+                                                    }
                                                     required
                                                 />
                                             </Form.Group>
@@ -1739,11 +2299,13 @@ const ProfessionalDashboard = () => {
                                     <Row>
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Data de Nascimento</Form.Label>
+                                                <Form.Label>Data de nascimento</Form.Label>
                                                 <Form.Control
                                                     type="date"
                                                     value={editingPatient.birthDate ? editingPatient.birthDate.split('T')[0] : ''}
-                                                    onChange={(e) => setEditingPatient({...editingPatient, birthDate: e.target.value})}
+                                                    onChange={(event) =>
+                                                        setEditingPatient({ ...editingPatient, birthDate: event.target.value })
+                                                    }
                                                 />
                                             </Form.Group>
                                         </Col>
@@ -1753,7 +2315,9 @@ const ProfessionalDashboard = () => {
                                                 <Form.Control
                                                     type="tel"
                                                     value={editingPatient.phone || ''}
-                                                    onChange={(e) => setEditingPatient({...editingPatient, phone: e.target.value})}
+                                                    onChange={(event) =>
+                                                        setEditingPatient({ ...editingPatient, phone: event.target.value })
+                                                    }
                                                 />
                                             </Form.Group>
                                         </Col>
@@ -1763,80 +2327,146 @@ const ProfessionalDashboard = () => {
                                         <Form.Control
                                             type="email"
                                             value={editingPatient.email || ''}
-                                            onChange={(e) => setEditingPatient({...editingPatient, email: e.target.value})}
+                                            onChange={(event) => setEditingPatient({ ...editingPatient, email: event.target.value })}
                                         />
                                     </Form.Group>
-                                    
-                                    {/* Campo de Diagnóstico com botões */}
                                     <Form.Group className="mb-3">
                                         <Form.Label>Diagnóstico do Transtorno do Espectro Autista (TEA)</Form.Label>
-                                        <div className="d-flex gap-2">
+                                        <div className="d-flex flex-wrap gap-2">
                                             <Button
+                                                type="button"
                                                 variant={editingPatient.diagnosis === 'Nível 1' ? 'primary' : 'outline-primary'}
-                                                onClick={() => setEditingPatient({...editingPatient, diagnosis: 'Nível 1'})}
+                                                onClick={() => setEditingPatient({ ...editingPatient, diagnosis: 'Nível 1' })}
                                             >
                                                 Nível 1
                                             </Button>
                                             <Button
+                                                type="button"
                                                 variant={editingPatient.diagnosis === 'Nível 2' ? 'primary' : 'outline-primary'}
-                                                onClick={() => setEditingPatient({...editingPatient, diagnosis: 'Nível 2'})}
+                                                onClick={() => setEditingPatient({ ...editingPatient, diagnosis: 'Nível 2' })}
                                             >
                                                 Nível 2
                                             </Button>
                                             <Button
+                                                type="button"
                                                 variant={editingPatient.diagnosis === 'Nível 3' ? 'primary' : 'outline-primary'}
-                                                onClick={() => setEditingPatient({...editingPatient, diagnosis: 'Nível 3'})}
+                                                onClick={() => setEditingPatient({ ...editingPatient, diagnosis: 'Nível 3' })}
                                             >
                                                 Nível 3
                                             </Button>
                                         </div>
                                     </Form.Group>
-
                                     <Form.Group className="mb-3">
                                         <Form.Label>Observações</Form.Label>
                                         <Form.Control
                                             as="textarea"
                                             rows={3}
                                             value={editingPatient.observacoes || ''}
-                                            onChange={(e) => setEditingPatient({...editingPatient, observacoes: e.target.value})}
+                                            onChange={(event) =>
+                                                setEditingPatient({ ...editingPatient, observacoes: event.target.value })
+                                            }
                                         />
                                     </Form.Group>
                                 </>
-                            )}
+                            ) : null}
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setShowEditPatientModal(false)}>
+                            <Button variant="outline-secondary" onClick={() => setShowEditPatientModal(false)}>
                                 Cancelar
                             </Button>
-                            <Button variant="primary" type="submit">
-                                Salvar Alterações
+                            <Button type="submit">Salvar alterações</Button>
+                        </Modal.Footer>
+                    </Form>
+                </Modal>
+
+                <Modal show={showAssistantModal} onHide={() => setShowAssistantModal(false)} size="lg" className="ac-prof-modal">
+                    <Modal.Header closeButton>
+                        <Modal.Title>Adicionar colaborador</Modal.Title>
+                    </Modal.Header>
+                    <Form onSubmit={handleAddAssistant}>
+                        <Modal.Body>
+                            <Row className="g-3">
+                                <Col md={6}>
+                                    <Form.Group>
+                                        <Form.Label>Nome</Form.Label>
+                                        <Form.Control
+                                            placeholder="Nome completo"
+                                            value={newAssistant.nome}
+                                            onChange={(event) => setNewAssistant({ ...newAssistant, nome: event.target.value })}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group>
+                                        <Form.Label>CPF</Form.Label>
+                                        <Form.Control
+                                            placeholder="CPF (opcional)"
+                                            value={newAssistant.cpf}
+                                            onChange={(event) => setNewAssistant({ ...newAssistant, cpf: event.target.value })}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group>
+                                        <Form.Label>Telefone</Form.Label>
+                                        <Form.Control
+                                            placeholder="Telefone"
+                                            value={newAssistant.telefone || ''}
+                                            onChange={(event) => setNewAssistant({ ...newAssistant, telefone: event.target.value })}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group>
+                                        <Form.Label>E-mail (para login)</Form.Label>
+                                        <Form.Control
+                                            type="email"
+                                            placeholder="Email"
+                                            value={newAssistant.email}
+                                            onChange={(event) => setNewAssistant({ ...newAssistant, email: event.target.value })}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group>
+                                        <Form.Label>Senha</Form.Label>
+                                        <Form.Control
+                                            type="password"
+                                            placeholder="Senha"
+                                            value={newAssistant.password}
+                                            onChange={(event) => setNewAssistant({ ...newAssistant, password: event.target.value })}
+                                            required
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group>
+                                        <Form.Label>Status</Form.Label>
+                                        <Form.Select
+                                            value={newAssistant.status}
+                                            onChange={(event) => setNewAssistant({ ...newAssistant, status: event.target.value })}
+                                        >
+                                            <option value="ativo">Ativo</option>
+                                            <option value="inativo">Inativo</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="outline-secondary" onClick={() => setShowAssistantModal(false)}>
+                                Cancelar
                             </Button>
+                            <Button type="submit">Adicionar colaborador</Button>
                         </Modal.Footer>
                     </Form>
                 </Modal>
             </div>
-        </Container>
-        </main>
-
-        <footer className="footer-section py-4">
-            <Container>
-                <Row className="align-items-center">
-                    <Col md={6} className="footer-left text-start">
-                        <p className="mb-0">
-                            {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
-                            <small>Todos os direitos reservados.</small>
-                        </p>
-                    </Col>
-                </Row>
-            </Container>
-        </footer>
-      </div>
-    </div>
+        </ErrorBoundary>
     );
 };
 
 export default ProfessionalDashboard;
-
-
-
-

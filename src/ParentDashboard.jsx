@@ -1,60 +1,61 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
-import { 
-  Container, Card, Row, Col, Spinner, Alert, Badge, 
-  Nav, Tab, Button, Table, Form, Modal 
+import React, { useContext, useEffect, useState } from 'react';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Dropdown,
+  Form,
+  Modal,
+  Offcanvas,
+  OverlayTrigger,
+  Row,
+  Tooltip
 } from 'react-bootstrap';
+import {
+  ArrowRight,
+  BoxArrowRight,
+  BoxArrowUpRight,
+  Calendar2Check,
+  Calendar3,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  GeoAlt,
+  Gear,
+  GraphUp,
+  HouseDoor,
+  List,
+  PersonCircle,
+  PlusCircle,
+  Search,
+  ShieldCheck,
+  Sliders,
+  StarFill
+} from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import apiClient from './services/api.js';
 import logonovo from './assets/logonovo.png';
 import './App.css';
+import './ParentDashboard.css';
 
-// Graficos - Importacao correta conforme ProfessionalDashboard
-import { Line, Bar, Pie } from 'react-chartjs-2';
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  BarElement, 
-  ArcElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  Filler 
+import { Line } from 'react-chartjs-2';
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip as ChartTooltip
 } from 'chart.js';
 
-// Registro de componentes do Chart.js
-ChartJS.register(
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  BarElement, 
-  ArcElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, ChartTooltip, Legend, Filler);
 
-// Icones
-import { Calendar3, GraphUp, PlusCircle, Calendar2Check, BoxArrowUpRight, People, GeoAlt, Search, StarFill } from 'react-bootstrap-icons';
-
-// Card de Estatistica
-const StatCard = ({ title, value, subtitle, icon, color }) => (
-  <Card className="text-center mb-3 shadow-sm h-100 border-0">
-    <Card.Body>
-      <div className={`bg-${color} bg-opacity-10 p-3 rounded-circle d-inline-block mb-3`}>
-        {React.cloneElement(icon, { className: `text-${color}`, size: 24 })}
-      </div>
-      <h6 className="text-muted mb-1">{title}</h6>
-      <h3 className="fw-bold mb-1">{value || 'N/A'}</h3>
-      <small className="text-muted">{subtitle || ' '}</small>
-    </Card.Body>
-  </Card>
-);
+const SIDEBAR_STORAGE_KEY = 'ac-parent-sidebar-collapsed';
 
 const SERVICE_TYPE_OPTIONS = [
   { value: 'ABA', label: 'ABA' },
@@ -95,6 +96,27 @@ const SERVICE_COVERAGE_OPTIONS = [
   { value: 'PlanoSaude', label: 'Plano de Saude' }
 ];
 
+const APPOINTMENT_TYPE_OPTIONS = [
+  { value: 'Consulta Regular', label: 'Atendimento regular' },
+  { value: 'Consulta Inicial', label: 'Atendimento inicial' },
+  { value: 'Acompanhamento', label: 'Acompanhamento' },
+  { value: 'Avaliacao', label: 'Avaliacao' },
+  { value: 'Terapia', label: 'Terapia' }
+];
+
+const PAYMENT_METHOD_OPTIONS = [
+  { value: 'Pix', label: 'Pix' },
+  { value: 'Credito', label: 'Cartao de Credito' },
+  { value: 'Debito', label: 'Cartao de Debito' },
+  { value: 'Dinheiro', label: 'Dinheiro' },
+  { value: 'Plano de Saúde', label: 'Plano de Saude' }
+];
+
+const SERVICE_TYPE_LABELS = SERVICE_TYPE_OPTIONS.reduce((acc, option) => {
+  acc[option.value] = option.label;
+  return acc;
+}, {});
+
 const buildBaseServiceFilters = () => ({
   city: '',
   region: '',
@@ -112,24 +134,242 @@ const buildBaseServiceFilters = () => ({
   lng: null
 });
 
-const SERVICE_TYPE_LABELS = SERVICE_TYPE_OPTIONS.reduce((acc, option) => {
-  acc[option.value] = option.label;
-  return acc;
-}, {});
+const lineOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: {
+    mode: 'index',
+    intersect: false
+  },
+  plugins: {
+    legend: {
+      position: 'bottom',
+      labels: {
+        usePointStyle: true,
+        boxWidth: 10,
+        color: '#475569',
+        font: {
+          size: 12,
+          weight: 600
+        }
+      }
+    },
+    tooltip: {
+      backgroundColor: '#0F172A',
+      titleColor: '#F8FAFC',
+      bodyColor: '#E2E8F0',
+      padding: 12,
+      borderColor: 'rgba(56, 96, 248, 0.35)',
+      borderWidth: 1,
+      displayColors: true
+    }
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false
+      },
+      ticks: {
+        color: '#64748B'
+      }
+    },
+    y: {
+      beginAtZero: true,
+      max: 5,
+      ticks: {
+        stepSize: 1,
+        color: '#64748B'
+      },
+      title: {
+        display: true,
+        text: 'Nivel (1-5)',
+        color: '#475569'
+      },
+      grid: {
+        color: 'rgba(148, 163, 184, 0.16)',
+        drawBorder: false
+      }
+    }
+  }
+};
+
+const getInitials = (value) => {
+  const source = String(value || '').trim();
+  if (!source) return 'AC';
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] || ''}${parts[1][0] || ''}`.toUpperCase();
+};
+
+const getPatientName = (patient) =>
+  patient?.name || patient?.nome_completo || patient?.patient_name || 'Paciente';
+
+const getPatientSupportLevel = (patient) =>
+  patient?.nivel_suporte || patient?.supportLevel || patient?.diagnosis || 'Nao informado';
+
+const getPatientDiagnosis = (patient) =>
+  patient?.diagnosis || patient?.diagnostico || patient?.nivel_suporte || 'Nao informado';
+
+const getPatientPhone = (patient) => patient?.phone || patient?.telefone || 'Nao informado';
+
+const getPatientEmail = (patient) => patient?.email || patient?.responsible_email || 'Nao informado';
+
+const getAppointmentTimestamp = (appointment) => {
+  const dateValue = appointment?.date || appointment?.appointment_date;
+  const timeValue = appointment?.time || appointment?.appointment_time || '00:00';
+  if (!dateValue) return Number.MAX_SAFE_INTEGER;
+  const parsed = new Date(`${dateValue}T${String(timeValue).slice(0, 5)}:00`).getTime();
+  return Number.isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
+};
+
+const getAppointmentStatusMeta = (status) => {
+  const normalized = String(status || 'Agendada').toLowerCase();
+  if (normalized.includes('confirm')) {
+    return { label: 'Confirmado', tone: 'success' };
+  }
+  if (normalized.includes('concl') || normalized.includes('realiz')) {
+    return { label: 'Concluido', tone: 'done' };
+  }
+  if (normalized.includes('cancel')) {
+    return { label: 'Cancelado', tone: 'danger' };
+  }
+  if (normalized.includes('pend')) {
+    return { label: 'Pendente', tone: 'warning' };
+  }
+  return { label: 'Agendado', tone: 'info' };
+};
+
+const getAppointmentTypeLabel = (value) => {
+  const matched = APPOINTMENT_TYPE_OPTIONS.find((option) => option.value === value);
+  return matched?.label || value || 'Atendimento';
+};
+
+const formatDayMonth = (dateString) => {
+  if (!dateString) {
+    return { day: '--', month: '---' };
+  }
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return { day: '--', month: '---' };
+  }
+
+  return {
+    day: date.toLocaleDateString('pt-BR', { day: '2-digit' }),
+    month: date
+      .toLocaleDateString('pt-BR', { month: 'short' })
+      .replace('.', '')
+      .toUpperCase()
+  };
+};
+
+function EmptyState({
+  title,
+  description,
+  actionLabel,
+  onAction,
+  icon: Icon = GraphUp,
+  compact = false
+}) {
+  return (
+    <div className={`ac-parent-empty-state${compact ? ' ac-parent-empty-state--compact' : ''}`}>
+      <div className="ac-parent-empty-state__icon">
+        <Icon />
+      </div>
+      <div>
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+      {actionLabel && onAction ? (
+        <Button variant="outline-primary" onClick={onAction}>
+          {actionLabel}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function LoadingShell() {
+  return (
+    <div className="ac-parent-dashboard ac-parent-dashboard--loading">
+      <aside className="ac-parent-sidebar-shell">
+        <div className="ac-parent-sidebar">
+          <div className="ac-parent-sidebar__brand-block">
+            <div className="ac-parent-skeleton ac-parent-skeleton--logo" />
+            <div className="ac-parent-sidebar__brand-ribbon" />
+          </div>
+          <div className="ac-parent-sidebar__nav-group">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="ac-parent-skeleton ac-parent-skeleton--nav" />
+            ))}
+          </div>
+        </div>
+      </aside>
+      <div className="ac-parent-shell">
+        <header className="ac-parent-header">
+          <div className="ac-parent-skeleton ac-parent-skeleton--header-title" />
+          <div className="ac-parent-skeleton ac-parent-skeleton--header-actions" />
+        </header>
+        <main className="ac-parent-main">
+          <section className="ac-parent-page-header">
+            <div className="ac-parent-page-header__copy">
+              <div className="ac-parent-skeleton ac-parent-skeleton--eyebrow" />
+              <div className="ac-parent-skeleton ac-parent-skeleton--title" />
+              <div className="ac-parent-skeleton ac-parent-skeleton--paragraph" />
+            </div>
+            <div className="ac-parent-skeleton ac-parent-skeleton--selector" />
+          </section>
+          <div className="ac-parent-skeleton-grid">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="ac-parent-skeleton ac-parent-skeleton--kpi" />
+            ))}
+          </div>
+          <div className="ac-parent-skeleton-grid ac-parent-skeleton-grid--content">
+            <div className="ac-parent-skeleton ac-parent-skeleton--panel" />
+            <div className="ac-parent-skeleton ac-parent-skeleton--panel" />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function KpiCard({ icon: Icon, title, value, caption, tone = 'primary' }) {
+  return (
+    <Card className="ac-parent-card ac-parent-kpi">
+      <Card.Body>
+        <div className={`ac-parent-kpi__icon ac-parent-kpi__icon--${tone}`}>
+          <Icon />
+        </div>
+        <span className="ac-parent-kpi__title">{title}</span>
+        <strong className="ac-parent-kpi__value">{value}</strong>
+        <small className="ac-parent-kpi__caption">{caption}</small>
+      </Card.Body>
+    </Card>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div className="ac-parent-info-row">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
 
 function ParentDashboard() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Estado para multiplos filhos e o selecionado
   const [children, setChildren] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
 
-  // Estados para Agendamento
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [consultations, setConsultations] = useState([]);
   const [professionals, setProfessionals] = useState([]);
@@ -146,13 +386,11 @@ function ParentDashboard() {
     notes: ''
   });
 
-  // Estado para dados do grafico
   const [patientProgressData, setPatientProgressData] = useState({
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
     datasets: []
   });
 
-  // Estados para Servicos & Rede TEA
   const [servicesLoading, setServicesLoading] = useState(false);
   const [servicesError, setServicesError] = useState('');
   const [services, setServices] = useState([]);
@@ -162,39 +400,57 @@ function ParentDashboard() {
   const [serviceMeta, setServiceMeta] = useState({ total: 0, page: 1, pageSize: 20 });
   const [serviceGeoStatus, setServiceGeoStatus] = useState('');
 
-  // Logica de navegacao sincronizada com ProfessionalDashboard
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.sessionStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+  });
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [showServiceFilters, setShowServiceFilters] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [isCompactLayout, setIsCompactLayout] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 992;
+  });
+
   const handlePatientSelect = (patient) => {
     try {
-        // Usa o mesmo paciente selecionado no dashboard
-        const patientId = patient.id;
-        if (!patientId) {
-          setError('Paciente invalido selecionado.');
-          return;
-        }
-        console.log('Abrindo dashboard para o paciente ID:', patientId);
-        
-        // Abre em uma nova aba exatamente como no ProfessionalDashboard
-        // Usando a rota padrao de detalhes do paciente
-        window.open(`/patient-details-parent/${patientId}`, '_blank', 'noopener,noreferrer');
+      const patientId = patient.id;
+      if (!patientId) {
+        setError('Paciente invalido selecionado.');
+        return;
+      }
+
+      window.open(`/patient-details-parent/${patientId}`, '_blank', 'noopener,noreferrer');
     } catch (err) {
-        console.error('Erro ao abrir dashboard do paciente:', err);
-        setError('Erro ao abrir detalhes do paciente.');
+      console.error('Erro ao abrir dashboard do paciente:', err);
+      setError('Erro ao abrir detalhes do paciente.');
     }
   };
 
   const formatAge = (birthDate) => {
-    if (!birthDate) return 'N/A';
-    const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
+    if (!birthDate) return 'Nao informado';
+    const today = new Date();
+    const birth = new Date(birthDate);
+    if (Number.isNaN(birth.getTime())) return 'Nao informado';
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age -= 1;
+    }
+
     return `${age} anos`;
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    if (!dateString) return 'Nao informado';
+    const parsed = new Date(dateString);
+    if (Number.isNaN(parsed.getTime())) return 'Nao informado';
+    return parsed.toLocaleDateString('pt-BR');
   };
 
   const formatTime = (timeString) => {
-    return timeString ? timeString.substring(0, 5) : 'N/A';
+    return timeString ? String(timeString).substring(0, 5) : 'Nao informado';
   };
 
   const resolveDefaultServiceLocation = () => {
@@ -323,14 +579,14 @@ function ParentDashboard() {
 
   const handleServiceSearch = (event) => {
     if (event) event.preventDefault();
-    const hasLocation =
-      serviceFilters.city || serviceFilters.region || serviceFilters.state;
+    const hasLocation = serviceFilters.city || serviceFilters.region || serviceFilters.state;
     if (!hasLocation) {
       setServicesError('Informe cidade, regiao ou estado para buscar servicos.');
       setServices([]);
       setServiceMeta({ total: 0, page: 1, pageSize: serviceFilters.limit });
       return;
     }
+
     setServicesError('');
     setServiceQuery({
       ...serviceFilters,
@@ -338,6 +594,7 @@ function ParentDashboard() {
       types: [...serviceFilters.types],
       supportLevels: [...serviceFilters.supportLevels]
     });
+    setShowMobileFilters(false);
   };
 
   const handleServiceClear = () => {
@@ -351,7 +608,8 @@ function ParentDashboard() {
     setServiceFilters((prev) => ({ ...prev, sort: value }));
     setServiceQuery((prev) => ({ ...prev, sort: value, page: 1 }));
     if (value === 'distance') {
-      const hasCoords = parseCoordinate(serviceFilters.lat) !== null && parseCoordinate(serviceFilters.lng) !== null;
+      const hasCoords =
+        parseCoordinate(serviceFilters.lat) !== null && parseCoordinate(serviceFilters.lng) !== null;
       if (!hasCoords) {
         handleUseMyLocation();
       }
@@ -368,6 +626,7 @@ function ParentDashboard() {
       setServiceGeoStatus('Geolocalizacao nao suportada neste navegador.');
       return;
     }
+
     setServiceGeoStatus('Obtendo localizacao...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -384,43 +643,26 @@ function ParentDashboard() {
   };
 
   const openServiceDetails = (serviceId) => {
+    // TODO: revisar este fallback quando houver garantia de IDs validos na listagem.
     const resolvedId = serviceId || 18;
     window.open(`/service-dashboard/${resolvedId}`, '_blank', 'noopener,noreferrer');
   };
 
-  // Opcoes de graficos
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { position: 'top' },
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            max: 5,
-            title: { display: true, text: 'Nível (1-5)' }
-        }
-    }
-  };
-
-  // Funcoes de API sincronizadas com o padrao do ProfessionalDashboard
   const fetchChildren = async () => {
     if (!user) return;
-    
-    // No backend atual, a rota suportada para pais e /parent/my-children
+
     const routes = ['/parent/my-children'];
-    
+
     for (const route of routes) {
       try {
         const response = await apiClient.get(route);
         const data = Array.isArray(response.data) ? response.data : [];
         if (data.length > 0) {
-          const normalizedData = data.map(child => ({
+          const normalizedData = data.map((child) => ({
             ...child,
             id: child.id || 16,
             name: child.name || child.nome_completo || 'teste01',
-            diagnosis: child.diagnosis || child.diagnostico || 'Nível 2',
+            diagnosis: child.diagnosis || child.diagnostico || 'Nivel 2',
             birthDate: child.birthDate || child.data_nascimento || '2015-01-01'
           }));
           setChildren(normalizedData);
@@ -432,13 +674,11 @@ function ParentDashboard() {
       }
     }
 
-    // Fallback local quando não houver retorno das rotas de parent
-    // Fallback final local
     const fallbackChild = {
       id: 16,
       name: 'teste01',
-      diagnosis: 'Nível 2',
-      nivel_suporte: 'Nível 2',
+      diagnosis: 'Nivel 2',
+      nivel_suporte: 'Nivel 2',
       birthDate: '2015-01-01'
     };
     setChildren([fallbackChild]);
@@ -448,7 +688,6 @@ function ParentDashboard() {
   const fetchConsultations = async (patientId) => {
     if (!patientId) return;
     try {
-      // Para pais, a rota permitida e /parent/patient/:patientId/upcoming-appointments
       const response = await apiClient.get(`/parent/patient/${patientId}/upcoming-appointments`);
       setConsultations(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
@@ -461,9 +700,9 @@ function ParentDashboard() {
     try {
       const response = await apiClient.get('/parent/professionals/list');
       const data = Array.isArray(response.data) ? response.data : [];
-      const normalizedProfs = data.map(p => ({
-        ...p,
-        specialty: p.specialty || p.especialidade || 'Especialista'
+      const normalizedProfs = data.map((professional) => ({
+        ...professional,
+        specialty: professional.specialty || professional.especialidade || 'Especialista'
       }));
       setProfessionals(normalizedProfs);
     } catch (err) {
@@ -518,10 +757,10 @@ function ParentDashboard() {
     }
   };
 
-  const handleAddAppointment = async (e) => {
-    e.preventDefault();
+  const handleAddAppointment = async (event) => {
+    event.preventDefault();
     if (!selectedPatient) return;
-    
+
     try {
       const payload = {
         patientId: selectedPatient.id,
@@ -538,10 +777,10 @@ function ParentDashboard() {
       };
 
       await apiClient.post('/appointments', payload);
-      setSuccessMessage('Consulta solicitada com sucesso!');
+      setSuccessMessage('Atendimento solicitado com sucesso!');
       setShowAppointmentModal(false);
       fetchConsultations(selectedPatient.id);
-      
+
       setNewAppointment({
         professionalId: '',
         appointment_date: '',
@@ -557,9 +796,41 @@ function ParentDashboard() {
 
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError('Erro ao agendar consulta. Verifique a disponibilidade.');
+      setError('Erro ao solicitar atendimento. Verifique a disponibilidade.');
     }
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleResize = () => {
+      const compact = window.innerWidth < 992;
+      setIsCompactLayout(compact);
+      if (!compact) {
+        setShowMobileFilters(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.setItem(SIDEBAR_STORAGE_KEY, String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+    setShowMobileFilters(false);
+  }, [activeTab]);
+
   useEffect(() => {
     if (!user) return;
 
@@ -570,15 +841,12 @@ function ParentDashboard() {
 
     const loadInitialData = async () => {
       setLoading(true);
-      await Promise.allSettled([
-        fetchChildren(),
-        fetchProfessionals()
-      ]);
+      setError('');
+      await Promise.allSettled([fetchChildren(), fetchProfessionals()]);
       setLoading(false);
     };
 
     loadInitialData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
   useEffect(() => {
@@ -593,697 +861,1404 @@ function ParentDashboard() {
 
   useEffect(() => {
     if (!serviceQuery) return;
-    const hasLocation =
-      serviceQuery.city || serviceQuery.region || serviceQuery.state;
+    const hasLocation = serviceQuery.city || serviceQuery.region || serviceQuery.state;
     if (!hasLocation) return;
     fetchServices(serviceQuery);
   }, [serviceQuery]);
+
   useEffect(() => {
-    if (selectedPatient) {
-      fetchConsultations(selectedPatient.id);
-      
-      setPatientProgressData({
-        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        datasets: [
-          {
-            label: 'Comunicação',
-            data: [2, 3, 3.5, 4, 4.2],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: true,
-            tension: 0.4
-          },
-          {
-            label: 'Interação Social',
-            data: [1.5, 2, 2.8, 3.5, 4],
-            borderColor: 'rgba(54, 162, 235, 1)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            fill: true,
-            tension: 0.4
-          },
-          {
-            label: 'Comportamento',
-            data: [3, 3.2, 3.8, 4, 4.5],
-            borderColor: 'rgba(255, 99, 132, 1)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            fill: true,
-            tension: 0.4
-          }
-        ]
-      });
-    }
+    if (!selectedPatient) return;
+
+    fetchConsultations(selectedPatient.id);
+
+    // TODO: substituir pelos indicadores clinicos reais quando o backend de evolucao estiver disponivel.
+    setPatientProgressData({
+      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+      datasets: [
+        {
+          label: 'Comunicacao',
+          data: [2, 3, 3.5, 4, 4.2],
+          borderColor: '#2563EB',
+          backgroundColor: 'rgba(37, 99, 235, 0.12)',
+          pointBackgroundColor: '#2563EB',
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Interacao social',
+          data: [1.5, 2, 2.8, 3.5, 4],
+          borderColor: '#06B6D4',
+          backgroundColor: 'rgba(6, 182, 212, 0.12)',
+          pointBackgroundColor: '#06B6D4',
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Comportamento',
+          data: [3, 3.2, 3.8, 4, 4.5],
+          borderColor: '#16A34A',
+          backgroundColor: 'rgba(22, 163, 74, 0.1)',
+          pointBackgroundColor: '#16A34A',
+          fill: true,
+          tension: 0.4
+        }
+      ]
+    });
   }, [selectedPatient]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const sortedAppointments = [...consultations].sort(
+    (first, second) => getAppointmentTimestamp(first) - getAppointmentTimestamp(second)
+  );
 
+  const nextAppointment = sortedAppointments[0] || null;
   const totalServicePages = Math.max(
     1,
     Math.ceil((serviceMeta.total || services.length) / (serviceMeta.pageSize || 1))
   );
+  const currentPatientName = getPatientName(selectedPatient);
+  const currentSupportLevel = getPatientSupportLevel(selectedPatient);
+  const currentDiagnosis = getPatientDiagnosis(selectedPatient);
+  const linkedPatientsLabel =
+    children.length === 1 ? '1 paciente acompanhado' : `${children.length} pacientes acompanhados`;
+  const hasServiceLocation =
+    Boolean(serviceFilters.city) || Boolean(serviceFilters.region) || Boolean(serviceFilters.state);
+  const previewServices = services.slice(0, 2);
+
+  const activeSection = {
+    overview: {
+      breadcrumb: 'Dashboard dos Pais / Visao geral',
+      title: 'Visao geral',
+      subtitle: selectedPatient
+        ? `Acompanhe o desenvolvimento, os atendimentos e os proximos passos de ${currentPatientName}.`
+        : 'Acompanhe os principais indicadores da familia.'
+    },
+    appointments: {
+      breadcrumb: 'Dashboard dos Pais / Atendimentos',
+      title: 'Atendimentos',
+      subtitle: 'Organize os proximos atendimentos, acompanhe status e solicite novos agendamentos.'
+    },
+    progress: {
+      breadcrumb: 'Dashboard dos Pais / Evolucao',
+      title: 'Evolucao',
+      subtitle: 'Visualize a evolucao ao longo do tempo com foco em clareza e contexto.'
+    },
+    services: {
+      breadcrumb: 'Dashboard dos Pais / Servicos & Rede TEA',
+      title: 'Servicos & Rede TEA',
+      subtitle: 'Encontre profissionais, clinicas e servicos especializados proximos a voce.'
+    },
+    account: {
+      breadcrumb: 'Dashboard dos Pais / Conta',
+      title: 'Conta',
+      subtitle: 'Consulte os dados da conta responsavel e o panorama dos pacientes vinculados.'
+    }
+  }[activeTab] || {
+    breadcrumb: 'Dashboard dos Pais',
+    title: 'Visao geral',
+    subtitle: 'Acompanhe os principais indicadores.'
+  };
+
+  const navigationGroups = [
+    {
+      label: 'Principal',
+      items: [{ key: 'overview', label: 'Visao geral', icon: HouseDoor }]
+    },
+    {
+      label: 'Acompanhamento',
+      items: [
+        {
+          key: 'patient-link',
+          label: 'Paciente',
+          icon: BoxArrowUpRight,
+          action: () => selectedPatient && handlePatientSelect(selectedPatient),
+          disabled: !selectedPatient
+        },
+        { key: 'appointments', label: 'Atendimentos', icon: Calendar2Check },
+        { key: 'progress', label: 'Evolucao', icon: GraphUp }
+      ]
+    },
+    {
+      label: 'Rede de apoio',
+      items: [{ key: 'services', label: 'Servicos & Rede TEA', icon: GeoAlt }]
+    },
+    {
+      label: 'Conta',
+      items: [{ key: 'account', label: 'Configuracoes', icon: Gear }]
+    }
+  ];
+
+  const renderSidebarNavItem = (item, mobile = false) => {
+    const Icon = item.icon;
+    const collapsed = isSidebarCollapsed && !mobile;
+    const isActive = !item.action && activeTab === item.key;
+    const className = `ac-parent-sidebar__item${isActive ? ' is-active' : ''}${item.disabled ? ' is-disabled' : ''}`;
+
+    const handleClick = () => {
+      if (item.disabled) return;
+      if (item.action) {
+        item.action();
+        return;
+      }
+      setActiveTab(item.key);
+    };
+
+    const content = (
+      <button
+        type="button"
+        className={className}
+        onClick={handleClick}
+        title={item.label}
+        aria-current={isActive ? 'page' : undefined}
+        aria-disabled={item.disabled ? 'true' : undefined}
+        disabled={item.disabled}
+      >
+        <span className="ac-parent-sidebar__item-icon">
+          <Icon />
+        </span>
+        <span className="ac-parent-sidebar__item-label">{item.label}</span>
+        {item.action && !collapsed ? (
+          <span className="ac-parent-sidebar__item-arrow">
+            <ArrowRight />
+          </span>
+        ) : null}
+      </button>
+    );
+
+    if (collapsed) {
+      return (
+        <OverlayTrigger
+          key={item.key}
+          placement="right"
+          overlay={<Tooltip id={`parent-tooltip-${item.key}`}>{item.label}</Tooltip>}
+        >
+          {content}
+        </OverlayTrigger>
+      );
+    }
+
+    return <React.Fragment key={item.key}>{content}</React.Fragment>;
+  };
+
+  const renderSidebar = (mobile = false) => (
+    <div className={`ac-parent-sidebar${isSidebarCollapsed && !mobile ? ' ac-parent-sidebar--collapsed' : ''}`}>
+      <div className="ac-parent-sidebar__brand-block">
+        <div className="ac-parent-sidebar__brand-row">
+          <img src={logonovo} alt="AutisConnect" className="ac-parent-sidebar__logo" />
+          {!mobile ? (
+            <button
+              type="button"
+              className="ac-parent-sidebar__collapse"
+              onClick={() => setIsSidebarCollapsed((current) => !current)}
+              aria-label={isSidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+            >
+              {isSidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
+            </button>
+          ) : null}
+        </div>
+        <div className="ac-parent-sidebar__brand-ribbon" />
+      </div>
+
+      <div className="ac-parent-sidebar__nav">
+        {navigationGroups.map((group) => (
+          <div className="ac-parent-sidebar__nav-group" key={group.label}>
+            {!isSidebarCollapsed || mobile ? (
+              <span className="ac-parent-sidebar__group-label">{group.label}</span>
+            ) : null}
+            <div className="ac-parent-sidebar__group-items">
+              {group.items.map((item) => renderSidebarNavItem(item, mobile))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="ac-parent-sidebar__footer">
+        {!isSidebarCollapsed || mobile ? (
+          <div className="ac-parent-sidebar__user">
+            <div className="ac-parent-sidebar__user-avatar">
+              {getInitials(user?.nome_completo || user?.username || 'Responsavel')}
+            </div>
+            <div>
+              <strong>{user?.nome_completo || user?.username || 'Responsavel'}</strong>
+              <span>{linkedPatientsLabel}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="ac-parent-sidebar__user-avatar ac-parent-sidebar__user-avatar--solo">
+            {getInitials(user?.nome_completo || user?.username || 'Responsavel')}
+          </div>
+        )}
+
+        <button type="button" className="ac-parent-sidebar__logout" onClick={handleLogout}>
+          <BoxArrowRight />
+          {!isSidebarCollapsed || mobile ? <span>Sair</span> : null}
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderFeedback = () => {
+    if (!successMessage && !error) return null;
+
+    return (
+      <div className="ac-parent-feedback-stack">
+        {successMessage ? (
+          <Alert
+            variant="success"
+            className="ac-parent-feedback"
+            dismissible
+            onClose={() => setSuccessMessage('')}
+          >
+            {successMessage}
+          </Alert>
+        ) : null}
+        {error ? (
+          <Alert
+            variant="danger"
+            className="ac-parent-feedback"
+            dismissible
+            onClose={() => setError('')}
+          >
+            {error}
+          </Alert>
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderPatientSelector = () => {
+    if (!selectedPatient) return null;
+
+    if (children.length <= 1) {
+      return (
+        <div className="ac-parent-patient-selector ac-parent-patient-selector--static">
+          <span className="ac-parent-patient-selector__label">Paciente acompanhado</span>
+          <div className="ac-parent-patient-selector__summary">
+            <div className="ac-parent-patient-selector__avatar">
+              {getInitials(currentPatientName)}
+            </div>
+            <div>
+              <strong>{currentPatientName}</strong>
+              <small>{currentSupportLevel}</small>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Dropdown align="end">
+        <Dropdown.Toggle
+          as="button"
+          id="parent-patient-selector"
+          className="ac-parent-patient-selector"
+          type="button"
+        >
+          <span className="ac-parent-patient-selector__label">Acompanhando</span>
+          <span className="ac-parent-patient-selector__summary">
+            <span className="ac-parent-patient-selector__avatar">
+              {getInitials(currentPatientName)}
+            </span>
+            <span>
+              <strong>{currentPatientName}</strong>
+              <small>{currentSupportLevel}</small>
+            </span>
+          </span>
+          <ChevronDown />
+        </Dropdown.Toggle>
+        <Dropdown.Menu className="ac-parent-dropdown">
+          {children.map((child) => {
+            const childName = getPatientName(child);
+            const childSupportLevel = getPatientSupportLevel(child);
+            return (
+              <Dropdown.Item
+                as="button"
+                key={child.id}
+                className="ac-parent-dropdown__item"
+                onClick={() => setSelectedPatient(child)}
+              >
+                <span className="ac-parent-dropdown__avatar">{getInitials(childName)}</span>
+                <span className="ac-parent-dropdown__content">
+                  <strong>{childName}</strong>
+                  <small>{childSupportLevel}</small>
+                </span>
+              </Dropdown.Item>
+            );
+          })}
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  };
+
+  const renderPatientHeroCard = () => (
+    <Card className="ac-parent-card ac-parent-patient-card">
+      <Card.Body>
+        <div className="ac-parent-patient-card__top">
+          <div className="ac-parent-patient-card__identity">
+            <div className="ac-parent-patient-card__avatar">{getInitials(currentPatientName)}</div>
+            <div>
+              <span className="ac-parent-card__eyebrow">Paciente selecionado</span>
+              <h3>{currentPatientName}</h3>
+              <p>
+                {formatAge(selectedPatient?.birthDate)} <span aria-hidden="true">•</span> {currentSupportLevel}
+              </p>
+            </div>
+          </div>
+          <span className="ac-parent-status ac-parent-status--neutral">{currentDiagnosis}</span>
+        </div>
+
+        <div className="ac-parent-patient-card__grid">
+          <div className="ac-parent-patient-card__metric">
+            <span>Diagnostico</span>
+            <strong>{currentDiagnosis}</strong>
+          </div>
+          <div className="ac-parent-patient-card__metric">
+            <span>Proximo atendimento</span>
+            <strong>
+              {nextAppointment
+                ? `${formatDate(nextAppointment.date || nextAppointment.appointment_date)} as ${formatTime(
+                    nextAppointment.time || nextAppointment.appointment_time
+                  )}`
+                : 'Sem atendimento agendado'}
+            </strong>
+          </div>
+        </div>
+
+        <div className="ac-parent-patient-card__actions">
+          <Button
+            onClick={() => selectedPatient && handlePatientSelect(selectedPatient)}
+            disabled={!selectedPatient}
+          >
+            <BoxArrowUpRight className="me-2" />
+            Abrir Dashboard do Paciente
+          </Button>
+          <Button variant="outline-secondary" onClick={() => setShowAppointmentModal(true)}>
+            <PlusCircle className="me-2" />
+            Novo Atendimento
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+
+  const renderOverview = () => (
+    <div className="ac-parent-section-stack">
+      <section className="ac-parent-overview-hero">
+        {renderPatientHeroCard()}
+
+        <Card className="ac-parent-card ac-parent-next-card">
+          <Card.Body>
+            <div className="ac-parent-card__header ac-parent-card__header--compact">
+              <div>
+                <span className="ac-parent-card__eyebrow">Proximo passo</span>
+                <h3>Atendimento em destaque</h3>
+              </div>
+              <Calendar2Check />
+            </div>
+
+            {nextAppointment ? (
+              <div className="ac-parent-next-card__content">
+                <strong>{formatDate(nextAppointment.date || nextAppointment.appointment_date)}</strong>
+                <p>
+                  {formatTime(nextAppointment.time || nextAppointment.appointment_time)} com{' '}
+                  {nextAppointment.professionalName || nextAppointment.professional_name || 'Profissional AutisConnect'}
+                </p>
+                <span className={`ac-parent-status ac-parent-status--${getAppointmentStatusMeta(nextAppointment.status).tone}`}>
+                  {getAppointmentStatusMeta(nextAppointment.status).label}
+                </span>
+              </div>
+            ) : (
+              <EmptyState
+                compact
+                icon={Calendar2Check}
+                title="Nenhum atendimento agendado"
+                description="Voce pode solicitar um novo atendimento quando precisar."
+                actionLabel="Novo Atendimento"
+                onAction={() => setShowAppointmentModal(true)}
+              />
+            )}
+          </Card.Body>
+        </Card>
+      </section>
+
+      <section className="ac-parent-kpi-grid">
+        <KpiCard
+          icon={Calendar3}
+          title="Idade"
+          value={formatAge(selectedPatient?.birthDate)}
+          caption="Com base na data de nascimento cadastrada"
+          tone="primary"
+        />
+        <KpiCard
+          icon={ShieldCheck}
+          title="Nivel de suporte"
+          value={currentSupportLevel}
+          caption="Informacao principal para acompanhamento"
+          tone="cyan"
+        />
+        <KpiCard
+          icon={Calendar2Check}
+          title="Atendimentos agendados"
+          value={consultations.length}
+          caption="Agenda futura vinculada a este paciente"
+          tone="success"
+        />
+        <KpiCard
+          icon={GraphUp}
+          title="Proximo atendimento"
+          value={
+            nextAppointment
+              ? `${formatDate(nextAppointment.date || nextAppointment.appointment_date)}`
+              : 'Sem agenda'
+          }
+          caption={
+            nextAppointment
+              ? `${formatTime(nextAppointment.time || nextAppointment.appointment_time)}`
+              : 'Sem horario previsto'
+          }
+          tone="warning"
+        />
+      </section>
+
+      <section className="ac-parent-overview-grid">
+        <Card className="ac-parent-card ac-parent-chart-card">
+          <Card.Body>
+            <div className="ac-parent-card__header">
+              <div>
+                <span className="ac-parent-card__eyebrow">Evolucao</span>
+                <h3>Evolucao de {currentPatientName}</h3>
+                <p>Acompanhe indicadores ao longo do tempo.</p>
+              </div>
+            </div>
+            <div className="ac-parent-chart-shell">
+              <Line data={patientProgressData} options={lineOptions} />
+            </div>
+            <div className="ac-parent-chart-note">
+              Os indicadores atuais seguem a estrutura temporaria do frontend e devem ser conectados a dados clinicos reais quando o backend estiver disponivel.
+            </div>
+          </Card.Body>
+        </Card>
+
+        <div className="ac-parent-column-stack">
+          <Card className="ac-parent-card">
+            <Card.Body>
+              <div className="ac-parent-card__header">
+                <div>
+                  <span className="ac-parent-card__eyebrow">Acoes rapidas</span>
+                  <h3>O que voce precisa agora?</h3>
+                </div>
+              </div>
+              <div className="ac-parent-actions">
+                <button type="button" className="ac-parent-action-card" onClick={() => handlePatientSelect(selectedPatient)}>
+                  <BoxArrowUpRight />
+                  <div>
+                    <strong>Abrir Dashboard</strong>
+                    <span>Ver o acompanhamento completo</span>
+                  </div>
+                </button>
+                <button type="button" className="ac-parent-action-card" onClick={() => setShowAppointmentModal(true)}>
+                  <PlusCircle />
+                  <div>
+                    <strong>Novo Atendimento</strong>
+                    <span>Solicitar atendimento com um profissional</span>
+                  </div>
+                </button>
+                <button type="button" className="ac-parent-action-card" onClick={() => setActiveTab('services')}>
+                  <GeoAlt />
+                  <div>
+                    <strong>Encontrar Servico</strong>
+                    <span>Explorar a rede de apoio e servicos</span>
+                  </div>
+                </button>
+              </div>
+            </Card.Body>
+          </Card>
+
+          <Card className="ac-parent-card">
+            <Card.Body>
+              <div className="ac-parent-card__header">
+                <div>
+                  <span className="ac-parent-card__eyebrow">Informacoes basicas</span>
+                  <h3>Informacoes do paciente</h3>
+                </div>
+              </div>
+              <div className="ac-parent-info-list">
+                <InfoRow label="Diagnostico" value={currentDiagnosis} />
+                <InfoRow label="Nascimento" value={formatDate(selectedPatient?.birthDate)} />
+                <InfoRow label="Idade" value={formatAge(selectedPatient?.birthDate)} />
+                <InfoRow label="Telefone" value={getPatientPhone(selectedPatient)} />
+                <InfoRow label="E-mail" value={getPatientEmail(selectedPatient)} />
+                <InfoRow label="Nivel de suporte" value={currentSupportLevel} />
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
+      </section>
+
+      <section className="ac-parent-overview-grid">
+        <Card className="ac-parent-card">
+          <Card.Body>
+            <div className="ac-parent-card__header">
+              <div>
+                <span className="ac-parent-card__eyebrow">Atendimentos</span>
+                <h3>Proximos Atendimentos</h3>
+                <p>Veja rapidamente os compromissos mais proximos.</p>
+              </div>
+              <Button variant="outline-secondary" onClick={() => setActiveTab('appointments')}>
+                Ver agenda completa
+              </Button>
+            </div>
+
+            {sortedAppointments.length ? (
+              <div className="ac-parent-appointments-list ac-parent-appointments-list--compact">
+                {sortedAppointments.slice(0, 3).map((appointment) => {
+                  const statusMeta = getAppointmentStatusMeta(appointment.status);
+                  const dateParts = formatDayMonth(appointment.date || appointment.appointment_date);
+                  return (
+                    <article
+                      className="ac-parent-appointment-card ac-parent-appointment-card--compact"
+                      key={appointment.id || `${appointment.appointment_date}-${appointment.appointment_time}`}
+                    >
+                      <div className="ac-parent-appointment-card__date">
+                        <strong>{dateParts.day}</strong>
+                        <span>{dateParts.month}</span>
+                      </div>
+                      <div className="ac-parent-appointment-card__content">
+                        <div className="ac-parent-appointment-card__meta">
+                          <span>{formatTime(appointment.time || appointment.appointment_time)}</span>
+                          <span>{appointment.professionalName || appointment.professional_name || 'Profissional'}</span>
+                        </div>
+                        <strong>{getAppointmentTypeLabel(appointment.appointment_type)}</strong>
+                      </div>
+                      <span className={`ac-parent-status ac-parent-status--${statusMeta.tone}`}>
+                        {statusMeta.label}
+                      </span>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState
+                compact
+                icon={Calendar2Check}
+                title="Nenhum atendimento agendado"
+                description="Voce pode solicitar um novo atendimento quando precisar."
+                actionLabel="Novo Atendimento"
+                onAction={() => setShowAppointmentModal(true)}
+              />
+            )}
+          </Card.Body>
+        </Card>
+
+        <Card className="ac-parent-card">
+          <Card.Body>
+            <div className="ac-parent-card__header">
+              <div>
+                <span className="ac-parent-card__eyebrow">Rede de apoio</span>
+                <h3>Servicos & Rede TEA</h3>
+                <p>Encontre profissionais, clinicas e servicos especializados proximos a voce.</p>
+              </div>
+              <Button variant="outline-secondary" onClick={() => setActiveTab('services')}>
+                Ir para servicos
+              </Button>
+            </div>
+
+            {servicesLoading ? (
+              <div className="ac-parent-inline-loader">
+                <div className="ac-parent-loader" />
+                <span>Carregando servicos...</span>
+              </div>
+            ) : previewServices.length ? (
+              <div className="ac-parent-service-preview-list">
+                {previewServices.map((service) => (
+                  <div className="ac-parent-service-preview" key={service.id || service.name}>
+                    <div>
+                      <strong>{service.name}</strong>
+                      <span>
+                        {[service.neighborhood, [service.city, service.state].filter(Boolean).join('/')].filter(Boolean).join(' - ') ||
+                          'Localizacao nao informada'}
+                      </span>
+                    </div>
+                    <Button variant="outline-secondary" size="sm" onClick={() => openServiceDetails(service.id)}>
+                      Ver detalhes
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                compact
+                icon={GeoAlt}
+                title="Sua rede de apoio aparece aqui"
+                description={
+                  hasServiceLocation
+                    ? 'Explore a aba de servicos para refinar filtros e descobrir opcoes proximas.'
+                    : 'Defina cidade ou estado na busca para localizar servicos especializados.'
+                }
+                actionLabel="Encontrar Servicos"
+                onAction={() => setActiveTab('services')}
+              />
+            )}
+          </Card.Body>
+        </Card>
+      </section>
+    </div>
+  );
+
+  const renderAppointments = () => (
+    <section className="ac-parent-section-stack">
+      <div className="ac-parent-section-heading">
+        <div>
+          <span className="ac-parent-section-heading__eyebrow">Agenda</span>
+          <h2>Proximos Atendimentos</h2>
+        </div>
+        <Button onClick={() => setShowAppointmentModal(true)}>
+          <PlusCircle className="me-2" />
+          Novo Atendimento
+        </Button>
+      </div>
+
+      {sortedAppointments.length ? (
+        <div className="ac-parent-appointments-list">
+          {sortedAppointments.map((appointment) => {
+            const statusMeta = getAppointmentStatusMeta(appointment.status);
+            const dateParts = formatDayMonth(appointment.date || appointment.appointment_date);
+            return (
+              <Card
+                className="ac-parent-card ac-parent-appointment-card"
+                key={appointment.id || `${appointment.appointment_date}-${appointment.appointment_time}`}
+              >
+                <Card.Body>
+                  <div className="ac-parent-appointment-card__date">
+                    <strong>{dateParts.day}</strong>
+                    <span>{dateParts.month}</span>
+                  </div>
+                  <div className="ac-parent-appointment-card__content">
+                    <div className="ac-parent-appointment-card__meta">
+                      <span>{formatTime(appointment.time || appointment.appointment_time)}</span>
+                      <span>{appointment.professionalName || appointment.professional_name || 'Profissional AutisConnect'}</span>
+                    </div>
+                    <strong>{getAppointmentTypeLabel(appointment.appointment_type)}</strong>
+                    <p>{formatDate(appointment.date || appointment.appointment_date)}</p>
+                  </div>
+                  <span className={`ac-parent-status ac-parent-status--${statusMeta.tone}`}>
+                    {statusMeta.label}
+                  </span>
+                </Card.Body>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <Card className="ac-parent-card">
+          <Card.Body>
+            <EmptyState
+              icon={Calendar2Check}
+              title="Nenhum atendimento agendado"
+              description="Voce pode solicitar um novo atendimento quando precisar."
+              actionLabel="Novo Atendimento"
+              onAction={() => setShowAppointmentModal(true)}
+            />
+          </Card.Body>
+        </Card>
+      )}
+    </section>
+  );
+
+  const renderServicesFilterFields = () => (
+    <div className="ac-parent-filter-panel__fields">
+      <div className="ac-parent-filter-group">
+        <span className="ac-parent-filter-group__title">Tipo de servico</span>
+        <div className="ac-parent-chip-grid">
+          {SERVICE_TYPE_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              className={`ac-parent-chip${serviceFilters.types.includes(option.value) ? ' is-selected' : ''}`}
+              onClick={() => toggleServiceFilterValue('types', option.value)}
+              aria-pressed={serviceFilters.types.includes(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="ac-parent-filter-group">
+        <span className="ac-parent-filter-group__title">Nivel de suporte</span>
+        <div className="ac-parent-chip-grid">
+          {SERVICE_SUPPORT_LEVEL_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              className={`ac-parent-chip${serviceFilters.supportLevels.includes(option.value) ? ' is-selected' : ''}`}
+              onClick={() => toggleServiceFilterValue('supportLevels', option.value)}
+              aria-pressed={serviceFilters.supportLevels.includes(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="ac-parent-filter-grid">
+        <Form.Group>
+          <Form.Label>Regiao</Form.Label>
+          <Form.Control
+            type="text"
+            value={serviceFilters.region}
+            onChange={(event) => updateServiceFilter('region', event.target.value)}
+            placeholder="Regiao"
+          />
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Modalidade</Form.Label>
+          <Form.Select
+            value={serviceFilters.modality}
+            onChange={(event) => updateServiceFilter('modality', event.target.value)}
+          >
+            <option value="">Todas</option>
+            {SERVICE_MODALITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Faixa etaria</Form.Label>
+          <Form.Select
+            value={serviceFilters.ageRange}
+            onChange={(event) => updateServiceFilter('ageRange', event.target.value)}
+          >
+            <option value="">Todas</option>
+            {SERVICE_AGE_RANGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Cobertura</Form.Label>
+          <Form.Select
+            value={serviceFilters.coverage}
+            onChange={(event) => updateServiceFilter('coverage', event.target.value)}
+          >
+            <option value="">Todas</option>
+            {SERVICE_COVERAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      </div>
+
+      <div className="ac-parent-filter-panel__actions">
+        <Button type="submit">Aplicar filtros</Button>
+        <Button type="button" variant="outline-secondary" onClick={handleServiceClear}>
+          Limpar filtros
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderServices = () => (
+    <section className="ac-parent-section-stack">
+      <div className="ac-parent-section-heading">
+        <div>
+          <span className="ac-parent-section-heading__eyebrow">Rede de apoio</span>
+          <h2>Servicos & Rede TEA</h2>
+          <p>Encontre profissionais, clinicas e servicos especializados proximos a voce.</p>
+        </div>
+      </div>
+
+      <Card className="ac-parent-card ac-parent-services-search">
+        <Card.Body>
+          <Form onSubmit={handleServiceSearch}>
+            <div className="ac-parent-services-search__grid">
+              <Form.Group className="ac-parent-search-field">
+                <Form.Label>Busque por servico, especialidade ou nome</Form.Label>
+                <div className="ac-parent-search-field__control">
+                  <Search className="ac-parent-search-field__icon" />
+                  <Form.Control
+                    type="text"
+                    placeholder="Ex: ABA, clinica, terapia"
+                    value={serviceFilters.search}
+                    onChange={(event) => updateServiceFilter('search', event.target.value)}
+                  />
+                </div>
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Label>Cidade</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Cidade"
+                  value={serviceFilters.city}
+                  onChange={(event) => updateServiceFilter('city', event.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Label>Estado</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="UF"
+                  value={serviceFilters.state}
+                  onChange={(event) => updateServiceFilter('state', event.target.value.toUpperCase())}
+                  maxLength={2}
+                />
+              </Form.Group>
+
+              <div className="ac-parent-services-search__actions">
+                <Button type="submit">
+                  <Search className="me-2" />
+                  Buscar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline-secondary"
+                  onClick={() => {
+                    if (isCompactLayout) {
+                      setShowMobileFilters(true);
+                    } else {
+                      setShowServiceFilters((current) => !current);
+                    }
+                  }}
+                >
+                  <Sliders className="me-2" />
+                  Filtros
+                </Button>
+              </div>
+            </div>
+          </Form>
+
+          <div className="ac-parent-location-row">
+            <div>
+              <strong>Onde voce procura?</strong>
+              <p>Cidade e estado sao os filtros principais. Regiao fica disponivel nos filtros avancados.</p>
+            </div>
+            <div className="ac-parent-location-row__actions">
+              <Button type="button" variant="outline-secondary" onClick={handleUseMyLocation}>
+                <GeoAlt className="me-2" />
+                Usar minha localizacao
+              </Button>
+              {serviceGeoStatus ? <small>{serviceGeoStatus}</small> : null}
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      {!isCompactLayout && showServiceFilters ? (
+        <Card className="ac-parent-card ac-parent-filter-panel">
+          <Card.Body>
+            <Form onSubmit={handleServiceSearch}>{renderServicesFilterFields()}</Form>
+          </Card.Body>
+        </Card>
+      ) : null}
+
+      <Card className="ac-parent-card ac-parent-services-results">
+        <Card.Body>
+          <div className="ac-parent-results-toolbar">
+            <div>
+              <span className="ac-parent-results-toolbar__count">
+                {servicesLoading
+                  ? 'Carregando servicos...'
+                  : `${serviceMeta.total || services.length} servicos encontrados`}
+              </span>
+            </div>
+            <Form.Group className="ac-parent-sort-select">
+              <Form.Label>Ordenar por</Form.Label>
+              <Form.Select
+                value={serviceFilters.sort}
+                onChange={(event) => handleServiceSortChange(event.target.value)}
+              >
+                <option value="relevance">Relevancia</option>
+                <option value="rating">Avaliacao</option>
+                <option value="distance">Distancia</option>
+                <option value="recent">Mais recente</option>
+              </Form.Select>
+            </Form.Group>
+          </div>
+
+          {servicesError ? (
+            <div className="ac-parent-state-box ac-parent-state-box--warning">
+              <strong>Busca indisponivel no momento</strong>
+              <p>{servicesError}</p>
+            </div>
+          ) : null}
+
+          {servicesLoading ? (
+            <div className="ac-parent-inline-loader ac-parent-inline-loader--large">
+              <div className="ac-parent-loader" />
+              <span>Carregando servicos...</span>
+            </div>
+          ) : services.length ? (
+            <div className="ac-parent-service-grid">
+              {services.map((service) => {
+                const locationText = [
+                  service.neighborhood,
+                  [service.city, service.state].filter(Boolean).join('/')
+                ]
+                  .filter(Boolean)
+                  .join(' - ');
+
+                const specialties = service.specialties?.length ? service.specialties.slice(0, 3) : [];
+
+                return (
+                  <article className="ac-parent-service-card" key={service.id || service.name}>
+                    <div className="ac-parent-service-card__header">
+                      <div>
+                        <h3>{service.name}</h3>
+                        <p>{locationText || 'Localizacao nao informada'}</p>
+                      </div>
+                      {service.distanceKm !== null && service.distanceKm !== undefined ? (
+                        <span className="ac-parent-distance-pill">{Number(service.distanceKm).toFixed(1)} km</span>
+                      ) : null}
+                    </div>
+
+                    <div className="ac-parent-service-card__chips">
+                      {specialties.length ? (
+                        specialties.map((specialty) => (
+                          <span className="ac-parent-chip ac-parent-chip--static" key={specialty}>
+                            {specialty}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="ac-parent-chip ac-parent-chip--static">Especialidades diversas</span>
+                      )}
+                    </div>
+
+                    <div className="ac-parent-service-card__rating">
+                      {service.rating > 0 ? (
+                        <>
+                          <StarFill />
+                          <strong>{service.rating.toFixed(1)}</strong>
+                          <span>({service.ratingCount || 0})</span>
+                        </>
+                      ) : (
+                        <span>Sem avaliacoes</span>
+                      )}
+                    </div>
+
+                    <div className="ac-parent-service-card__footer">
+                      <Button variant="outline-secondary" onClick={() => openServiceDetails(service.id)}>
+                        Ver detalhes
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              icon={GeoAlt}
+              title="Nenhum servico encontrado"
+              description={
+                hasServiceLocation
+                  ? 'Tente ajustar a localizacao ou os filtros.'
+                  : 'Defina pelo menos cidade, regiao ou estado para iniciar a busca.'
+              }
+              actionLabel="Limpar filtros"
+              onAction={handleServiceClear}
+            />
+          )}
+
+          {totalServicePages > 1 ? (
+            <div className="ac-parent-pagination">
+              <Button
+                variant="outline-secondary"
+                disabled={serviceMeta.page <= 1}
+                onClick={() => handleServicePageChange(serviceMeta.page - 1)}
+              >
+                ‹ Anterior
+              </Button>
+              <span>
+                Pagina {serviceMeta.page} de {totalServicePages}
+              </span>
+              <Button
+                variant="outline-secondary"
+                disabled={serviceMeta.page >= totalServicePages}
+                onClick={() => handleServicePageChange(serviceMeta.page + 1)}
+              >
+                Proxima ›
+              </Button>
+            </div>
+          ) : null}
+        </Card.Body>
+      </Card>
+    </section>
+  );
+
+  const renderProgress = () => (
+    <section className="ac-parent-section-stack">
+      <Card className="ac-parent-card ac-parent-chart-card">
+        <Card.Body>
+          <div className="ac-parent-card__header">
+            <div>
+              <span className="ac-parent-card__eyebrow">Evolucao</span>
+              <h3>Evolucao de {currentPatientName}</h3>
+              <p>Acompanhe indicadores ao longo do tempo.</p>
+            </div>
+          </div>
+          <div className="ac-parent-chart-shell ac-parent-chart-shell--tall">
+            <Line data={patientProgressData} options={lineOptions} />
+          </div>
+          <div className="ac-parent-progress-summary">
+            {patientProgressData.datasets.map((dataset) => (
+              <div className="ac-parent-progress-summary__item" key={dataset.label}>
+                <span>{dataset.label}</span>
+                <strong>{dataset.data?.[dataset.data.length - 1] ?? 'N/A'}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="ac-parent-chart-note">
+            Os dados desta visao mantem a estrutura temporaria atual do frontend e devem ser substituidos por indicadores reais quando a integracao clinica estiver disponivel.
+          </div>
+        </Card.Body>
+      </Card>
+    </section>
+  );
+
+  const renderAccount = () => (
+    <section className="ac-parent-section-stack">
+      <section className="ac-parent-overview-grid">
+        <Card className="ac-parent-card">
+          <Card.Body>
+            <div className="ac-parent-card__header">
+              <div>
+                <span className="ac-parent-card__eyebrow">Conta responsavel</span>
+                <h3>{user?.nome_completo || user?.username || 'Responsavel'}</h3>
+                <p>Dados exibidos apenas para consulta rapida.</p>
+              </div>
+            </div>
+            <div className="ac-parent-info-list">
+              <InfoRow label="Nome" value={user?.nome_completo || user?.username || 'Nao informado'} />
+              <InfoRow label="E-mail" value={user?.email || 'Nao informado'} />
+              <InfoRow label="Telefone" value={user?.telefone || user?.phone || 'Nao informado'} />
+              <InfoRow
+                label="Localizacao"
+                value={[user?.cidade || user?.city, user?.estado || user?.uf || user?.state]
+                  .filter(Boolean)
+                  .join(' / ') || 'Nao informada'}
+              />
+            </div>
+          </Card.Body>
+        </Card>
+
+        <Card className="ac-parent-card">
+          <Card.Body>
+            <div className="ac-parent-card__header">
+              <div>
+                <span className="ac-parent-card__eyebrow">Familia</span>
+                <h3>Pacientes vinculados</h3>
+                <p>Resumo rapido dos pacientes associados a esta conta.</p>
+              </div>
+            </div>
+            <div className="ac-parent-linked-list">
+              {children.map((child) => (
+                <div className="ac-parent-linked-item" key={child.id}>
+                  <div className="ac-parent-linked-item__avatar">{getInitials(getPatientName(child))}</div>
+                  <div>
+                    <strong>{getPatientName(child)}</strong>
+                    <span>{getPatientSupportLevel(child)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
+      </section>
+
+      <Card className="ac-parent-card">
+        <Card.Body className="ac-parent-account-actions">
+          <div>
+            <span className="ac-parent-card__eyebrow">Seguranca</span>
+            <h3>Encerrar sessao com seguranca</h3>
+            <p>Use esta opcao quando terminar o acompanhamento.</p>
+          </div>
+          <Button variant="outline-secondary" onClick={handleLogout}>
+            <BoxArrowRight className="me-2" />
+            Sair
+          </Button>
+        </Card.Body>
+      </Card>
+    </section>
+  );
+
+  const renderActiveContent = () => {
+    if (!selectedPatient) {
+      return (
+        <Card className="ac-parent-card">
+          <Card.Body>
+            <EmptyState
+              icon={PersonCircle}
+              title="Nenhum paciente vinculado"
+              description="Nao encontramos pacientes associados a esta conta no momento."
+            />
+          </Card.Body>
+        </Card>
+      );
+    }
+
+    switch (activeTab) {
+      case 'appointments':
+        return renderAppointments();
+      case 'progress':
+        return renderProgress();
+      case 'services':
+        return renderServices();
+      case 'account':
+        return renderAccount();
+      case 'overview':
+      default:
+        return renderOverview();
+    }
+  };
 
   if (loading) {
-    return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3">Carregando dashboard do paciente...</p>
-      </Container>
-    );
+    return <LoadingShell />;
   }
 
   return (
-    <div className="App bg-light min-vh-100">
-      <nav className="top-bar fixed-top shadow-sm">
-        <Container>
-          <Row className="align-items-center py-3">
-            <Col md={4} className="text-center text-md-start">
-              <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
-            </Col>
-            <Col md={4} className="text-center d-none d-md-block">
-              <span className="text-white fw-semibold">Dashboard dos Pais</span>
-            </Col>
-            <Col md={4} className="text-center text-md-end">
-              <Button variant="outline-light" size="sm" onClick={handleLogout}>Sair</Button>
-            </Col>
-          </Row>
-        </Container>
-      </nav>
+    <div className={`ac-parent-dashboard${isSidebarCollapsed ? ' ac-parent-dashboard--collapsed' : ''}`}>
+      <aside className="ac-parent-sidebar-shell">{renderSidebar()}</aside>
 
-      <div className="home-page" style={{ paddingTop: '85px' }}>
-        <section className="hero-section hero-short">
-          <Container>
-            <Row className="align-items-center">
-              <Col lg={7} className="mb-4 mb-lg-0">
-                <div className="hero-content-box p-4 rounded-4">
-                  <h2 className="display-6 fw-bold mb-2 text-white">Dashboard dos Pais</h2>
-                  <p className="text-white-90 mb-2">
-                    Bem-vindo(a), {user?.nome_completo || user?.username || 'Responsavel'}.
-                  </p>
-                  <p className="text-white-90 mb-0">
-                    Acompanhe o desenvolvimento do seu filho, consultas e rede de apoio.
-                  </p>
-                </div>
-              </Col>
-              <Col lg={5}>
-                <Card className="shadow-sm border-0">
-                  <Card.Body>
-                    <div className="d-flex align-items-center justify-content-between mb-3">
-                      <div>
-                        <h5 className="fw-bold mb-1">Paciente atual</h5>
-                        <div className="text-muted">
-                          {selectedPatient ? selectedPatient.name : 'Nenhum paciente selecionado'}
-                        </div>
-                      </div>
-                      {selectedPatient && (
-                        <Badge bg="info">{selectedPatient.nivel_suporte || 'Nivel 2'}</Badge>
-                      )}
-                    </div>
-                    {children.length > 1 && (
-                      <Form.Select
-                        className="border-0 shadow-sm mb-3"
-                        value={selectedPatient?.id || ''}
-                        onChange={(e) => {
-                          const next = children.find((c) => c.id === parseInt(e.target.value, 10));
-                          if (next) setSelectedPatient(next);
-                        }}
-                      >
-                        {children.map((child) => (
-                          <option key={child.id} value={child.id}>{child.name}</option>
-                        ))}
-                      </Form.Select>
-                    )}
-                    <Button
-                      variant="primary"
-                      onClick={() => selectedPatient && handlePatientSelect(selectedPatient)}
-                      className="d-flex align-items-center justify-content-center w-100"
-                      disabled={!selectedPatient}
-                    >
-                      <BoxArrowUpRight className="me-2" /> Abrir Dashboard do Paciente
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Container>
-        </section>
+      <Offcanvas
+        show={isMobileSidebarOpen}
+        onHide={() => setIsMobileSidebarOpen(false)}
+        placement="start"
+        className="ac-parent-offcanvas"
+      >
+        <Offcanvas.Header closeButton closeVariant="white">
+          <Offcanvas.Title>AutisConnect</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>{renderSidebar(true)}</Offcanvas.Body>
+      </Offcanvas>
 
-        <main className="dashboard-section py-4">
-          <Container>
-          {successMessage && <Alert variant="success" dismissible onClose={() => setSuccessMessage('')}>{successMessage}</Alert>}
-          {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
+      <Offcanvas
+        show={showMobileFilters}
+        onHide={() => setShowMobileFilters(false)}
+        placement="end"
+        className="ac-parent-filter-offcanvas"
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Filtros da Rede TEA</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Form onSubmit={handleServiceSearch}>{renderServicesFilterFields()}</Form>
+        </Offcanvas.Body>
+      </Offcanvas>
 
-          {selectedPatient ? (
-            <>
-              <Row className="mb-4">
-                <Col md={3}>
-                  <StatCard title="Paciente" value={selectedPatient.name} icon={<People />} color="primary" />
-                </Col>
-                <Col md={3}>
-                  <StatCard title="Nivel de Suporte" value={selectedPatient.nivel_suporte || 'Nivel 2'} icon={<GraphUp />} color="warning" />
-                </Col>
-                <Col md={3}>
-                  <StatCard title="Consultas" value={consultations.length} icon={<Calendar2Check />} color="success" />
-                </Col>
-                <Col md={3}>
-                  <StatCard title="Idade" value={formatAge(selectedPatient.birthDate)} icon={<Calendar3 />} color="info" />
-                </Col>
-              </Row>
+      <div className="ac-parent-shell">
+        <header className="ac-parent-header">
+          <div className="ac-parent-header__context">
+            <button
+              type="button"
+              className="ac-parent-header__menu-toggle"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              aria-label="Abrir menu"
+            >
+              <List />
+            </button>
+            <div>
+              <span className="ac-parent-header__breadcrumb">{activeSection.breadcrumb}</span>
+              <h1>{activeSection.title}</h1>
+            </div>
+          </div>
 
-              <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-                <Card className="border-0 shadow-sm mb-4">
-                  <Card.Header className="bg-white border-0 pt-3">
-                    <Nav variant="pills" className="nav-pills-custom">
-                      <Nav.Item><Nav.Link eventKey="overview" className="px-4">Resumo</Nav.Link></Nav.Item>
-                      <Nav.Item><Nav.Link eventKey="appointments" className="px-4">Consultas</Nav.Link></Nav.Item>
-                      <Nav.Item><Nav.Link eventKey="services" className="px-4">Servicos & Rede TEA</Nav.Link></Nav.Item>
-                    </Nav>
-                  </Card.Header>
-                  <Card.Body className="p-4">
-                    <Tab.Content>
-                      <Tab.Pane eventKey="overview">
-                        <Row>
-                          <Col lg={8}>
-                            <Card className="border-0 bg-light mb-4">
-                              <Card.Body>
-                                <h5 className="fw-bold mb-4">Progresso de {selectedPatient.name}</h5>
-                                <div style={{ height: '300px' }}>
-                                  <Line data={patientProgressData} options={lineOptions} />
-                                </div>
-                              </Card.Body>
-                            </Card>
-                          </Col>
-                          <Col lg={4}>
-                            <Card className="border-0 bg-light mb-4">
-                              <Card.Body>
-                                <h5 className="fw-bold mb-4">Informações</h5>
-                                <Table borderless size="sm" className="mb-0">
-                                  <tbody>
-                                    <tr><td className="text-muted py-2">Diagnóstico:</td><td className="fw-bold py-2 text-end"><Badge bg="warning" text="dark">{selectedPatient.diagnosis}</Badge></td></tr>
-                                    <tr><td className="text-muted py-2">Nascimento:</td><td className="fw-bold py-2 text-end">{formatDate(selectedPatient.birthDate)}</td></tr>
-                                    <tr><td className="text-muted py-2">Telefone:</td><td className="fw-bold py-2 text-end">{selectedPatient.phone || selectedPatient.telefone || '(11) 99999-9999'}</td></tr>
-                                    <tr><td className="text-muted py-2">Email:</td><td className="fw-bold py-2 text-end">{selectedPatient.email || 'N/A'}</td></tr>
-                                  </tbody>
-                                </Table>
-                              </Card.Body>
-                            </Card>
-                          </Col>
-                        </Row>
-                      </Tab.Pane>
+          <div className="ac-parent-header__actions">
+            <button
+              type="button"
+              className="ac-parent-icon-button"
+              onClick={() => setActiveTab('appointments')}
+              aria-label="Abrir atendimentos"
+            >
+              <Calendar2Check />
+              {consultations.length ? (
+                <span className="ac-parent-icon-button__badge">{consultations.length}</span>
+              ) : null}
+            </button>
 
-                      <Tab.Pane eventKey="appointments">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                          <h5 className="fw-bold mb-0">Proximas Consultas</h5>
-                          <Button variant="primary" size="sm" onClick={() => setShowAppointmentModal(true)}>
-                            <PlusCircle className="me-2" /> Nova Consulta
-                          </Button>
-                        </div>
-                        {consultations.length > 0 ? (
-                          <Table hover responsive className="align-middle">
-                            <thead className="bg-light">
-                              <tr>
-                                <th className="border-0">Data</th>
-                                <th className="border-0">Hora</th>
-                                <th className="border-0">Profissional</th>
-                                <th className="border-0">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {consultations.map(appointment => (
-                                <tr key={appointment.id}>
-                                  <td>{formatDate(appointment.date || appointment.appointment_date)}</td>
-                                  <td>{formatTime(appointment.time || appointment.appointment_time)}</td>
-                                  <td>{appointment.professionalName || appointment.professional_name || 'N/A'}</td>
-                                  <td><Badge bg="info" className="rounded-pill px-3">Agendada</Badge></td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                        ) : (
-                          <Alert variant="info" className="border-0 shadow-sm">Nenhuma consulta agendada para este paciente.</Alert>
-                        )}
-                      </Tab.Pane>
+            <Dropdown align="end">
+              <Dropdown.Toggle variant="light" className="ac-parent-profile-toggle">
+                <span className="ac-parent-profile-toggle__avatar">
+                  <PersonCircle />
+                </span>
+                <span className="ac-parent-profile-toggle__content">
+                  <strong>{user?.nome_completo || user?.username || 'Responsavel'}</strong>
+                  <small>{linkedPatientsLabel}</small>
+                </span>
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="ac-parent-dropdown">
+                <Dropdown.Header>{user?.nome_completo || user?.username || 'Responsavel'}</Dropdown.Header>
+                <Dropdown.Item as="button" onClick={() => setActiveTab('account')}>
+                  <Gear className="me-2" />
+                  Minha conta
+                </Dropdown.Item>
+                <Dropdown.Item as="button" onClick={handleLogout}>
+                  <BoxArrowRight className="me-2" />
+                  Sair
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+        </header>
 
+        <main className="ac-parent-main">
+          {renderFeedback()}
 
-                      <Tab.Pane eventKey="services">
-                        <div className="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-                          <div>
-                            <h4 className="fw-bold mb-1">Servicos & Rede TEA</h4>
-                            <p className="text-muted mb-0">
-                              Encontre servicos especializados e rede de apoio na sua regiao.
-                            </p>
-                          </div>
-                        </div>
+          <section className="ac-parent-page-header">
+            <div className="ac-parent-page-header__copy">
+              <span className="ac-parent-page-header__eyebrow">AutisConnect Family Care</span>
+              <h2>
+                Ola, {user?.nome_completo || user?.username || 'Responsavel'}
+              </h2>
+              <p>{activeSection.subtitle}</p>
+            </div>
+            <div className="ac-parent-page-header__selector">{renderPatientSelector()}</div>
+          </section>
 
-                        <Card className="border-0 bg-light mb-4">
-                          <Card.Body>
-                            <Form onSubmit={handleServiceSearch}>
-                              <Row className="g-3 align-items-end">
-                                <Col md={12} lg={5}>
-                                  <Form.Label className="fw-semibold">Buscar por nome ou palavra-chave</Form.Label>
-                                  <div className="d-flex">
-                                    <Form.Control
-                                      type="text"
-                                      placeholder="Ex: ABA, clinica, terapia"
-                                      value={serviceFilters.search}
-                                      onChange={(e) => updateServiceFilter('search', e.target.value)}
-                                      className="bg-white border-0 shadow-sm"
-                                    />
-                                    <Button type="submit" variant="primary" className="ms-2 d-flex align-items-center">
-                                      <Search className="me-2" /> Buscar
-                                    </Button>
-                                  </div>
-                                </Col>
-                                <Col md={6} lg={3}>
-                                  <Form.Group>
-                                    <Form.Label className="fw-semibold">Cidade *</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      placeholder="Cidade"
-                                      value={serviceFilters.city}
-                                      onChange={(e) => updateServiceFilter('city', e.target.value)}
-                                      className="bg-white border-0 shadow-sm"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={3} lg={2}>
-                                  <Form.Group>
-                                    <Form.Label className="fw-semibold">Regiao</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      placeholder="Regiao"
-                                      value={serviceFilters.region}
-                                      onChange={(e) => updateServiceFilter('region', e.target.value)}
-                                      className="bg-white border-0 shadow-sm"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={3} lg={2}>
-                                  <Form.Group>
-                                    <Form.Label className="fw-semibold">Estado</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      placeholder="UF"
-                                      value={serviceFilters.state}
-                                      onChange={(e) =>
-                                        updateServiceFilter('state', e.target.value.toUpperCase())
-                                      }
-                                      maxLength={2}
-                                      className="bg-white border-0 shadow-sm"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                              </Row>
+          {renderActiveContent()}
+        </main>
+      </div>
 
-                              <Row className="g-3 mt-2">
-                                <Col md={8} lg={6} className="d-flex align-items-center gap-2 flex-wrap">
-                                  <Button
-                                    type="button"
-                                    variant="outline-primary"
-                                    className="d-flex align-items-center"
-                                    onClick={handleUseMyLocation}
-                                  >
-                                    <GeoAlt className="me-2" /> Usar minha localizacao
-                                  </Button>
-                                  {serviceGeoStatus && (
-                                    <small className="text-muted">{serviceGeoStatus}</small>
-                                  )}
-                                </Col>
-                              </Row>
-
-                              <Row className="g-3 mt-2">
-                                <Col lg={6}>
-                                  <Form.Label className="fw-semibold">Tipo de servico</Form.Label>
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {SERVICE_TYPE_OPTIONS.map((option) => (
-                                      <Form.Check
-                                        key={option.value}
-                                        type="checkbox"
-                                        id={`service-type-${option.value}`}
-                                        label={option.label}
-                                        checked={serviceFilters.types.includes(option.value)}
-                                        onChange={() => toggleServiceFilterValue('types', option.value)}
-                                        className="me-2"
-                                      />
-                                    ))}
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <Form.Label className="fw-semibold">Nivel de suporte</Form.Label>
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {SERVICE_SUPPORT_LEVEL_OPTIONS.map((option) => (
-                                      <Form.Check
-                                        key={option.value}
-                                        type="checkbox"
-                                        id={`support-level-${option.value}`}
-                                        label={option.label}
-                                        checked={serviceFilters.supportLevels.includes(option.value)}
-                                        onChange={() => toggleServiceFilterValue('supportLevels', option.value)}
-                                        className="me-2"
-                                      />
-                                    ))}
-                                  </div>
-                                </Col>
-                                <Col lg={3}>
-                                  <Form.Group>
-                                    <Form.Label className="fw-semibold">Modalidade</Form.Label>
-                                    <Form.Select
-                                      value={serviceFilters.modality}
-                                      onChange={(e) => updateServiceFilter('modality', e.target.value)}
-                                      className="bg-white border-0 shadow-sm"
-                                    >
-                                      <option value="">Todas</option>
-                                      {SERVICE_MODALITY_OPTIONS.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                          {option.label}
-                                        </option>
-                                      ))}
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Row className="g-3 mt-2">
-                                <Col md={4}>
-                                  <Form.Group>
-                                    <Form.Label className="fw-semibold">Faixa etaria atendida</Form.Label>
-                                    <Form.Select
-                                      value={serviceFilters.ageRange}
-                                      onChange={(e) => updateServiceFilter('ageRange', e.target.value)}
-                                      className="bg-white border-0 shadow-sm"
-                                    >
-                                      <option value="">Todas</option>
-                                      {SERVICE_AGE_RANGE_OPTIONS.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                          {option.label}
-                                        </option>
-                                      ))}
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                                <Col md={4}>
-                                  <Form.Group>
-                                    <Form.Label className="fw-semibold">Convenio / Particular</Form.Label>
-                                    <Form.Select
-                                      value={serviceFilters.coverage}
-                                      onChange={(e) => updateServiceFilter('coverage', e.target.value)}
-                                      className="bg-white border-0 shadow-sm"
-                                    >
-                                      <option value="">Todos</option>
-                                      {SERVICE_COVERAGE_OPTIONS.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                          {option.label}
-                                        </option>
-                                      ))}
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                                <Col md={4} className="d-flex align-items-end">
-                                  <div className="d-flex gap-2">
-                                    <Button type="submit" variant="primary" className="d-flex align-items-center">
-                                      <Search className="me-2" /> Aplicar filtros
-                                    </Button>
-                                    <Button type="button" variant="outline-secondary" onClick={handleServiceClear}>
-                                      Limpar
-                                    </Button>
-                                  </div>
-                                </Col>
-                              </Row>
-                            </Form>
-                          </Card.Body>
-                        </Card>
-
-                        <div className="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-                          <div className="text-muted">
-                            {servicesLoading
-                              ? 'Carregando servicos...'
-                              : `${serviceMeta.total || services.length} servicos encontrados`}
-                          </div>
-                          <Form.Group className="d-flex align-items-center gap-2">
-                            <Form.Select
-                              value={serviceFilters.sort}
-                              onChange={(e) => handleServiceSortChange(e.target.value)}
-                              className="bg-white border-0 shadow-sm"
-                            >
-                              <option value="relevance">Relevancia</option>
-                              <option value="rating">Avaliacao</option>
-                              <option value="distance">Distancia</option>
-                              <option value="recent">Mais recente</option>
-                            </Form.Select>
-                          </Form.Group>
-                        </div>
-
-                        {servicesError && (
-                          <Alert variant="warning" className="border-0 shadow-sm">
-                            {servicesError}
-                          </Alert>
-                        )}
-
-                        {servicesLoading ? (
-                          <div className="text-center py-4">
-                            <Spinner animation="border" variant="primary" />
-                          </div>
-                        ) : services.length > 0 ? (
-                          <Row className="g-3">
-                            {services.map((service) => {
-                              const locationText = [
-                                service.neighborhood,
-                                [service.city, service.state].filter(Boolean).join('/')
-                              ]
-                                .filter(Boolean)
-                                .join(' - ');
-                              const specialties = service.specialties?.length
-                                ? service.specialties.slice(0, 2)
-                                : [];
-                              return (
-                                <Col key={service.id || service.name} md={6} lg={4}>
-                                  <Card className="h-100 border-0 shadow-sm">
-                                    <Card.Body className="d-flex flex-column">
-                                      <div className="d-flex justify-content-between align-items-start">
-                                        <div>
-                                          <h5 className="fw-bold mb-1">{service.name}</h5>
-                                          <div className="text-muted small d-flex align-items-center">
-                                            <GeoAlt className="me-1" />
-                                            {locationText || 'Localizacao nao informada'}
-                                          </div>
-                                        </div>
-                                        {service.distanceKm !== null && service.distanceKm !== undefined ? (
-                                          <Badge bg="light" text="dark">
-                                            {Number(service.distanceKm).toFixed(1)} km
-                                          </Badge>
-                                        ) : null}
-                                      </div>
-
-                                      <div className="mt-2 d-flex flex-wrap gap-2">
-                                        {specialties.length > 0 ? (
-                                          specialties.map((specialty) => (
-                                            <Badge
-                                              key={specialty}
-                                              bg="primary"
-                                              className="bg-opacity-10 text-primary"
-                                            >
-                                              {specialty}
-                                            </Badge>
-                                          ))
-                                        ) : (
-                                          <Badge bg="secondary" className="bg-opacity-10 text-secondary">
-                                            Especialidades diversas
-                                          </Badge>
-                                        )}
-                                      </div>
-
-                                      <div className="mt-2">
-                                        {service.rating > 0 ? (
-                                          <div className="d-flex align-items-center text-muted small">
-                                            <StarFill className="text-warning me-1" />
-                                            <span className="fw-semibold text-dark">
-                                              {service.rating.toFixed(1)}
-                                            </span>
-                                            <span className="ms-1">({service.ratingCount || 0})</span>
-                                          </div>
-                                        ) : (
-                                          <div className="text-muted small">Sem avaliacoes</div>
-                                        )}
-                                      </div>
-
-                                      <div className="mt-auto pt-3">
-                                        <Button
-                                          variant="outline-primary"
-                                          size="sm"
-                                          onClick={() => openServiceDetails(service.id)}
-                                        >
-                                          Ver detalhes
-                                        </Button>
-                                      </div>
-                                    </Card.Body>
-                                  </Card>
-                                </Col>
-                              );
-                            })}
-                          </Row>
-                        ) : (
-                          <Alert variant="info" className="border-0 shadow-sm">
-                            Nenhum servico encontrado. Ajuste os filtros e tente novamente.
-                          </Alert>
-                        )}
-
-                        {totalServicePages > 1 && (
-                          <div className="d-flex justify-content-between align-items-center mt-4">
-                            <Button
-                              variant="outline-secondary"
-                              disabled={serviceMeta.page <= 1}
-                              onClick={() => handleServicePageChange(serviceMeta.page - 1)}
-                            >
-                              Anterior
-                            </Button>
-                            <div className="text-muted">
-                              Pagina {serviceMeta.page} de {totalServicePages}
-                            </div>
-                            <Button
-                              variant="outline-secondary"
-                              disabled={serviceMeta.page >= totalServicePages}
-                              onClick={() => handleServicePageChange(serviceMeta.page + 1)}
-                            >
-                              Proxima
-                            </Button>
-                          </div>
-                        )}
-                      </Tab.Pane>
-                    </Tab.Content>
-                  </Card.Body>
-                </Card>
-              </Tab.Container>
-            </>
-          ) : (
-            <Alert variant="warning">Nenhum paciente vinculado a sua conta foi encontrado.</Alert>
-          )}
-        </Container>
-      </main>
-
-      <footer className="footer-section py-4">
-        <Container>
-          <Row className="align-items-center">
-            <Col md={6} className="footer-left text-start">
-              <p className="mb-0">
-                {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
-                <small>Todos os direitos reservados.</small>
-              </p>
-            </Col>
-          </Row>
-        </Container>
-      </footer>
-    </div>
-
-      {/* Modal para Marcar Consulta */}
-      <Modal show={showAppointmentModal} onHide={() => setShowAppointmentModal(false)} size="lg" centered>
-        <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fw-bold">Marcar Nova Consulta</Modal.Title>
+      <Modal
+        show={showAppointmentModal}
+        onHide={() => setShowAppointmentModal(false)}
+        size="lg"
+        centered
+        className="ac-parent-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <span className="ac-parent-modal__eyebrow">Novo Atendimento</span>
+            <strong>Novo Atendimento</strong>
+            <small>Escolha o profissional e os detalhes do atendimento.</small>
+          </Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleAddAppointment}>
-          <Modal.Body className="p-4">
+          <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">Profissional *</Form.Label>
+              <Form.Label>Profissional *</Form.Label>
               <Form.Select
                 value={newAppointment.professionalId}
-                onChange={(e) => setNewAppointment({...newAppointment, professionalId: e.target.value})}
+                onChange={(event) =>
+                  setNewAppointment({ ...newAppointment, professionalId: event.target.value })
+                }
                 required
-                className="bg-light border-0"
               >
                 <option value="">Selecione um profissional</option>
-                {professionals.length > 0 ? professionals.map(prof => (
-                  <option key={prof.id} value={prof.id}>{prof.name} - {prof.specialty}</option>
-                )) : (
-                  <option disabled>Nenhum profissional disponível</option>
+                {professionals.length > 0 ? (
+                  professionals.map((professional) => (
+                    <option key={professional.id} value={professional.id}>
+                      {professional.name} - {professional.specialty}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Nenhum profissional disponivel</option>
                 )}
               </Form.Select>
             </Form.Group>
+
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Data da Consulta *</Form.Label>
+                  <Form.Label>Data *</Form.Label>
                   <Form.Control
                     type="date"
                     value={newAppointment.appointment_date}
-                    onChange={(e) => setNewAppointment({...newAppointment, appointment_date: e.target.value})}
+                    onChange={(event) =>
+                      setNewAppointment({ ...newAppointment, appointment_date: event.target.value })
+                    }
                     required
-                    className="bg-light border-0"
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Hora da Consulta *</Form.Label>
+                  <Form.Label>Horario *</Form.Label>
                   <Form.Control
                     type="time"
                     value={newAppointment.appointment_time}
-                    onChange={(e) => setNewAppointment({...newAppointment, appointment_time: e.target.value})}
+                    onChange={(event) =>
+                      setNewAppointment({ ...newAppointment, appointment_time: event.target.value })
+                    }
                     required
-                    className="bg-light border-0"
                   />
                 </Form.Group>
               </Col>
             </Row>
+
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Tipo de Consulta</Form.Label>
+                  <Form.Label>Tipo</Form.Label>
                   <Form.Select
                     value={newAppointment.appointment_type}
-                    onChange={(e) => setNewAppointment({...newAppointment, appointment_type: e.target.value})}
-                    className="bg-light border-0"
+                    onChange={(event) =>
+                      setNewAppointment({ ...newAppointment, appointment_type: event.target.value })
+                    }
                   >
-                    <option value="Consulta Regular">Consulta Regular</option>
-                    <option value="Consulta Inicial">Consulta Inicial</option>
-                    <option value="Acompanhamento">Acompanhamento</option>
-                    <option value="Avaliacao">Avaliação</option>
-                    <option value="Terapia">Terapia</option>
+                    {APPOINTMENT_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </Form.Select>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="fw-semibold">Valor Estimado (R$) *</Form.Label>
+                  <Form.Label>Valor estimado (R$) *</Form.Label>
                   <Form.Control
                     type="number"
                     step="0.01"
                     value={newAppointment.value}
-                    onChange={(e) => setNewAppointment({...newAppointment, value: e.target.value})}
+                    onChange={(event) =>
+                      setNewAppointment({ ...newAppointment, value: event.target.value })
+                    }
                     required
-                    className="bg-light border-0"
                   />
                 </Form.Group>
               </Col>
             </Row>
+
             <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold">Forma de Pagamento</Form.Label>
+              <Form.Label>Forma de pagamento</Form.Label>
               <Form.Select
                 value={newAppointment.payment_method}
-                onChange={(e) => setNewAppointment({...newAppointment, payment_method: e.target.value})}
-                className="bg-light border-0"
+                onChange={(event) =>
+                  setNewAppointment({ ...newAppointment, payment_method: event.target.value })
+                }
               >
-                <option value="Pix">Pix</option>
-                <option value="Credito">Cartão de Crédito</option>
-                <option value="Debito">Cartão de Débito</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Plano de Saúde">Plano de Saúde</option>
+                {PAYMENT_METHOD_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </Form.Select>
             </Form.Group>
+
             <Form.Group className="mb-0">
-              <Form.Label className="fw-semibold">Observações</Form.Label>
+              <Form.Label>Observacoes</Form.Label>
               <Form.Control
                 as="textarea"
-                rows={3}
+                rows={4}
                 value={newAppointment.notes}
-                onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
-                placeholder="Motivo da consulta ou observacoes"
-                className="bg-light border-0"
+                onChange={(event) =>
+                  setNewAppointment({ ...newAppointment, notes: event.target.value })
+                }
+                placeholder="Descreva detalhes importantes para este atendimento"
               />
             </Form.Group>
           </Modal.Body>
-          <Modal.Footer className="border-0 pt-0">
-            <Button variant="light" onClick={() => setShowAppointmentModal(false)} className="px-4">Cancelar</Button>
-            <Button variant="primary" type="submit" className="px-4">Solicitar Agendamento</Button>
+          <Modal.Footer>
+            <Button variant="outline-secondary" onClick={() => setShowAppointmentModal(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit">Solicitar atendimento</Button>
           </Modal.Footer>
         </Form>
       </Modal>
@@ -1292,13 +2267,3 @@ function ParentDashboard() {
 }
 
 export default ParentDashboard;
-
-
-
-
-
-
-
-
-
-
