@@ -1,0 +1,1188 @@
+.ac-emotion-shell {
+    --ac-emotion-navy: #07152e;
+    --ac-emotion-navy-soft: #0f172a;
+    --ac-emotion-primary: #2563eb;
+    --ac-emotion-primary-strong: #3860f8;
+    --ac-emotion-cyan: #06b6d4;
+    --ac-emotion-bg: #f8fafc;
+    --ac-emotion-surface: #ffffff;
+    --ac-emotion-surface-soft: #f8fbff;
+    --ac-emotion-border: #e2e8f0;
+    --ac-emotion-text: #1e293b;
+    --ac-emotion-muted: #64748b;
+    --ac-emotion-success: #16a34a;
+    --ac-emotion-warning: #f59e0b;
+    --ac-emotion-danger: #dc2626;
+    --ac-emotion-shadow: 0 12px 40px rgba(15, 23, 42, 0.05);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 26%),
+        linear-gradient(180deg, #fafdff 0%, #f8fafc 40%, #f8fafc 100%);
+    color: var(--ac-emotion-text);
+    font-family: "Inter", "Manrope", "Plus Jakarta Sans", "Segoe UI", sans-serif;
+}
+
+.ac-emotion-shell *,
+.ac-emotion-shell *::before,
+.ac-emotion-shell *::after {
+    box-sizing: border-box;
+}
+
+.ac-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.ac-emotion-container {
+    max-width: 1460px;
+    margin: 0 auto;
+    padding-inline: 24px;
+}
+
+.ac-emotion-tool-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background:
+        linear-gradient(135deg, rgba(56, 96, 248, 0.18), transparent 26%),
+        linear-gradient(180deg, #07152e 0%, #0b1d39 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: 0 14px 32px rgba(2, 6, 23, 0.18);
+}
+
+.ac-emotion-tool-header__inner {
+    min-height: 74px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    padding-block: 0.7rem;
+}
+
+.ac-emotion-tool-header__brand,
+.ac-emotion-tool-header__actions,
+.ac-emotion-card-head,
+.ac-emotion-card-head__chips,
+.ac-emotion-reference-actions,
+.ac-emotion-live-hud--bottom,
+.ac-emotion-controls-row,
+.ac-emotion-filters,
+.ac-emotion-privacy-item,
+.ac-emotion-inline-status,
+.ac-emotion-guidance-item,
+.ac-emotion-guidance-empty,
+.ac-emotion-banner,
+.ac-emotion-status-card,
+.ac-emotion-mini-pill,
+.ac-emotion-live-badge {
+    display: flex;
+    align-items: center;
+}
+
+.ac-emotion-tool-header__brand {
+    gap: 1rem;
+    min-width: 0;
+}
+
+.ac-emotion-tool-header__logo {
+    width: 240px;
+    max-width: 42vw;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 28px rgba(2, 6, 23, 0.24));
+}
+
+.ac-emotion-tool-header__divider {
+    width: 1px;
+    height: 42px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(148, 163, 184, 0.5), rgba(255, 255, 255, 0.1));
+}
+
+.ac-emotion-tool-header__copy {
+    display: grid;
+    gap: 0.15rem;
+    color: #e2e8f0;
+    min-width: 0;
+}
+
+.ac-emotion-tool-header__copy span {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: #93c5fd;
+    font-weight: 700;
+}
+
+.ac-emotion-tool-header__copy strong {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.ac-emotion-tool-header__actions {
+    gap: 0.8rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.ac-emotion-mini-pill,
+.ac-emotion-live-badge {
+    gap: 0.45rem;
+    min-height: 36px;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.84rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ac-emotion-mini-pill.is-success,
+.ac-emotion-live-badge.is-success {
+    background: rgba(22, 163, 74, 0.14);
+    color: #166534;
+    border-color: rgba(22, 163, 74, 0.22);
+}
+
+.ac-emotion-mini-pill.is-searching,
+.ac-emotion-mini-pill.is-info,
+.ac-emotion-mini-pill.is-ready,
+.ac-emotion-live-badge.is-searching,
+.ac-emotion-live-badge.is-info,
+.ac-emotion-live-badge.is-ready {
+    background: rgba(37, 99, 235, 0.12);
+    color: #1d4ed8;
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+.ac-emotion-mini-pill.is-warning,
+.ac-emotion-live-badge.is-warning {
+    background: rgba(245, 158, 11, 0.14);
+    color: #92400e;
+    border-color: rgba(245, 158, 11, 0.22);
+}
+
+.ac-emotion-mini-pill.is-danger,
+.ac-emotion-live-badge.is-danger {
+    background: rgba(220, 38, 38, 0.12);
+    color: #991b1b;
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+.ac-emotion-mini-pill.is-neutral,
+.ac-emotion-mini-pill.is-paused,
+.ac-emotion-live-badge.is-neutral,
+.ac-emotion-live-badge.is-paused {
+    background: rgba(15, 23, 42, 0.08);
+    color: #334155;
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+.ac-emotion-close-button.btn {
+    min-height: 42px;
+    padding-inline: 1rem;
+    border-radius: 14px;
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.ac-emotion-close-button.btn:hover,
+.ac-emotion-close-button.btn:focus {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.ac-emotion-main {
+    padding-block: 1.6rem 2.4rem;
+}
+
+.ac-emotion-page-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-page-header__eyebrow,
+.ac-emotion-card-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ac-emotion-primary);
+}
+
+.ac-emotion-page-header h1 {
+    margin: 0;
+    font-size: clamp(1.85rem, 2.5vw, 2.3rem);
+    line-height: 1.08;
+    font-weight: 800;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-page-header p,
+.ac-emotion-card-copy,
+.ac-emotion-page-header__note,
+.ac-emotion-reference-helper {
+    color: var(--ac-emotion-muted);
+    line-height: 1.58;
+}
+
+.ac-emotion-page-header p {
+    margin: 0.75rem 0 0;
+    max-width: 760px;
+    font-size: 1rem;
+}
+
+.ac-emotion-page-header__note {
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    font-size: 0.94rem;
+}
+
+.ac-emotion-status-grid,
+.ac-emotion-live-grid,
+.ac-emotion-kpi-grid,
+.ac-emotion-analytics-grid,
+.ac-emotion-support-grid,
+.ac-emotion-reference-meta,
+.ac-emotion-expression-metrics,
+.ac-emotion-system-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.ac-emotion-status-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-status-card {
+    gap: 0.85rem;
+    min-height: 86px;
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--ac-emotion-border);
+    box-shadow: var(--ac-emotion-shadow);
+}
+
+.ac-emotion-status-card.is-success {
+    border-top: 3px solid var(--ac-emotion-success);
+}
+
+.ac-emotion-status-card.is-searching,
+.ac-emotion-status-card.is-info,
+.ac-emotion-status-card.is-ready {
+    border-top: 3px solid var(--ac-emotion-primary);
+}
+
+.ac-emotion-status-card.is-warning {
+    border-top: 3px solid var(--ac-emotion-warning);
+}
+
+.ac-emotion-status-card.is-danger {
+    border-top: 3px solid var(--ac-emotion-danger);
+}
+
+.ac-emotion-status-card.is-neutral,
+.ac-emotion-status-card.is-paused {
+    border-top: 3px solid #94a3b8;
+}
+
+.ac-emotion-status-card__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--ac-emotion-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.ac-emotion-status-card__content {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+}
+
+.ac-emotion-status-card__content span {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ac-emotion-muted);
+}
+
+.ac-emotion-status-card__content strong {
+    font-size: 1rem;
+    line-height: 1.35;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-banner-stack {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-banner {
+    gap: 0.95rem;
+    padding: 1rem 1.15rem;
+    border-radius: 18px;
+    border: 1px solid var(--ac-emotion-border);
+    background: var(--ac-emotion-surface);
+    box-shadow: var(--ac-emotion-shadow);
+}
+
+.ac-emotion-banner.is-error {
+    border-color: rgba(220, 38, 38, 0.18);
+    background: rgba(254, 242, 242, 0.9);
+}
+
+.ac-emotion-banner.is-warning {
+    border-color: rgba(245, 158, 11, 0.22);
+    background: rgba(255, 251, 235, 0.92);
+}
+
+.ac-emotion-banner.is-info {
+    border-color: rgba(37, 99, 235, 0.18);
+    background: rgba(239, 246, 255, 0.94);
+}
+
+.ac-emotion-banner__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.ac-emotion-banner.is-error .ac-emotion-banner__icon {
+    background: rgba(220, 38, 38, 0.12);
+    color: var(--ac-emotion-danger);
+}
+
+.ac-emotion-banner.is-warning .ac-emotion-banner__icon {
+    background: rgba(245, 158, 11, 0.16);
+    color: #b45309;
+}
+
+.ac-emotion-banner.is-info .ac-emotion-banner__icon {
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--ac-emotion-primary);
+}
+
+.ac-emotion-banner__content {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.ac-emotion-banner__content strong {
+    font-size: 0.95rem;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-banner__content span {
+    color: var(--ac-emotion-text);
+}
+
+.ac-emotion-card {
+    border-radius: 20px;
+    border: 1px solid var(--ac-emotion-border);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: var(--ac-emotion-shadow);
+}
+
+.ac-emotion-card .card-body {
+    padding: 1.35rem;
+}
+
+.ac-emotion-card .card-header {
+    padding: 1rem 1.35rem 0.7rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.9));
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.ac-emotion-card-title {
+    margin: 0;
+    font-size: 1.18rem;
+    font-weight: 800;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-card-copy {
+    margin: 0.4rem 0 0;
+    font-size: 0.95rem;
+}
+
+.ac-emotion-card-head {
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-card-head--stack {
+    margin-bottom: 0.95rem;
+}
+
+.ac-emotion-card-head__chips {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.ac-emotion-live-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-live-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    aspect-ratio: 16 / 9;
+    min-height: 420px;
+    background:
+        radial-gradient(circle at top, rgba(6, 182, 212, 0.12), transparent 30%),
+        linear-gradient(180deg, #020817 0%, #0f172a 100%);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.ac-emotion-video,
+.ac-emotion-video-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.ac-emotion-video {
+    object-fit: cover;
+    display: block;
+    transform: scaleX(-1);
+    z-index: 0;
+    background: transparent;
+    backface-visibility: hidden;
+}
+
+.ac-emotion-video-overlay {
+    transform: scaleX(-1);
+    z-index: 1;
+    pointer-events: none;
+    background: transparent;
+}
+
+.ac-emotion-live-hud {
+    position: absolute;
+    z-index: 2;
+}
+
+.ac-emotion-live-hud--top-left {
+    top: 1rem;
+    left: 1rem;
+}
+
+.ac-emotion-live-hud--top-right {
+    top: 1rem;
+    right: 1rem;
+}
+
+.ac-emotion-live-hud--bottom {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.ac-emotion-live-badge {
+    background: rgba(15, 23, 42, 0.78);
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.ac-emotion-camera-placeholder,
+.ac-emotion-overlay-message {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.ac-emotion-camera-placeholder {
+    background: rgba(2, 6, 23, 0.5);
+    color: #e2e8f0;
+}
+
+.ac-emotion-camera-placeholder strong,
+.ac-emotion-overlay-message strong {
+    font-size: 1.02rem;
+}
+
+.ac-emotion-camera-placeholder span,
+.ac-emotion-overlay-message span {
+    max-width: 360px;
+    line-height: 1.55;
+}
+
+.ac-emotion-overlay-message {
+    inset: auto 1rem 1rem;
+    min-height: auto;
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: #f8fafc;
+    padding: 1rem 1.15rem;
+}
+
+.ac-emotion-overlay-message--compact {
+    inset: auto 1rem 1rem;
+    align-items: flex-start;
+}
+
+.ac-emotion-side-stack {
+    display: grid;
+    gap: 1rem;
+}
+
+.ac-emotion-expression-hero {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-expression-hero__marker {
+    width: 14px;
+    min-height: 78px;
+    border-radius: 999px;
+}
+
+.ac-emotion-expression-hero__value {
+    margin: 0;
+    font-size: clamp(2rem, 3vw, 2.55rem);
+    line-height: 1;
+    font-weight: 800;
+    color: var(--ac-emotion-navy-soft);
+    text-transform: capitalize;
+}
+
+.ac-emotion-expression-hero__helper {
+    margin: 0.6rem 0 0;
+    color: var(--ac-emotion-muted);
+}
+
+.ac-emotion-expression-confidence,
+.ac-emotion-observational-note,
+.ac-emotion-inline-note,
+.ac-emotion-inline-status,
+.ac-emotion-guidance-empty {
+    border-radius: 16px;
+}
+
+.ac-emotion-expression-confidence {
+    padding: 1rem 1.05rem;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(6, 182, 212, 0.08));
+    border: 1px solid rgba(37, 99, 235, 0.14);
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-expression-confidence span,
+.ac-emotion-expression-metric span,
+.ac-emotion-reference-meta__item span,
+.ac-emotion-kpi-card span {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ac-emotion-muted);
+}
+
+.ac-emotion-expression-confidence strong {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-expression-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-expression-metric,
+.ac-emotion-reference-meta__item,
+.ac-emotion-kpi-card,
+.ac-emotion-system-row {
+    padding: 0.95rem 1rem;
+    border-radius: 16px;
+    background: rgba(248, 250, 252, 0.92);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.ac-emotion-expression-metric strong,
+.ac-emotion-reference-meta__item strong {
+    display: block;
+    margin-top: 0.28rem;
+    font-size: 1rem;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-observational-note {
+    padding: 0.95rem 1rem;
+    border: 1px solid rgba(37, 99, 235, 0.14);
+    background: rgba(239, 246, 255, 0.76);
+    color: #1e3a8a;
+    line-height: 1.55;
+}
+
+.ac-emotion-inline-note {
+    margin-top: 0.85rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(245, 158, 11, 0.18);
+    background: rgba(255, 251, 235, 0.9);
+    color: #92400e;
+}
+
+.ac-emotion-reference-preview {
+    min-height: 220px;
+    margin-bottom: 1rem;
+    border-radius: 18px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top left, rgba(6, 182, 212, 0.12), transparent 38%),
+        linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.94) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.ac-emotion-reference-preview img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+}
+
+.ac-emotion-reference-placeholder {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    text-align: center;
+    color: var(--ac-emotion-muted);
+    padding: 1.2rem;
+}
+
+.ac-emotion-reference-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-reference-input {
+    display: none;
+}
+
+.ac-emotion-reference-actions {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.ac-emotion-reference-helper {
+    margin: 0.9rem 0 0;
+    font-size: 0.92rem;
+}
+
+.ac-emotion-inline-status,
+.ac-emotion-guidance-item,
+.ac-emotion-insight-item,
+.ac-emotion-privacy-item {
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    color: var(--ac-emotion-text);
+}
+
+.ac-emotion-inline-status {
+    margin-top: 0.9rem;
+    color: var(--ac-emotion-muted);
+}
+
+.ac-emotion-controls-section {
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-controls-row {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ac-emotion-primary-button.btn,
+.ac-emotion-secondary-button.btn,
+.ac-emotion-danger-button.btn {
+    min-height: 46px;
+    padding-inline: 1.1rem;
+    border-radius: 14px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.ac-emotion-primary-button.btn {
+    background: linear-gradient(135deg, var(--ac-emotion-primary), var(--ac-emotion-primary-strong));
+    border-color: var(--ac-emotion-primary);
+}
+
+.ac-emotion-primary-button.btn:hover,
+.ac-emotion-primary-button.btn:focus {
+    background: linear-gradient(135deg, #1d4ed8, var(--ac-emotion-primary));
+    border-color: #1d4ed8;
+}
+
+.ac-emotion-secondary-button.btn {
+    background: var(--ac-emotion-surface);
+    color: var(--ac-emotion-text);
+    border-color: rgba(148, 163, 184, 0.28);
+}
+
+.ac-emotion-secondary-button.btn:hover,
+.ac-emotion-secondary-button.btn:focus {
+    background: #eff6ff;
+    border-color: rgba(37, 99, 235, 0.24);
+    color: var(--ac-emotion-primary);
+}
+
+.ac-emotion-secondary-button--ghost.btn {
+    color: var(--ac-emotion-muted);
+}
+
+.ac-emotion-danger-button.btn {
+    background: rgba(220, 38, 38, 0.02);
+    color: var(--ac-emotion-danger);
+    border-color: rgba(220, 38, 38, 0.24);
+}
+
+.ac-emotion-danger-button.btn:hover,
+.ac-emotion-danger-button.btn:focus {
+    background: rgba(254, 242, 242, 0.92);
+    color: #991b1b;
+    border-color: rgba(220, 38, 38, 0.32);
+}
+
+.ac-emotion-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-kpi-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.ac-emotion-kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--ac-emotion-primary), var(--ac-emotion-cyan));
+}
+
+.ac-emotion-kpi-card strong {
+    display: block;
+    margin-top: 0.32rem;
+    font-size: 1.55rem;
+    line-height: 1.05;
+    font-weight: 800;
+}
+
+.ac-emotion-guidance-section {
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-guidance-list,
+.ac-emotion-insights-list,
+.ac-emotion-privacy-list {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.ac-emotion-ai-highlights {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.ac-emotion-guidance-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ac-emotion-guidance-item svg,
+.ac-emotion-banner.is-warning .ac-emotion-banner__icon svg {
+    color: var(--ac-emotion-warning);
+}
+
+.ac-emotion-guidance-empty {
+    justify-content: center;
+    background: rgba(240, 253, 244, 0.82);
+    border: 1px solid rgba(22, 163, 74, 0.16);
+    color: #166534;
+}
+
+.ac-emotion-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-analytics-card--wide {
+    grid-column: 1 / -1;
+}
+
+.ac-emotion-filters {
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ac-emotion-shell .form-select,
+.ac-emotion-shell .form-control {
+    min-height: 44px;
+    border-radius: 14px;
+    border-color: rgba(148, 163, 184, 0.26);
+    color: var(--ac-emotion-text);
+    background-color: #ffffff;
+}
+
+.ac-emotion-chart-area {
+    height: 360px;
+}
+
+.ac-emotion-chart-area--compact {
+    height: 320px;
+}
+
+.ac-emotion-empty-state {
+    min-height: 220px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    text-align: center;
+    padding: 1.4rem;
+    color: var(--ac-emotion-muted);
+    border-radius: 18px;
+    border: 1px dashed rgba(148, 163, 184, 0.28);
+    background: rgba(248, 250, 252, 0.86);
+}
+
+.ac-emotion-empty-state strong {
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-empty-card .card-body {
+    padding: 2.5rem;
+}
+
+.ac-emotion-timeline-list {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.ac-emotion-timeline-item {
+    display: grid;
+    grid-template-columns: 80px 12px minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.ac-emotion-timeline-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.ac-emotion-timeline-item__time {
+    font-weight: 800;
+    color: var(--ac-emotion-primary);
+}
+
+.ac-emotion-timeline-item__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    margin-top: 0.3rem;
+}
+
+.ac-emotion-timeline-item__content {
+    display: grid;
+    gap: 0.18rem;
+}
+
+.ac-emotion-timeline-item__content strong {
+    text-transform: capitalize;
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-timeline-item__content span,
+.ac-emotion-timeline-item__content small {
+    color: var(--ac-emotion-muted);
+}
+
+.ac-emotion-insight-item svg,
+.ac-emotion-privacy-item svg {
+    color: var(--ac-emotion-primary);
+    flex: 0 0 auto;
+}
+
+.ac-emotion-support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.ac-emotion-system-details {
+    margin-top: 0.35rem;
+}
+
+.ac-emotion-system-details summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--ac-emotion-primary);
+    list-style: none;
+}
+
+.ac-emotion-system-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.ac-emotion-system-grid {
+    margin-top: 1rem;
+}
+
+.ac-emotion-system-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    color: var(--ac-emotion-text);
+}
+
+.ac-emotion-system-row strong {
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-system-row .badge {
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 0.5rem 0.7rem;
+}
+
+.ac-emotion-footer {
+    padding-block: 0.25rem 1.5rem;
+}
+
+.ac-emotion-footer p {
+    margin: 0;
+    text-align: center;
+    color: var(--ac-emotion-muted);
+    font-size: 0.92rem;
+}
+
+.ac-emotion-shell code {
+    padding: 0.15rem 0.38rem;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--ac-emotion-navy-soft);
+}
+
+.ac-emotion-shell .btn:focus-visible,
+.ac-emotion-shell .form-select:focus-visible,
+.ac-emotion-shell .form-control:focus-visible,
+.ac-emotion-shell summary:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.26);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.ac-emotion-shell .btn:disabled {
+    opacity: 0.55;
+}
+
+.ac-emotion-live-badge.is-success,
+.ac-emotion-mini-pill.is-success {
+    animation: acEmotionPulse 1.9s ease-in-out infinite;
+}
+
+@keyframes acEmotionPulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.16);
+    }
+
+    50% {
+        box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+    }
+}
+
+@media (max-width: 1279.98px) {
+    .ac-emotion-status-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ac-emotion-live-grid,
+    .ac-emotion-support-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-emotion-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .ac-emotion-page-header,
+    .ac-emotion-analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-emotion-analytics-card--wide {
+        grid-column: auto;
+    }
+
+    .ac-emotion-guidance-list {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-emotion-live-frame {
+        min-height: 340px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ac-emotion-container {
+        padding-inline: 16px;
+    }
+
+    .ac-emotion-tool-header__inner,
+    .ac-emotion-tool-header__brand,
+    .ac-emotion-tool-header__actions,
+    .ac-emotion-card-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ac-emotion-tool-header__logo {
+        width: 190px;
+        max-width: 100%;
+    }
+
+    .ac-emotion-tool-header__divider {
+        display: none;
+    }
+
+    .ac-emotion-status-grid,
+    .ac-emotion-kpi-grid,
+    .ac-emotion-expression-metrics,
+    .ac-emotion-reference-meta,
+    .ac-emotion-support-grid,
+    .ac-emotion-analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-emotion-live-frame {
+        min-height: 240px;
+    }
+
+    .ac-emotion-reference-preview img,
+    .ac-emotion-reference-preview,
+    .ac-emotion-reference-placeholder {
+        min-height: 200px;
+        height: 200px;
+    }
+
+    .ac-emotion-controls-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ac-emotion-controls-row .ac-emotion-primary-button,
+    .ac-emotion-controls-row .ac-emotion-secondary-button--ghost {
+        grid-column: 1 / -1;
+    }
+
+    .ac-emotion-reference-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .ac-emotion-reference-actions .btn,
+    .ac-emotion-filters .form-select,
+    .ac-emotion-filters .form-control {
+        width: 100%;
+    }
+
+    .ac-emotion-timeline-item {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+
+    .ac-emotion-timeline-item__dot {
+        display: none;
+    }
+
+    .ac-emotion-chart-area,
+    .ac-emotion-chart-area--compact {
+        height: 280px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ac-emotion-shell *,
+    .ac-emotion-shell *::before,
+    .ac-emotion-shell *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}

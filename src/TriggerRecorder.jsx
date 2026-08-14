@@ -1,57 +1,104 @@
-// Ficheiro: src/TriggerRecorder.jsx (Versão Final e Limpa)
-
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Alert, Spinner, ListGroup, Badge } from 'react-bootstrap';
-import logonovo from './assets/logonovo.png';
-import { X } from 'react-bootstrap-icons';
+import { Alert, Badge, Button, Col, Container, Row, Spinner } from 'react-bootstrap';
+import {
+    CheckCircle,
+    ExclamationTriangle,
+    InfoCircle,
+    Mic,
+    MicMute,
+    RecordCircle,
+    Soundwave,
+    X
+} from 'react-bootstrap-icons';
 import axios from 'axios';
+import logonovo from './assets/logonovo.png';
 import './App.css';
+import './TriggerRecorder.css';
+
+const decodeBrokenUtf8 = (value) => {
+    if (typeof value !== 'string' || !/[ÃÂ]/.test(value)) {
+        return value;
+    }
+
+    try {
+        const bytes = new Uint8Array(Array.from(value).map((character) => character.charCodeAt(0)));
+        return new TextDecoder('utf-8').decode(bytes);
+    } catch (error) {
+        return value;
+    }
+};
+
+const normalizeText = (value) => {
+    if (typeof value !== 'string') {
+        return value;
+    }
+
+    return decodeBrokenUtf8(value).trim();
+};
 
 const TriggerRecorder = () => {
-    // Estados
     const [patientId, setPatientId] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [analysisResults, setAnalysisResults] = useState([]);
     const [transcribedText, setTranscribedText] = useState('');
-    const [, setIsTranscribing] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const [saveMessage, setSaveMessage] = useState('');
 
-    // Refs
     const recognitionRef = useRef(null);
-    const finalTranscriptRef = useRef(''); // Usar ref para acumular o texto final
+    const finalTranscriptRef = useRef('');
 
     const location = useLocation();
 
-    // Efeito para ler o ID do paciente
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const id = queryParams.get('patientId');
+
         if (id) {
             setPatientId(id);
-        } else {
-            setError("ID do paciente não encontrado na URL. A gravação está desativada.");
-        }
-    }, [location]);
-
-    // --- Funções de Gravação e Transcrição ---
-    const handleStartRecording = async () => {
-        if (!patientId) {
-            setError("Não é possível iniciar a gravação sem um ID de paciente.");
+            setError(null);
             return;
         }
+
+        setPatientId(null);
+        setError('Paciente não identificado. Abra esta ferramenta a partir do Dashboard do Paciente para iniciar um monitoramento.');
+    }, [location]);
+
+    useEffect(() => () => {
+        if (recognitionRef.current) {
+            try {
+                recognitionRef.current.stop();
+            } catch (stopError) {
+                console.warn('Não foi possível encerrar o reconhecimento ao desmontar.', stopError);
+            }
+        }
+    }, []);
+
+    const clearFeedback = () => {
         setError(null);
+        setSaveMessage('');
+    };
+
+    const handleStartRecording = async () => {
+        if (!patientId) {
+            setError('Não é possível iniciar a gravação sem um ID de paciente.');
+            return;
+        }
+
+        clearFeedback();
         setAnalysisResults([]);
         setTranscribedText('');
-        finalTranscriptRef.current = ''; // Limpa o texto acumulado
+        setIsLoading(false);
+        finalTranscriptRef.current = '';
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
-            setError("Reconhecimento de fala não é suportado neste navegador. Tente usar o Google Chrome.");
+            setError('Reconhecimento de fala não é suportado neste navegador. Utilize um navegador compatível, como Google Chrome.');
             return;
         }
-        
+
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
@@ -59,37 +106,39 @@ const TriggerRecorder = () => {
 
         recognitionRef.current.onstart = () => {
             setIsTranscribing(true);
-            console.log("Reconhecimento de fala iniciado.");
+            console.log('Reconhecimento de fala iniciado.');
         };
 
         recognitionRef.current.onresult = (event) => {
             let interimTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscriptRef.current += event.results[i][0].transcript + ' ';
+
+            for (let index = event.resultIndex; index < event.results.length; index += 1) {
+                if (event.results[index].isFinal) {
+                    finalTranscriptRef.current += `${event.results[index][0].transcript} `;
                 } else {
-                    interimTranscript += event.results[i][0].transcript;
+                    interimTranscript += event.results[index][0].transcript;
                 }
             }
-            // Atualiza o estado com o texto parcial e o final acumulado
-            setTranscribedText(finalTranscriptRef.current + interimTranscript);
+
+            setTranscribedText(`${finalTranscriptRef.current}${interimTranscript}`.trim());
         };
 
         recognitionRef.current.onerror = (event) => {
-            console.error("Erro no reconhecimento de fala:", event.error);
-            // Trata o erro 'no-speech' de forma amigável
+            console.error('Erro no reconhecimento de fala:', event.error);
+
             if (event.error === 'no-speech') {
-                setError("Nenhuma fala foi detectada. Por favor, tente falar mais perto do microfone.");
+                setError('Nenhuma fala foi detectada. Tente falar mais próximo ao microfone.');
             } else {
-                setError(`Erro no reconhecimento de fala: ${event.error}`);
+                setError(`Erro no reconhecimento de fala: ${normalizeText(event.error)}`);
             }
+
             setIsRecording(false);
             setIsTranscribing(false);
         };
 
         recognitionRef.current.onend = () => {
             setIsTranscribing(false);
-            console.log("Reconhecimento de fala parado.");
+            console.log('Reconhecimento de fala parado.');
         };
 
         recognitionRef.current.start();
@@ -100,10 +149,12 @@ const TriggerRecorder = () => {
         if (recognitionRef.current) {
             recognitionRef.current.stop();
         }
+
         setIsRecording(false);
 
-        // Aguarda um momento para garantir que o texto final foi processado
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => {
+            window.setTimeout(resolve, 500);
+        });
 
         const finalText = finalTranscriptRef.current.trim();
         if (finalText.length > 0) {
@@ -113,26 +164,27 @@ const TriggerRecorder = () => {
         }
     };
 
-    // --- Análise e Salvamento do Texto ---
     const analyzeAndSaveText = async (text) => {
-        if (!text) return;
-        
-        console.log("Analisando texto:", text);
-        
+        if (!text) {
+            return;
+        }
+
+        console.log('Analisando texto:', text);
+
         const words = text.toLowerCase().match(/\b(\w+)\b/g) || [];
         const wordCount = words.length;
         const uniqueWords = new Set(words).size;
-        const wordFrequency = words.reduce((acc, word) => {
-            acc[word] = (acc[word] || 0) + 1;
-            return acc;
+        const wordFrequency = words.reduce((accumulator, word) => {
+            accumulator[word] = (accumulator[word] || 0) + 1;
+            return accumulator;
         }, {});
-        
+
         const repeatedWords = Object.entries(wordFrequency).filter(([, count]) => count > 2);
 
         const analysis = {
             wordCount,
             uniqueWords,
-            lexicalDiversity: wordCount > 0 ? (uniqueWords / wordCount) : 0,
+            lexicalDiversity: wordCount > 0 ? uniqueWords / wordCount : 0,
             repeatedWords: repeatedWords.map(([word, count]) => `${word} (${count}x)`),
             fullText: text
         };
@@ -142,135 +194,316 @@ const TriggerRecorder = () => {
     };
 
     const saveVocalizationToDB = async (analysisData) => {
-        if (!patientId) return;
+        if (!patientId) {
+            return;
+        }
+
         const token = localStorage.getItem('token');
         if (!token) {
-            setError("Token não encontrado. Não foi possível salvar a análise.");
+            setError('Token não encontrado. Não foi possível salvar a análise.');
             return;
         }
 
         try {
-            const config = { headers: { 'Authorization': `Bearer ${token}` } };
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            };
+
             await axios.post('http://localhost:5000/api/vocalizations', {
                 patient_id: patientId,
                 analysis_data: analysisData,
-                date: new Date( ).toISOString()
+                date: new Date().toISOString()
             }, config);
-            console.log("Análise de vocalização salva com sucesso.");
+
+            setSaveMessage('Análise salva com sucesso no histórico do paciente.');
+            console.log('Análise de vocalização salva com sucesso.');
         } catch (err) {
-            console.error("Erro ao salvar análise de vocalização:", err);
-            setError("Falha ao comunicar com o servidor para salvar a análise.");
+            console.error('Erro ao salvar análise de vocalização:', err);
+            setError(normalizeText(err?.response?.data?.error || 'Falha ao comunicar com o servidor para salvar a análise.'));
         }
     };
 
-    // --- Renderização ---
+    const latestAnalysis = analysisResults[0] || null;
+    const showLiveTranscript = isRecording || isTranscribing;
+    const appState = useMemo(() => {
+        if (!patientId) return 'blocked';
+        if (error && !isRecording && !isLoading && !latestAnalysis) return 'error';
+        if (isLoading) return 'analyzing';
+        if (isRecording || isTranscribing) return 'recording';
+        if (latestAnalysis) return 'complete';
+        return 'ready';
+    }, [error, isLoading, isRecording, isTranscribing, latestAnalysis, patientId]);
+
+    const statusMeta = {
+        blocked: {
+            label: 'Paciente não identificado',
+            description: 'Abra esta ferramenta a partir do Dashboard do Paciente para iniciar um monitoramento.',
+            tone: 'blocked',
+            icon: InfoCircle
+        },
+        ready: {
+            label: 'Pronto',
+            description: 'Posicione-se próximo ao microfone e inicie quando estiver preparado.',
+            tone: 'ready',
+            icon: Mic
+        },
+        recording: {
+            label: 'Gravando',
+            description: 'Escutando... fale normalmente.',
+            tone: 'recording',
+            icon: RecordCircle
+        },
+        analyzing: {
+            label: 'Analisando',
+            description: 'Analisando vocalização...',
+            tone: 'analyzing',
+            icon: Soundwave
+        },
+        complete: {
+            label: 'Análise concluída',
+            description: 'Os resultados da vocalização já estão disponíveis abaixo.',
+            tone: 'complete',
+            icon: CheckCircle
+        },
+        error: {
+            label: 'Atenção',
+            description: 'A ferramenta encontrou um problema e você pode tentar novamente.',
+            tone: 'error',
+            icon: ExclamationTriangle
+        }
+    }[appState];
+
+    const StatusIcon = statusMeta.icon;
+    const recordButtonDisabled = isLoading || !patientId;
+    const recordButtonLabel = isRecording ? 'Parar gravação' : 'Iniciar gravação';
+    const recordButtonIcon = isRecording ? MicMute : Mic;
+    const RecordButtonIcon = recordButtonIcon;
+
     return (
-        <div className="App bg-light min-vh-100">
-            <nav className="top-bar fixed-top shadow-sm">
-                <Container>
-                    <Row className="align-items-center py-3">
-                        <Col md={4} className="text-center text-md-start">
-                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
-                        </Col>
-                        <Col md={4} className="text-center d-none d-md-block">
-                            <span className="text-white fw-semibold">Analisador de Vocalizacoes</span>
-                        </Col>
-                        <Col md={4} className="text-center text-md-end">
-                            <Button variant="outline-light" size="sm" onClick={() => window.close()}>
-                                <X className="me-2" /> Fechar
-                            </Button>
-                        </Col>
-                    </Row>
+        <div className="ac-trigger-page">
+            <header className="ac-trigger-header">
+                <Container fluid="xl" className="ac-trigger-header__inner">
+                    <div className="ac-trigger-header__brand">
+                        <img src={logonovo} alt="AutisConnect" className="ac-trigger-header__logo" />
+                    </div>
+
+                    <div className="ac-trigger-header__title">
+                        <span>Vocalizações</span>
+                        <strong>Monitoramento de Vocalizações</strong>
+                    </div>
+
+                    <Button
+                        variant="link"
+                        className="ac-trigger-header__close"
+                        onClick={() => window.close()}
+                        aria-label="Fechar ferramenta"
+                    >
+                        <X />
+                        <span>Fechar</span>
+                    </Button>
                 </Container>
-            </nav>
+            </header>
 
-            <div className="home-page" style={{ paddingTop: '85px' }}>
-                <section className="hero-section hero-short">
-                    <Container>
-                        <Row className="align-items-center">
-                            <Col lg={7} className="mb-4 mb-lg-0">
-                                <div className="hero-content-box p-4 rounded-4">
-                                    <h2 className="display-6 fw-bold mb-2 text-white">Analisador de Vocalizacoes</h2>
-                                    <p className="text-white-90 mb-1">Registre e acompanhe padroes de vocalizacao.</p>
-                                    <p className="text-white-90 mb-0">Dados organizados para apoio terapeutico.</p>
+            <main className="ac-trigger-workspace">
+                <Container fluid="xl">
+                    <section className="ac-trigger-hero">
+                        <div>
+                            <span className="ac-trigger-hero__eyebrow">Voice Monitoring Workspace</span>
+                            <h1>Monitoramento de Vocalizações</h1>
+                            <p>Registre amostras de fala e acompanhe indicadores de comunicação.</p>
+                        </div>
+                        <Badge className="ac-trigger-badge">Análise em tempo real</Badge>
+                    </section>
+
+                    {(error || saveMessage) && (
+                        <div className="ac-trigger-feedback-stack">
+                            {error ? (
+                                <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-0">
+                                    {error}
+                                </Alert>
+                            ) : null}
+                            {saveMessage ? (
+                                <Alert variant="success" dismissible onClose={() => setSaveMessage('')} className="mb-0">
+                                    {saveMessage}
+                                </Alert>
+                            ) : null}
+                        </div>
+                    )}
+
+                    <Row className="g-4">
+                        <Col xl={5}>
+                            <section className={`ac-trigger-recorder ac-trigger-recorder--${statusMeta.tone}`}>
+                                <div className="ac-trigger-recorder__status">
+                                    <span className={`ac-trigger-status ac-trigger-status--${statusMeta.tone}`}>
+                                        <StatusIcon />
+                                        <span>{statusMeta.label}</span>
+                                    </span>
+                                    {isLoading ? (
+                                        <span className="ac-trigger-status-note">
+                                            <Spinner animation="border" size="sm" />
+                                            <span>Analisando vocalização...</span>
+                                        </span>
+                                    ) : showLiveTranscript ? (
+                                        <span className="ac-trigger-status-note">
+                                            <Spinner animation="grow" size="sm" />
+                                            <span>Escutando em tempo real</span>
+                                        </span>
+                                    ) : null}
                                 </div>
-                            </Col>
-                            <Col lg={5}>
-                                <Card className="shadow-sm border-0">
-                                    <Card.Body>
-                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
-                                        <div className="text-muted">Use a gravacao para gerar insights automaticos.</div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Container>
-                </section>
 
-                <main className="dashboard-section py-4">
-                    <Container fluid className="trigger-recorder-page">
-{error && <Alert variant="danger" onClose={() => setError(null)} dismissible>{error}</Alert>}
+                                <div className="ac-trigger-recorder__center">
+                                    <div className={`ac-trigger-mic${isRecording ? ' is-recording' : ''}`}>
+                                        <div className="ac-trigger-mic__rings" aria-hidden="true">
+                                            <span />
+                                            <span />
+                                            <span />
+                                        </div>
+                                        <div className="ac-trigger-mic__core">
+                                            {isRecording ? <RecordCircle /> : <Mic />}
+                                        </div>
+                                    </div>
 
-                    <Row className="align-items-center mb-3">
-                        <Col xs="auto">
-                            <Button
-                                variant={isRecording ? "danger" : "success"}
-                                onClick={isRecording ? handleStopRecording : handleStartRecording}
-                                disabled={isLoading || !patientId}
-                            >
-                                {isRecording ? <><Spinner as="span" animation="grow" size="sm" /> Parar Gravação</> : "Iniciar Análise de Fala"}
-                            </Button>
+                                    <div className="ac-trigger-recorder__copy">
+                                        <h2>{statusMeta.label === 'Pronto' ? 'Pronto para gravar' : statusMeta.label}</h2>
+                                        <p>{statusMeta.description}</p>
+                                    </div>
+                                </div>
+
+                                <div className="ac-trigger-recorder__actions">
+                                    <Button
+                                        className={`ac-trigger-record-button${isRecording ? ' is-recording' : ''}`}
+                                        onClick={isRecording ? handleStopRecording : handleStartRecording}
+                                        disabled={recordButtonDisabled}
+                                    >
+                                        <RecordButtonIcon />
+                                        <span>{recordButtonLabel}</span>
+                                    </Button>
+                                </div>
+
+                                {!patientId ? (
+                                    <div className="ac-trigger-blocked-note">
+                                        Abra esta ferramenta pelo dashboard do paciente para habilitar a gravação.
+                                    </div>
+                                ) : null}
+                            </section>
                         </Col>
-                        <Col>
-                            {isRecording && <span className="text-danger">Escutando... Fale agora.</span>}
-                            {isLoading && <Spinner animation="border" size="sm" />}
+
+                        <Col xl={7}>
+                            <section className="ac-trigger-transcript">
+                                <div className="ac-trigger-panel-header">
+                                    <div>
+                                        <span className="ac-trigger-panel-header__eyebrow">Transcrição</span>
+                                        <h3>Transcrição em tempo real</h3>
+                                    </div>
+                                    <Badge className={`ac-trigger-badge ac-trigger-badge--${statusMeta.tone}`}>
+                                        {statusMeta.label}
+                                    </Badge>
+                                </div>
+
+                                <div className="ac-trigger-transcript__content">
+                                    {transcribedText ? (
+                                        <p>{transcribedText}</p>
+                                    ) : (
+                                        <div className="ac-trigger-empty-state">
+                                            <InfoCircle />
+                                            <div>
+                                                <strong>Transcrição disponível aqui</strong>
+                                                <span>A transcrição aparecerá aqui durante a gravação.</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
                         </Col>
                     </Row>
 
-                    <Card bg="light" className="p-3 mb-3">
-                        <Card.Title>Transcrição</Card.Title>
-                        <Card.Text style={{ minHeight: '50px' }}>
-                            {transcribedText || (isRecording ? "Ouvindo..." : "Aguardando início da gravação.")}
-                        </Card.Text>
-                    </Card>
-                    
-                    <hr />
+                    <section className="ac-trigger-results">
+                        <div className="ac-trigger-panel-header">
+                            <div>
+                                <span className="ac-trigger-panel-header__eyebrow">Análise estatística</span>
+                                <h3>Análise da vocalização</h3>
+                            </div>
+                            {latestAnalysis ? (
+                                <Badge className="ac-trigger-badge ac-trigger-badge--complete">Sessão processada</Badge>
+                            ) : null}
+                        </div>
 
-                    <h6 className="mt-3">Resultados da Análise (IA - Nível 1):</h6>
-                    {isLoading && <p>Analisando texto gravado...</p>}
-                    
-                    {analysisResults.length > 0 && (
-                        <ListGroup variant="flush">
-                            {analysisResults.map((result, index) => (
-                                <React.Fragment key={index}>
-                                    <ListGroup.Item><strong>Contagem de Palavras:</strong> <Badge bg="primary">{result.wordCount}</Badge></ListGroup.Item>
-                                    <ListGroup.Item><strong>Vocabulário (Palavras Únicas):</strong> <Badge bg="info">{result.uniqueWords}</Badge></ListGroup.Item>
-                                    <ListGroup.Item><strong>Diversidade Léxica:</strong> <Badge bg="secondary">{(result.lexicalDiversity * 100).toFixed(1)}%</Badge></ListGroup.Item>
-                                    {result.repeatedWords.length > 0 && (
-                                        <ListGroup.Item><strong>Padrões de Repetição (Ecolalia):</strong> {result.repeatedWords.join(', ')}</ListGroup.Item>
+                        {isLoading ? (
+                            <div className="ac-trigger-analysis-loading">
+                                <Spinner animation="border" size="sm" />
+                                <span>Analisando vocalização...</span>
+                            </div>
+                        ) : null}
+
+                        {latestAnalysis ? (
+                            <>
+                                <div className="ac-trigger-metrics">
+                                    <article className="ac-trigger-metric">
+                                        <span>Palavras</span>
+                                        <strong>{latestAnalysis.wordCount}</strong>
+                                        <small>Total identificado na gravação.</small>
+                                    </article>
+                                    <article className="ac-trigger-metric">
+                                        <span>Palavras únicas</span>
+                                        <strong>{latestAnalysis.uniqueWords}</strong>
+                                        <small>Termos diferentes identificados.</small>
+                                    </article>
+                                    <article className="ac-trigger-metric">
+                                        <span>Diversidade lexical</span>
+                                        <strong>{(latestAnalysis.lexicalDiversity * 100).toFixed(1)}%</strong>
+                                        <small>Proporção entre palavras diferentes e o total de palavras.</small>
+                                    </article>
+                                    <article className="ac-trigger-metric">
+                                        <span>Repetições</span>
+                                        <strong>{latestAnalysis.repeatedWords.length}</strong>
+                                        <small>Termos que apareceram mais de duas vezes.</small>
+                                    </article>
+                                </div>
+
+                                <div className="ac-trigger-repetitions">
+                                    <div className="ac-trigger-panel-header ac-trigger-panel-header--compact">
+                                        <div>
+                                            <span className="ac-trigger-panel-header__eyebrow">Padrões</span>
+                                            <h4>Padrões de repetição</h4>
+                                        </div>
+                                    </div>
+
+                                    {latestAnalysis.repeatedWords.length > 0 ? (
+                                        <div className="ac-trigger-chip-list">
+                                            {latestAnalysis.repeatedWords.map((item) => (
+                                                <span key={item} className="ac-trigger-chip">{item}</span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="ac-trigger-repetitions__empty">
+                                            Nenhum padrão recorrente foi identificado com o critério atual.
+                                        </p>
                                     )}
-                                </React.Fragment>
-                            ))}
-                        </ListGroup>
-                    )}
-        </Container>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="ac-trigger-empty-results">
+                                <Soundwave />
+                                <div>
+                                    <strong>Nenhuma análise disponível ainda</strong>
+                                    <span>Capture uma amostra de fala para gerar indicadores de comunicação.</span>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+                </Container>
             </main>
 
-            <footer className="footer-section py-4">
-                <Container>
-                    <Row className="align-items-center">
-                        <Col md={6} className="footer-left text-start">
-                            <p className="mb-0">
-                                {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
-                                <small>Todos os direitos reservados.</small>
-                            </p>
-                        </Col>
-                    </Row>
+            <footer className="ac-trigger-footer">
+                <Container fluid="xl">
+                    <p>© 2026 Nf Representações Comerciais Ltda. Todos os direitos reservados.</p>
                 </Container>
             </footer>
         </div>
-    </div>
     );
 };
 
 export default TriggerRecorder;
+

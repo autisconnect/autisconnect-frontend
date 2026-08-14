@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Alert, Badge, ProgressBar } from 'react-bootstrap';
+import { Alert, Badge, Card, ProgressBar } from 'react-bootstrap';
 
 /**
  * AbaAiAnalysis
@@ -11,60 +11,53 @@ import { Card, Alert, Badge, ProgressBar } from 'react-bootstrap';
 const AbaAiAnalysis = ({ analytics, compact = false }) => {
     if (!analytics) {
         return (
-            <Card className="shadow-sm">
+            <Card className="shadow-sm h-100">
                 <Card.Header>Análise Inteligente ABA</Card.Header>
                 <Card.Body>
                     <p className="text-muted mb-0">
-                        Dados insuficientes para análise IA.
+                        Dados insuficientes para análise com IA.
                     </p>
                 </Card.Body>
             </Card>
         );
     }
 
-    /* ==============================
-       Helpers
-    ============================== */
     const getStatusVariant = (status) => {
-        switch (status) {
-            case 'PROGRESSO':
-                return 'success';
-            case 'ESTÁVEL':
-                return 'info';
-            case 'ESTAGNAÇÃO':
-                return 'warning';
-            case 'REGRESSÃO':
-                return 'danger';
-            default:
-                return 'secondary';
+        switch (String(status || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()) {
+        case 'PROGRESSO':
+            return 'success';
+        case 'ESTAVEL':
+            return 'info';
+        case 'ESTAGNACAO':
+            return 'warning';
+        case 'REGRESSAO':
+            return 'danger';
+        default:
+            return 'secondary';
         }
     };
 
     const getStatusDescription = () => {
-        switch (analytics.overallStatus) {
-            case 'PROGRESSO':
-                return 'O paciente apresenta evolução consistente nas habilidades avaliadas.';
-            case 'ESTÁVEL':
-                return 'O desempenho estável indica manutenção das habilidades adquiridas.';
-            case 'ESTAGNAÇÃO':
-                return 'Não foram observados ganhos clínicos significativos no período.';
-            case 'REGRESSÃO':
-                return 'Há evidências de perda de desempenho em habilidades previamente adquiridas.';
-            default:
-                return 'Análise indisponível.';
+        switch (String(analytics.overallStatus || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()) {
+        case 'PROGRESSO':
+            return 'O paciente apresenta evolução consistente nas habilidades avaliadas.';
+        case 'ESTAVEL':
+            return 'O desempenho estável indica manutenção das habilidades adquiridas.';
+        case 'ESTAGNACAO':
+            return 'Não foram observados ganhos clínicos significativos no período.';
+        case 'REGRESSAO':
+            return 'Há evidências de queda de desempenho em habilidades previamente adquiridas.';
+        default:
+            return 'Análise indisponível.';
         }
     };
 
-    /* ==============================
-       Render
-    ============================== */
     return (
         <Card className="shadow-sm h-100">
-            <Card.Header>Análise IA – Progresso ABA</Card.Header>
+            <Card.Header>Análise IA - Progresso ABA</Card.Header>
             <Card.Body>
-                {/* STATUS GERAL */}
                 <Alert variant={getStatusVariant(analytics.overallStatus)}>
-                    <strong>Status Geral:</strong>{' '}
+                    <strong>Status geral:</strong>{' '}
                     <Badge bg={getStatusVariant(analytics.overallStatus)}>
                         {analytics.overallStatus}
                     </Badge>
@@ -73,9 +66,8 @@ const AbaAiAnalysis = ({ analytics, compact = false }) => {
                     </div>
                 </Alert>
 
-                {/* MÉTRICAS */}
                 <div className="mb-3">
-                    <small className="text-muted">Taxa Média de Acerto</small>
+                    <small className="text-muted">Taxa média de acerto</small>
                     <ProgressBar
                         now={analytics.avgAccuracy}
                         label={`${analytics.avgAccuracy}%`}
@@ -91,7 +83,7 @@ const AbaAiAnalysis = ({ analytics, compact = false }) => {
                         className="mb-2"
                     />
 
-                    <small className="text-muted">Dependência de Prompt</small>
+                    <small className="text-muted">Dependência de prompt</small>
                     <ProgressBar
                         now={analytics.promptDependency}
                         label={`${analytics.promptDependency}%`}
@@ -99,39 +91,35 @@ const AbaAiAnalysis = ({ analytics, compact = false }) => {
                     />
                 </div>
 
-                {/* CLASSIFICAÇÃO IA */}
                 <div className="mt-3">
-                    <h6>Classificação Clínica IA</h6>
+                    <h6>Classificação clínica IA</h6>
                     <p className="mb-1">
-                        <strong>Nível de Desempenho:</strong>{' '}
+                        <strong>Nível de desempenho:</strong>{' '}
                         {analytics.classification}
                     </p>
                     <p className="mb-1">
-                        <strong>Sessões Avaliadas:</strong>{' '}
+                        <strong>Sessões avaliadas:</strong>{' '}
                         {analytics.totalSessions}
                     </p>
 
-                    {!compact && (
+                    {!compact ? (
                         <p className="text-muted mb-0">
-                            A classificação considera taxa de acerto, redução
-                            de prompts e ocorrência de generalização ao longo
-                            do tempo.
+                            A classificação considera taxa de acerto, redução de prompts e ocorrência de generalização ao longo do tempo.
                         </p>
-                    )}
+                    ) : null}
                 </div>
 
-                {/* ALERTAS */}
-                {analytics.overallStatus === 'ESTAGNAÇÃO' && (
+                {String(analytics.overallStatus || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase() === 'ESTAGNACAO' ? (
                     <Alert variant="warning" className="mt-3">
-                        ?? Sugere-se revisão do programa ABA atual.
+                        Sugere-se revisão do programa ABA atual.
                     </Alert>
-                )}
+                ) : null}
 
-                {analytics.overallStatus === 'REGRESSÃO' && (
+                {String(analytics.overallStatus || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase() === 'REGRESSAO' ? (
                     <Alert variant="danger" className="mt-3">
-                        ?? Recomendado ajuste imediato de estratégias terapêuticas.
+                        Recomenda-se reavaliar as estratégias terapêuticas com prioridade.
                     </Alert>
-                )}
+                ) : null}
             </Card.Body>
         </Card>
     );

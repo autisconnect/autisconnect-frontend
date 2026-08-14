@@ -18,7 +18,7 @@ import PublicServiceProfile from './PublicServiceProfile';
 import ServiceDashboard01 from './service_dashboard/ServiceDashboard01';
 import ServiceDashboard17 from './service_dashboard/ServiceDashboard17';
 import ServiceDashboard18 from './service_dashboard/ServiceDashboard18';
-import EmotionDetector from './emotion-tracking/EmotionDetector';
+import EmotionDetector from './emotion-tracking/EmotionDetectorVerified';
 import EmotionChart from './emotion-tracking/EmotionChart';
 import SessionsGraph from './emotion-tracking/SessionsGraph';
 import EmotionTrackingDashboard from './emotion-tracking/EmotionTrackingDashboard';

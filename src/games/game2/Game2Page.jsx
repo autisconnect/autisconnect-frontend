@@ -6,8 +6,7 @@ import { io } from 'socket.io-client';
 import api from '../../services/api';
 import { createGame2Game } from './game2Phaser';
 import { getLevelConfig } from './levelConfig';
-import '../game1/game1.css';
-import logoNovo from '../../assets/logonovo.png';
+import TherapeuticGameLayout from '../shared/TherapeuticGameLayout';
 
 const buildSocketUrl = (baseUrl) => {
   if (!baseUrl) return undefined;
@@ -65,6 +64,23 @@ const Game2Page = () => {
   const [showAdvanceModal, setShowAdvanceModal] = useState(false);
   const [nextLevelCandidate, setNextLevelCandidate] = useState(null);
   const [restartKey, setRestartKey] = useState(0);
+  const supportCards = useMemo(() => ([
+    {
+      label: 'Foco terapêutico',
+      value: 'Autonomia funcional',
+      description: 'Estimula independência em rotinas concretas de vida diária.'
+    },
+    {
+      label: 'Experiência',
+      value: 'Sequência prática',
+      description: 'Cada missão reforça ordem correta, atenção e execução consistente.'
+    },
+    {
+      label: 'Aplicação clínica',
+      value: 'Treino cotidiano',
+      description: 'Ideal para generalização de hábitos e ações do dia a dia.'
+    }
+  ]), []);
 
   const metricsRef = useRef({
     stepsTotal: 0,
@@ -227,7 +243,7 @@ const Game2Page = () => {
           localStorage.setItem(storageKey, String(nextLevel));
         }
         setStatus('aguardando');
-        setStatusMessage(`Nivel ${levelId} concluido com sucesso.`);
+        setStatusMessage(`Nível ${levelId} concluído com sucesso.`);
         setNextLevelCandidate(nextLevel);
         setShowAdvanceModal(true);
         return;
@@ -235,15 +251,15 @@ const Game2Page = () => {
 
       setStatus('finalizado');
       if (passed && nextLevel > 5) {
-        setStatusMessage('Nivel maximo concluido com sucesso.');
+        setStatusMessage('Nível máximo concluído com sucesso.');
       } else if (reason === 'abandon') {
-        setStatusMessage('Sessao encerrada.');
+        setStatusMessage('Sessão encerrada.');
       } else {
-        setStatusMessage(passed ? 'Nivel concluido com sucesso.' : 'Sessao finalizada.');
+        setStatusMessage(passed ? 'Nível concluído com sucesso.' : 'Sessão finalizada.');
       }
     } catch (err) {
-      console.error('[GAME2] Erro ao finalizar sessao:', err);
-      setError('Nao foi possivel salvar a sessao.');
+      console.error('[GAME2] Erro ao finalizar sessão:', err);
+      setError('Não foi possível salvar a sessão.');
     }
   }, [levelId, patientId, sendEvent]);
 
@@ -277,7 +293,7 @@ const Game2Page = () => {
     }
     setShowAdvanceModal(false);
     setStatus('avancando');
-    setStatusMessage(`Indo para o nivel ${nextLevelCandidate}...`);
+    setStatusMessage(`Indo para o nível ${nextLevelCandidate}...`);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('level', String(nextLevelCandidate));
     setSearchParams(nextParams);
@@ -286,7 +302,7 @@ const Game2Page = () => {
   const handleRepeatLevel = useCallback(() => {
     setShowAdvanceModal(false);
     setStatus('reiniciando');
-    setStatusMessage(`Repetindo nivel ${levelId}...`);
+    setStatusMessage(`Repetindo nível ${levelId}...`);
     setRestartKey((value) => value + 1);
   }, [levelId]);
 
@@ -294,7 +310,7 @@ const Game2Page = () => {
     setShowAdvanceModal(false);
     setNextLevelCandidate(null);
     setStatus('finalizado');
-    setStatusMessage('Sessao finalizada.');
+    setStatusMessage('Sessão finalizada.');
   }, []);
 
   useEffect(() => {
@@ -327,7 +343,7 @@ const Game2Page = () => {
   useEffect(() => {
     const parsedPatientId = parseInt(patientId, 10);
     if (Number.isNaN(parsedPatientId) || parsedPatientId <= 0) {
-      setError('patientId invalido');
+      setError('patientId inválido');
       return undefined;
     }
 
@@ -356,9 +372,9 @@ const Game2Page = () => {
 
         flushPendingEvents();
       } catch (err) {
-        console.error('[GAME2] Erro ao iniciar sessao:', err);
+        console.error('[GAME2] Erro ao iniciar sessão:', err);
         if (isMounted) {
-          setError('Nao foi possivel iniciar o jogo.');
+          setError('Não foi possível iniciar o jogo.');
           setStatus('erro');
         }
       }
@@ -378,61 +394,51 @@ const Game2Page = () => {
   }, [patientId, levelId, sendEvent, finalizeSession, flushPendingEvents]);
 
   return (
-    <div className="game1-page">
-      <header className="game1-header">
-        <div className="game1-logo-container">
-          <img src={logoNovo} alt="AutisConnect Logo" className="game1-logo-img" />
-          <div className="game1-header-info">
-            <h1>Daily Life Quest</h1>
-            <p>Paciente #{patientId} - Nivel {levelId}</p>
-          </div>
-        </div>
-        <div className="game1-status-bar">
-          <div className="game1-status-badge">{status}</div>
-          <button type="button" className="game1-back" onClick={() => navigate(-1)}>
-            Sair do Jogo
-          </button>
-        </div>
-      </header>
+    <TherapeuticGameLayout
+      tone="autonomy"
+      title="Autonomia na Vida Diária"
+      subtitle="Sequências práticas do cotidiano para reforçar independência, atenção e execução funcional em um ambiente terapêutico seguro."
+      patientId={patientId}
+      levelId={levelId}
+      maxLevel={5}
+      status={status}
+      error={error}
+      statusMessage={statusMessage}
+      onExit={() => navigate(-1)}
+      stageTitle="Missões funcionais do dia a dia"
+      stageDescription="Complete rotinas em ordem correta e no seu tempo, com coleta de eventos para análise do desempenho e do nível de ajuda."
+      supportCards={supportCards}
+      footer="Missão de autonomia: complete cada passo com foco em independência, organização e generalização de habilidades de vida diária."
+    >
+      <div ref={containerRef} className="ac-game-canvas-host" />
 
-      {error && <div className="game1-error">{error}</div>}
-      {statusMessage && <div className="game1-status-message">{statusMessage}</div>}
-
-      <div ref={containerRef} className="game1-canvas" />
-
-      <div className="game1-footer">
-        <strong>Missao de autonomia:</strong> complete cada passo no seu tempo, com foco em independencia.
-        <br />
-        Desenvolvido para reforcar habilidades de vida diaria.
-      </div>
-
-      <Modal show={showAdvanceModal} onHide={handleAdvanceCancel} centered className="game1-advance-modal">
+      <Modal show={showAdvanceModal} onHide={handleAdvanceCancel} centered className="ac-game-advance-modal">
         <Modal.Body>
-          <div className="game1-advance-hero">
-            <div className="game1-advance-icon">
+          <div className="ac-game-advance-hero">
+            <div className="ac-game-advance-icon">
               <EmojiSmile size={40} />
             </div>
             <h5>Excelente Trabalho!</h5>
             {nextLevelCandidate ? (
-              <p>Voce concluiu o nivel {levelId} com sucesso. Pronto para o proximo desafio?</p>
+              <p>Você concluiu o nível {levelId} com sucesso. Pronto para o próximo desafio?</p>
             ) : (
-              <p>Nivel concluido. O que deseja fazer agora?</p>
+              <p>Nível concluído. O que deseja fazer agora?</p>
             )}
           </div>
-          <div className="game1-advance-actions">
+          <div className="ac-game-advance-actions">
             <Button variant="primary" onClick={handleAdvanceConfirm}>
-              <ArrowRightCircle className="me-2" /> Avancar para o Nivel {nextLevelCandidate}
+              <ArrowRightCircle className="me-2" /> Avançar para o Nível {nextLevelCandidate}
             </Button>
             <Button variant="outline-primary" onClick={handleRepeatLevel}>
               <ArrowRepeat className="me-2" /> Praticar Novamente
             </Button>
             <Button variant="link" className="text-muted mt-2" onClick={handleAdvanceCancel}>
-              <XCircle className="me-2" /> Encerrar Sessao
+              <XCircle className="me-2" /> Encerrar Sessão
             </Button>
           </div>
         </Modal.Body>
       </Modal>
-    </div>
+    </TherapeuticGameLayout>
   );
 };
 

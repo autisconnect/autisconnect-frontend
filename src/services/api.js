@@ -1,4 +1,4 @@
-import axios from 'axios';
+Ôªøimport axios from 'axios';
 
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 const isLocalHost =
@@ -22,9 +22,6 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    console.log('API Base URL:', baseURL);
-    console.log('Token enviado:', token);
-    console.log('RequisiÁ„o para:', config.url);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,14 +34,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (!error.response) {
-      console.error('Erro de conex„o com a API:', error.message);
+      console.error('Erro de conex√£o com a API:', error.message);
     } else {
       const status = error.response.status;
       const url = error.response.config?.url || '';
       const isSilent404 = status === 404 && (url.includes('/patient-progress') || url.includes('/appointment-types'));
 
       if (!isSilent404) {
-        console.error('Erro na requisiÁ„o:', status, error.response.data);
+        console.error('Erro na requisi√ß√£o:', status, error.response.data);
       }
 
       if (status === 401) {
@@ -62,5 +59,6 @@ api.interceptors.response.use(
 );
 
 export default api;
+
 
 

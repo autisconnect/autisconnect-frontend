@@ -6,10 +6,7 @@ import { io } from 'socket.io-client';
 import api from '../../services/api';
 import { createGame1Game } from './game1Phaser';
 import { getLevelConfig } from './levelConfig';
-import './game1.css';
-
-// Importando o novo logo (ajustado para o caminho do projeto)
-import logoNovo from '../../assets/logonovo.png';
+import TherapeuticGameLayout from '../shared/TherapeuticGameLayout';
 
 const buildSocketUrl = (baseUrl) => {
   if (!baseUrl) return undefined;
@@ -39,6 +36,23 @@ const Game1Page = () => {
   const [showAdvanceModal, setShowAdvanceModal] = useState(false);
   const [nextLevelCandidate, setNextLevelCandidate] = useState(null);
   const [restartKey, setRestartKey] = useState(0);
+  const supportCards = useMemo(() => ([
+    {
+      label: 'Foco terapêutico',
+      value: 'Autorregulação',
+      description: 'Estimula reconhecimento emocional e escolha de estratégias reguladoras.'
+    },
+    {
+      label: 'Experiência',
+      value: 'Feedback imediato',
+      description: 'As missões respondem em tempo real às decisões do paciente.'
+    },
+    {
+      label: 'Aplicação clínica',
+      value: 'Sessão guiada',
+      description: 'Ideal para acompanhamento estruturado com mediação terapêutica.'
+    }
+  ]), []);
 
   const metricsRef = useRef({
     triggerCount: 0,
@@ -326,38 +340,28 @@ const Game1Page = () => {
   }, [patientId, levelId, restartKey, sendEvent, finalizeSession, flushPendingEvents]);
 
   return (
-    <div className="game1-page">
-      <header className="game1-header">
-        <div className="game1-logo-container">
-          <img src={logoNovo} alt="AutisConnect Logo" className="game1-logo-img" />
-          <div className="game1-header-info">
-            <h1>Emotional Regulation Adventures</h1>
-            <p>Paciente #{patientId} · Nível {levelId}</p>
-          </div>
-        </div>
-        <div className="game1-status-bar">
-          <div className="game1-status-badge">{status}</div>
-          <button type="button" className="game1-back" onClick={() => navigate(-1)}>
-            Sair do Jogo
-          </button>
-        </div>
-      </header>
+    <TherapeuticGameLayout
+      tone="emotion"
+      title="Regulação Emocional"
+      subtitle="Jornada terapêutica voltada ao reconhecimento de gatilhos, escolha de estratégias e autorregulação com apoio lúdico."
+      patientId={patientId}
+      levelId={levelId}
+      maxLevel={5}
+      status={status}
+      error={error}
+      statusMessage={statusMessage}
+      onExit={() => navigate(-1)}
+      stageTitle="Aventura clínica de regulação"
+      stageDescription="Explore cenários interativos com foco em identificação emocional, pausa, respiração e tomada de decisão guiada."
+      supportCards={supportCards}
+      footer="Estratégias de regulação: respiração profunda, pausa sensorial e reformulação cognitiva, com foco em inovação, acessibilidade e segurança clínica."
+    >
+      <div ref={containerRef} className="ac-game-canvas-host" />
 
-      {error && <div className="game1-error">{error}</div>}
-      {statusMessage && <div className="game1-status-message">{statusMessage}</div>}
-
-      <div ref={containerRef} className="game1-canvas" />
-
-      <div className="game1-footer">
-        <strong>Estratégias de Regulação:</strong> Respiração Profunda, Pausa Sensorial e Reformulação Cognitiva. 
-        <br />
-        Desenvolvido com foco em inovação e acessibilidade cognitiva.
-      </div>
-
-      <Modal show={showAdvanceModal} onHide={handleAdvanceCancel} centered className="game1-advance-modal">
+      <Modal show={showAdvanceModal} onHide={handleAdvanceCancel} centered className="ac-game-advance-modal">
         <Modal.Body>
-          <div className="game1-advance-hero">
-            <div className="game1-advance-icon">
+          <div className="ac-game-advance-hero">
+            <div className="ac-game-advance-icon">
               <EmojiSmile size={40} />
             </div>
             <h5>Excelente Trabalho!</h5>
@@ -367,7 +371,7 @@ const Game1Page = () => {
               <p>Nível concluído. O que deseja fazer agora?</p>
             )}
           </div>
-          <div className="game1-advance-actions">
+          <div className="ac-game-advance-actions">
             <Button variant="primary" onClick={handleAdvanceConfirm}>
               <ArrowRightCircle className="me-2" /> Avançar para o Nível {nextLevelCandidate}
             </Button>
@@ -380,7 +384,7 @@ const Game1Page = () => {
           </div>
         </Modal.Body>
       </Modal>
-    </div>
+    </TherapeuticGameLayout>
   );
 };
 

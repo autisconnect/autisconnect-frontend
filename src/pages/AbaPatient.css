@@ -1,0 +1,67 @@
+.ac-aba-patient-shell .ac-aba-sidebar__copy strong {
+    font-size: 1.02rem;
+}
+
+.ac-aba-patient-shell .ac-aba-sidebar__nav {
+    overflow-y: auto;
+    padding-right: 0.2rem;
+}
+
+.ac-aba-patient-shell .ac-aba-sidebar__nav::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ac-aba-patient-shell .ac-aba-sidebar__nav::-webkit-scrollbar-thumb {
+    background: rgba(147, 197, 253, 0.25);
+    border-radius: 999px;
+}
+
+.ac-aba-patient-shell .ac-aba-patient-stack {
+    display: grid;
+    gap: 1rem;
+}
+
+.ac-aba-patient-shell .ac-aba-patient-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ac-aba-patient-shell .ac-aba-component-slot > .card,
+.ac-aba-patient-shell .ac-aba-panel-card > .container,
+.ac-aba-patient-shell .ac-aba-panel-card > .container-fluid {
+    width: 100%;
+}
+
+.ac-aba-patient-shell .ac-aba-panel-card > .container,
+.ac-aba-patient-shell .ac-aba-panel-card > .container-fluid {
+    padding: 0;
+}
+
+.ac-aba-patient-shell .ac-aba-panel-card > .row:last-child,
+.ac-aba-patient-shell .ac-aba-component-slot > .row:last-child {
+    margin-bottom: 0;
+}
+
+.ac-aba-patient-shell .ac-aba-component-slot .card,
+.ac-aba-patient-shell .ac-aba-panel-card .card {
+    box-shadow: none;
+}
+
+.ac-aba-patient-shell .ac-aba-component-slot .card .alert:last-child,
+.ac-aba-patient-shell .ac-aba-panel-card .card .alert:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 1320px) {
+    .ac-aba-patient-shell .ac-aba-patient-action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 991px) {
+    .ac-aba-patient-shell .ac-aba-sidebar__nav {
+        overflow-y: visible;
+        padding-right: 0;
+    }
+}

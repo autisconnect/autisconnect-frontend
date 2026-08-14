@@ -1,7 +1,18 @@
-﻿import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Nav, Alert, Spinner, Card } from 'react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Button } from 'react-bootstrap';
+import {
+    ArrowLeft,
+    BarChartLine,
+    ClipboardPlus,
+    ClockHistory,
+    FileEarmarkMedical,
+    GraphUpArrow,
+    JournalText,
+    Lightbulb,
+    ShieldCheck,
+    Stars
+} from 'react-bootstrap-icons';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { X } from 'react-bootstrap-icons';
 
 import AbaSessionsList from '../components/AbaSessionsList';
 import AbaSessionForm from '../components/AbaSessionForm';
@@ -18,7 +29,108 @@ import abaService from '../services/abaService';
 import abaAiService from '../services/abaAiService';
 
 import logonovo from '../assets/logonovo.png';
-import '../App.css';
+import '../DashboardABA.css';
+import './AbaPatient.css';
+
+const NAVIGATION_ITEMS = [
+    { key: 'dashboard', label: 'Visão Geral', icon: BarChartLine },
+    { key: 'sessions', label: 'Sessões', icon: ClockHistory },
+    { key: 'new-session', label: 'Nova Sessão', icon: ClipboardPlus },
+    { key: 'charts', label: 'Gráficos', icon: GraphUpArrow },
+    { key: 'analysis', label: 'Insights', icon: Stars, tag: 'IA' },
+    { key: 'forecast', label: 'Previsão', icon: Lightbulb, tag: 'IA' },
+    { key: 'monitoring', label: 'Monitoramento', icon: ShieldCheck },
+    { key: 'suggestions', label: 'Sugestões', icon: JournalText, tag: 'IA' },
+    { key: 'report', label: 'Relatório', icon: FileEarmarkMedical }
+];
+
+function formatPercent(value) {
+    if (!Number.isFinite(Number(value))) {
+        return '--';
+    }
+
+    return `${Math.round(Number(value))}%`;
+}
+
+function formatValue(value) {
+    if (value === null || value === undefined || value === '') {
+        return '--';
+    }
+
+    return value;
+}
+
+function getStatusTone(status) {
+    const normalizedStatus = String(status || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+
+    switch (normalizedStatus) {
+    case 'PROGRESSO':
+        return 'success';
+    case 'ESTAVEL':
+        return 'info';
+    case 'ESTAGNACAO':
+        return 'warning';
+    case 'REGRESSAO':
+        return 'danger';
+    default:
+        return 'neutral';
+    }
+}
+
+function getStatusLabel(status) {
+    const normalizedStatus = String(status || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+
+    switch (normalizedStatus) {
+    case 'PROGRESSO':
+        return 'Progresso';
+    case 'ESTAVEL':
+        return 'Estável';
+    case 'ESTAGNACAO':
+        return 'Estagnação';
+    case 'REGRESSAO':
+        return 'Regressão';
+    default:
+        return status || 'Sem classificação';
+    }
+}
+
+function EmptyState({ icon: Icon, title, description, note }) {
+    return (
+        <div className="ac-aba-empty-state">
+            <div className="ac-aba-empty-state__icon">
+                <Icon />
+            </div>
+            <strong>{title}</strong>
+            <p>{description}</p>
+            {note ? <small>{note}</small> : null}
+        </div>
+    );
+}
+
+function LoadingSkeleton() {
+    return (
+        <div className="ac-aba-loading-shell">
+            <div className="ac-aba-skeleton ac-aba-skeleton--title" />
+            <div className="ac-aba-skeleton ac-aba-skeleton--paragraph" />
+            <div className="ac-aba-loading-grid">
+                <div className="ac-aba-skeleton ac-aba-skeleton--card" />
+                <div className="ac-aba-skeleton ac-aba-skeleton--card" />
+                <div className="ac-aba-skeleton ac-aba-skeleton--card" />
+                <div className="ac-aba-skeleton ac-aba-skeleton--card" />
+            </div>
+            <div className="ac-aba-loading-grid ac-aba-loading-grid--main">
+                <div className="ac-aba-skeleton ac-aba-skeleton--panel" />
+                <div className="ac-aba-skeleton ac-aba-skeleton--panel" />
+            </div>
+        </div>
+    );
+}
 
 const AbaPatient = () => {
     const { patientId: routePatientId } = useParams();
@@ -30,22 +142,26 @@ const AbaPatient = () => {
         return params.get('patientId');
     }, [location.search]);
 
-    const patientId = routePatientId || queryPatientId;
+    const patientId = routePatientId || queryPatientId || null;
 
     const [activeTab, setActiveTab] = useState('dashboard');
-
     const [sessions, setSessions] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [forecast, setForecast] = useState(null);
     const [monitoring, setMonitoring] = useState(null);
     const [suggestions, setSuggestions] = useState([]);
     const [suggestionsError, setSuggestionsError] = useState(null);
-
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState(null);
 
     const loadAbaData = useCallback(async () => {
         if (!patientId) {
+            setSessions([]);
+            setAnalytics(null);
+            setForecast(null);
+            setMonitoring(null);
+            setSuggestions([]);
+            setSuggestionsError(null);
             setLoadError('Paciente não identificado.');
             setLoading(false);
             return;
@@ -66,35 +182,37 @@ const AbaPatient = () => {
         const [sessionsRes, analyticsRes, forecastRes, monitoringRes, suggestionsRes] = results;
 
         if (sessionsRes.status === 'fulfilled') {
-            setSessions(sessionsRes.value.data || []);
+            setSessions(Array.isArray(sessionsRes.value?.data) ? sessionsRes.value.data : []);
         } else {
             setSessions([]);
         }
 
         if (analyticsRes.status === 'fulfilled') {
-            setAnalytics(analyticsRes.value.data);
+            setAnalytics(analyticsRes.value?.data || null);
         } else {
             setAnalytics(null);
         }
+
         if (forecastRes.status === 'fulfilled') {
-            setForecast(forecastRes.value.data);
+            setForecast(forecastRes.value?.data || null);
         } else {
             setForecast(null);
         }
 
         if (monitoringRes.status === 'fulfilled') {
-            setMonitoring(monitoringRes.value.data);
+            setMonitoring(monitoringRes.value?.data || null);
         } else {
             setMonitoring(null);
         }
 
         if (suggestionsRes.status === 'fulfilled') {
-            const rawSuggestions = suggestionsRes.value.data || [];
+            const rawSuggestions = Array.isArray(suggestionsRes.value?.data) ? suggestionsRes.value.data : [];
             const mappedSuggestions = rawSuggestions.map((suggestion) => {
                 const reasonText = suggestion.reason || 'Sugestão gerada automaticamente';
-                const priority = reasonText.toLowerCase().includes('regress')
+                const normalizedReason = reasonText.toLowerCase();
+                const priority = normalizedReason.includes('regress')
                     ? 'ALTA'
-                    : reasonText.toLowerCase().includes('estagna')
+                    : normalizedReason.includes('estagna')
                         ? 'MÉDIA'
                         : 'BAIXA';
 
@@ -107,6 +225,7 @@ const AbaPatient = () => {
                     priority
                 };
             });
+
             setSuggestions(mappedSuggestions);
             setSuggestionsError(null);
         } else {
@@ -131,273 +250,470 @@ const AbaPatient = () => {
             navigate(`/patient-details/${patientId}`);
             return;
         }
+
         navigate(-1);
     };
 
-    const formatPercent = (value) => {
-        if (value === null || value === undefined) return '--';
-        return `${value}%`;
-    };
+    const contextPills = useMemo(() => ([
+        {
+            label: 'Paciente',
+            value: patientId ? `Vinculado ao prontuário ${patientId}` : 'Não identificado',
+            tone: patientId ? 'info' : 'warning'
+        },
+        {
+            label: 'Monitoramento',
+            value: monitoring?.status ? getStatusLabel(monitoring.status) : 'Sem leitura disponível',
+            tone: monitoring?.status ? getStatusTone(monitoring.status) : 'neutral'
+        },
+        {
+            label: 'Sugestões IA',
+            value: suggestions.length ? `${suggestions.length} recomendação(ões)` : (suggestionsError || 'Aguardando base suficiente'),
+            tone: suggestions.length ? 'info' : 'neutral'
+        }
+    ]), [monitoring, patientId, suggestions.length, suggestionsError]);
 
-    const formatValue = (value) => {
-        if (value === null || value === undefined) return '--';
-        return value;
-    };
+    const kpiCards = useMemo(() => ([
+        {
+            label: 'Taxa média de acerto',
+            value: formatPercent(analytics?.avgAccuracy),
+            helper: 'Leitura agregada das tentativas registradas para o paciente.'
+        },
+        {
+            label: 'Dependência de prompt',
+            value: formatPercent(analytics?.promptDependency),
+            helper: 'Ajuda a visualizar o nível de suporte ainda necessário.'
+        },
+        {
+            label: 'Generalização',
+            value: formatPercent(analytics?.generalizationRate),
+            helper: 'Indica a transferência de aprendizagem já observada.'
+        },
+        {
+            label: 'Sessões avaliadas',
+            value: formatValue(analytics?.totalSessions ?? sessions.length),
+            helper: 'Total consolidado a partir das sessões carregadas.'
+        }
+    ]), [analytics?.avgAccuracy, analytics?.generalizationRate, analytics?.promptDependency, analytics?.totalSessions, sessions.length]);
 
     const renderDashboard = () => (
-        <>
-            <Row className="mb-4">
-                <Col md={3}>
-                    <Card className="shadow-sm h-100">
-                        <Card.Body>
-                            <h6>Taxa Média de Acerto</h6>
-                            <h3>{formatPercent(analytics?.avgAccuracy)}</h3>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={3}>
-                    <Card className="shadow-sm h-100">
-                        <Card.Body>
-                            <h6>Dependência de Prompt</h6>
-                            <h3>{formatPercent(analytics?.promptDependency)}</h3>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={3}>
-                    <Card className="shadow-sm h-100">
-                        <Card.Body>
-                            <h6>Generalização</h6>
-                            <h3>{formatPercent(analytics?.generalizationRate)}</h3>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={3}>
-                    <Card className="shadow-sm h-100">
-                        <Card.Body>
-                            <h6>Sessões Avaliadas</h6>
-                            <h3>{formatValue(analytics?.totalSessions)}</h3>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Visão Geral ABA</span>
+                    <h2>Central de evolução terapêutica</h2>
+                    <p>Uma leitura integrada de sessões, gráficos, insights, previsão e monitoramento do acompanhamento ABA.</p>
+                </div>
+            </div>
 
-            <Row>
-                <Col lg={12}>
-                    <AbaCharts sessions={sessions} />
-                </Col>
-            </Row>
+            <div className="ac-aba-kpi-grid">
+                {kpiCards.map((kpi) => (
+                    <article key={kpi.label} className="ac-aba-kpi-card">
+                        <span>{kpi.label}</span>
+                        <strong>{kpi.value}</strong>
+                        <small>{kpi.helper}</small>
+                    </article>
+                ))}
+            </div>
 
-            <Row className="mt-4">
-                <Col lg={6}>
-                    <AbaAiAnalysis analytics={analytics} />
-                </Col>
-                <Col lg={6}>
-                    <AbaForecast forecast={forecast} sessions={sessions} />
-                </Col>
-            </Row>
+            <div className="ac-aba-overview-grid">
+                <div className="ac-aba-panel-card">
+                    <div className="ac-aba-panel-header">
+                        <div>
+                            <span className="ac-aba-section-kicker">Gráficos</span>
+                            <h3>Evolução das sessões e habilidades</h3>
+                            <p>O módulo existente de gráficos continua responsável pela leitura clínica da evolução ABA.</p>
+                        </div>
+                    </div>
 
-            <Row className="mt-4">
-                <Col lg={12}>
-                    <AbaProgramMonitoring monitoring={monitoring} />
-                </Col>
-            </Row>
-        </>
+                    {sessions.length ? (
+                        <div className="ac-aba-component-slot">
+                            <AbaCharts sessions={sessions} />
+                        </div>
+                    ) : (
+                        <EmptyState
+                            icon={BarChartLine}
+                            title="Nenhum dado de evolução disponível"
+                            description="Os gráficos aparecerão assim que o paciente tiver sessões ABA registradas."
+                        />
+                    )}
+                </div>
+
+                <div className="ac-aba-insights-column">
+                    {analytics ? (
+                        <div className="ac-aba-component-slot">
+                            <AbaAiAnalysis analytics={analytics} />
+                        </div>
+                    ) : (
+                        <div className="ac-aba-panel-card">
+                            <EmptyState
+                                icon={Stars}
+                                title="Insights ainda indisponíveis"
+                                description="A análise complementar é exibida somente quando houver dados suficientes para interpretação segura."
+                            />
+                        </div>
+                    )}
+
+                    {forecast ? (
+                        <div className="ac-aba-component-slot">
+                            <AbaForecast forecast={forecast} sessions={sessions} />
+                        </div>
+                    ) : (
+                        <div className="ac-aba-panel-card">
+                            <EmptyState
+                                icon={Lightbulb}
+                                title="Previsão terapêutica indisponível"
+                                description="A previsão de desempenho futuro aparecerá quando houver base suficiente para análise."
+                            />
+                        </div>
+                    )}
+
+                    {monitoring ? (
+                        <div className="ac-aba-component-slot">
+                            <AbaProgramMonitoring monitoring={monitoring} />
+                        </div>
+                    ) : (
+                        <div className="ac-aba-panel-card">
+                            <EmptyState
+                                icon={ShieldCheck}
+                                title="Monitoramento ainda não disponível"
+                                description="Quando o serviço responder com dados válidos, os alertas de progresso, estabilidade ou possível regressão aparecerão aqui."
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
+        </section>
     );
 
-    const renderTab = () => {
-        if (loading && activeTab !== 'new-session') {
-            return (
-                <div className="text-center py-5">
-                    <Spinner animation="border" />
-                    <p className="mt-3 text-muted">Carregando dados ABA...</p>
+    const renderSessions = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Histórico</span>
+                    <h2>Sessões ABA registradas</h2>
+                    <p>Acompanhe os lançamentos clínicos do paciente com a lista completa das sessões já registradas.</p>
                 </div>
-            );
+            </div>
+
+            <div className="ac-aba-component-slot">
+                <AbaSessionsList sessions={sessions} patientId={patientId} />
+            </div>
+        </section>
+    );
+
+    const renderNewSession = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Registro</span>
+                    <h2>Nova sessão ABA</h2>
+                    <p>Registre programa, habilidade, tentativas, prompt e observações clínicas no mesmo ambiente premium do prontuário.</p>
+                </div>
+            </div>
+
+            <div className="ac-aba-component-slot">
+                <AbaSessionForm patientId={patientId} onSaved={loadAbaData} />
+            </div>
+        </section>
+    );
+
+    const renderCharts = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Gráficos</span>
+                    <h2>Visualização detalhada da evolução</h2>
+                    <p>Explore os gráficos do módulo ABA com foco em consistência, aquisição e resposta às intervenções.</p>
+                </div>
+            </div>
+
+            {sessions.length ? (
+                <div className="ac-aba-component-slot">
+                    <AbaCharts sessions={sessions} />
+                </div>
+            ) : (
+                <div className="ac-aba-panel-card">
+                    <EmptyState
+                        icon={GraphUpArrow}
+                        title="Sem gráficos para exibir"
+                        description="Quando houver sessões registradas, esta área mostrará a evolução gráfica do paciente."
+                    />
+                </div>
+            )}
+        </section>
+    );
+
+    const renderAnalysis = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Insights</span>
+                    <h2>Análise clínica complementar</h2>
+                    <p>Insights e previsão aparecem apenas como apoio à leitura profissional do progresso terapêutico.</p>
+                </div>
+            </div>
+
+            <div className="ac-aba-overview-grid">
+                {analytics ? (
+                    <div className="ac-aba-component-slot">
+                        <AbaAiAnalysis analytics={analytics} />
+                    </div>
+                ) : (
+                    <div className="ac-aba-panel-card">
+                        <EmptyState
+                            icon={Stars}
+                            title="Sem insights disponíveis"
+                            description="Ainda não há dados suficientes para gerar uma análise complementar segura."
+                        />
+                    </div>
+                )}
+
+                <div className="ac-aba-insights-column">
+                    {forecast ? (
+                        <div className="ac-aba-component-slot">
+                            <AbaForecast forecast={forecast} sessions={sessions} />
+                        </div>
+                    ) : (
+                        <div className="ac-aba-panel-card">
+                            <EmptyState
+                                icon={Lightbulb}
+                                title="Sem previsão disponível"
+                                description="A previsão de desempenho futuro será exibida quando houver base consistente para cálculo."
+                            />
+                        </div>
+                    )}
+
+                    {monitoring ? (
+                        <div className="ac-aba-component-slot">
+                            <AbaProgramMonitoring monitoring={monitoring} />
+                        </div>
+                    ) : (
+                        <div className="ac-aba-panel-card">
+                            <EmptyState
+                                icon={ShieldCheck}
+                                title="Sem monitoramento disponível"
+                                description="O monitoramento do programa será exibido automaticamente quando o serviço retornar dados válidos."
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
+        </section>
+    );
+
+    const renderForecast = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Previsão</span>
+                    <h2>Projeção terapêutica</h2>
+                    <p>Use a leitura preditiva como apoio adicional ao planejamento, sempre com validação clínica.</p>
+                </div>
+            </div>
+
+            {forecast ? (
+                <div className="ac-aba-component-slot">
+                    <AbaForecast forecast={forecast} sessions={sessions} />
+                </div>
+            ) : (
+                <div className="ac-aba-panel-card">
+                    <EmptyState
+                        icon={Lightbulb}
+                        title="Previsão ainda não disponível"
+                        description="O serviço de previsão não retornou dados suficientes para este paciente."
+                    />
+                </div>
+            )}
+        </section>
+    );
+
+    const renderSuggestions = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Sugestões</span>
+                    <h2>Recomendações inteligentes de programas</h2>
+                    <p>As recomendações abaixo precisam de validação do profissional responsável antes de qualquer aplicação clínica.</p>
+                </div>
+            </div>
+
+            <div className="ac-aba-component-slot">
+                <AbaProgramSuggestions suggestions={suggestions} error={suggestionsError} />
+            </div>
+        </section>
+    );
+
+    const renderMonitoring = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Monitoramento</span>
+                    <h2>Saúde do programa ABA</h2>
+                    <p>Concentre aqui a leitura de progresso, estabilidade, estagnação ou possível regressão do programa em execução.</p>
+                </div>
+            </div>
+
+            <div className="ac-aba-patient-stack">
+                {monitoring ? (
+                    <div className="ac-aba-component-slot">
+                        <AbaProgramMonitoring monitoring={monitoring} />
+                    </div>
+                ) : (
+                    <div className="ac-aba-panel-card">
+                        <EmptyState
+                            icon={ShieldCheck}
+                            title="Monitoramento indisponível"
+                            description="Quando houver dados válidos do serviço de monitoramento, as ações clínicas assistidas aparecerão nesta área."
+                        />
+                    </div>
+                )}
+
+                <div className="ac-aba-patient-action-grid">
+                    <div className="ac-aba-component-slot">
+                        <AbaProgramReplacement monitoring={monitoring} onActionCompleted={loadAbaData} />
+                    </div>
+                    <div className="ac-aba-component-slot">
+                        <AbaProgramClosure monitoring={monitoring} onActionCompleted={loadAbaData} />
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+
+    const renderReport = () => (
+        <section className="ac-aba-section">
+            <div className="ac-aba-section-header">
+                <div>
+                    <span className="ac-aba-section-kicker">Relatório</span>
+                    <h2>Documento clínico consolidado</h2>
+                    <p>Gere uma visão consolidada do progresso ABA com gráficos, indicadores e leitura complementar já integrada ao módulo.</p>
+                </div>
+            </div>
+
+            <div className="ac-aba-panel-card">
+                <AbaReport patientId={patientId} embedded />
+            </div>
+        </section>
+    );
+
+    const renderActiveSection = () => {
+        if (loading && activeTab !== 'new-session') {
+            return <LoadingSkeleton />;
         }
 
         switch (activeTab) {
-            case 'dashboard':
-                return renderDashboard();
-
-            case 'sessions':
-                return <AbaSessionsList sessions={sessions} />;
-
-            case 'new-session':
-                return <AbaSessionForm patientId={patientId} onSaved={loadAbaData} />;
-
-            case 'charts':
-                return <AbaCharts sessions={sessions} />;
-
-            case 'analysis':
-                return (
-                    <>
-                        <Row>
-                            <Col lg={6}>
-                                <AbaAiAnalysis analytics={analytics} />
-                            </Col>
-                            <Col lg={6}>
-                                <AbaForecast forecast={forecast} sessions={sessions} />
-                            </Col>
-                        </Row>
-                        <Row className="mt-4">
-                            <Col lg={12}>
-                                <AbaProgramMonitoring monitoring={monitoring} />
-                            </Col>
-                        </Row>
-                    </>
-                );
-
-            case 'report':
-                return <AbaReport patientId={patientId} embedded />;
-
-            case 'forecast':
-                return (
-                    <Row>
-                        <Col lg={8} className="mx-auto">
-                            <AbaForecast forecast={forecast} />
-                        </Col>
-                    </Row>
-                );
-
-            case 'suggestions':
-                return (
-                    <Row>
-                        <Col lg={10} className="mx-auto">
-                            <AbaProgramSuggestions suggestions={suggestions} error={suggestionsError} />
-                        </Col>
-                    </Row>
-                );
-
-            case 'monitoring':
-                return (
-                    <Row>
-                        <Col lg={8} className="mx-auto">
-                            <AbaProgramMonitoring monitoring={monitoring} />
-                            <div className="mt-3">
-                                <AbaProgramReplacement monitoring={monitoring} onActionCompleted={loadAbaData} />
-                            </div>
-                            <div className="mt-3">
-                                <AbaProgramClosure monitoring={monitoring} onActionCompleted={loadAbaData} />
-                            </div>
-                        </Col>
-                    </Row>
-                );
-default:
-                return renderDashboard();
+        case 'sessions':
+            return renderSessions();
+        case 'new-session':
+            return renderNewSession();
+        case 'charts':
+            return renderCharts();
+        case 'analysis':
+            return renderAnalysis();
+        case 'forecast':
+            return renderForecast();
+        case 'suggestions':
+            return renderSuggestions();
+        case 'monitoring':
+            return renderMonitoring();
+        case 'report':
+            return renderReport();
+        case 'dashboard':
+        default:
+            return renderDashboard();
         }
     };
 
     return (
-        <div className="App bg-light min-vh-100">
-            <nav className="top-bar fixed-top shadow-sm">
-                <Container>
-                    <Row className="align-items-center py-3">
-                        <Col md={4} className="text-center text-md-start">
-                            <img src={logonovo} alt="AutisConnect" className="top-bar-logo" />
-                        </Col>
-                        <Col md={4} className="text-center d-none d-md-block">
-                            <span className="text-white fw-semibold">Modulo ABA</span>
-                        </Col>
-                        <Col md={4} className="text-center text-md-end">
-                            <Button variant="outline-light" size="sm" onClick={handleExit}>
-                                <X className="me-2" /> Fechar
-                            </Button>
-                        </Col>
-                    </Row>
-                </Container>
-            </nav>
+        <div className="ac-aba-shell ac-aba-patient-shell">
+            <aside className="ac-aba-sidebar">
+                <div className="ac-aba-sidebar__brand">
+                    <img src={logonovo} alt="AutisConnect" className="ac-aba-sidebar__logo" />
+                    <div className="ac-aba-sidebar__copy">
+                        <span>ABA Professional Workspace</span>
+                        <strong>Atividade ABA do paciente</strong>
+                    </div>
+                </div>
 
-            <div className="home-page" style={{ paddingTop: '85px' }}>
-                <section className="hero-section hero-short">
-                    <Container>
-                        <Row className="align-items-center">
-                            <Col lg={7} className="mb-4 mb-lg-0">
-                                <div className="hero-content-box p-4 rounded-4">
-                                    <h2 className="display-6 fw-bold mb-2 text-white">Modulo ABA</h2>
-                                    <p className="text-white-90 mb-1">Monitoramento clinico do paciente {patientId || ''}</p>
-                                    <p className="text-white-90 mb-0">Planejamento, sessoes e evolucao em um so lugar.</p>
-                                </div>
-                            </Col>
-                            <Col lg={5}>
-                                <Card className="shadow-sm border-0">
-                                    <Card.Body>
-                                        <h5 className="fw-bold mb-2">Resumo rapido</h5>
-                                        <div className="text-muted">Acompanhe habilidades, sessoes e analises IA.</div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </Container>
+                <nav className="ac-aba-sidebar__nav" aria-label="Navegação da Atividade ABA do paciente">
+                    {NAVIGATION_ITEMS.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.key;
+
+                        return (
+                            <button
+                                key={item.key}
+                                type="button"
+                                className={`ac-aba-sidebar__item ${isActive ? 'is-active' : ''}`}
+                                onClick={() => setActiveTab(item.key)}
+                            >
+                                <Icon />
+                                <span>{item.label}</span>
+                                {item.tag ? <span className="ac-aba-nav-tag">{item.tag}</span> : null}
+                            </button>
+                        );
+                    })}
+                </nav>
+
+                <div className="ac-aba-sidebar__footer">
+                    <p className="ac-aba-sidebar__signature">
+                        Workspace premium integrado ao fluxo profissional, preservando sessões, relatório, monitoramento e sugestões do módulo ABA.
+                    </p>
+                </div>
+            </aside>
+
+            <main className="ac-aba-main">
+                <header className="ac-aba-header">
+                    <div>
+                        <div className="ac-aba-breadcrumb">Paciente / Atividade ABA</div>
+                        <h1>Central Premium ABA</h1>
+                    </div>
+
+                    <Button variant="outline-primary" className="ac-aba-back-button" onClick={handleExit}>
+                        <ArrowLeft className="me-2" />
+                        Voltar ao paciente
+                    </Button>
+                </header>
+
+                <section className="ac-aba-patient-context">
+                    <div>
+                        <span className="ac-aba-section-kicker">Contexto do paciente</span>
+                        <h2>Paciente vinculado</h2>
+                        <p>
+                            Conduza o acompanhamento ABA com visão consolidada de sessões, gráficos, insights,
+                            previsão e ações de monitoramento em uma única interface.
+                        </p>
+                    </div>
+
+                    <div className="ac-aba-context-pills">
+                        {contextPills.map((pill) => (
+                            <article key={pill.label} className={`ac-aba-context-pill is-${pill.tone}`}>
+                                <span>{pill.label}</span>
+                                <strong>{pill.value}</strong>
+                            </article>
+                        ))}
+                    </div>
                 </section>
 
-                <main className="dashboard-section py-4">
-                    <Container fluid className="aba-module-page">
-{loadError && (
-                <Alert variant="warning" className="mb-4">
-                    {loadError}
-                </Alert>
-            )}
+                {loadError ? (
+                    <Alert variant="warning" className="ac-aba-alert">
+                        <div className="ac-aba-alert__title">
+                            <ShieldCheck />
+                            <strong>Atenção ao carregamento</strong>
+                        </div>
+                        <div>{loadError}</div>
+                    </Alert>
+                ) : null}
 
-            <Nav
-                variant="tabs"
-                activeKey={activeTab}
-                onSelect={(key) => key && setActiveTab(key)}
-                className="mb-4"
-            >
-                <Nav.Item>
-                    <Nav.Link eventKey="dashboard">Dashboard</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="sessions">Sessões</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="new-session">Nova Sessão</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="charts">Gráficos</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="analysis">Análise IA</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="report">Relatório</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="forecast">Previsão</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="suggestions">Sugestões</Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                    <Nav.Link eventKey="monitoring">Monitoramento</Nav.Link>
-                </Nav.Item>
-            </Nav>
+                {renderActiveSection()}
 
-            {renderTab()}
-        </Container>
+                <footer className="ac-aba-footer">
+                    <span>AutisConnect ABA Workspace</span>
+                    <span>Tecnologia que conecta. Cuidado que transforma.</span>
+                </footer>
             </main>
-
-            <footer className="footer-section py-4">
-                <Container>
-                    <Row className="align-items-center">
-                        <Col md={6} className="footer-left text-start">
-                            <p className="mb-0">
-                                {'\u00a9'} 2026 Nf Representacoes Comerciais Ltda.<br />
-                                <small>Todos os direitos reservados.</small>
-                            </p>
-                        </Col>
-                    </Row>
-                </Container>
-            </footer>
         </div>
-    </div>
     );
 };
 
 export default AbaPatient;
-
-
-
-
-
-
-

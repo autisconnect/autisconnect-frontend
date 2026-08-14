@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Badge, Alert, Spinner } from 'react-bootstrap';
+import { Alert, Badge, Card, Spinner, Table } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import abaService from '../services/abaService';
 
@@ -17,15 +17,17 @@ const AbaSessionsList = ({ sessions: sessionsProp, patientId }) => {
 
     useEffect(() => {
         const loadSessions = async () => {
-            if (isControlled || !patientId) return;
+            if (isControlled || !patientId) {
+                return;
+            }
 
             try {
                 setLoading(true);
                 setError(null);
                 const response = await abaService.getSessions(patientId);
                 setSessions(response.data || []);
-            } catch (err) {
-                console.error(err);
+            } catch (requestError) {
+                console.error(requestError);
                 setError('Erro ao carregar sessões ABA.');
             } finally {
                 setLoading(false);
@@ -74,24 +76,29 @@ const AbaSessionsList = ({ sessions: sessionsProp, patientId }) => {
     }
 
     const getAccuracy = (session) => {
-        if (!session.totalTrials || session.totalTrials === 0) return '--';
-        return Math.round(
-            (session.correctResponses / session.totalTrials) * 100
-        );
+        if (!session.totalTrials || session.totalTrials === 0) {
+            return '--';
+        }
+
+        return Math.round((session.correctResponses / session.totalTrials) * 100);
     };
 
     const getPromptBadge = (prompt) => {
-        switch (prompt) {
-            case 'INDEPENDENTE':
-                return <Badge bg="success">Independente</Badge>;
-            case 'GESTUAL':
-                return <Badge bg="info">Gestual</Badge>;
-            case 'VERBAL':
-                return <Badge bg="warning">Verbal</Badge>;
-            case 'FÍSICO':
-                return <Badge bg="danger">Físico</Badge>;
-            default:
-                return <Badge bg="secondary">{prompt}</Badge>;
+        const normalizedPrompt = String(prompt || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+
+        switch (normalizedPrompt) {
+        case 'INDEPENDENTE':
+            return <Badge bg="success">Independente</Badge>;
+        case 'GESTUAL':
+            return <Badge bg="info">Gestual</Badge>;
+        case 'VERBAL':
+            return <Badge bg="warning">Verbal</Badge>;
+        case 'FISICO':
+        case 'FISICO PARCIAL':
+        case 'FISICO TOTAL':
+            return <Badge bg="danger">Físico</Badge>;
+        default:
+            return <Badge bg="secondary">{prompt || 'Não informado'}</Badge>;
         }
     };
 
@@ -116,24 +123,20 @@ const AbaSessionsList = ({ sessions: sessionsProp, patientId }) => {
                         {sessions.map((session) => (
                             <tr key={session.id}>
                                 <td>
-                                    {session.createdAt || session.sessionDate ? dayjs(session.createdAt || session.sessionDate).format('DD/MM/YYYY') : '--'}
+                                    {session.createdAt || session.sessionDate
+                                        ? dayjs(session.createdAt || session.sessionDate).format('DD/MM/YYYY')
+                                        : '--'}
                                 </td>
                                 <td>
                                     <Badge bg="secondary">
-                                        {session.sessionType}
+                                        {session.sessionType || 'Sessão ABA'}
                                     </Badge>
                                 </td>
-                                <td>{session.programName}</td>
-                                <td>{session.targetSkill}</td>
-                                <td>
-                                    {getAccuracy(session)}%
-                                </td>
-                                <td>
-                                    {getPromptBadge(session.promptLevel)}
-                                </td>
-                                <td className="text-center">
-                                    {session.generalization ? '??' : '—'}
-                                </td>
+                                <td>{session.programName || '--'}</td>
+                                <td>{session.targetSkill || '--'}</td>
+                                <td>{getAccuracy(session)}%</td>
+                                <td>{getPromptBadge(session.promptLevel)}</td>
+                                <td className="text-center">{session.generalization ? 'Sim' : '—'}</td>
                                 <td>
                                     {session.durationMinutes
                                         ? `${session.durationMinutes} min`
@@ -149,4 +152,3 @@ const AbaSessionsList = ({ sessions: sessionsProp, patientId }) => {
 };
 
 export default AbaSessionsList;
-

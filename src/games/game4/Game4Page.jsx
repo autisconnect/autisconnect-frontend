@@ -6,8 +6,7 @@ import { io } from 'socket.io-client';
 import api from '../../services/api';
 import { createGame4Game } from './game4Phaser';
 import { getLevelConfig } from './levelConfig';
-import '../game1/game1.css';
-import logoNovo from '../../assets/logonovo.png';
+import TherapeuticGameLayout from '../shared/TherapeuticGameLayout';
 
 const buildSocketUrl = (baseUrl) => {
   if (!baseUrl) return undefined;
@@ -47,6 +46,23 @@ const Game4Page = () => {
   const [showAdvanceModal, setShowAdvanceModal] = useState(false);
   const [nextLevelCandidate, setNextLevelCandidate] = useState(null);
   const [restartKey, setRestartKey] = useState(0);
+  const supportCards = useMemo(() => ([
+    {
+      label: 'Foco terapêutico',
+      value: 'Rotina previsível',
+      description: 'Reforça organização temporal, sequência correta e antecipação de atividades.'
+    },
+    {
+      label: 'Experiência',
+      value: 'Sequência visual',
+      description: 'As tarefas trabalham ordenação e consistência em cenários cotidianos.'
+    },
+    {
+      label: 'Aplicação clínica',
+      value: 'Autonomia estruturada',
+      description: 'Ajuda a consolidar hábitos com maior previsibilidade e segurança.'
+    }
+  ]), []);
 
   const metricsRef = useRef({
     totalActivities: 0,
@@ -211,7 +227,7 @@ const Game4Page = () => {
           localStorage.setItem(storageKey, String(nextLevel));
         }
         setStatus('aguardando');
-        setStatusMessage(`Nivel ${levelId} concluido com sucesso.`);
+        setStatusMessage(`Nível ${levelId} concluído com sucesso.`);
         setNextLevelCandidate(nextLevel);
         setShowAdvanceModal(true);
         return;
@@ -219,15 +235,15 @@ const Game4Page = () => {
 
       setStatus('finalizado');
       if (passed && nextLevel > 3) {
-        setStatusMessage('Nivel maximo concluido com sucesso.');
+        setStatusMessage('Nível máximo concluído com sucesso.');
       } else if (reason === 'abandon') {
-        setStatusMessage('Sessao encerrada.');
+        setStatusMessage('Sessão encerrada.');
       } else {
-        setStatusMessage(passed ? 'Nivel concluido com sucesso.' : 'Sessao finalizada.');
+        setStatusMessage(passed ? 'Nível concluído com sucesso.' : 'Sessão finalizada.');
       }
     } catch (err) {
-      console.error('[GAME4] Erro ao finalizar sessao:', err);
-      setError('Nao foi possivel salvar a sessao.');
+      console.error('[GAME4] Erro ao finalizar sessão:', err);
+      setError('Não foi possível salvar a sessão.');
     }
   }, [levelId, patientId, sendEvent]);
 
@@ -260,7 +276,7 @@ const Game4Page = () => {
     }
     setShowAdvanceModal(false);
     setStatus('avancando');
-    setStatusMessage(`Indo para o nivel ${nextLevelCandidate}...`);
+    setStatusMessage(`Indo para o nível ${nextLevelCandidate}...`);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('level', String(nextLevelCandidate));
     setSearchParams(nextParams);
@@ -269,7 +285,7 @@ const Game4Page = () => {
   const handleRepeatLevel = useCallback(() => {
     setShowAdvanceModal(false);
     setStatus('reiniciando');
-    setStatusMessage(`Repetindo nivel ${levelId}...`);
+    setStatusMessage(`Repetindo nível ${levelId}...`);
     setRestartKey((value) => value + 1);
   }, [levelId]);
 
@@ -277,7 +293,7 @@ const Game4Page = () => {
     setShowAdvanceModal(false);
     setNextLevelCandidate(null);
     setStatus('finalizado');
-    setStatusMessage('Sessao finalizada.');
+    setStatusMessage('Sessão finalizada.');
   }, []);
 
   useEffect(() => {
@@ -310,7 +326,7 @@ const Game4Page = () => {
   useEffect(() => {
     const parsedPatientId = parseInt(patientId, 10);
     if (Number.isNaN(parsedPatientId) || parsedPatientId <= 0) {
-      setError('patientId invalido');
+      setError('patientId inválido');
       return undefined;
     }
 
@@ -339,9 +355,9 @@ const Game4Page = () => {
 
         flushPendingEvents();
       } catch (err) {
-        console.error('[GAME4] Erro ao iniciar sessao:', err);
+        console.error('[GAME4] Erro ao iniciar sessão:', err);
         if (isMounted) {
-          setError('Nao foi possivel iniciar o jogo.');
+          setError('Não foi possível iniciar o jogo.');
           setStatus('erro');
         }
       }
@@ -361,61 +377,51 @@ const Game4Page = () => {
   }, [patientId, levelId, restartKey, sendEvent, finalizeSession, flushPendingEvents]);
 
   return (
-    <div className="game1-page">
-      <header className="game1-header">
-        <div className="game1-logo-container">
-          <img src={logoNovo} alt="AutisConnect Logo" className="game1-logo-img" />
-          <div className="game1-header-info">
-            <h1>Routine Builder</h1>
-            <p>Paciente #{patientId} - Nivel {levelId}</p>
-          </div>
-        </div>
-        <div className="game1-status-bar">
-          <div className="game1-status-badge">{status}</div>
-          <button type="button" className="game1-back" onClick={() => navigate(-1)}>
-            Sair do Jogo
-          </button>
-        </div>
-      </header>
+    <TherapeuticGameLayout
+      tone="routine"
+      title="Construtor de Rotinas"
+      subtitle="Organização previsível de atividades do dia para promover estrutura, antecipação e autonomia em experiências terapêuticas guiadas."
+      patientId={patientId}
+      levelId={levelId}
+      maxLevel={3}
+      status={status}
+      error={error}
+      statusMessage={statusMessage}
+      onExit={() => navigate(-1)}
+      stageTitle="Sequências visuais de rotina"
+      stageDescription="Monte rotinas do dia a dia na ordem correta para reforçar previsibilidade, consistência e autonomia funcional."
+      supportCards={supportCards}
+      footer="Rotina previsível: organize as atividades do dia em ordem correta para aumentar previsibilidade, autonomia e segurança no cotidiano."
+    >
+      <div ref={containerRef} className="ac-game-canvas-host" />
 
-      {error && <div className="game1-error">{error}</div>}
-      {statusMessage && <div className="game1-status-message">{statusMessage}</div>}
-
-      <div ref={containerRef} className="game1-canvas" />
-
-      <div className="game1-footer">
-        <strong>Rotina previsivel:</strong> organize as atividades do dia em ordem correta.
-        <br />
-        Desenvolvido para aumentar previsibilidade e autonomia.
-      </div>
-
-      <Modal show={showAdvanceModal} onHide={handleAdvanceCancel} centered className="game1-advance-modal">
+      <Modal show={showAdvanceModal} onHide={handleAdvanceCancel} centered className="ac-game-advance-modal">
         <Modal.Body>
-          <div className="game1-advance-hero">
-            <div className="game1-advance-icon">
+          <div className="ac-game-advance-hero">
+            <div className="ac-game-advance-icon">
               <EmojiSmile size={40} />
             </div>
             <h5>Excelente Trabalho!</h5>
             {nextLevelCandidate ? (
-              <p>Voce concluiu o nivel {levelId} com sucesso. Pronto para o proximo desafio?</p>
+              <p>Você concluiu o nível {levelId} com sucesso. Pronto para o próximo desafio?</p>
             ) : (
-              <p>Nivel concluido. O que deseja fazer agora?</p>
+              <p>Nível concluído. O que deseja fazer agora?</p>
             )}
           </div>
-          <div className="game1-advance-actions">
+          <div className="ac-game-advance-actions">
             <Button variant="primary" onClick={handleAdvanceConfirm}>
-              <ArrowRightCircle className="me-2" /> Avancar para o Nivel {nextLevelCandidate}
+              <ArrowRightCircle className="me-2" /> Avançar para o Nível {nextLevelCandidate}
             </Button>
             <Button variant="outline-primary" onClick={handleRepeatLevel}>
               <ArrowRepeat className="me-2" /> Praticar Novamente
             </Button>
             <Button variant="link" className="text-muted mt-2" onClick={handleAdvanceCancel}>
-              <XCircle className="me-2" /> Encerrar Sessao
+              <XCircle className="me-2" /> Encerrar Sessão
             </Button>
           </div>
         </Modal.Body>
       </Modal>
-    </div>
+    </TherapeuticGameLayout>
   );
 };
 
