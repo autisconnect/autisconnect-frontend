@@ -33,6 +33,9 @@ function AuthRoute() {
             case 'servicos_locais':
                 target = `/service-dashboard/${user.id}`;
                 break;
+            case 'school':
+                target = '/school/dashboard';
+                break;
             default:
                 target = '/';
         }

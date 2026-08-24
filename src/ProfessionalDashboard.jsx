@@ -1482,7 +1482,7 @@ const ProfessionalDashboard = () => {
                                                 </td>
                                                 <td data-label="Ações">
                                                     <Button variant="outline-primary" size="sm" onClick={() => handlePatientSelect(patient)}>
-                                                        Ver detalhes
+                                                        Perfil Paciente
                                                     </Button>
                                                 </td>
                                             </tr>

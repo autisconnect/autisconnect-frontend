@@ -1,0 +1,1272 @@
+.ac-school-dashboard {
+  --ac-school-bg: #f4f7fb;
+  --ac-school-surface: #ffffff;
+  --ac-school-surface-alt: #edf3f8;
+  --ac-school-border: #d9e4f0;
+  --ac-school-text: #1f2f3d;
+  --ac-school-text-muted: #6c7b8d;
+  --ac-school-primary: #0f766e;
+  --ac-school-primary-strong: #0f5f59;
+  --ac-school-cyan: #0891b2;
+  --ac-school-success: #15803d;
+  --ac-school-warning: #b45309;
+  --ac-school-danger: #b91c1c;
+  --ac-school-sidebar-bg: #102133;
+  --ac-school-sidebar-bg-alt: #0c1a2d;
+  --ac-school-sidebar-text: #e2e8f0;
+  --ac-school-shadow: 0 22px 48px rgba(15, 23, 42, 0.09);
+  --ac-school-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.05);
+  --ac-school-radius-xl: 28px;
+  --ac-school-radius-lg: 22px;
+  --ac-school-radius-md: 16px;
+  --ac-school-radius-sm: 12px;
+  --ac-school-sidebar-width: 252px;
+  --ac-school-sidebar-collapsed-width: 82px;
+  display: flex;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(8, 145, 178, 0.08), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.08), transparent 22%),
+    var(--ac-school-bg);
+  color: var(--ac-school-text);
+}
+
+.ac-school-dashboard *,
+.ac-school-dashboard *::before,
+.ac-school-dashboard *::after {
+  box-sizing: border-box;
+}
+
+.ac-school-sidebar-shell {
+  width: var(--ac-school-sidebar-width);
+  flex: 0 0 var(--ac-school-sidebar-width);
+}
+
+.ac-school-dashboard--collapsed .ac-school-sidebar-shell {
+  width: var(--ac-school-sidebar-collapsed-width);
+  flex-basis: var(--ac-school-sidebar-collapsed-width);
+}
+
+.ac-school-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--ac-school-sidebar-width);
+  height: 100vh;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background:
+    linear-gradient(180deg, rgba(8, 145, 178, 0.14), transparent 18%),
+    linear-gradient(180deg, var(--ac-school-sidebar-bg-alt) 0%, var(--ac-school-sidebar-bg) 60%, #08111d 100%);
+  color: var(--ac-school-sidebar-text);
+  transition: width 0.2s ease, padding 0.2s ease;
+  box-shadow: 14px 0 40px rgba(2, 6, 23, 0.18);
+  z-index: 20;
+}
+
+.ac-school-sidebar::after {
+  content: '';
+  position: absolute;
+  inset: 18px 16px auto;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0), rgba(148, 163, 184, 0.42), rgba(148, 163, 184, 0));
+}
+
+.ac-school-sidebar--collapsed {
+  width: var(--ac-school-sidebar-collapsed-width);
+  padding-inline: 12px;
+}
+
+.ac-school-sidebar__brand-block,
+.ac-school-sidebar__nav,
+.ac-school-sidebar__footer {
+  position: relative;
+  z-index: 1;
+}
+
+.ac-school-sidebar__brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ac-school-sidebar__brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ac-school-sidebar__eyebrow {
+  font-size: 0.73rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.ac-school-sidebar__brand-copy strong {
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.ac-school-sidebar__brand-ribbon {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ac-school-cyan), rgba(15, 118, 110, 0.4));
+  margin-top: 14px;
+}
+
+.ac-school-sidebar__collapse,
+.ac-school-header__menu-toggle,
+.ac-school-sidebar__logout {
+  border: 0;
+  cursor: pointer;
+}
+
+.ac-school-sidebar__collapse {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(148, 163, 184, 0.12);
+  color: inherit;
+}
+
+.ac-school-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ac-school-sidebar__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 0;
+  border-radius: 16px;
+  padding: 13px 14px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.ac-school-sidebar__item:hover,
+.ac-school-sidebar__item:focus-visible {
+  background: rgba(148, 163, 184, 0.12);
+  transform: translateX(2px);
+}
+
+.ac-school-sidebar__item.is-active {
+  background: rgba(8, 145, 178, 0.18);
+  box-shadow: inset 3px 0 0 var(--ac-school-cyan);
+}
+
+.ac-school-sidebar__item-icon {
+  width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ac-school-sidebar__item-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ac-school-sidebar--collapsed .ac-school-sidebar__brand-copy,
+.ac-school-sidebar--collapsed .ac-school-sidebar__item-label,
+.ac-school-sidebar--collapsed .ac-school-sidebar__logout span,
+.ac-school-sidebar--collapsed .ac-school-sidebar__user div {
+  display: none;
+}
+
+.ac-school-sidebar__footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ac-school-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ac-school-sidebar__avatar {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.24), rgba(15, 118, 110, 0.4));
+  font-weight: 700;
+}
+
+.ac-school-sidebar__user strong,
+.ac-school-sidebar__user span {
+  display: block;
+}
+
+.ac-school-sidebar__user span {
+  color: rgba(226, 232, 240, 0.7);
+  font-size: 0.84rem;
+}
+
+.ac-school-sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.14);
+  color: #fee2e2;
+}
+
+.ac-school-shell {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px 28px;
+  margin-left: var(--ac-school-sidebar-width);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: margin-left 0.2s ease;
+}
+
+.ac-school-dashboard--collapsed .ac-school-shell {
+  margin-left: var(--ac-school-sidebar-collapsed-width);
+}
+
+.ac-school-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ac-school-header__context {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ac-school-header__context strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.ac-school-header__breadcrumb {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--ac-school-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 4px;
+}
+
+.ac-school-header__menu-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--ac-school-surface);
+  box-shadow: var(--ac-school-shadow-soft);
+}
+
+.ac-school-profile-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--ac-school-border) !important;
+  border-radius: 16px !important;
+  background: var(--ac-school-surface) !important;
+  padding: 8px 12px !important;
+  box-shadow: var(--ac-school-shadow-soft);
+}
+
+.ac-school-profile-toggle::after {
+  margin-left: 8px;
+}
+
+.ac-school-profile-toggle__avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.14), rgba(15, 118, 110, 0.2));
+  color: var(--ac-school-primary);
+  font-weight: 700;
+}
+
+.ac-school-profile-toggle__content strong,
+.ac-school-profile-toggle__content small {
+  display: block;
+  text-align: left;
+}
+
+.ac-school-profile-toggle__content small {
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ac-school-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px 30px;
+  border: 1px solid var(--ac-school-border);
+  border-radius: var(--ac-school-radius-xl);
+  background:
+    radial-gradient(circle at top right, rgba(8, 145, 178, 0.08), transparent 24%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(247, 250, 252, 0.92));
+  box-shadow: var(--ac-school-shadow-soft);
+}
+
+.ac-school-page-header__copy {
+  max-width: 780px;
+}
+
+.ac-school-page-header__eyebrow,
+.ac-school-card__eyebrow,
+.ac-school-section-heading__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ac-school-primary);
+  font-weight: 700;
+}
+
+.ac-school-page-header h1,
+.ac-school-card__header h3,
+.ac-school-section-heading h2 {
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.ac-school-page-header p,
+.ac-school-card__header p,
+.ac-school-empty-state__copy p,
+.ac-school-list-card p,
+.ac-school-support-copy {
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-feedback,
+.ac-school-inline-loader,
+.ac-school-card,
+.ac-school-stat-card,
+.ac-school-summary-card,
+.ac-school-list-card,
+.ac-school-student-hero,
+.ac-school-monitoring-shell,
+.ac-school-monitoring-side,
+.ac-school-session-summary,
+.ac-school-table-shell {
+  border: 1px solid var(--ac-school-border);
+  background: var(--ac-school-surface);
+  border-radius: var(--ac-school-radius-lg);
+  box-shadow: var(--ac-school-shadow-soft);
+}
+
+.ac-school-card {
+  padding: 24px;
+}
+
+.ac-school-card--compact {
+  padding: 18px;
+}
+
+.ac-school-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ac-school-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ac-school-grid,
+.ac-school-overview-grid,
+.ac-school-report-grid,
+.ac-school-settings-grid,
+.ac-school-student-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.ac-school-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ac-school-overview-grid,
+.ac-school-report-grid,
+.ac-school-settings-grid,
+.ac-school-student-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ac-school-stat-card {
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-height: 132px;
+}
+
+.ac-school-stat-card__icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(8, 145, 178, 0.12);
+  color: var(--ac-school-primary);
+  font-size: 1.2rem;
+}
+
+.ac-school-stat-card--emerald .ac-school-stat-card__icon {
+  background: rgba(21, 128, 61, 0.12);
+  color: var(--ac-school-success);
+}
+
+.ac-school-stat-card--amber .ac-school-stat-card__icon {
+  background: rgba(180, 83, 9, 0.12);
+  color: var(--ac-school-warning);
+}
+
+.ac-school-stat-card--red .ac-school-stat-card__icon {
+  background: rgba(185, 28, 28, 0.12);
+  color: var(--ac-school-danger);
+}
+
+.ac-school-stat-card__copy span,
+.ac-school-stat-card__copy small {
+  display: block;
+}
+
+.ac-school-stat-card__copy span {
+  color: var(--ac-school-text-muted);
+  margin-bottom: 8px;
+}
+
+.ac-school-stat-card__copy strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.ac-school-empty-state,
+.ac-school-inline-loader {
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: var(--ac-school-radius-lg);
+  background: linear-gradient(180deg, rgba(237, 243, 248, 0.8), rgba(255, 255, 255, 0.95));
+}
+
+.ac-school-empty-state__icon,
+.ac-school-monitoring-placeholder__icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(8, 145, 178, 0.12);
+  color: var(--ac-school-primary);
+  font-size: 1.4rem;
+}
+
+.ac-school-empty-state__copy h3,
+.ac-school-list-card h4,
+.ac-school-student-hero h2,
+.ac-school-session-summary h3 {
+  margin: 0 0 6px;
+}
+
+.ac-school-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ac-school-list-card {
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ac-school-list-card__meta,
+.ac-school-kpi-row,
+.ac-school-student-hero__meta,
+.ac-school-pill-list,
+.ac-school-filter-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ac-school-chip,
+.ac-school-pill,
+.ac-school-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.ac-school-chip,
+.ac-school-pill {
+  background: var(--ac-school-surface-alt);
+  color: var(--ac-school-text);
+}
+
+.ac-school-status {
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-status--success {
+  background: rgba(21, 128, 61, 0.12);
+  color: var(--ac-school-success);
+}
+
+.ac-school-status--warning {
+  background: rgba(180, 83, 9, 0.12);
+  color: var(--ac-school-warning);
+}
+
+.ac-school-status--danger {
+  background: rgba(185, 28, 28, 0.12);
+  color: var(--ac-school-danger);
+}
+
+.ac-school-status--info {
+  background: rgba(8, 145, 178, 0.12);
+  color: var(--ac-school-cyan);
+}
+
+.ac-school-status--neutral {
+  background: rgba(100, 116, 139, 0.16);
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-table-shell {
+  overflow: hidden;
+}
+
+.ac-school-table {
+  width: 100%;
+  margin: 0;
+}
+
+.ac-school-table thead th {
+  padding: 16px 18px;
+  background: rgba(237, 243, 248, 0.85);
+  border-bottom: 1px solid var(--ac-school-border);
+  color: var(--ac-school-text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.ac-school-table tbody td {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(217, 228, 240, 0.8);
+  vertical-align: middle;
+}
+
+.ac-school-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ac-school-form-grid,
+.ac-school-modal-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ac-school-dashboard .form-control,
+.ac-school-dashboard .form-select,
+.ac-school-dashboard textarea.form-control {
+  border-radius: 14px;
+  border: 1px solid var(--ac-school-border);
+  padding: 12px 14px;
+  min-height: 48px;
+}
+
+.ac-school-dashboard .form-control:focus,
+.ac-school-dashboard .form-select:focus,
+.ac-school-dashboard button:focus-visible,
+.ac-school-dashboard a:focus-visible {
+  border-color: rgba(8, 145, 178, 0.4);
+  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.12);
+}
+
+.ac-school-actions-row,
+.ac-school-card__actions,
+.ac-school-page-header__actions,
+.ac-school-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ac-school-monitoring-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.9fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.ac-school-monitoring-video,
+.ac-school-monitoring-placeholder {
+  position: relative;
+  width: 100%;
+  min-height: 440px;
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(8, 145, 178, 0.12), transparent 25%),
+    linear-gradient(180deg, #102133, #0b1525);
+}
+
+.ac-school-monitoring-video video,
+.ac-school-monitoring-video canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ac-school-monitoring-placeholder {
+  display: grid;
+  place-items: center;
+  color: #dbeafe;
+}
+
+.ac-school-monitoring-placeholder__content {
+  width: min(420px, 90%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.ac-school-monitoring-overlay {
+  position: absolute;
+  inset: auto 18px 18px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  z-index: 3;
+}
+
+.ac-school-inline-chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.56);
+  color: #f8fafc;
+  backdrop-filter: blur(10px);
+  font-weight: 600;
+}
+
+.ac-school-monitoring-side {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ac-school-monitoring-student {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--ac-school-surface-alt);
+}
+
+.ac-school-monitoring-student strong,
+.ac-school-monitoring-student span,
+.ac-school-monitoring-student small {
+  display: block;
+}
+
+.ac-school-monitoring-student span,
+.ac-school-monitoring-student small,
+.ac-school-muted {
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-monitoring-student__emotion {
+  margin-top: 6px;
+  font-weight: 600;
+  color: var(--ac-school-text);
+}
+
+.ac-school-session-summary {
+  padding: 24px;
+}
+
+.ac-school-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ac-school-timeline__item {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.ac-school-timeline__time {
+  color: var(--ac-school-text-muted);
+  font-weight: 700;
+}
+
+.ac-school-timeline__content {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--ac-school-surface-alt);
+}
+
+.ac-school-chart-shell {
+  min-height: 300px;
+}
+
+.ac-school-student-hero {
+  padding: 24px 26px;
+}
+
+.ac-school-student-hero__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.ac-school-student-hero__identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ac-school-student-hero__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.12), rgba(15, 118, 110, 0.18));
+  color: var(--ac-school-primary);
+  font-weight: 700;
+  font-size: 1.45rem;
+}
+
+.ac-school-student-hero__avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.ac-school-tabs .nav-link {
+  border: 0;
+  border-radius: 999px;
+  color: var(--ac-school-text-muted);
+  font-weight: 600;
+}
+
+.ac-school-tabs .nav-link.active {
+  background: rgba(8, 145, 178, 0.12);
+  color: var(--ac-school-primary);
+}
+
+.ac-school-dropdown {
+  border-radius: 18px;
+  border: 1px solid var(--ac-school-border);
+  box-shadow: var(--ac-school-shadow);
+}
+
+.ac-school-offcanvas .offcanvas-body {
+  padding: 0;
+}
+
+.ac-school-offcanvas .ac-school-sidebar {
+  position: static;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  box-shadow: none;
+}
+
+.ac-school-feedback-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ac-school-skeleton {
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 75%);
+  background-size: 200% 100%;
+  animation: ac-school-shimmer 1.2s linear infinite;
+}
+
+.ac-school-skeleton--logo {
+  width: 100%;
+  height: 86px;
+}
+
+.ac-school-skeleton--nav {
+  width: 100%;
+  height: 52px;
+}
+
+.ac-school-skeleton--title {
+  width: 260px;
+  height: 44px;
+}
+
+.ac-school-skeleton--actions {
+  width: 180px;
+  height: 44px;
+}
+
+.ac-school-skeleton-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ac-school-skeleton--panel {
+  min-height: 220px;
+}
+
+.ac-school-camera-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.ac-school-camera-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100%;
+  padding: 22px;
+  border: 1px solid var(--ac-school-border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+  box-shadow: var(--ac-school-shadow);
+}
+
+.ac-school-camera-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ac-school-camera-card__header h3 {
+  margin: 6px 0 4px;
+  font-size: 1.12rem;
+}
+
+.ac-school-camera-card__header p {
+  margin: 0;
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-camera-card__stats,
+.ac-school-camera-card__meta,
+.ac-school-camera-setup__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ac-school-camera-card__stats span,
+.ac-school-camera-card__meta span,
+.ac-school-camera-setup__summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.75);
+  color: var(--ac-school-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ac-school-camera-card__meta span {
+  background: rgba(8, 145, 178, 0.1);
+  color: var(--ac-school-primary);
+  text-transform: capitalize;
+}
+
+.ac-school-camera-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ac-school-operation-wall {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ac-school-operation-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+.ac-school-operation-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--ac-school-border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+  box-shadow: var(--ac-school-shadow);
+}
+
+.ac-school-operation-tile__header,
+.ac-school-operation-tile__device,
+.ac-school-operation-tile__summary,
+.ac-school-operation-tile__badges {
+  display: flex;
+  gap: 12px;
+}
+
+.ac-school-operation-tile__header,
+.ac-school-operation-tile__device {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ac-school-operation-tile__header h3 {
+  margin: 6px 0 4px;
+  font-size: 1.08rem;
+}
+
+.ac-school-operation-tile__header p {
+  margin: 0;
+  color: var(--ac-school-text-muted);
+}
+
+.ac-school-operation-tile__badges {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ac-school-operation-tile__device {
+  flex-wrap: wrap;
+}
+
+.ac-school-operation-tile__device .form-group,
+.ac-school-operation-tile__device > div:first-child {
+  flex: 1 1 240px;
+}
+
+.ac-school-monitor-preview--compact {
+  min-height: 280px;
+}
+
+.ac-school-operation-tile__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.94);
+  text-align: center;
+}
+
+.ac-school-operation-tile__summary,
+.ac-school-operation-tile__students {
+  flex-wrap: wrap;
+}
+
+.ac-school-operation-tile__summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.75);
+  color: var(--ac-school-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ac-school-operation-tile__students {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.ac-school-detail-grid,
+.ac-school-monitor-layout__summary {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ac-school-detail-grid > div,
+.ac-school-monitor-layout__summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--ac-school-surface-alt);
+}
+
+.ac-school-detail-grid span,
+.ac-school-monitor-layout__summary span {
+  color: var(--ac-school-text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ac-school-detail-grid strong,
+.ac-school-monitor-layout__summary strong {
+  color: var(--ac-school-text);
+  font-size: 1rem;
+}
+
+.ac-school-premium-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(8, 145, 178, 0.14);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.1), rgba(15, 118, 110, 0.08));
+}
+
+.ac-school-premium-note svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--ac-school-primary);
+}
+
+.ac-school-premium-note strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.ac-school-monitor-stage {
+  margin-bottom: 20px;
+}
+
+.ac-school-monitor-preview {
+  position: relative;
+  overflow: hidden;
+  min-height: 440px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(8, 145, 178, 0.18), transparent 40%),
+    linear-gradient(145deg, #0f172a, #111827 55%, #1f2937);
+}
+
+.ac-school-monitor-preview__video,
+.ac-school-monitor-preview__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ac-school-monitor-preview__canvas {
+  pointer-events: none;
+}
+
+.ac-school-monitor-preview--placeholder {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 28px;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+}
+
+.ac-school-monitor-preview--placeholder h3,
+.ac-school-monitor-preview--placeholder p {
+  margin: 0;
+}
+
+.ac-school-monitor-layout {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.95fr);
+}
+
+.ac-school-monitor-layout__main,
+.ac-school-monitor-layout__side {
+  min-width: 0;
+}
+
+.ac-school-monitor-layout__side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@keyframes ac-school-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 1320px) {
+  .ac-school-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .ac-school-sidebar-shell {
+    display: none;
+  }
+
+  .ac-school-shell,
+  .ac-school-dashboard--collapsed .ac-school-shell {
+    margin-left: 0;
+  }
+
+  .ac-school-header__menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ac-school-monitoring-shell,
+  .ac-school-overview-grid,
+  .ac-school-report-grid,
+  .ac-school-settings-grid,
+  .ac-school-student-grid,
+  .ac-school-form-grid,
+  .ac-school-modal-grid,
+  .ac-school-monitor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ac-school-grid,
+  .ac-school-skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ac-school-monitor-preview {
+    min-height: 380px;
+  }
+
+  .ac-school-operation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .ac-school-shell {
+    padding: 18px 14px 24px;
+  }
+
+  .ac-school-header,
+  .ac-school-page-header,
+  .ac-school-card__header,
+  .ac-school-camera-card__header,
+  .ac-school-student-hero__top,
+  .ac-school-list-card,
+  .ac-school-empty-state,
+  .ac-school-inline-loader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ac-school-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ac-school-detail-grid,
+  .ac-school-monitor-layout__summary,
+  .ac-school-camera-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ac-school-stat-card {
+    min-height: 0;
+  }
+
+  .ac-school-table-shell {
+    overflow-x: auto;
+  }
+
+  .ac-school-monitoring-video,
+  .ac-school-monitoring-placeholder {
+    min-height: 320px;
+  }
+
+  .ac-school-monitor-preview {
+    min-height: 300px;
+  }
+
+  .ac-school-operation-tile__header,
+  .ac-school-operation-tile__device {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ac-school-premium-note {
+    flex-direction: column;
+  }
+
+  .ac-school-timeline__item {
+    grid-template-columns: 1fr;
+  }
+}

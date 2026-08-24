@@ -48,6 +48,9 @@ function Login() {
             eyebrow="Acesso seguro"
             title="Bem-vindo de volta"
             subtitle="Acesse sua conta AutisConnect"
+            pageClassName="ac-login-page--entry"
+            showPremiumPanel={false}
+            showcaseMode="compact"
             footer={
                 <>
                     <span>Nao possui uma conta?</span>

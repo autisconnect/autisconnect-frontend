@@ -19,6 +19,124 @@
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
 }
 
+.ac-login-page--entry {
+    display: flex;
+    align-items: stretch;
+    padding: 24px;
+}
+
+.ac-login-page--entry .ac-login-layout {
+    width: min(100%, 1440px);
+    min-height: calc(100vh - 48px);
+    margin: 0 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid rgba(191, 219, 254, 0.54);
+    border-radius: 36px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.36);
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(20px);
+}
+
+.ac-login-page--entry .ac-login-showcase {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 42px 40px;
+    background:
+        radial-gradient(circle at 50% -10%, rgba(230, 31, 68, 0.16), transparent 18%),
+        radial-gradient(circle at 50% 112%, rgba(6, 182, 212, 0.16), transparent 24%),
+        linear-gradient(180deg, #031024 0%, #06162f 54%, #071226 100%);
+}
+
+.ac-login-page--entry .ac-login-showcase__content {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+    gap: 1.75rem;
+}
+
+.ac-login-page--entry .ac-login-showcase__content--compact {
+    min-height: 520px;
+    padding: 2.5rem 2.25rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 32px;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(230, 31, 68, 0.12), transparent 18%),
+        linear-gradient(180deg, rgba(5, 17, 42, 0.94) 0%, rgba(7, 23, 52, 0.96) 100%);
+    box-shadow: 0 26px 70px rgba(4, 12, 31, 0.26);
+}
+
+.ac-login-page--entry .ac-login-panel {
+    padding: 3rem 2.5rem;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(248, 250, 252, 0.94) 100%);
+}
+
+.ac-login-page--entry .ac-login-panel__content {
+    width: min(100%, 520px);
+    gap: 1.5rem;
+}
+
+.ac-login-page--entry .ac-login-card {
+    padding: 2.25rem;
+    border-radius: 28px;
+    box-shadow: 0 24px 56px rgba(15, 23, 42, 0.12), 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.ac-login-page--entry .ac-login-copy {
+    width: 100%;
+    max-width: 460px;
+    justify-items: center;
+    text-align: center;
+}
+
+.ac-login-page--entry .ac-login-feature-grid {
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.ac-login-page--entry .ac-login-brand {
+    align-self: center;
+    width: min(100%, 400px);
+}
+
+.ac-login-page--entry .ac-login-description {
+    max-width: 760px;
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.82;
+}
+
+.ac-login-page--entry .ac-login-title {
+    display: grid;
+    max-width: 100%;
+    gap: 0.35rem;
+    font-size: clamp(2.8rem, 4.1vw, 4.65rem);
+    line-height: 0.98;
+    letter-spacing: -0.07em;
+}
+
+.ac-login-page--entry .ac-login-feature {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: start;
+    min-height: 198px;
+    padding: 1.45rem 1.45rem;
+    border-radius: 28px;
+    background: rgba(10, 28, 64, 0.92);
+    text-align: left;
+    gap: 1.1rem;
+}
+
+.ac-login-page--entry .ac-login-ribbon {
+    display: none;
+}
+
 .ac-login-showcase {
     position: relative;
     overflow: hidden;
@@ -96,6 +214,7 @@
 .ac-login-kicker {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     width: fit-content;
     padding: 0.5rem 0.85rem;
     border: 1px solid rgba(148, 163, 184, 0.18);
@@ -106,6 +225,13 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+}
+
+.ac-login-kicker svg {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    color: #22d3ee;
 }
 
 .ac-login-title {
@@ -153,6 +279,42 @@
     font-weight: 700;
 }
 
+.ac-login-feature__copy {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.ac-login-feature__label {
+    display: block;
+    margin: 0;
+    color: inherit;
+    font-size: 1rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    font-weight: 800;
+}
+
+.ac-login-feature__description {
+    margin: 0;
+    color: rgba(226, 232, 240, 0.82);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.ac-login-page--entry .ac-login-feature__label {
+    color: #f8fafc;
+    font-size: clamp(1.45rem, 1.9vw, 2rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+}
+
+.ac-login-page--entry .ac-login-feature__description {
+    color: rgba(226, 232, 240, 0.9);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
 .ac-login-feature__icon {
     display: inline-flex;
     align-items: center;
@@ -163,6 +325,15 @@
     background: rgba(37, 99, 235, 0.18);
     color: #7dd3fc;
     box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.18);
+}
+
+.ac-login-page--entry .ac-login-feature__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: rgba(8, 22, 48, 0.98);
+    color: #22d3ee;
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
 .ac-login-feature__icon svg,
@@ -474,11 +645,30 @@
     .ac-login-ribbon {
         width: min(100%, 620px);
     }
+
+    .ac-login-page--entry .ac-login-showcase__content--compact {
+        min-height: 500px;
+        padding: 2.2rem 2rem;
+    }
 }
 
 @media (max-width: 1024px) {
     .ac-login-layout {
         grid-template-columns: 1fr;
+    }
+
+    .ac-login-page--entry {
+        padding: 0;
+    }
+
+    .ac-login-page--entry .ac-login-layout {
+        width: 100%;
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        backdrop-filter: none;
     }
 
     .ac-login-showcase {
@@ -517,6 +707,11 @@
         padding: 1.75rem 1.35rem;
         border-radius: 22px;
     }
+
+    .ac-login-page--entry .ac-login-panel {
+        padding: 1.75rem 1.25rem 2.1rem;
+        background: transparent;
+    }
 }
 
 @media (max-width: 640px) {
@@ -545,5 +740,173 @@
         align-items: flex-start;
         flex-direction: column;
         gap: 0.45rem;
+    }
+}
+
+.ac-login-page {
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(230, 31, 68, 0.08), transparent 18%),
+        linear-gradient(180deg, #eef3ff 0%, #f8fafc 46%, #f8fafc 100%);
+}
+
+.ac-login-showcase {
+    background:
+        radial-gradient(circle at 12% 20%, rgba(56, 189, 248, 0.18), transparent 20%),
+        radial-gradient(circle at 88% 14%, rgba(230, 31, 68, 0.14), transparent 16%),
+        linear-gradient(145deg, #040c1f 0%, #08172f 44%, #0a2552 100%);
+    border-right: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.ac-login-showcase__glow {
+    background:
+        radial-gradient(circle at 18% 24%, rgba(56, 96, 248, 0.32), transparent 30%),
+        radial-gradient(circle at 82% 14%, rgba(230, 31, 68, 0.16), transparent 22%),
+        radial-gradient(circle at 56% 100%, rgba(6, 182, 212, 0.16), transparent 28%);
+}
+
+.ac-login-brand__logo {
+    filter: drop-shadow(0 22px 34px rgba(2, 6, 23, 0.28));
+}
+
+.ac-login-kicker {
+    background: rgba(255, 255, 255, 0.08);
+    color: #dbeafe;
+}
+
+.ac-login-title span {
+    color: #7dd3fc;
+}
+
+.ac-login-feature,
+.ac-signup-benefit {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.ac-login-feature__icon,
+.ac-signup-benefit__icon {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(6, 182, 212, 0.16));
+    color: #bae6fd;
+}
+
+.ac-login-premium-panel {
+    display: grid;
+    gap: 1rem;
+    max-width: 620px;
+    padding: 1.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+}
+
+.ac-login-premium-panel__header {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.ac-login-premium-panel__header span {
+    color: #bae6fd;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.ac-login-premium-panel__header strong {
+    color: #f8fafc;
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.ac-login-premium-panel__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.ac-login-premium-panel__metric {
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ac-login-premium-panel__metric strong,
+.ac-login-premium-panel__metric span {
+    display: block;
+}
+
+.ac-login-premium-panel__metric strong {
+    color: #ffffff;
+    font-size: 1.35rem;
+    letter-spacing: -0.04em;
+}
+
+.ac-login-premium-panel__metric span {
+    margin-top: 0.35rem;
+    color: rgba(226, 232, 240, 0.84);
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.ac-login-premium-panel__palette {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.ac-login-premium-panel__palette i {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.ac-login-card {
+    border-color: rgba(226, 232, 240, 0.82);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1), 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.ac-login-page--entry .ac-login-card {
+    border-color: rgba(219, 234, 254, 0.88);
+}
+
+.ac-login-card__eyebrow,
+.ac-signup-section__eyebrow {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+}
+
+.ac-login-button {
+    background: linear-gradient(135deg, #2563eb 0%, #06b6d4 58%, #e61f44 100%);
+    box-shadow: 0 22px 40px rgba(37, 99, 235, 0.24);
+}
+
+.ac-login-button:hover:not(:disabled) {
+    box-shadow: 0 24px 46px rgba(37, 99, 235, 0.28);
+}
+
+@media (max-width: 991px) {
+    .ac-login-premium-panel__metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 1025px) {
+    .ac-login-page--entry .ac-login-showcase__grid {
+        opacity: 0.28;
+        mask-image: none;
+    }
+
+    .ac-login-page--entry .ac-login-showcase__glow {
+        background:
+            radial-gradient(circle at 12% 50%, rgba(37, 99, 235, 0.3), transparent 24%),
+            radial-gradient(circle at 88% 50%, rgba(56, 189, 248, 0.24), transparent 24%),
+            radial-gradient(circle at 50% 0%, rgba(230, 31, 68, 0.14), transparent 18%);
     }
 }

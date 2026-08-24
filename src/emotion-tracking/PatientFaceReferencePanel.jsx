@@ -293,7 +293,11 @@ const PatientFaceReferencePanel = ({
     onReferenceChange = null,
     openMonitorLabel = 'Abrir detector emocional',
     title = 'Referencia facial do paciente',
-    description = 'Cadastre uma foto frontal e bem iluminada para que o monitoramento emocional reconheca apenas a pessoa correta.'
+    description = 'Cadastre uma foto frontal e bem iluminada para que o monitoramento emocional reconheca apenas a pessoa correta.',
+    fetchReference = fetchPatientFaceReference,
+    saveReference = savePatientFaceReference,
+    deleteReference = deletePatientFaceReference,
+    resolveErrorMessage = resolveEmotionServiceErrorMessage
 }) => {
     const mountedRef = useRef(true);
     const inputRef = useRef(null);
@@ -415,7 +419,7 @@ const PatientFaceReferencePanel = ({
         setInfoMessage('');
 
         try {
-            const payload = await fetchPatientFaceReference(patientId);
+            const payload = await fetchReference(patientId);
 
             if (!mountedRef.current || requestVersion !== referenceRequestVersionRef.current) {
                 return;
@@ -430,7 +434,7 @@ const PatientFaceReferencePanel = ({
             }
 
             setFaceReference(createEmptyFaceReferenceState());
-            setError(resolveEmotionServiceErrorMessage(loadError, {
+            setError(resolveErrorMessage(loadError, {
                 timeoutMessage: 'A referencia facial demorou para responder. Tente novamente em alguns instantes.',
                 networkMessage: 'Nao foi possivel carregar a referencia facial porque o servidor nao respondeu.',
                 fallbackMessage: 'Nao foi possivel carregar a referencia facial deste paciente.'
@@ -440,7 +444,7 @@ const PatientFaceReferencePanel = ({
                 setReferenceLoading(false);
             }
         }
-    }, [emitReferenceChange, patientId]);
+    }, [emitReferenceChange, fetchReference, patientId, resolveErrorMessage]);
 
     useEffect(() => {
         void loadReference();
@@ -497,19 +501,20 @@ const PatientFaceReferencePanel = ({
 
             const descriptor = Array.from(detections[0].descriptor || []);
             const previewDataUrl = buildReferencePreview(image) || sourceDataUrl;
-            const payload = await savePatientFaceReference(patientId, {
+            const payload = await saveReference(patientId, {
                 descriptor,
                 referenceImageData: previewDataUrl,
                 captureMode,
                 faceConfidence: detections[0]?.detection?.score || null,
                 matchThreshold: DETECTION_CONFIG.faceMatchThreshold
             });
+            const normalizedPayload = payload;
 
             if (!mountedRef.current) {
                 return;
             }
 
-            const nextReference = mapFaceReferencePayload(payload, {
+            const nextReference = mapFaceReferencePayload(normalizedPayload, {
                 descriptor,
                 referenceImageData: previewDataUrl,
                 captureMode,
@@ -527,7 +532,7 @@ const PatientFaceReferencePanel = ({
             );
             return { success: true, message: '' };
         } catch (saveError) {
-            const message = resolveEmotionServiceErrorMessage(saveError, {
+            const message = resolveErrorMessage(saveError, {
                 timeoutMessage: 'O salvamento da referencia facial demorou mais do que o esperado. Tente novamente.',
                 networkMessage: 'Nao foi possivel salvar a referencia facial porque o servidor nao respondeu.',
                 fallbackMessage: 'Nao foi possivel salvar a referencia facial do paciente.'
@@ -551,7 +556,7 @@ const PatientFaceReferencePanel = ({
                 inputRef.current.value = '';
             }
         }
-    }, [emitReferenceChange, loadModels, modelsReady, patientId]);
+    }, [emitReferenceChange, loadModels, modelsReady, patientId, resolveErrorMessage, saveReference]);
 
     const handleFileChange = useCallback(async (event) => {
         const file = event.target.files?.[0];
@@ -574,7 +579,7 @@ const PatientFaceReferencePanel = ({
         referenceRequestVersionRef.current += 1;
 
         try {
-            await deletePatientFaceReference(patientId);
+            await deleteReference(patientId);
 
             if (!mountedRef.current) {
                 return;
@@ -586,7 +591,7 @@ const PatientFaceReferencePanel = ({
             setInfoMessage('Referencia facial removida. Cadastre uma nova foto antes do proximo monitoramento.');
         } catch (removeError) {
             if (mountedRef.current) {
-                setError(resolveEmotionServiceErrorMessage(removeError, {
+                setError(resolveErrorMessage(removeError, {
                     timeoutMessage: 'A remocao da referencia facial demorou mais do que o esperado. Tente novamente.',
                     networkMessage: 'Nao foi possivel remover a referencia facial porque o servidor nao respondeu.',
                     fallbackMessage: 'Nao foi possivel remover a referencia facial deste paciente.'
@@ -601,7 +606,7 @@ const PatientFaceReferencePanel = ({
                 inputRef.current.value = '';
             }
         }
-    }, [emitReferenceChange, patientId]);
+    }, [deleteReference, emitReferenceChange, patientId, resolveErrorMessage]);
 
     const startCameraCapture = useCallback(async () => {
         if (!patientId) {

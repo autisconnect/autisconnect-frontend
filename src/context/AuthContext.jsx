@@ -60,6 +60,7 @@ export const AuthProvider = ({ children }) => {
                   break;
                 case 'clinica': navigate(appUser.executive_access ? '/dashboard-executivo' : `/clinic-dashboard/${appUser.id}`); break;
                 case 'servicos_locais': navigate(`/service-dashboard/${appUser.id}`); break;
+                case 'school': navigate('/school/dashboard'); break;
                 default: navigate('/');
               }
             }
@@ -116,6 +117,9 @@ export const AuthProvider = ({ children }) => {
               break;
           case 'servicos_locais':
               navigate(`/service-dashboard/${appUserData.id}`);
+              break;
+          case 'school':
+              navigate('/school/dashboard');
               break;
           default:
               // Se o tipo for desconhecido, vai para a Home como um fallback seguro.

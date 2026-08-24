@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import AuthRoute from './AuthRoute';
 import Home from './Home';
@@ -24,6 +24,7 @@ import SessionsGraph from './emotion-tracking/SessionsGraph';
 import EmotionTrackingDashboard from './emotion-tracking/EmotionTrackingDashboard';
 import StrokeRiskMonitor from './StrokeRiskMonitor';
 import TriggerRecorder from './TriggerRecorder';
+import StereotypyMonitor from './StereotypyMonitor';
 import PatientDetails from './PatientDetails';           // visão do profissional
 import PatientDetailsParent from './PatientDetailsParent'; // visão dos pais (NOVO)
 import PaymentSuccess from './PaymentSuccess';
@@ -34,6 +35,20 @@ import Game3Page from './games/game3/Game3Page';
 import Game4Page from './games/game4/Game4Page';
 import DashboardExecutive from './DashboardExecutive/DashboardExecutive';
 import TherapeuticDashboard from './DashboardTherapeutic/TherapeuticDashboard';
+import SchoolDashboard from './school/SchoolDashboard';
+import SchoolStudents from './school/SchoolStudents';
+import SchoolClassrooms from './school/SchoolClassrooms';
+import SchoolLocations from './school/SchoolLocations';
+import SchoolCameras from './school/SchoolCameras';
+import SchoolCameraDetails from './school/SchoolCameraDetails';
+import SchoolCameraMonitor from './school/SchoolCameraMonitor';
+import SchoolMonitoring from './school/SchoolMonitoring';
+import SchoolMonitoringKiosk from './school/SchoolMonitoringKiosk';
+import SchoolStudentDetails from './school/SchoolStudentDetails';
+import SchoolReports from './school/SchoolReports';
+import SchoolSettings from './school/SchoolSettings';
+import SchoolEvents from './school/SchoolEvents';
+import SchoolTeam from './school/SchoolTeam';
 
 // ABA Module Imports
 import AbaPatient from './pages/AbaPatient';
@@ -316,6 +331,127 @@ function App() {
           element={<PublicServiceDashboard />}
         />
 
+        <Route
+          path="/school"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <Navigate to="/school/dashboard" replace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/dashboard"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/students"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolStudents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/students/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolStudentDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/classrooms"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolClassrooms />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/locations"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolLocations />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/cameras"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolCameras />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/cameras/:cameraId"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolCameraDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/cameras/:cameraId/monitor"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolCameraMonitor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/monitoring"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolMonitoring />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/monitoring/kiosk"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolMonitoringKiosk />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/events"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/reports"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolReports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/team"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/school/settings"
+          element={
+            <ProtectedRoute allowedUserTypes={['school']}>
+              <SchoolSettings />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Ferramentas de monitoramento (permitidas para pais e profissionais) */}
         <Route
           path="/emotion-detector"
@@ -338,6 +474,22 @@ function App() {
           element={
             <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
               <TriggerRecorder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stereotypy-monitor"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <StereotypyMonitor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stereotypy-monitor/:patientId"
+          element={
+            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
+              <StereotypyMonitor />
             </ProtectedRoute>
           }
         />

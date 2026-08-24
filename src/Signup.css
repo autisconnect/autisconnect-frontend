@@ -747,3 +747,59 @@
         flex-direction: column;
     }
 }
+
+.ac-signup-page {
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(230, 31, 68, 0.08), transparent 18%),
+        linear-gradient(180deg, #eef3ff 0%, #f8fafc 42%, #f8fafc 100%);
+}
+
+.ac-signup-step.is-active {
+    border-color: rgba(37, 99, 235, 0.32);
+    background: linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(224, 242, 254, 0.9));
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.08);
+}
+
+.ac-signup-step.is-complete {
+    border-color: rgba(6, 182, 212, 0.26);
+    background: linear-gradient(180deg, rgba(236, 253, 245, 0.96), rgba(240, 249, 255, 0.92));
+}
+
+.ac-signup-profile-card,
+.ac-signup-section,
+.ac-signup-plan {
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.06);
+}
+
+.ac-signup-profile-card.is-selected {
+    border-color: rgba(37, 99, 235, 0.42);
+    background: linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(248, 250, 252, 0.96));
+    box-shadow: 0 22px 42px rgba(37, 99, 235, 0.12);
+}
+
+.ac-signup-profile-card__icon,
+.ac-signup-plan.is-selected .ac-signup-plan__header span {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(6, 182, 212, 0.16));
+}
+
+.ac-signup-section {
+    border-color: rgba(226, 232, 240, 0.88);
+    background: rgba(255, 255, 255, 0.97);
+}
+
+.ac-signup-section__eyebrow {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+}
+
+.ac-signup-chip.is-selected,
+.ac-signup-plan.is-selected {
+    border-color: rgba(37, 99, 235, 0.38);
+    background: linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(248, 250, 252, 0.96));
+    box-shadow: 0 18px 34px rgba(37, 99, 235, 0.1);
+}
+
+.ac-signup-password-strength__fill {
+    background: linear-gradient(135deg, #2563eb 0%, #06b6d4 60%, #e61f44 100%);
+}

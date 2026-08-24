@@ -79,6 +79,7 @@ const ROUTES = {
     EMOTION_DETECTOR: '/emotion-detector',
     STROKE_RISK_MONITOR: '/stroke-risk-monitor',
     TRIGGER_RECORDER: '/trigger-recorder',
+    STEREOTYPY_MONITOR: '/stereotypy-monitor',
     ABA_MODULE: '/aba/patient'
 };
 
@@ -86,6 +87,7 @@ const MONITORING_WINDOW_NAMES = {
     [ROUTES.EMOTION_DETECTOR]: 'autisconnect-emotion-detector',
     [ROUTES.STROKE_RISK_MONITOR]: 'autisconnect-stroke-risk-monitor',
     [ROUTES.TRIGGER_RECORDER]: 'autisconnect-trigger-recorder',
+    [ROUTES.STEREOTYPY_MONITOR]: 'autisconnect-stereotypy-monitor',
     [ROUTES.ABA_MODULE]: 'autisconnect-aba-patient'
 };
 
@@ -1892,6 +1894,10 @@ const PatientDetailsParent = () => {
                                 <Mic />
                                 <span>Vocalizações</span>
                             </button>
+                            <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(ROUTES.STEREOTYPY_MONITOR)}>
+                                <Activity />
+                                <span>Estereotipias</span>
+                            </button>
                             <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(`${ROUTES.ABA_MODULE}/${patientId}`)}>
                                 <ClipboardPulse />
                                 <span>ABA</span>
@@ -2320,6 +2326,14 @@ const PatientDetailsParent = () => {
                 buttonLabel="Abrir gravador"
                 onClick={() => handleOpenMonitoringTool(ROUTES.TRIGGER_RECORDER)}
                 tone="success"
+            />
+            <MonitoringToolCard
+                icon={Activity}
+                title="Monitor de Estereotipias"
+                description="Observe padrões motores repetitivos por vídeo e registre frequência, duração e confiança."
+                buttonLabel="Abrir monitor"
+                onClick={() => handleOpenMonitoringTool(ROUTES.STEREOTYPY_MONITOR)}
+                tone="info"
             />
             <MonitoringToolCard
                 icon={ClipboardPulse}

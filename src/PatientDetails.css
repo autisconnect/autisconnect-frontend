@@ -666,6 +666,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.ac-patient-chart-grid--stacked {
+    grid-template-columns: 1fr;
+}
+
 .ac-patient-detail-grid {
     grid-template-columns: 1fr;
 }

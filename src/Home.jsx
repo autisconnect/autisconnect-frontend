@@ -36,6 +36,7 @@ import game3Image from './assets/game3.png';
 import game4Image from './assets/game4.png';
 
 import './App.css';
+import './HomePremium.css';
 
 const DEMO_URL = 'https://calendar.app.google/WYc6Lm5gzHqqir7q7';
 const WHATSAPP_PHONE = '5581982540904';
@@ -227,6 +228,24 @@ const footerTrustItems = [
     'Segurança',
     'Inclusão',
     'Evolução constante'
+];
+
+const premiumMetrics = [
+    {
+        value: '360°',
+        label: 'Jornada integrada',
+        detail: 'Famílias, profissionais e clínicas conectados na mesma visão.'
+    },
+    {
+        value: 'IA',
+        label: 'Monitoramentos inteligentes',
+        detail: 'Emoções, vocalizações, ABA e sinais relevantes em um só ecossistema.'
+    },
+    {
+        value: 'TEA',
+        label: 'Design especializado',
+        detail: 'Experiência feita para o cuidado contínuo da pessoa com TEA.'
+    }
 ];
 
 const SERVICE_TYPE_OPTIONS = [
@@ -595,16 +614,11 @@ const Home = () => {
 
     return (
         <>
-            <nav className="top-bar fixed-top autis-home-nav ecosystem-nav">
+            <nav className="top-bar fixed-top autis-home-nav ecosystem-nav ecosystem-nav--premium">
                 <Container>
-                    <Row className="align-items-center gy-3 py-3">
-                        <Col xl={2} lg={2} md={4} className="text-center text-md-start">
-                            <a href="#topo" aria-label="AutisConnect Home">
-                                <img src={logonovo} alt="AutisConnect" className="top-bar-logo ecosystem-nav__logo" />
-                            </a>
-                        </Col>
-                        <Col xl={10} lg={10} md={8}>
-                            <div className="autis-home-nav__actions ecosystem-nav__actions">
+                    <Row className="justify-content-end align-items-center gy-3 py-3">
+                        <Col xl={12} lg={12} md={12}>
+                            <div className="autis-home-nav__actions ecosystem-nav__actions ecosystem-nav__actions--compact">
                                 <a href="#plataforma" className="autis-home-nav__link">Plataforma</a>
                                 <a href="#solucoes" className="autis-home-nav__link">Soluções</a>
                                 <a href="#clinicas" className="autis-home-nav__link">Para Clínicas</a>
@@ -640,15 +654,21 @@ const Home = () => {
                 </Container>
             </nav>
 
-            <main id="topo" className="home-page landing-home autisconnect-intelligence-home ecosystem-home">
-                <section className="ecosystem-hero">
+            <main id="topo" className="home-page landing-home autisconnect-intelligence-home ecosystem-home ecosystem-home--premium">
+                <section className="ecosystem-hero ecosystem-hero--premium">
                     <Container>
-                        <Row className="align-items-center g-5">
-                            <Col xl={6} lg={6}>
-                                <Badge className="ecosystem-eyebrow">Plataforma inteligente HealthTech para TEA</Badge>
-                                <h1>Tecnologia que conecta toda a jornada da pessoa com TEA.</h1>
+                        <div className="ecosystem-hero__masthead">
+                            <div className="ecosystem-hero__brand-heading">
+                                <span className="ecosystem-hero__brand-overline">Bem-vindo ao ecossistema</span>
+                                <h1>
+                                    <img src={logonovo} alt="AutisConnect" className="ecosystem-hero__brand-logo" />
+                                </h1>
+                            </div>
+                        </div>
+                        <Row className="align-items-center g-5 ecosystem-hero__content-row">
+                            <Col xl={7} lg={7}>
                                 <p className="ecosystem-hero__subtitle">
-                                    Uma plataforma inteligente que integra famílias, profissionais, clínicas, acompanhamento terapêutico, dados e gestão em um único ecossistema.
+                                    Monitoramento Inteligente e Desenvolvimento TEA com uma experiência premium que integra famílias, profissionais, clínicas, dados e cuidado em uma única jornada conectada.
                                 </p>
                                 <div className="ecosystem-hero__actions">
                                     <Button
@@ -688,19 +708,40 @@ const Home = () => {
                                     <span>Cuidado contínuo</span>
                                     <span>Dados e ciência</span>
                                 </div>
+                                <div className="ecosystem-hero__metrics" aria-label="Diferenciais do AutisConnect">
+                                    {premiumMetrics.map((metric) => (
+                                        <article key={metric.label} className="ecosystem-hero__metric">
+                                            <strong>{metric.value}</strong>
+                                            <span>{metric.label}</span>
+                                            <p>{metric.detail}</p>
+                                        </article>
+                                    ))}
+                                </div>
                             </Col>
-                            <Col xl={6} lg={6} className="hero-ecosystem-col">
-                                <div className="hero-ecosystem-visual">
-                                    <img
-                                        src={img01}
-                                        alt="Ecossistema AutisConnect com a pessoa com TEA no centro, conectando família, profissionais, clínica, gestão e ferramentas de acompanhamento"
-                                        className="hero-ecosystem-image"
-                                        width="1150"
-                                        height="1368"
-                                        loading="eager"
-                                        fetchPriority="high"
-                                        decoding="async"
-                                    />
+                            <Col xl={5} lg={5} className="hero-ecosystem-col">
+                                <div className="ecosystem-hero__visual-stack">
+                                    <div className="ecosystem-hero-preview">
+                                        <div className="ecosystem-hero-preview__frame">
+                                            <img
+                                                src={img01}
+                                                alt="Ecossistema AutisConnect com a pessoa com TEA no centro, conectando família, profissionais, clínica, gestão e ferramentas de acompanhamento"
+                                                className="hero-ecosystem-image"
+                                                width="1150"
+                                                height="1368"
+                                                loading="eager"
+                                                fetchpriority="high"
+                                                decoding="async"
+                                            />
+                                        </div>
+                                        <div className="ecosystem-hero-preview__badge ecosystem-hero-preview__badge--primary">
+                                            <span>Monitoramentos com IA</span>
+                                            <strong>Emoções, vocalizações, ABA e estereotipias</strong>
+                                        </div>
+                                        <div className="ecosystem-hero-preview__badge ecosystem-hero-preview__badge--secondary">
+                                            <span>Experiência integrada</span>
+                                            <strong>Família, clínica e especialistas na mesma jornada</strong>
+                                        </div>
+                                    </div>
                                 </div>
                             </Col>
                         </Row>
@@ -1347,7 +1388,7 @@ const Home = () => {
                     </Container>
                 </section>
 
-                <section className="landing-final-cta ecosystem-final-cta">
+                <section className="landing-final-cta ecosystem-final-cta ecosystem-final-cta--premium">
                     <Container>
                         <img src={logonovo} alt="AutisConnect" className="ecosystem-final-cta__logo" />
                         <h2>O futuro do acompanhamento do TEA é integrado, contínuo e orientado por dados.</h2>
@@ -1389,7 +1430,7 @@ const Home = () => {
                 </section>
             </main>
 
-            <footer className="footer-section ecosystem-footer py-4">
+            <footer className="footer-section ecosystem-footer ecosystem-footer--premium py-4">
                 <Container>
                     <div className="ecosystem-footer__top">
                         <img src={logonovo} alt="AutisConnect" className="footer-logo" />
