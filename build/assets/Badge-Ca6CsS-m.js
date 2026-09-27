@@ -1,1 +1,0 @@
-import{r as f,k as i,j as x,m as l}from"./index-CSoIF3_j.js";const n=f.forwardRef(({bsPrefix:r,bg:s="primary",pill:e=!1,text:a,className:o,as:t="span",...p},m)=>{const d=i(r,"badge");return x.jsx(t,{ref:m,...p,className:l(o,d,e&&"rounded-pill",a&&`text-${a}`,s&&`bg-${s}`)})});n.displayName="Badge";export{n as B};

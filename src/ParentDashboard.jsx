@@ -876,7 +876,7 @@ function ParentDashboard() {
       labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
       datasets: [
         {
-          label: 'Comunicacao',
+          label: 'Comunicação',
           data: [2, 3, 3.5, 4, 4.2],
           borderColor: '#2563EB',
           backgroundColor: 'rgba(37, 99, 235, 0.12)',
@@ -885,7 +885,7 @@ function ParentDashboard() {
           tension: 0.4
         },
         {
-          label: 'Interacao social',
+          label: 'Interação social',
           data: [1.5, 2, 2.8, 3.5, 4],
           borderColor: '#06B6D4',
           backgroundColor: 'rgba(6, 182, 212, 0.12)',
@@ -926,42 +926,42 @@ function ParentDashboard() {
 
   const activeSection = {
     overview: {
-      breadcrumb: 'Dashboard dos Pais / Visao geral',
-      title: 'Visao geral',
+      breadcrumb: 'Dashboard dos Pais / Visão geral',
+      title: 'Visâo geral',
       subtitle: selectedPatient
-        ? `Acompanhe o desenvolvimento, os atendimentos e os proximos passos de ${currentPatientName}.`
-        : 'Acompanhe os principais indicadores da familia.'
+        ? `Acompanhe o desenvolvimento, os atendimentos e os próximos passos de ${currentPatientName}.`
+        : 'Acompanhe os principais indicadores da família.'
     },
     appointments: {
       breadcrumb: 'Dashboard dos Pais / Atendimentos',
       title: 'Atendimentos',
-      subtitle: 'Organize os proximos atendimentos, acompanhe status e solicite novos agendamentos.'
+      subtitle: 'Organize os próximos atendimentos, acompanhe status e solicite novos agendamentos.'
     },
     progress: {
-      breadcrumb: 'Dashboard dos Pais / Evolucao',
-      title: 'Evolucao',
+      breadcrumb: 'Dashboard dos Pais / Evolução',
+      title: 'Evolução',
       subtitle: 'Visualize a evolucao ao longo do tempo com foco em clareza e contexto.'
     },
     services: {
-      breadcrumb: 'Dashboard dos Pais / Servicos & Rede TEA',
-      title: 'Servicos & Rede TEA',
-      subtitle: 'Encontre profissionais, clinicas e servicos especializados proximos a voce.'
+      breadcrumb: 'Dashboard dos Pais / Serviços & Rede TEA',
+      title: 'Serviços & Rede TEA',
+      subtitle: 'Encontre profissionais, clínicas e serviços especializados próximos a você.'
     },
     account: {
       breadcrumb: 'Dashboard dos Pais / Conta',
       title: 'Conta',
-      subtitle: 'Consulte os dados da conta responsavel e o panorama dos pacientes vinculados.'
+      subtitle: 'Consulte os dados da conta responsável e o panorama dos pacientes vinculados.'
     }
   }[activeTab] || {
     breadcrumb: 'Dashboard dos Pais',
-    title: 'Visao geral',
+    title: 'Visão geral',
     subtitle: 'Acompanhe os principais indicadores.'
   };
 
   const navigationGroups = [
     {
       label: 'Principal',
-      items: [{ key: 'overview', label: 'Visao geral', icon: HouseDoor }]
+      items: [{ key: 'overview', label: 'Visão geral', icon: HouseDoor }]
     },
     {
       label: 'Acompanhamento',
@@ -974,16 +974,16 @@ function ParentDashboard() {
           disabled: !selectedPatient
         },
         { key: 'appointments', label: 'Atendimentos', icon: Calendar2Check },
-        { key: 'progress', label: 'Evolucao', icon: GraphUp }
+        { key: 'progress', label: 'Evolução', icon: GraphUp }
       ]
     },
     {
       label: 'Rede de apoio',
-      items: [{ key: 'services', label: 'Servicos & Rede TEA', icon: GeoAlt }]
+      items: [{ key: 'services', label: 'Serviços & Rede TEA', icon: GeoAlt }]
     },
     {
       label: 'Conta',
-      items: [{ key: 'account', label: 'Configuracoes', icon: Gear }]
+      items: [{ key: 'account', label: 'Configurações', icon: Gear }]
     }
   ];
 
@@ -1208,11 +1208,11 @@ function ParentDashboard() {
 
         <div className="ac-parent-patient-card__grid">
           <div className="ac-parent-patient-card__metric">
-            <span>Diagnostico</span>
+            <span>Diagnóstico</span>
             <strong>{currentDiagnosis}</strong>
           </div>
           <div className="ac-parent-patient-card__metric">
-            <span>Proximo atendimento</span>
+            <span>Próximo atendimento</span>
             <strong>
               {nextAppointment
                 ? `${formatDate(nextAppointment.date || nextAppointment.appointment_date)} as ${formatTime(
@@ -1271,7 +1271,7 @@ function ParentDashboard() {
                 compact
                 icon={Calendar2Check}
                 title="Nenhum atendimento agendado"
-                description="Voce pode solicitar um novo atendimento quando precisar."
+                description="Você pode solicitar um novo atendimento quando precisar."
                 actionLabel="Novo Atendimento"
                 onAction={() => setShowAppointmentModal(true)}
               />
@@ -1292,7 +1292,7 @@ function ParentDashboard() {
           icon={ShieldCheck}
           title="Nivel de suporte"
           value={currentSupportLevel}
-          caption="Informacao principal para acompanhamento"
+          caption="Informação principal para acompanhamento"
           tone="cyan"
         />
         <KpiCard
@@ -1304,7 +1304,7 @@ function ParentDashboard() {
         />
         <KpiCard
           icon={GraphUp}
-          title="Proximo atendimento"
+          title="Próximo atendimento"
           value={
             nextAppointment
               ? `${formatDate(nextAppointment.date || nextAppointment.appointment_date)}`
@@ -1313,7 +1313,7 @@ function ParentDashboard() {
           caption={
             nextAppointment
               ? `${formatTime(nextAppointment.time || nextAppointment.appointment_time)}`
-              : 'Sem horario previsto'
+              : 'Sem horário previsto'
           }
           tone="warning"
         />
@@ -1325,7 +1325,7 @@ function ParentDashboard() {
             <div className="ac-parent-card__header">
               <div>
                 <span className="ac-parent-card__eyebrow">Evolucao</span>
-                <h3>Evolucao de {currentPatientName}</h3>
+                <h3>Evolução de {currentPatientName}</h3>
                 <p>Acompanhe indicadores ao longo do tempo.</p>
               </div>
             </div>
@@ -1333,7 +1333,7 @@ function ParentDashboard() {
               <Line data={patientProgressData} options={lineOptions} />
             </div>
             <div className="ac-parent-chart-note">
-              Os indicadores atuais seguem a estrutura temporaria do frontend e devem ser conectados a dados clinicos reais quando o backend estiver disponivel.
+              Os indicadores atuais seguem a estrutura temporária do frontend e devem ser conectados a dados clínicos reais quando o backend estiver disponível.
             </div>
           </Card.Body>
         </Card>
@@ -1344,7 +1344,7 @@ function ParentDashboard() {
               <div className="ac-parent-card__header">
                 <div>
                   <span className="ac-parent-card__eyebrow">Acoes rapidas</span>
-                  <h3>O que voce precisa agora?</h3>
+                  <h3>O que você precisa agora?</h3>
                 </div>
               </div>
               <div className="ac-parent-actions">
@@ -1366,7 +1366,7 @@ function ParentDashboard() {
                   <GeoAlt />
                   <div>
                     <strong>Encontrar Servico</strong>
-                    <span>Explorar a rede de apoio e servicos</span>
+                    <span>Explorar a rede de apoio e serviços</span>
                   </div>
                 </button>
               </div>
@@ -1377,17 +1377,17 @@ function ParentDashboard() {
             <Card.Body>
               <div className="ac-parent-card__header">
                 <div>
-                  <span className="ac-parent-card__eyebrow">Informacoes basicas</span>
-                  <h3>Informacoes do paciente</h3>
+                  <span className="ac-parent-card__eyebrow">Informações básicas</span>
+                  <h3>Informações do paciente</h3>
                 </div>
               </div>
               <div className="ac-parent-info-list">
-                <InfoRow label="Diagnostico" value={currentDiagnosis} />
+                <InfoRow label="Diagnóstico" value={currentDiagnosis} />
                 <InfoRow label="Nascimento" value={formatDate(selectedPatient?.birthDate)} />
                 <InfoRow label="Idade" value={formatAge(selectedPatient?.birthDate)} />
                 <InfoRow label="Telefone" value={getPatientPhone(selectedPatient)} />
                 <InfoRow label="E-mail" value={getPatientEmail(selectedPatient)} />
-                <InfoRow label="Nivel de suporte" value={currentSupportLevel} />
+                <InfoRow label="Nível de suporte" value={currentSupportLevel} />
               </div>
             </Card.Body>
           </Card>
@@ -1400,8 +1400,8 @@ function ParentDashboard() {
             <div className="ac-parent-card__header">
               <div>
                 <span className="ac-parent-card__eyebrow">Atendimentos</span>
-                <h3>Proximos Atendimentos</h3>
-                <p>Veja rapidamente os compromissos mais proximos.</p>
+                <h3>Próximos Atendimentos</h3>
+                <p>Veja rapidamente os compromissos mais próximos.</p>
               </div>
               <Button variant="outline-secondary" onClick={() => setActiveTab('appointments')}>
                 Ver agenda completa
@@ -1441,7 +1441,7 @@ function ParentDashboard() {
                 compact
                 icon={Calendar2Check}
                 title="Nenhum atendimento agendado"
-                description="Voce pode solicitar um novo atendimento quando precisar."
+                description="Você pode solicitar um novo atendimento quando precisar."
                 actionLabel="Novo Atendimento"
                 onAction={() => setShowAppointmentModal(true)}
               />
@@ -1454,18 +1454,18 @@ function ParentDashboard() {
             <div className="ac-parent-card__header">
               <div>
                 <span className="ac-parent-card__eyebrow">Rede de apoio</span>
-                <h3>Servicos & Rede TEA</h3>
-                <p>Encontre profissionais, clinicas e servicos especializados proximos a voce.</p>
+                <h3>Serviços & Rede TEA</h3>
+                <p>Encontre profissionais, clinicas e servicos especializados próximos a você.</p>
               </div>
               <Button variant="outline-secondary" onClick={() => setActiveTab('services')}>
-                Ir para servicos
+                Ir para serviços
               </Button>
             </div>
 
             {servicesLoading ? (
               <div className="ac-parent-inline-loader">
                 <div className="ac-parent-loader" />
-                <span>Carregando servicos...</span>
+                <span>Carregando serviços...</span>
               </div>
             ) : previewServices.length ? (
               <div className="ac-parent-service-preview-list">
@@ -1475,7 +1475,7 @@ function ParentDashboard() {
                       <strong>{service.name}</strong>
                       <span>
                         {[service.neighborhood, [service.city, service.state].filter(Boolean).join('/')].filter(Boolean).join(' - ') ||
-                          'Localizacao nao informada'}
+                          'Localização não informada'}
                       </span>
                     </div>
                     <Button variant="outline-secondary" size="sm" onClick={() => openServiceDetails(service.id)}>
@@ -1491,10 +1491,10 @@ function ParentDashboard() {
                 title="Sua rede de apoio aparece aqui"
                 description={
                   hasServiceLocation
-                    ? 'Explore a aba de servicos para refinar filtros e descobrir opcoes proximas.'
-                    : 'Defina cidade ou estado na busca para localizar servicos especializados.'
+                    ? 'Explore a aba de serviços para refinar filtros e descobrir opções próximas.'
+                    : 'Defina cidade ou estado na busca para localizar serviços especializados.'
                 }
-                actionLabel="Encontrar Servicos"
+                actionLabel="Encontrar Serviços"
                 onAction={() => setActiveTab('services')}
               />
             )}
@@ -1509,7 +1509,7 @@ function ParentDashboard() {
       <div className="ac-parent-section-heading">
         <div>
           <span className="ac-parent-section-heading__eyebrow">Agenda</span>
-          <h2>Proximos Atendimentos</h2>
+          <h2>Próximos Atendimentos</h2>
         </div>
         <Button onClick={() => setShowAppointmentModal(true)}>
           <PlusCircle className="me-2" />
@@ -1554,7 +1554,7 @@ function ParentDashboard() {
             <EmptyState
               icon={Calendar2Check}
               title="Nenhum atendimento agendado"
-              description="Voce pode solicitar um novo atendimento quando precisar."
+              description="Você pode solicitar um novo atendimento quando precisar."
               actionLabel="Novo Atendimento"
               onAction={() => setShowAppointmentModal(true)}
             />
@@ -1668,7 +1668,7 @@ function ParentDashboard() {
       <div className="ac-parent-section-heading">
         <div>
           <span className="ac-parent-section-heading__eyebrow">Rede de apoio</span>
-          <h2>Servicos & Rede TEA</h2>
+          <h2>Serviços & Rede TEA</h2>
           <p>Encontre profissionais, clinicas e servicos especializados proximos a voce.</p>
         </div>
       </div>
@@ -1898,7 +1898,7 @@ function ParentDashboard() {
           <div className="ac-parent-card__header">
             <div>
               <span className="ac-parent-card__eyebrow">Evolucao</span>
-              <h3>Evolucao de {currentPatientName}</h3>
+              <h3>Evolução de {currentPatientName}</h3>
               <p>Acompanhe indicadores ao longo do tempo.</p>
             </div>
           </div>
@@ -2113,7 +2113,7 @@ function ParentDashboard() {
             <div className="ac-parent-page-header__copy">
               <span className="ac-parent-page-header__eyebrow">AutisConnect Family Care</span>
               <h2>
-                Ola, {user?.nome_completo || user?.username || 'Responsavel'}
+                Olá, {user?.nome_completo || user?.username || 'Responsavel'}
               </h2>
               <p>{activeSection.subtitle}</p>
             </div>

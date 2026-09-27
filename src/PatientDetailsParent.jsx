@@ -32,7 +32,8 @@ import {
     PersonCircle,
     PlusCircle,
     Stars,
-    Wallet
+    Wallet,
+    XCircle
 } from 'react-bootstrap-icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
@@ -77,15 +78,13 @@ ChartJS.register(
 const ROUTES = {
     EMOTION_DETECTOR: '/emotion-detector',
     TRIGGER_RECORDER: '/trigger-recorder',
-    STEREOTYPY_MONITOR: '/stereotypy-monitor',
-    ABA_MODULE: '/aba/patient'
+    STEREOTYPY_MONITOR: '/stereotypy-monitor'
 };
 
 const MONITORING_WINDOW_NAMES = {
     [ROUTES.EMOTION_DETECTOR]: 'autisconnect-emotion-detector',
     [ROUTES.TRIGGER_RECORDER]: 'autisconnect-trigger-recorder',
-    [ROUTES.STEREOTYPY_MONITOR]: 'autisconnect-stereotypy-monitor',
-    [ROUTES.ABA_MODULE]: 'autisconnect-aba-patient'
+    [ROUTES.STEREOTYPY_MONITOR]: 'autisconnect-stereotypy-monitor'
 };
 
 const SIDEBAR_STORAGE_KEY = 'ac-parent-patient-sidebar-collapsed';
@@ -118,6 +117,11 @@ const SECTION_META = {
         eyebrow: 'Comunicação',
         title: 'Comunicação & Vocalizações',
         description: 'Entenda padrões de comunicação registrados ao longo do acompanhamento.'
+    },
+    stereotypy: {
+        eyebrow: 'Comportamento motor',
+        title: 'Estereotipias',
+        description: 'Acompanhe movimentos repetitivos observados, sua frequência e duração ao longo do tempo.'
     },
     games: {
         eyebrow: 'Desenvolvimento',
@@ -163,6 +167,7 @@ const PATIENT_NAVIGATION_GROUPS = [
         items: [
             { key: 'emotion', label: 'Emoções', icon: EmojiSmile },
             { key: 'trigger', label: 'Vocalizações', icon: Mic },
+            { key: 'stereotypy', label: 'Estereotipias', icon: Activity },
         ]
     },
     {
@@ -621,7 +626,55 @@ const generateVocalizationAISummary = (analysis) => {
     return summary;
 };
 
-const processChartData = (emotions, vocalizations) => {
+const analyzeStereotypyPatterns = (records) => {
+    if (!records || records.length === 0) {
+        return null;
+    }
+
+    const sortedRecords = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const totalEpisodes = sortedRecords.reduce((total, record) => (
+        total + Math.max(1, Number(record.frequency) || 1)
+    ), 0);
+    const totalDuration = sortedRecords.reduce((total, record) => (
+        total + Math.max(0, Number(record.duration) || 0)
+    ), 0);
+    const typeCounts = sortedRecords.reduce((counts, record) => {
+        const type = normalizeText(record.type) || 'Não identificado';
+        counts[type] = (counts[type] || 0) + Math.max(1, Number(record.frequency) || 1);
+        return counts;
+    }, {});
+    const dominantType = Object.entries(typeCounts)
+        .sort(([, countA], [, countB]) => countB - countA)[0]?.[0] || 'Não identificado';
+
+    return {
+        totalEpisodes,
+        totalDuration,
+        averageDuration: totalEpisodes > 0 ? totalDuration / totalEpisodes : 0,
+        dominantType,
+        lastRecordedAt: sortedRecords[sortedRecords.length - 1]?.date || null
+    };
+};
+
+const generateStereotypyFamilySummary = (analysis) => {
+    if (!analysis) {
+        return 'Ainda não há ocorrências registradas no período selecionado. Ao concluir um monitoramento, o histórico aparecerá aqui.';
+    }
+
+    const { totalEpisodes, totalDuration, averageDuration, dominantType, lastRecordedAt } = analysis;
+    let summary = `Foram observadas **${totalEpisodes}** ocorrência(s), com predominância de **${dominantType}**. `;
+
+    if (totalDuration > 0) {
+        summary += `A duração acumulada foi de **${totalDuration.toFixed(1)} segundos**, com média de **${averageDuration.toFixed(1)} segundos** por ocorrência. `;
+    }
+
+    if (lastRecordedAt) {
+        summary += `O registro mais recente foi realizado em **${formatDate(lastRecordedAt)}**.`;
+    }
+
+    return summary;
+};
+
+const processChartData = (emotions, vocalizations, stereotypies = []) => {
 
     const emotionTypes = ['happy', 'sad', 'neutral', 'angry', 'surprised', 'fearful', 'disgusted'];
     const emotionColors = {
@@ -677,6 +730,7 @@ const processChartData = (emotions, vocalizations) => {
 
     let vocalizationTrendData = null;
     let repetitionPatternData = null;
+    let stereotypyTrendData = null;
 
     if (vocalizations && vocalizations.length > 0) {
         const sortedVocalizations = [...vocalizations].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -725,11 +779,35 @@ const processChartData = (emotions, vocalizations) => {
         };
     }
 
+    if (stereotypies.length > 0) {
+        const dailyOccurrences = stereotypies.reduce((occurrences, record) => {
+            const date = formatDate(record.date);
+            occurrences[date] = (occurrences[date] || 0) + Math.max(1, Number(record.frequency) || 1);
+            return occurrences;
+        }, {});
+        const dates = Object.keys(dailyOccurrences).sort((dateA, dateB) => (
+            new Date(dateA.split('/').reverse().join('-')) - new Date(dateB.split('/').reverse().join('-'))
+        ));
+
+        stereotypyTrendData = {
+            labels: dates,
+            datasets: [{
+                label: 'Ocorrências observadas',
+                data: dates.map((date) => dailyOccurrences[date]),
+                borderColor: '#0891b2',
+                backgroundColor: 'rgba(6, 182, 212, 0.16)',
+                fill: true,
+                tension: 0.35
+            }]
+        };
+    }
+
     return {
         emotionData: emotionLineChartData,
         emotionDistributionData,
         vocalizationTrendData,
-        repetitionPatternData
+        repetitionPatternData,
+        stereotypyTrendData
     };
 };
 
@@ -847,6 +925,7 @@ const PatientDetailsParent = () => {
     const [patient, setPatient] = useState(null);
     const [notes, setNotes] = useState([]);
     const [emotions, setEmotions] = useState([]);
+    const [stereotypies, setStereotypies] = useState([]);
     const [prescriptions, setPrescriptions] = useState([]);
     const [newPrescription, setNewPrescription] = useState({
         date: '',
@@ -926,6 +1005,10 @@ const PatientDetailsParent = () => {
         navigate('/login');
     }, [navigate, user]);
 
+    const handleClosePatientTab = useCallback(() => {
+        window.close();
+    }, []);
+
     const fetchConsultations = useCallback(async () => {
         if (!patientId) {
             return;
@@ -971,13 +1054,18 @@ const PatientDetailsParent = () => {
                 notesRes,
                 consultationsRes,
                 vocalizationsRes,
-                emotionsRes
+                emotionsRes,
+                stereotypiesRes
             ] = await Promise.all([
                 apiClient.get(`/parent/patient/${patientId}`),
                 apiClient.get(`/parent/patient/${patientId}/recommendations`),
                 apiClient.get(`/parent/patient/${patientId}/upcoming-appointments`),
                 apiClient.get(`/vocalizations/${patientId}`),
-                apiClient.get(`/emotions/${patientId}`)
+                apiClient.get(`/emotions/${patientId}`),
+                apiClient.get(`/stereotypies/${patientId}`).catch((stereotypyError) => {
+                    console.warn('Não foi possível carregar o histórico de estereotipias:', stereotypyError);
+                    return { data: [] };
+                })
             ]);
 
             const normalizedConsultations = Array.isArray(consultationsRes.data)
@@ -1032,6 +1120,17 @@ const PatientDetailsParent = () => {
                 }))
                 : [];
 
+            const normalizedStereotypies = Array.isArray(stereotypiesRes.data)
+                ? stereotypiesRes.data.map((record) => ({
+                    ...record,
+                    type: normalizeText(record.type),
+                    context: normalizeText(record.context),
+                    observations: normalizeText(record.observations),
+                    duration: Math.max(0, Number(record.duration) || 0),
+                    frequency: Math.max(1, Number(record.frequency) || 1)
+                }))
+                : [];
+
             setPatient(patientRes.data ? {
                 ...patientRes.data,
                 name: normalizeText(patientRes.data.name),
@@ -1045,6 +1144,7 @@ const PatientDetailsParent = () => {
             setConsultations(normalizedConsultations);
             setVocalizations(normalizedVocalizations);
             setEmotions(normalizedEmotions);
+            setStereotypies(normalizedStereotypies);
         } catch (fetchError) {
             console.error('Erro ao carregar dados do paciente:', fetchError);
             const errorMessage = normalizeText(fetchError.response?.data?.error || fetchError.message || 'Ocorreu um erro desconhecido.');
@@ -1333,6 +1433,10 @@ const PatientDetailsParent = () => {
         () => filterRecordsByPeriod(vocalizations, periodFilter, (record) => record.date),
         [periodFilter, vocalizations]
     );
+    const filteredStereotypies = useMemo(
+        () => filterRecordsByPeriod(stereotypies, periodFilter, (record) => record.date),
+        [periodFilter, stereotypies]
+    );
     const filteredConsultations = useMemo(
         () => filterRecordsByPeriod(consultations, periodFilter, (record) => record.appointment_date || record.date),
         [consultations, periodFilter]
@@ -1354,10 +1458,11 @@ const PatientDetailsParent = () => {
 
     const emotionAnalysis = useMemo(() => analyzeEmotionPatterns(filteredEmotions), [filteredEmotions]);
     const vocalizationAnalysis = useMemo(() => analyzeVocalizationPatterns(filteredVocalizations), [filteredVocalizations]);
+    const stereotypyAnalysis = useMemo(() => analyzeStereotypyPatterns(filteredStereotypies), [filteredStereotypies]);
 
     const chartData = useMemo(
-        () => processChartData(filteredEmotions, filteredVocalizations),
-        [filteredEmotions, filteredVocalizations]
+        () => processChartData(filteredEmotions, filteredVocalizations, filteredStereotypies),
+        [filteredEmotions, filteredStereotypies, filteredVocalizations]
     );
 
     const lineOptions = useMemo(() => ({
@@ -1470,6 +1575,10 @@ const PatientDetailsParent = () => {
 
     const emotionSummary = useMemo(() => generateAISummary(emotionAnalysis), [emotionAnalysis]);
     const vocalizationSummary = useMemo(() => generateVocalizationAISummary(vocalizationAnalysis), [vocalizationAnalysis]);
+    const stereotypySummary = useMemo(
+        () => generateStereotypyFamilySummary(stereotypyAnalysis),
+        [stereotypyAnalysis]
+    );
 
     const mobileNavValue = activeTab;
     const workspaceMeta = SECTION_META[activeTab] || SECTION_META.overview;
@@ -1505,9 +1614,15 @@ const PatientDetailsParent = () => {
                 <div className="ac-parent-patient-global-sidebar__body">
                     <div className="ac-parent-patient-global-sidebar__group">
                         {!collapsed ? <span className="ac-parent-patient-global-sidebar__label">Navegação</span> : null}
-                        <button type="button" className="ac-parent-patient-global-sidebar__item" onClick={handleBackToParent}>
-                            <span className="ac-parent-patient-global-sidebar__icon"><ArrowLeft /></span>
-                            {!collapsed ? <span>Dashboard dos Pais</span> : null}
+                        <button
+                            type="button"
+                            className="ac-parent-patient-global-sidebar__item"
+                            onClick={handleClosePatientTab}
+                            aria-label="Fechar aba do paciente"
+                            title="Fechar aba do paciente"
+                        >
+                            <span className="ac-parent-patient-global-sidebar__icon"><XCircle /></span>
+                            {!collapsed ? <span>Fechar</span> : null}
                         </button>
                         <div className="ac-parent-patient-global-sidebar__item is-active">
                             <span className="ac-parent-patient-global-sidebar__icon"><PersonCircle /></span>
@@ -1725,10 +1840,6 @@ const PatientDetailsParent = () => {
                             <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(ROUTES.STEREOTYPY_MONITOR)}>
                                 <Activity />
                                 <span>Estereotipias</span>
-                            </button>
-                            <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(`${ROUTES.ABA_MODULE}/${patientId}`)}>
-                                <ClipboardPulse />
-                                <span>ABA</span>
                             </button>
                         </div>
                     </ShellCard>
@@ -2023,6 +2134,150 @@ const PatientDetailsParent = () => {
         </div>
     );
 
+    const renderStereotypySection = () => (
+        <div className="ac-parent-patient-detail-grid">
+            <MonitoringToolCard
+                icon={Activity}
+                title="StereotypyMonitor"
+                description="Monitore movimentos repetitivos pela câmera e registre automaticamente o tipo, a frequência e a duração das ocorrências."
+                buttonLabel="Iniciar monitoramento"
+                onClick={() => handleOpenMonitoringTool(ROUTES.STEREOTYPY_MONITOR)}
+                tone="info"
+            />
+
+            <ShellCard
+                eyebrow="Resumo do período"
+                title="Movimentos observados"
+                subtitle="Uma visão simples do histórico registrado no período selecionado."
+            >
+                <p className="ac-parent-patient-summary-text">{renderRichSummary(stereotypySummary)}</p>
+
+                {stereotypyAnalysis ? (
+                    <div className="ac-parent-patient-stats-row">
+                        <div className="ac-parent-patient-stat">
+                            <span>Total de ocorrências</span>
+                            <strong>{stereotypyAnalysis.totalEpisodes}</strong>
+                        </div>
+                        <div className="ac-parent-patient-stat">
+                            <span>Movimento predominante</span>
+                            <strong>{stereotypyAnalysis.dominantType}</strong>
+                        </div>
+                        <div className="ac-parent-patient-stat">
+                            <span>Duração acumulada</span>
+                            <strong>{stereotypyAnalysis.totalDuration.toFixed(1)}s</strong>
+                        </div>
+                        <div className="ac-parent-patient-stat">
+                            <span>Último registro</span>
+                            <strong>{formatDate(stereotypyAnalysis.lastRecordedAt)}</strong>
+                        </div>
+                    </div>
+                ) : null}
+            </ShellCard>
+
+            <div className="ac-parent-patient-chart-grid">
+                <ShellCard
+                    eyebrow="Evolução"
+                    title="Ocorrências ao longo do tempo"
+                    subtitle="Quantidade de movimentos identificados em cada dia."
+                    bodyClassName="ac-parent-patient-chart-card"
+                >
+                    {chartData.stereotypyTrendData?.labels?.length > 0 ? (
+                        <div className="ac-parent-patient-chart">
+                            <Line data={chartData.stereotypyTrendData} options={lineOptions} />
+                        </div>
+                    ) : (
+                        <EmptyState
+                            title="Sem dados para o gráfico"
+                            description="Inicie um monitoramento para acompanhar a evolução das ocorrências."
+                        />
+                    )}
+                </ShellCard>
+
+                <ShellCard
+                    eyebrow="Orientação"
+                    title="Como interpretar"
+                    subtitle="Os registros ajudam a reconhecer padrões, mas não substituem avaliação profissional."
+                >
+                    <div className="ac-parent-patient-summary-block">
+                        <strong>Observe o contexto</strong>
+                        <p>Considere o ambiente, a atividade realizada e possíveis estímulos antes e depois de cada ocorrência.</p>
+                    </div>
+                    <div className="ac-parent-patient-insight-list">
+                        <div className="ac-parent-patient-insight-list__item">
+                            <span>Frequência</span>
+                            <strong>Quantas vezes ocorreu</strong>
+                        </div>
+                        <div className="ac-parent-patient-insight-list__item">
+                            <span>Duração</span>
+                            <strong>Quanto tempo permaneceu</strong>
+                        </div>
+                        <div className="ac-parent-patient-insight-list__item">
+                            <span>Contexto</span>
+                            <strong>O que acontecia no momento</strong>
+                        </div>
+                    </div>
+                </ShellCard>
+            </div>
+
+            <ShellCard
+                eyebrow="Histórico"
+                title="Registros de estereotipias"
+                subtitle="Ocorrências armazenadas pelo StereotypyMonitor no período selecionado."
+            >
+                {!isDesktop ? (
+                    <div className="ac-parent-patient-note-stack">
+                        {filteredStereotypies.length > 0 ? filteredStereotypies.map((record) => (
+                            <article key={record.id || `${record.date}-${record.type}`} className="ac-parent-patient-note-card">
+                                <div className="ac-parent-patient-note-card__top">
+                                    <strong>{record.type || 'Movimento não identificado'}</strong>
+                                    <small>{formatDate(record.date)}</small>
+                                </div>
+                                <p>{record.frequency} ocorrência(s) • {record.duration.toFixed(1)}s</p>
+                                <small>{record.context || 'Sem contexto informado.'}</small>
+                            </article>
+                        )) : (
+                            <EmptyState
+                                title="Nenhum registro encontrado"
+                                description="Não há ocorrências de estereotipias no período selecionado."
+                            />
+                        )}
+                    </div>
+                ) : (
+                    <div className="ac-parent-patient-table-wrap">
+                        <Table responsive className="ac-parent-patient-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Movimento</th>
+                                    <th>Frequência</th>
+                                    <th>Duração</th>
+                                    <th>Contexto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredStereotypies.length > 0 ? filteredStereotypies.map((record) => (
+                                    <tr key={record.id || `${record.date}-${record.type}`}>
+                                        <td>{formatDate(record.date)}</td>
+                                        <td>{record.type || 'Não identificado'}</td>
+                                        <td>{record.frequency}</td>
+                                        <td>{record.duration.toFixed(1)}s</td>
+                                        <td className="ac-parent-patient-table__text">{record.context || 'Sem contexto informado.'}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={5} className="ac-parent-patient-table__empty">
+                                            Nenhuma estereotipia registrada.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </Table>
+                    </div>
+                )}
+            </ShellCard>
+        </div>
+    );
+
     const renderGamesSection = () => (
         <div className="ac-games-container">
             <div className="ac-games-header">
@@ -2067,14 +2322,6 @@ const PatientDetailsParent = () => {
                 description="Observe padrões motores repetitivos por vídeo e registre frequência, duração e confiança."
                 buttonLabel="Abrir monitor"
                 onClick={() => handleOpenMonitoringTool(ROUTES.STEREOTYPY_MONITOR)}
-                tone="info"
-            />
-            <MonitoringToolCard
-                icon={ClipboardPulse}
-                title="Módulo ABA"
-                description="Gestão de habilidades, atividades e acompanhamento comportamental do paciente."
-                buttonLabel="Abrir módulo ABA"
-                onClick={() => handleOpenMonitoringTool(`${ROUTES.ABA_MODULE}/${patientId}`)}
                 tone="info"
             />
             </div>
@@ -2422,6 +2669,8 @@ const PatientDetailsParent = () => {
             return renderEmotionSection();
         case 'trigger':
             return renderVocalizationSection();
+        case 'stereotypy':
+            return renderStereotypySection();
         case 'games':
             return renderGamesSection();
         case 'consultation':
