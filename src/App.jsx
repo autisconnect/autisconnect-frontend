@@ -1,76 +1,30 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import AuthRoute from './AuthRoute';
-import Home from './Home';
-import Login from './Login';
-import Signup from './Signup';
-import ForgotPassword from './ForgotPassword';
-import ResetPassword from './ResetPassword';
-import ParentDashboard from './ParentDashboard';
-import ProfessionalDashboard from './ProfessionalDashboard';
-import ClinicDashboard from './ClinicDashboard';
-import FinancialDashboard from './FinancialDashboard';
-import SecretaryDashboard from './SecretaryDashboard';
-import DashboardABA from './DashboardABA';
-import ServiceDashboard from './ServiceDashboard';
-import PublicServiceProfile from './PublicServiceProfile';
-import ServiceDashboard01 from './service_dashboard/ServiceDashboard01';
-import ServiceDashboard17 from './service_dashboard/ServiceDashboard17';
-import ServiceDashboard18 from './service_dashboard/ServiceDashboard18';
-import EmotionDetector from './emotion-tracking/EmotionDetectorVerified';
-import EmotionChart from './emotion-tracking/EmotionChart';
-import SessionsGraph from './emotion-tracking/SessionsGraph';
-import EmotionTrackingDashboard from './emotion-tracking/EmotionTrackingDashboard';
-import StrokeRiskMonitor from './StrokeRiskMonitor';
-import TriggerRecorder from './TriggerRecorder';
-import StereotypyMonitor from './StereotypyMonitor';
-import PatientDetails from './PatientDetails';           // visão do profissional
-import PatientDetailsParent from './PatientDetailsParent'; // visão dos pais (NOVO)
-import PaymentSuccess from './PaymentSuccess';
-import PaymentFailure from './PaymentFailure';
-import Game1Page from './games/game1/Game1Page';
-import Game2Page from './games/game2/Game2Page';
-import Game3Page from './games/game3/Game3Page';
-import Game4Page from './games/game4/Game4Page';
-import DashboardExecutive from './DashboardExecutive/DashboardExecutive';
-import TherapeuticDashboard from './DashboardTherapeutic/TherapeuticDashboard';
-import SchoolDashboard from './school/SchoolDashboard';
-import SchoolStudents from './school/SchoolStudents';
-import SchoolClassrooms from './school/SchoolClassrooms';
-import SchoolLocations from './school/SchoolLocations';
-import SchoolCameras from './school/SchoolCameras';
-import SchoolCameraDetails from './school/SchoolCameraDetails';
-import SchoolCameraMonitor from './school/SchoolCameraMonitor';
-import SchoolMonitoring from './school/SchoolMonitoring';
-import SchoolMonitoringKiosk from './school/SchoolMonitoringKiosk';
-import SchoolStudentDetails from './school/SchoolStudentDetails';
-import SchoolReports from './school/SchoolReports';
-import SchoolSettings from './school/SchoolSettings';
-import SchoolEvents from './school/SchoolEvents';
-import SchoolTeam from './school/SchoolTeam';
-
-// ABA Module Imports
-import AbaPatient from './pages/AbaPatient';
-import AbaDashboard from './pages/AbaDashboard';
-import AbaReport from './pages/AbaReport';
-
-// Componentes de apresentação (mantidos)
-import PresentationServiceDashboard from './presentation-dashboard/PresentationServiceDashboard';
-import PresentationProfessionalDashboard from './presentation-dashboard/PresentationProfessionalDashboard';
-import PresentationParentDashboard from './presentation-dashboard/PresentationParentDashboard';
-import PresentationEmotionDetector from './presentation-dashboard/PresentationEmotionDetector';
-import PresentationStrokeRiskMonitor from './presentation-dashboard/PresentationStrokeRiskMonitor';
-import PresentationIntegratedScheduling from './presentation-dashboard/PresentationIntegratedScheduling';
-import PresentationServiceCertification from './presentation-dashboard/PresentationServiceCertification';
-import PresentationVirtualConsultations from './presentation-dashboard/PresentationVirtualConsultations';
-import PresentationCommunitySupport from './presentation-dashboard/PresentationCommunitySupport';
-import PresentationTriggerRecorder from './presentation-dashboard/PresentationTriggerRecorder';
-import PresentationSecretaryDashboard from './presentation-dashboard/PresentationSecretaryDashboard';
-import PresentationPatientDetails from './presentation-dashboard/PresentationPatientDetails';
-
+import HospitalAccessGuard from './components/hospital/HospitalAccessGuard';
 import { Alert, Button } from 'react-bootstrap';
 import './App.css';
+
+const Home = lazy(() => import('./Home')); const Login = lazy(() => import('./Login')); const Signup = lazy(() => import('./Signup'));
+const ForgotPassword = lazy(() => import('./ForgotPassword')); const ResetPassword = lazy(() => import('./ResetPassword'));
+const ParentDashboard = lazy(() => import('./ParentDashboard')); const ProfessionalDashboard = lazy(() => import('./ProfessionalDashboard'));
+const HospitalDashboard = lazy(() => import('./HospitalDashboard')); const HospitalPatient360Page = lazy(() => import('./HospitalPatient360Page'));
+const ClinicDashboard = lazy(() => import('./ClinicDashboard')); const FinancialDashboard = lazy(() => import('./FinancialDashboard'));
+const SecretaryDashboard = lazy(() => import('./SecretaryDashboard')); const DashboardABA = lazy(() => import('./DashboardABA'));
+const ServiceDashboard = lazy(() => import('./ServiceDashboard')); const PublicServiceProfile = lazy(() => import('./PublicServiceProfile'));
+const ServiceDashboard01 = lazy(() => import('./service_dashboard/ServiceDashboard01')); const ServiceDashboard17 = lazy(() => import('./service_dashboard/ServiceDashboard17')); const ServiceDashboard18 = lazy(() => import('./service_dashboard/ServiceDashboard18'));
+const EmotionDetector = lazy(() => import('./emotion-tracking/EmotionDetectorVerified')); const EmotionChart = lazy(() => import('./emotion-tracking/EmotionChart')); const SessionsGraph = lazy(() => import('./emotion-tracking/SessionsGraph')); const EmotionTrackingDashboard = lazy(() => import('./emotion-tracking/EmotionTrackingDashboard'));
+const TriggerRecorder = lazy(() => import('./TriggerRecorder')); const StereotypyMonitor = lazy(() => import('./StereotypyMonitor'));
+const PatientDetails = lazy(() => import('./PatientDetails')); const PatientDetailsParent = lazy(() => import('./PatientDetailsParent'));
+const PaymentSuccess = lazy(() => import('./PaymentSuccess')); const PaymentFailure = lazy(() => import('./PaymentFailure'));
+const Game1Page = lazy(() => import('./games/game1/Game1Page')); const Game2Page = lazy(() => import('./games/game2/Game2Page')); const Game3Page = lazy(() => import('./games/game3/Game3Page')); const Game4Page = lazy(() => import('./games/game4/Game4Page'));
+const DashboardExecutive = lazy(() => import('./DashboardExecutive/DashboardExecutive')); const TherapeuticDashboard = lazy(() => import('./DashboardTherapeutic/TherapeuticDashboard'));
+const SchoolDashboard = lazy(() => import('./school/SchoolDashboard')); const SchoolStudents = lazy(() => import('./school/SchoolStudents')); const SchoolClassrooms = lazy(() => import('./school/SchoolClassrooms')); const SchoolLocations = lazy(() => import('./school/SchoolLocations')); const SchoolCameras = lazy(() => import('./school/SchoolCameras')); const SchoolCameraDetails = lazy(() => import('./school/SchoolCameraDetails')); const SchoolCameraMonitor = lazy(() => import('./school/SchoolCameraMonitor')); const SchoolMonitoring = lazy(() => import('./school/SchoolMonitoring')); const SchoolMonitoringKiosk = lazy(() => import('./school/SchoolMonitoringKiosk')); const SchoolStudentDetails = lazy(() => import('./school/SchoolStudentDetails')); const SchoolReports = lazy(() => import('./school/SchoolReports')); const SchoolSettings = lazy(() => import('./school/SchoolSettings')); const SchoolEvents = lazy(() => import('./school/SchoolEvents')); const SchoolTeam = lazy(() => import('./school/SchoolTeam'));
+const AbaPatient = lazy(() => import('./pages/AbaPatient')); const AbaDashboard = lazy(() => import('./pages/AbaDashboard')); const AbaReport = lazy(() => import('./pages/AbaReport'));
+const PresentationServiceDashboard = lazy(() => import('./presentation-dashboard/PresentationServiceDashboard')); const PresentationProfessionalDashboard = lazy(() => import('./presentation-dashboard/PresentationProfessionalDashboard')); const PresentationParentDashboard = lazy(() => import('./presentation-dashboard/PresentationParentDashboard')); const PresentationEmotionDetector = lazy(() => import('./presentation-dashboard/PresentationEmotionDetector')); const PresentationIntegratedScheduling = lazy(() => import('./presentation-dashboard/PresentationIntegratedScheduling')); const PresentationServiceCertification = lazy(() => import('./presentation-dashboard/PresentationServiceCertification')); const PresentationVirtualConsultations = lazy(() => import('./presentation-dashboard/PresentationVirtualConsultations')); const PresentationCommunitySupport = lazy(() => import('./presentation-dashboard/PresentationCommunitySupport')); const PresentationTriggerRecorder = lazy(() => import('./presentation-dashboard/PresentationTriggerRecorder')); const PresentationSecretaryDashboard = lazy(() => import('./presentation-dashboard/PresentationSecretaryDashboard')); const PresentationPatientDetails = lazy(() => import('./presentation-dashboard/PresentationPatientDetails'));
+
+const RouteLoading = () => <div className="app-route-loading" role="status" aria-live="polite"><span className="spinner-border text-primary" aria-hidden="true" /><strong>Carregando módulo…</strong></div>;
 
 // ErrorBoundary
 class ErrorBoundary extends React.Component {
@@ -88,9 +42,9 @@ class ErrorBoundary extends React.Component {
     if (this.state.error) {
       return (
         <div className="container mt-5">
-          <Alert variant="danger">
+          <Alert variant="danger" role="alert">
             <h4>Erro na aplicação</h4>
-            <p>{this.state.error}</p>
+            <p>Não foi possível exibir esta área. Recarregue a página para tentar novamente.</p>
             <Button onClick={() => window.location.reload()}>
               Recarregar Página
             </Button>
@@ -126,6 +80,7 @@ const DynamicSessionsGraph = () => {
 function App() {
   return (
     <ErrorBoundary>
+      <Suspense fallback={<RouteLoading />}>
       <Routes>
         {/* Rota Home Pública */}
         <Route index element={<Home />} />
@@ -143,7 +98,6 @@ function App() {
         <Route path="/PresentationProfessionalDashboard" element={<PresentationProfessionalDashboard />} />
         <Route path="/PresentationParentDashboard" element={<PresentationParentDashboard />} />
         <Route path="/presentation-dashboard/PresentationEmotionDetector" element={<PresentationEmotionDetector />} />
-        <Route path="/presentation-dashboard/PresentationStrokeRiskMonitor" element={<PresentationStrokeRiskMonitor />} />
         <Route path="/presentation-dashboard/PresentationIntegratedScheduling" element={<PresentationIntegratedScheduling />} />
         <Route path="/presentation-dashboard/PresentationServiceCertification" element={<PresentationServiceCertification />} />
         <Route path="/presentation-dashboard/PresentationVirtualConsultations" element={<PresentationVirtualConsultations />} />
@@ -178,6 +132,28 @@ function App() {
           element={
             <ProtectedRoute allowedUserTypes={['clinica', 'medicos_terapeutas', 'servicos_locais', 'administrador_clinica']}>
               <ClinicDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/hospital/:hospitalId/dashboard"
+          element={
+            <ProtectedRoute>
+              <HospitalAccessGuard>
+                <HospitalDashboard />
+              </HospitalAccessGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/hospital/:hospitalId/patient/:patientId"
+          element={
+            <ProtectedRoute>
+              <HospitalAccessGuard>
+                <HospitalPatient360Page />
+              </HospitalAccessGuard>
             </ProtectedRoute>
           }
         />
@@ -462,14 +438,6 @@ function App() {
           }
         />
         <Route
-          path="/stroke-risk-monitor"
-          element={
-            <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
-              <StrokeRiskMonitor />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/trigger-recorder"
           element={
             <ProtectedRoute allowedUserTypes={['medicos_terapeutas', 'pais_responsavel']}>
@@ -531,6 +499,7 @@ function App() {
         {/* Rota 404 */}
         <Route path="*" element={<div>Página não encontrada (404)</div>} />
       </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 }

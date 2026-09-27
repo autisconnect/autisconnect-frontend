@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { InstitutionProvider } from './context/InstitutionContext';
 import App from './App';
 
 // Estilos globais
@@ -16,6 +17,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Cria o cliente do React Query (cache das queries)
 const queryClient = new QueryClient();
+const TrpcProvider = trpc.Provider;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -23,13 +25,15 @@ root.render(
   <React.StrictMode>
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
+        <InstitutionProvider>
         {/* PROVIDER DO tRPC - ESSENCIAL */}
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <TrpcProvider client={trpcClient} queryClient={queryClient}>
           {/* PROVIDER DO REACT QUERY - ESSENCIAL */}
           <QueryClientProvider client={queryClient}>
             <App />
           </QueryClientProvider>
-        </trpc.Provider>
+        </TrpcProvider>
+        </InstitutionProvider>
       </AuthProvider>
     </Router>
   </React.StrictMode>

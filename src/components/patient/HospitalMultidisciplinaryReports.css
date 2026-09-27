@@ -1,0 +1,26 @@
+.ac-report { display: grid; gap: 1rem; }
+.ac-report > header, .ac-report-list article, .ac-report-list__identity, .ac-report-list__identity > div > div, .ac-report-actions, .ac-report-state { display: flex; align-items: center; }
+.ac-report > header { justify-content: space-between; gap: 1rem; }
+.ac-report > header span { color: #087fd1; font-size: .76rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ac-report > header h2 { color: #082855; font-size: 1.25rem; margin: .15rem 0 0; }
+.ac-report-list { display: grid; gap: .8rem; }
+.ac-report-list article { background: #fff; border: 1px solid #dce7f4; border-radius: 14px; box-shadow: 0 8px 24px rgba(8, 40, 85, .06); justify-content: space-between; gap: 1rem; padding: 1rem; }
+.ac-report-list__identity { gap: .8rem; min-width: 0; }
+.ac-report-list__identity > svg { color: #0d6efd; flex: 0 0 auto; font-size: 1.8rem; }
+.ac-report-list__identity > div > div { flex-wrap: wrap; gap: .5rem; }
+.ac-report-list h3 { color: #082855; font-size: 1rem; margin: 0; }
+.ac-report-list p, .ac-report-list small { color: #637992; margin: .25rem 0 0; }
+.ac-report-actions { flex-wrap: wrap; gap: .45rem; justify-content: flex-end; }
+.ac-report-state { color: #637992; gap: .6rem; justify-content: center; min-height: 120px; }
+.ac-report-form { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ac-report-sources { border: 1px solid #dce7f4; border-radius: 12px; display: flex; flex-wrap: wrap; gap: .7rem 1.2rem; margin: 1rem 0; padding: 1rem; }
+.ac-report-sources legend { color: #082855; float: none; font-size: .9rem; font-weight: 700; margin: 0 0 .4rem; width: 100%; }
+.ac-report-sections { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ac-report-sections > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+.ac-report-history { display: grid; gap: .8rem; }
+.ac-report-history article { border: 1px solid #dce7f4; border-radius: 12px; padding: 1rem; }
+.ac-report-history article header { display: flex; justify-content: space-between; gap: 1rem; }
+.ac-report-history dl { display: flex; flex-wrap: wrap; gap: 1rem; margin: .8rem 0 0; }
+.ac-report-history dl div { background: #f4f8fd; border-radius: 8px; min-width: 120px; padding: .5rem .7rem; }
+.ac-report-history dt { color: #637992; font-size: .72rem; }.ac-report-history dd { color: #082855; font-weight: 700; margin: 0; }
+@media (max-width: 820px) { .ac-report-list article { align-items: flex-start; flex-direction: column; }.ac-report-actions { justify-content: flex-start; }.ac-report-form, .ac-report-sections { grid-template-columns: 1fr; } }

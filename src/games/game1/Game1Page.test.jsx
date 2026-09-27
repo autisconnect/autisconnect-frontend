@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import Game1Page from './Game1Page';
 
 const { apiPostMock, ioMock, registryStore, createGameMock } = vi.hoisted(() => {
@@ -68,7 +68,7 @@ describe('Game1Page', () => {
     const onEvent = () => registryStore.get('onEvent');
     const onSessionComplete = () => registryStore.get('onSessionComplete');
 
-    await screen.findByText(/Emotional Regulation Adventures/i);
+    await screen.findByRole('heading', { level: 1, name: /Regulação Emocional/i });
 
     await act(async () => {
       onEvent()({ eventType: 'trigger', data: { scenarioId: 'barulho' } });

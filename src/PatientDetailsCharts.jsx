@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Nav, Tab, Button, Table } from 'react-bootstrap';
-import { ArrowLeft, GraphUp, Calendar3, ExclamationTriangle, Heart } from 'react-bootstrap-icons';
+import { ArrowLeft, GraphUp, Calendar3, ExclamationTriangle } from 'react-bootstrap-icons';
 import { Line, Bar, Pie, Radar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -39,7 +39,6 @@ const PatientDetailsCharts = () => {
     
     // Dados simulados para os gráficos
     const [triggerData, setTriggerData] = useState(null);
-    const [strokeData, setStrokeData] = useState(null);
     const [stereotypyData, setStereotypyData] = useState(null);
     const [emotionData, setEmotionData] = useState(null);
 
@@ -97,23 +96,6 @@ const PatientDetailsCharts = () => {
             ]
         };
         setTriggerData(triggerMockData);
-
-        // Dados para o gráfico de risco de AVC
-        const strokeLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-        const strokeMockData = {
-            labels: strokeLabels,
-            datasets: [
-                {
-                    label: 'Índice de Assimetria Facial',
-                    data: [0.15, 0.12, 0.18, 0.14, 0.11, 0.13],
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
-        };
-        setStrokeData(strokeMockData);
 
         // Dados para o gráfico de estereotipias
         const stereotypyMockData = {
@@ -282,9 +264,6 @@ const PatientDetailsCharts = () => {
                                 <Nav.Link eventKey="trigger">Gatilhos</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link eventKey="stroke">Risco de AVC</Nav.Link>
-                            </Nav.Item>
-                            <Nav.Item>
                                 <Nav.Link eventKey="stereotypy">Estereotipias</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
@@ -306,16 +285,6 @@ const PatientDetailsCharts = () => {
                                                         <h6>Gatilhos Identificados</h6>
                                                         <h3>4</h3>
                                                         <small className="text-muted">Último: Sirene (2 dias atrás)</small>
-                                                    </Card.Body>
-                                                </Card>
-                                            </Col>
-                                            <Col md={3}>
-                                                <Card className="text-center mb-3 mb-md-0 shadow-sm">
-                                                    <Card.Body>
-                                                        <Heart className="text-danger mb-2" size={24} />
-                                                        <h6>Risco de AVC</h6>
-                                                        <h3>Baixo</h3>
-                                                        <small className="text-muted">Assimetria: 0.12</small>
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
@@ -370,16 +339,6 @@ const PatientDetailsCharts = () => {
                                             </Card.Header>
                                             <Card.Body>
                                                 {stereotypyData && <Pie data={stereotypyData} options={pieOptions} />}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Card className="shadow-sm h-100">
-                                            <Card.Header>
-                                                <h5 className="mb-0">Índice de Assimetria Facial</h5>
-                                            </Card.Header>
-                                            <Card.Body>
-                                                {strokeData && <Line data={strokeData} options={lineOptions} />}
                                             </Card.Body>
                                         </Card>
                                     </Col>
@@ -474,96 +433,6 @@ const PatientDetailsCharts = () => {
                                                             <td>Textura áspera</td>
                                                             <td>Baixa</td>
                                                             <td>15 segundos</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </Table>
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                </Row>
-                            </Tab.Pane>
-                            
-                            {/* Aba de Risco de AVC */}
-                            <Tab.Pane eventKey="stroke">
-                                <Row>
-                                    <Col md={8} className="mb-4">
-                                        <Card className="shadow-sm h-100">
-                                            <Card.Header>
-                                                <h5 className="mb-0">Evolução do Índice de Assimetria Facial</h5>
-                                            </Card.Header>
-                                            <Card.Body>
-                                                {strokeData && <Line data={strokeData} options={lineOptions} />}
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={4} className="mb-4">
-                                        <Card className="shadow-sm h-100">
-                                            <Card.Header>
-                                                <h5 className="mb-0">Distribuição de Níveis de Risco</h5>
-                                            </Card.Header>
-                                            <Card.Body>
-                                                <Pie 
-                                                    data={{
-                                                        labels: ['Baixo', 'Médio', 'Alto'],
-                                                        datasets: [{
-                                                            data: [75, 20, 5],
-                                                            backgroundColor: [
-                                                                'rgba(75, 192, 192, 0.6)',
-                                                                'rgba(255, 206, 86, 0.6)',
-                                                                'rgba(255, 99, 132, 0.6)'
-                                                            ],
-                                                            borderColor: [
-                                                                'rgba(75, 192, 192, 1)',
-                                                                'rgba(255, 206, 86, 1)',
-                                                                'rgba(255, 99, 132, 1)'
-                                                            ],
-                                                            borderWidth: 1
-                                                        }]
-                                                    }} 
-                                                    options={pieOptions} 
-                                                />
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                    <Col md={12}>
-                                        <Card className="shadow-sm">
-                                            <Card.Header>
-                                                <h5 className="mb-0">Histórico de Medições</h5>
-                                            </Card.Header>
-                                            <Card.Body>
-                                                <Table striped bordered hover responsive>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Data</th>
-                                                            <th>Índice de Assimetria</th>
-                                                            <th>Nível de Risco</th>
-                                                            <th>Observações</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>05/06/2025</td>
-                                                            <td>0.13</td>
-                                                            <td>Baixo</td>
-                                                            <td>Sem alterações significativas</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>20/05/2025</td>
-                                                            <td>0.18</td>
-                                                            <td>Médio</td>
-                                                            <td>Leve assimetria no lado esquerdo</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>05/05/2025</td>
-                                                            <td>0.12</td>
-                                                            <td>Baixo</td>
-                                                            <td>Sem alterações significativas</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>20/04/2025</td>
-                                                            <td>0.11</td>
-                                                            <td>Baixo</td>
-                                                            <td>Sem alterações significativas</td>
                                                         </tr>
                                                     </tbody>
                                                 </Table>

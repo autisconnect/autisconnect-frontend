@@ -1,0 +1,1797 @@
+{
+  "_AuthScaffold-DPlhEEMo.js": {
+    "file": "assets/AuthScaffold-DPlhEEMo.js",
+    "name": "AuthScaffold",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "_ContextSelector-244DE9lr.css": {
+    "file": "assets/ContextSelector-244DE9lr.css",
+    "src": "_ContextSelector-244DE9lr.css"
+  },
+  "_ContextSelector-Csc_E-WO.js": {
+    "file": "assets/ContextSelector-Csc_E-WO.js",
+    "name": "ContextSelector",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/ContextSelector-244DE9lr.css"
+    ]
+  },
+  "_DashboardABA-D0_17eZA.css": {
+    "file": "assets/DashboardABA-D0_17eZA.css",
+    "src": "_DashboardABA-D0_17eZA.css"
+  },
+  "_DashboardABA-DtfJ3xxd.js": {
+    "file": "assets/DashboardABA-DtfJ3xxd.js",
+    "name": "DashboardABA",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_abaAiService-B3v2hJ5e.js"
+    ],
+    "css": [
+      "assets/DashboardABA-D0_17eZA.css"
+    ]
+  },
+  "_DashboardExecutive-BOdFxg2q.css": {
+    "file": "assets/DashboardExecutive-BOdFxg2q.css",
+    "src": "_DashboardExecutive-BOdFxg2q.css"
+  },
+  "_Login-BpZqJTTY.css": {
+    "file": "assets/Login-BpZqJTTY.css",
+    "src": "_Login-BpZqJTTY.css"
+  },
+  "_PatientFaceReferencePanel-B-U40W-X.js": {
+    "file": "assets/PatientFaceReferencePanel-B-U40W-X.js",
+    "name": "PatientFaceReferencePanel",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_emotionService-CkDUeVzC.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/PatientFaceReferencePanel-DdEjeFE0.css"
+    ]
+  },
+  "_PatientFaceReferencePanel-DdEjeFE0.css": {
+    "file": "assets/PatientFaceReferencePanel-DdEjeFE0.css",
+    "src": "_PatientFaceReferencePanel-DdEjeFE0.css"
+  },
+  "_ProfessionalDashboard-CKmJi49n.css": {
+    "file": "assets/ProfessionalDashboard-CKmJi49n.css",
+    "src": "_ProfessionalDashboard-CKmJi49n.css"
+  },
+  "_SchoolCameraGrid-DQ5xKw9R.js": {
+    "file": "assets/SchoolCameraGrid-DQ5xKw9R.js",
+    "name": "SchoolCameraGrid",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "_SchoolMonitoringCentral-Cair3ZG9.js": {
+    "file": "assets/SchoolMonitoringCentral-Cair3ZG9.js",
+    "name": "SchoolMonitoringCentral",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_SchoolCameraGrid-DQ5xKw9R.js",
+      "_useSchoolMonitoringEngine-ZPAlORpu.js",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "_SchoolShell-BACf98hb.js": {
+    "file": "assets/SchoolShell-BACf98hb.js",
+    "name": "SchoolShell",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/SchoolShell-DqgQuhw3.css"
+    ]
+  },
+  "_SchoolShell-DqgQuhw3.css": {
+    "file": "assets/SchoolShell-DqgQuhw3.css",
+    "src": "_SchoolShell-DqgQuhw3.css"
+  },
+  "_TherapeuticGameLayout-CBUSoD_v.css": {
+    "file": "assets/TherapeuticGameLayout-CBUSoD_v.css",
+    "src": "_TherapeuticGameLayout-CBUSoD_v.css"
+  },
+  "_TherapeuticGameLayout-ItShZm-T.js": {
+    "file": "assets/TherapeuticGameLayout-ItShZm-T.js",
+    "name": "TherapeuticGameLayout",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/TherapeuticGameLayout-CBUSoD_v.css"
+    ]
+  },
+  "_abaAiService-B3v2hJ5e.js": {
+    "file": "assets/abaAiService-B3v2hJ5e.js",
+    "name": "abaAiService",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_vendor-ui-DE57BOUR.js",
+      "index.html"
+    ]
+  },
+  "_emotionService-CkDUeVzC.js": {
+    "file": "assets/emotionService-CkDUeVzC.js",
+    "name": "emotionService",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_emotionUtils-Bxrlb537.js": {
+    "file": "assets/emotionUtils-Bxrlb537.js",
+    "name": "emotionUtils"
+  },
+  "_game4-gAGDz6ZL.js": {
+    "file": "assets/game4-gAGDz6ZL.js",
+    "name": "game4",
+    "assets": [
+      "assets/game4-1lm0A_qC.png"
+    ]
+  },
+  "_gamesSection-DVB8KPMm.css": {
+    "file": "assets/gamesSection-DVB8KPMm.css",
+    "src": "_gamesSection-DVB8KPMm.css"
+  },
+  "_gamesSection-cHqJROn2.js": {
+    "file": "assets/gamesSection-cHqJROn2.js",
+    "name": "gamesSection",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/gamesSection-DVB8KPMm.css"
+    ]
+  },
+  "_logohoriz copy-BCLRz8jA.js": {
+    "file": "assets/logohoriz copy-BCLRz8jA.js",
+    "name": "logohoriz copy",
+    "assets": [
+      "assets/logohoriz-B1aTJxBF.jpg"
+    ]
+  },
+  "_logohoriz-BCLRz8jA.js": {
+    "file": "assets/logohoriz-BCLRz8jA.js",
+    "name": "logohoriz",
+    "assets": [
+      "assets/logohoriz-B1aTJxBF.jpg"
+    ]
+  },
+  "_logonovo-B8fpvhjk.js": {
+    "file": "assets/logonovo-B8fpvhjk.js",
+    "name": "logonovo",
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "_useSchoolMonitoringEngine-ZPAlORpu.js": {
+    "file": "assets/useSchoolMonitoringEngine-ZPAlORpu.js",
+    "name": "useSchoolMonitoringEngine",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_emotionUtils-Bxrlb537.js"
+    ]
+  },
+  "_vendor-charts-DjROEP7A.js": {
+    "file": "assets/vendor-charts-DjROEP7A.js",
+    "name": "vendor-charts",
+    "imports": [
+      "_vendor-react-D5AOm95y.js"
+    ]
+  },
+  "_vendor-games-BbrE81bZ.js": {
+    "file": "assets/vendor-games-BbrE81bZ.js",
+    "name": "vendor-games",
+    "imports": [
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "_vendor-maps-Dgihpmma.css": {
+    "file": "assets/vendor-maps-Dgihpmma.css",
+    "src": "_vendor-maps-Dgihpmma.css"
+  },
+  "_vendor-maps-H1tDn4eH.js": {
+    "file": "assets/vendor-maps-H1tDn4eH.js",
+    "name": "vendor-maps",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/vendor-maps-Dgihpmma.css"
+    ]
+  },
+  "_vendor-react-D5AOm95y.js": {
+    "file": "assets/vendor-react-D5AOm95y.js",
+    "name": "vendor-react",
+    "imports": [
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "_vendor-ui-DE57BOUR.js": {
+    "file": "assets/vendor-ui-DE57BOUR.js",
+    "name": "vendor-ui",
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/vendor-ui-DJSy8M6b.css"
+    ]
+  },
+  "_vendor-ui-DJSy8M6b.css": {
+    "file": "assets/vendor-ui-DJSy8M6b.css",
+    "src": "_vendor-ui-DJSy8M6b.css"
+  },
+  "index.html": {
+    "file": "assets/index-BNo3BRvk.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "dynamicImports": [
+      "src/Home.jsx",
+      "src/Login.jsx",
+      "src/Signup.jsx",
+      "src/ForgotPassword.jsx",
+      "src/ResetPassword.jsx",
+      "src/ParentDashboard.jsx",
+      "src/ProfessionalDashboard.jsx",
+      "src/HospitalDashboard.jsx",
+      "src/HospitalPatient360Page.jsx",
+      "src/ClinicDashboard.jsx",
+      "src/FinancialDashboard.jsx",
+      "src/SecretaryDashboard.jsx",
+      "src/DashboardABA.jsx",
+      "src/ServiceDashboard.jsx",
+      "src/PublicServiceProfile.jsx",
+      "src/service_dashboard/ServiceDashboard01.jsx",
+      "src/service_dashboard/ServiceDashboard17.jsx",
+      "src/service_dashboard/ServiceDashboard18.jsx",
+      "src/emotion-tracking/EmotionDetectorVerified.jsx",
+      "src/emotion-tracking/EmotionChart.jsx",
+      "src/emotion-tracking/SessionsGraph.jsx",
+      "src/emotion-tracking/EmotionTrackingDashboard.jsx",
+      "src/TriggerRecorder.jsx",
+      "src/StereotypyMonitor.jsx",
+      "src/PatientDetails.jsx",
+      "src/PatientDetailsParent.jsx",
+      "src/PaymentSuccess.jsx",
+      "src/PaymentFailure.jsx",
+      "src/games/game1/Game1Page.jsx",
+      "src/games/game2/Game2Page.jsx",
+      "src/games/game3/Game3Page.jsx",
+      "src/games/game4/Game4Page.jsx",
+      "src/DashboardExecutive/DashboardExecutive.jsx",
+      "src/DashboardTherapeutic/TherapeuticDashboard.jsx",
+      "src/school/SchoolDashboard.jsx",
+      "src/school/SchoolStudents.jsx",
+      "src/school/SchoolClassrooms.jsx",
+      "src/school/SchoolLocations.jsx",
+      "src/school/SchoolCameras.jsx",
+      "src/school/SchoolCameraDetails.jsx",
+      "src/school/SchoolCameraMonitor.jsx",
+      "src/school/SchoolMonitoring.jsx",
+      "src/school/SchoolMonitoringKiosk.jsx",
+      "src/school/SchoolStudentDetails.jsx",
+      "src/school/SchoolReports.jsx",
+      "src/school/SchoolSettings.jsx",
+      "src/school/SchoolEvents.jsx",
+      "src/school/SchoolTeam.jsx",
+      "src/pages/AbaPatient.jsx",
+      "src/pages/AbaDashboard.jsx",
+      "src/pages/AbaReport.jsx",
+      "src/presentation-dashboard/PresentationServiceDashboard.jsx",
+      "src/presentation-dashboard/PresentationProfessionalDashboard.jsx",
+      "src/presentation-dashboard/PresentationParentDashboard.jsx",
+      "src/presentation-dashboard/PresentationEmotionDetector.jsx",
+      "src/presentation-dashboard/PresentationIntegratedScheduling.jsx",
+      "src/presentation-dashboard/PresentationServiceCertification.jsx",
+      "src/presentation-dashboard/PresentationVirtualConsultations.jsx",
+      "src/presentation-dashboard/PresentationCommunitySupport.jsx",
+      "src/presentation-dashboard/PresentationTriggerRecorder.jsx",
+      "src/presentation-dashboard/PresentationSecretaryDashboard.jsx",
+      "src/presentation-dashboard/PresentationPatientDetails.jsx"
+    ],
+    "css": [
+      "assets/index-CrdhFNNU.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png",
+      "assets/logo-CieYGve9.png"
+    ]
+  },
+  "src/ClinicDashboard.jsx": {
+    "file": "assets/ClinicDashboard-ByFZAafe.js",
+    "name": "ClinicDashboard",
+    "src": "src/ClinicDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/ClinicDashboard-C7rebOKp.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/DashboardABA.jsx": {
+    "file": "assets/DashboardABA-CHLRULqJ.js",
+    "name": "DashboardABA",
+    "src": "src/DashboardABA.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "_abaAiService-B3v2hJ5e.js",
+      "_DashboardABA-DtfJ3xxd.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/DashboardExecutive/DashboardExecutive.jsx": {
+    "file": "assets/DashboardExecutive-CfK3HnOw.js",
+    "name": "DashboardExecutive",
+    "src": "src/DashboardExecutive/DashboardExecutive.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "dynamicImports": [
+      "src/DashboardExecutive/ExecutiveDashboardCharts.jsx"
+    ],
+    "css": [
+      "assets/DashboardExecutive-BOdFxg2q.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/DashboardExecutive/ExecutiveDashboardCharts.jsx": {
+    "file": "assets/ExecutiveDashboardCharts-9Ue3SYtQ.js",
+    "name": "ExecutiveDashboardCharts",
+    "src": "src/DashboardExecutive/ExecutiveDashboardCharts.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "src/DashboardTherapeutic/TherapeuticDashboard.jsx": {
+    "file": "assets/TherapeuticDashboard-Dq4qS2i_.js",
+    "name": "TherapeuticDashboard",
+    "src": "src/DashboardTherapeutic/TherapeuticDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/TherapeuticDashboard-CMD4MWce.css",
+      "assets/DashboardExecutive-BOdFxg2q.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/FinancialDashboard.jsx": {
+    "file": "assets/FinancialDashboard-DPFbNT3p.js",
+    "name": "FinancialDashboard",
+    "src": "src/FinancialDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/FinancialDashboard-BaQQyAOV.css",
+      "assets/ProfessionalDashboard-CKmJi49n.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/ForgotPassword.jsx": {
+    "file": "assets/ForgotPassword-BUbc0wQ_.js",
+    "name": "ForgotPassword",
+    "src": "src/ForgotPassword.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_AuthScaffold-DPlhEEMo.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "css": [
+      "assets/Login-BpZqJTTY.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/Home.jsx": {
+    "file": "assets/Home-ZQZ2k88m.js",
+    "name": "Home",
+    "src": "src/Home.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_logonovo-B8fpvhjk.js",
+      "_game4-gAGDz6ZL.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/Home-bMvPV7qm.css"
+    ],
+    "assets": [
+      "assets/servico01-BbOGkqCE.png",
+      "assets/servico02-DdqcBRNH.png",
+      "assets/img01-DRG5GmMY.png",
+      "assets/img02-DE95W5H2.png",
+      "assets/game1-73inbjYl.png",
+      "assets/game2-Cap4HljL.jpg",
+      "assets/game3-B7FN4nTs.png"
+    ]
+  },
+  "src/HospitalDashboard.jsx": {
+    "file": "assets/HospitalDashboard-BrgZGlx9.js",
+    "name": "HospitalDashboard",
+    "src": "src/HospitalDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_ContextSelector-Csc_E-WO.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "dynamicImports": [
+      "src/components/hospital/HospitalWorkforce.jsx",
+      "src/components/hospital/HospitalPatients.jsx",
+      "src/components/hospital/HospitalAppointments.jsx",
+      "src/components/hospital/HospitalAnalytics.jsx",
+      "src/components/hospital/HospitalIntegrationHub.jsx",
+      "src/components/hospital/HospitalAudit.jsx",
+      "src/components/hospital/HospitalPendingCenter.jsx",
+      "src/components/hospital/HospitalProfileDashboard.jsx",
+      "src/components/hospital/HospitalInstitutionalJourney.jsx",
+      "src/components/hospital/HospitalSettings.jsx"
+    ],
+    "css": [
+      "assets/HospitalDashboard-bkjhIxrM.css"
+    ]
+  },
+  "src/HospitalPatient360Page.jsx": {
+    "file": "assets/HospitalPatient360Page-D8Fn-iY_.js",
+    "name": "HospitalPatient360Page",
+    "src": "src/HospitalPatient360Page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalPatient360Page-DtDX7x_Y.css"
+    ]
+  },
+  "src/Login.jsx": {
+    "file": "assets/Login-DcuxVRPh.js",
+    "name": "Login",
+    "src": "src/Login.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_AuthScaffold-DPlhEEMo.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "css": [
+      "assets/Login-BpZqJTTY.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/ParentDashboard.jsx": {
+    "file": "assets/ParentDashboard-CrOHo8us.js",
+    "name": "ParentDashboard",
+    "src": "src/ParentDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/ParentDashboard-BkpWzxi4.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/PatientDetails.jsx": {
+    "file": "assets/PatientDetails-BxO_bEQM.js",
+    "name": "PatientDetails",
+    "src": "src/PatientDetails.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-charts-DjROEP7A.js",
+      "_PatientFaceReferencePanel-B-U40W-X.js",
+      "_gamesSection-cHqJROn2.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_emotionService-CkDUeVzC.js",
+      "_emotionUtils-Bxrlb537.js"
+    ],
+    "css": [
+      "assets/PatientDetails-CHsaVurH.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/PatientDetailsParent.jsx": {
+    "file": "assets/PatientDetailsParent-yCxmUqAZ.js",
+    "name": "PatientDetailsParent",
+    "src": "src/PatientDetailsParent.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-charts-DjROEP7A.js",
+      "src/pages/AbaReport.jsx",
+      "_PatientFaceReferencePanel-B-U40W-X.js",
+      "_gamesSection-cHqJROn2.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_abaAiService-B3v2hJ5e.js",
+      "_emotionService-CkDUeVzC.js",
+      "_emotionUtils-Bxrlb537.js"
+    ],
+    "css": [
+      "assets/PatientDetailsParent-rYrXQjEf.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/PaymentFailure.jsx": {
+    "file": "assets/PaymentFailure-K-xUos_D.js",
+    "name": "PaymentFailure",
+    "src": "src/PaymentFailure.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logohoriz-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/PaymentSuccess.jsx": {
+    "file": "assets/PaymentSuccess-MG8HmQqD.js",
+    "name": "PaymentSuccess",
+    "src": "src/PaymentSuccess.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logohoriz-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/ProfessionalDashboard.jsx": {
+    "file": "assets/ProfessionalDashboard-Dtl6DapN.js",
+    "name": "ProfessionalDashboard",
+    "src": "src/ProfessionalDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_ContextSelector-Csc_E-WO.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "css": [
+      "assets/ProfessionalDashboard-BLn48_nn.css",
+      "assets/ProfessionalDashboard-CKmJi49n.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/PublicServiceProfile.jsx": {
+    "file": "assets/PublicServiceProfile-B5YJGJ0B.js",
+    "name": "PublicServiceProfile",
+    "src": "src/PublicServiceProfile.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/ResetPassword.jsx": {
+    "file": "assets/ResetPassword-ChZi9AM9.js",
+    "name": "ResetPassword",
+    "src": "src/ResetPassword.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_AuthScaffold-DPlhEEMo.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "css": [
+      "assets/Login-BpZqJTTY.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/SecretaryDashboard.jsx": {
+    "file": "assets/SecretaryDashboard-t1fpA7E2.js",
+    "name": "SecretaryDashboard",
+    "src": "src/SecretaryDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/SecretaryDashboard-N22f_XHX.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/ServiceDashboard.jsx": {
+    "file": "assets/ServiceDashboard-ClS6TUY_.js",
+    "name": "ServiceDashboard",
+    "src": "src/ServiceDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_logohoriz copy-BCLRz8jA.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/UsersPhoto18-DGe89Nvn.jpg",
+      "assets/UsersPhoto17-C9JZ2Hp5.jpg"
+    ]
+  },
+  "src/Signup.jsx": {
+    "file": "assets/Signup-GrY0o6W7.js",
+    "name": "Signup",
+    "src": "src/Signup.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/Signup-BuFGXBV0.css",
+      "assets/Login-BpZqJTTY.css"
+    ],
+    "assets": [
+      "assets/logonovo-CEN8qT_q.png"
+    ]
+  },
+  "src/StereotypyMonitor.jsx": {
+    "file": "assets/StereotypyMonitor-Bfooq2sC.js",
+    "name": "StereotypyMonitor",
+    "src": "src/StereotypyMonitor.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "src/TriggerRecorder.jsx": {
+    "file": "assets/TriggerRecorder-j6Jc43_e.js",
+    "name": "TriggerRecorder",
+    "src": "src/TriggerRecorder.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/TriggerRecorder-Dpbt_2kM.css"
+    ]
+  },
+  "src/assets/17.jpg": {
+    "file": "assets/17-sjQ2wYcM.jpg",
+    "src": "src/assets/17.jpg"
+  },
+  "src/assets/18.jpg": {
+    "file": "assets/18-C0jQ6IvU.jpg",
+    "src": "src/assets/18.jpg"
+  },
+  "src/assets/UsersPhoto/UsersPhoto17.jpg": {
+    "file": "assets/UsersPhoto17-C9JZ2Hp5.jpg",
+    "src": "src/assets/UsersPhoto/UsersPhoto17.jpg"
+  },
+  "src/assets/UsersPhoto/UsersPhoto18.jpg": {
+    "file": "assets/UsersPhoto18-DGe89Nvn.jpg",
+    "src": "src/assets/UsersPhoto/UsersPhoto18.jpg"
+  },
+  "src/assets/dp 00.png": {
+    "file": "assets/dp 00-MlfrRJzj.png",
+    "src": "src/assets/dp 00.png"
+  },
+  "src/assets/dp 01.png": {
+    "file": "assets/dp 01-BgM2zJVf.png",
+    "src": "src/assets/dp 01.png"
+  },
+  "src/assets/dp 02.png": {
+    "file": "assets/dp 02-DWkAyb5J.png",
+    "src": "src/assets/dp 02.png"
+  },
+  "src/assets/dp 04.png": {
+    "file": "assets/dp 04-DQUvZPtq.png",
+    "src": "src/assets/dp 04.png"
+  },
+  "src/assets/dp 05.png": {
+    "file": "assets/dp 05-XPAIPZ5x.png",
+    "src": "src/assets/dp 05.png"
+  },
+  "src/assets/emotion-bar-chart.png": {
+    "file": "assets/emotion-bar-chart-CRiY4fYG.png",
+    "src": "src/assets/emotion-bar-chart.png"
+  },
+  "src/assets/emotion-detection.png": {
+    "file": "assets/emotion-detection-BqB7Z81u.png",
+    "src": "src/assets/emotion-detection.png"
+  },
+  "src/assets/emotion-hero.png": {
+    "file": "assets/emotion-hero-CDBpeDYH.png",
+    "src": "src/assets/emotion-hero.png"
+  },
+  "src/assets/emotion-insights.png": {
+    "file": "assets/emotion-insights-DnTQSVHG.png",
+    "src": "src/assets/emotion-insights.png"
+  },
+  "src/assets/emotion-line-chart.png": {
+    "file": "assets/emotion-line-chart-4lkpnGkL.png",
+    "src": "src/assets/emotion-line-chart.png"
+  },
+  "src/assets/game1.png": {
+    "file": "assets/game1-73inbjYl.png",
+    "src": "src/assets/game1.png"
+  },
+  "src/assets/game1_1.jpg": {
+    "file": "assets/game1_1-Nf7DUuLq.jpg",
+    "src": "src/assets/game1_1.jpg"
+  },
+  "src/assets/game1_2.jpg": {
+    "file": "assets/game1_2-qQagMNJu.jpg",
+    "src": "src/assets/game1_2.jpg"
+  },
+  "src/assets/game1_3.jpg": {
+    "file": "assets/game1_3-CwCHMzkI.jpg",
+    "src": "src/assets/game1_3.jpg"
+  },
+  "src/assets/game1_4.jpg": {
+    "file": "assets/game1_4-xkOzhaZF.jpg",
+    "src": "src/assets/game1_4.jpg"
+  },
+  "src/assets/game1_5.jpg": {
+    "file": "assets/game1_5-Ba00xIjq.jpg",
+    "src": "src/assets/game1_5.jpg"
+  },
+  "src/assets/game2.jpg": {
+    "file": "assets/game2-Cap4HljL.jpg",
+    "src": "src/assets/game2.jpg"
+  },
+  "src/assets/game2_cama.jpg": {
+    "file": "assets/game2_cama-BNH3nv8A.jpg",
+    "src": "src/assets/game2_cama.jpg"
+  },
+  "src/assets/game2_higiene.jpg": {
+    "file": "assets/game2_higiene-BzzPd9G4.jpg",
+    "src": "src/assets/game2_higiene.jpg"
+  },
+  "src/assets/game2_lanche.jpg": {
+    "file": "assets/game2_lanche-ByuYcNiq.jpg",
+    "src": "src/assets/game2_lanche.jpg"
+  },
+  "src/assets/game2_mochila.jpg": {
+    "file": "assets/game2_mochila-CK_MMjLV.jpg",
+    "src": "src/assets/game2_mochila.jpg"
+  },
+  "src/assets/game2_roupa.jpg": {
+    "file": "assets/game2_roupa-Dosq_jMB.jpg",
+    "src": "src/assets/game2_roupa.jpg"
+  },
+  "src/assets/game3.png": {
+    "file": "assets/game3-B7FN4nTs.png",
+    "src": "src/assets/game3.png"
+  },
+  "src/assets/game3_defesa.png": {
+    "file": "assets/game3_defesa-BYUrmrbC.png",
+    "src": "src/assets/game3_defesa.png"
+  },
+  "src/assets/game3_escola.png": {
+    "file": "assets/game3_escola-Bh4wlzRX.png",
+    "src": "src/assets/game3_escola.png"
+  },
+  "src/assets/game3_inibicao.png": {
+    "file": "assets/game3_inibicao-DIs3IY3z.png",
+    "src": "src/assets/game3_inibicao.png"
+  },
+  "src/assets/game3_jornada.png": {
+    "file": "assets/game3_jornada-CpO2G6j9.png",
+    "src": "src/assets/game3_jornada.png"
+  },
+  "src/assets/game3_memoria.png": {
+    "file": "assets/game3_memoria-aHf71aq7.png",
+    "src": "src/assets/game3_memoria.png"
+  },
+  "src/assets/game3_mudanca.png": {
+    "file": "assets/game3_mudanca-DTOKFL8j.png",
+    "src": "src/assets/game3_mudanca.png"
+  },
+  "src/assets/game4.png": {
+    "file": "assets/game4-1lm0A_qC.png",
+    "src": "src/assets/game4.png"
+  },
+  "src/assets/game4_acordar.png": {
+    "file": "assets/game4_acordar-DLxdQB6y.png",
+    "src": "src/assets/game4_acordar.png"
+  },
+  "src/assets/game4_brincar.png": {
+    "file": "assets/game4_brincar-kfYU9BtA.png",
+    "src": "src/assets/game4_brincar.png"
+  },
+  "src/assets/game4_dormir.png": {
+    "file": "assets/game4_dormir-DfkiDW4N.png",
+    "src": "src/assets/game4_dormir.png"
+  },
+  "src/assets/game4_escola.png": {
+    "file": "assets/game4_escola-D2UwDft7.png",
+    "src": "src/assets/game4_escola.png"
+  },
+  "src/assets/game4_escovar.png": {
+    "file": "assets/game4_escovar-C1MIDV3w.png",
+    "src": "src/assets/game4_escovar.png"
+  },
+  "src/assets/game4_tomar.png": {
+    "file": "assets/game4_tomar-BTniVk4m.png",
+    "src": "src/assets/game4_tomar.png"
+  },
+  "src/assets/img01.png": {
+    "file": "assets/img01-DRG5GmMY.png",
+    "src": "src/assets/img01.png"
+  },
+  "src/assets/img02.png": {
+    "file": "assets/img02-DE95W5H2.png",
+    "src": "src/assets/img02.png"
+  },
+  "src/assets/logo.png": {
+    "file": "assets/logo-CieYGve9.png",
+    "src": "src/assets/logo.png"
+  },
+  "src/assets/logohoriz copy.jpg": {
+    "file": "assets/logohoriz-B1aTJxBF.jpg",
+    "src": "src/assets/logohoriz copy.jpg"
+  },
+  "src/assets/logohoriz.jpg": {
+    "file": "assets/logohoriz-B1aTJxBF.jpg",
+    "src": "src/assets/logohoriz copy.jpg"
+  },
+  "src/assets/logonovo.png": {
+    "file": "assets/logonovo-CEN8qT_q.png",
+    "src": "src/assets/logonovo.png"
+  },
+  "src/assets/prof-dashboard-assistants.png": {
+    "file": "assets/prof-dashboard-assistants-BFKgmkSs.png",
+    "src": "src/assets/prof-dashboard-assistants.png"
+  },
+  "src/assets/prof-dashboard-financial.png": {
+    "file": "assets/prof-dashboard-financial-37-HNdne.png",
+    "src": "src/assets/prof-dashboard-financial.png"
+  },
+  "src/assets/prof-dashboard-monitoring.png": {
+    "file": "assets/prof-dashboard-monitoring-CL8grwE-.png",
+    "src": "src/assets/prof-dashboard-monitoring.png"
+  },
+  "src/assets/prof-dashboard-overview.png": {
+    "file": "assets/prof-dashboard-overview-B-k-QJCK.png",
+    "src": "src/assets/prof-dashboard-overview.png"
+  },
+  "src/assets/prof-dashboard-patients.png": {
+    "file": "assets/prof-dashboard-patients-BQlxYSNd.png",
+    "src": "src/assets/prof-dashboard-patients.png"
+  },
+  "src/assets/professional-hero.png": {
+    "file": "assets/professional-hero-DuKjwb0i.png",
+    "src": "src/assets/professional-hero.png"
+  },
+  "src/assets/recorder-analysis.png": {
+    "file": "assets/recorder-analysis-BmNwlE5V.png",
+    "src": "src/assets/recorder-analysis.png"
+  },
+  "src/assets/recorder-history.png": {
+    "file": "assets/recorder-history-CrSfim7v.png",
+    "src": "src/assets/recorder-history.png"
+  },
+  "src/assets/recorder-main.png": {
+    "file": "assets/recorder-main-DO4oHVHJ.png",
+    "src": "src/assets/recorder-main.png"
+  },
+  "src/assets/recorder-quantitative.png": {
+    "file": "assets/recorder-quantitative-sooDaPgO.png",
+    "src": "src/assets/recorder-quantitative.png"
+  },
+  "src/assets/recorder-transcription.png": {
+    "file": "assets/recorder-transcription-DZFLVXy_.png",
+    "src": "src/assets/recorder-transcription.png"
+  },
+  "src/assets/secretary-analytics.png": {
+    "file": "assets/secretary-analytics-kTjtxR3C.png",
+    "src": "src/assets/secretary-analytics.png"
+  },
+  "src/assets/secretary-appointments.png": {
+    "file": "assets/secretary-appointments-DzOF8Zeb.png",
+    "src": "src/assets/secretary-appointments.png"
+  },
+  "src/assets/secretary-main.png": {
+    "file": "assets/secretary-main-B5zKGwho.png",
+    "src": "src/assets/secretary-main.png"
+  },
+  "src/assets/secretary-patients.png": {
+    "file": "assets/secretary-patients-Cq15RbX_.png",
+    "src": "src/assets/secretary-patients.png"
+  },
+  "src/assets/secretary-vision.png": {
+    "file": "assets/secretary-vision-DjXvItF3.png",
+    "src": "src/assets/secretary-vision.png"
+  },
+  "src/assets/servico01.png": {
+    "file": "assets/servico01-BbOGkqCE.png",
+    "src": "src/assets/servico01.png"
+  },
+  "src/assets/servico02.png": {
+    "file": "assets/servico02-DdqcBRNH.png",
+    "src": "src/assets/servico02.png"
+  },
+  "src/components/hospital/HospitalAnalytics.jsx": {
+    "file": "assets/HospitalAnalytics-CUEmL_R6.js",
+    "name": "HospitalAnalytics",
+    "src": "src/components/hospital/HospitalAnalytics.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/HospitalAnalytics-DSdZc0Xv.css"
+    ]
+  },
+  "src/components/hospital/HospitalAppointments.jsx": {
+    "file": "assets/HospitalAppointments-BIFTshG6.js",
+    "name": "HospitalAppointments",
+    "src": "src/components/hospital/HospitalAppointments.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalAppointments-CXBbJfHG.css"
+    ]
+  },
+  "src/components/hospital/HospitalAudit.jsx": {
+    "file": "assets/HospitalAudit-7PvQCkXt.js",
+    "name": "HospitalAudit",
+    "src": "src/components/hospital/HospitalAudit.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalAudit-OoJ2HVs-.css"
+    ]
+  },
+  "src/components/hospital/HospitalInstitutionalJourney.jsx": {
+    "file": "assets/HospitalInstitutionalJourney-JNmdvByV.js",
+    "name": "HospitalInstitutionalJourney",
+    "src": "src/components/hospital/HospitalInstitutionalJourney.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalInstitutionalJourney-C7dxBPBo.css"
+    ]
+  },
+  "src/components/hospital/HospitalIntegrationHub.jsx": {
+    "file": "assets/HospitalIntegrationHub-DXdvi68u.js",
+    "name": "HospitalIntegrationHub",
+    "src": "src/components/hospital/HospitalIntegrationHub.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalIntegrationHub-uXT5Q8Ac.css"
+    ]
+  },
+  "src/components/hospital/HospitalPatients.jsx": {
+    "file": "assets/HospitalPatients-CybSK7AM.js",
+    "name": "HospitalPatients",
+    "src": "src/components/hospital/HospitalPatients.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalPatients-Dxt-ii1M.css"
+    ]
+  },
+  "src/components/hospital/HospitalPendingCenter.jsx": {
+    "file": "assets/HospitalPendingCenter-BgO4l96L.js",
+    "name": "HospitalPendingCenter",
+    "src": "src/components/hospital/HospitalPendingCenter.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalPendingCenter-3az0MAoR.css"
+    ]
+  },
+  "src/components/hospital/HospitalProfileDashboard.jsx": {
+    "file": "assets/HospitalProfileDashboard-CgzE3B-b.js",
+    "name": "HospitalProfileDashboard",
+    "src": "src/components/hospital/HospitalProfileDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalProfileDashboard-DMwlP_VN.css"
+    ]
+  },
+  "src/components/hospital/HospitalSettings.jsx": {
+    "file": "assets/HospitalSettings-67SttAVu.js",
+    "name": "HospitalSettings",
+    "src": "src/components/hospital/HospitalSettings.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/components/hospital/HospitalWorkforce.jsx": {
+    "file": "assets/HospitalWorkforce-Ch_IwTMZ.js",
+    "name": "HospitalWorkforce",
+    "src": "src/components/hospital/HospitalWorkforce.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/HospitalWorkforce-fzDni5Zj.css"
+    ]
+  },
+  "src/emotion-tracking/EmotionChart.jsx": {
+    "file": "assets/EmotionChart-CsIEUSal.js",
+    "name": "EmotionChart",
+    "src": "src/emotion-tracking/EmotionChart.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "src/emotion-tracking/EmotionDetectorVerified.jsx": {
+    "file": "assets/EmotionDetectorVerified-D1yZMEC8.js",
+    "name": "EmotionDetectorVerified",
+    "src": "src/emotion-tracking/EmotionDetectorVerified.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js",
+      "_emotionService-CkDUeVzC.js",
+      "_emotionUtils-Bxrlb537.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ],
+    "css": [
+      "assets/EmotionDetectorVerified-BbGFHaBr.css"
+    ]
+  },
+  "src/emotion-tracking/EmotionTrackingDashboard.jsx": {
+    "file": "assets/EmotionTrackingDashboard-BFXaulKW.js",
+    "name": "EmotionTrackingDashboard",
+    "src": "src/emotion-tracking/EmotionTrackingDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "src/emotion-tracking/EmotionChart.jsx",
+      "src/emotion-tracking/SessionsGraph.jsx",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "src/emotion-tracking/SessionsGraph.jsx": {
+    "file": "assets/SessionsGraph-nkypSw4M.js",
+    "name": "SessionsGraph",
+    "src": "src/emotion-tracking/SessionsGraph.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js"
+    ]
+  },
+  "src/games/game1/Game1Page.jsx": {
+    "file": "assets/Game1Page-Dc72dcIh.js",
+    "name": "Game1Page",
+    "src": "src/games/game1/Game1Page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_TherapeuticGameLayout-ItShZm-T.js",
+      "index.html",
+      "_vendor-games-BbrE81bZ.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "assets": [
+      "assets/game1_1-Nf7DUuLq.jpg",
+      "assets/game1_2-qQagMNJu.jpg",
+      "assets/game1_3-CwCHMzkI.jpg",
+      "assets/game1_4-xkOzhaZF.jpg",
+      "assets/game1_5-Ba00xIjq.jpg"
+    ]
+  },
+  "src/games/game2/Game2Page.jsx": {
+    "file": "assets/Game2Page-Df8OwG5H.js",
+    "name": "Game2Page",
+    "src": "src/games/game2/Game2Page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_TherapeuticGameLayout-ItShZm-T.js",
+      "index.html",
+      "_vendor-games-BbrE81bZ.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "assets": [
+      "assets/game2_cama-BNH3nv8A.jpg",
+      "assets/game2_higiene-BzzPd9G4.jpg",
+      "assets/game2_lanche-ByuYcNiq.jpg",
+      "assets/game2_mochila-CK_MMjLV.jpg",
+      "assets/game2_roupa-Dosq_jMB.jpg"
+    ]
+  },
+  "src/games/game3/Game3Page.jsx": {
+    "file": "assets/Game3Page-D773Hq0U.js",
+    "name": "Game3Page",
+    "src": "src/games/game3/Game3Page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_TherapeuticGameLayout-ItShZm-T.js",
+      "index.html",
+      "_vendor-games-BbrE81bZ.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "assets": [
+      "assets/game3_jornada-CpO2G6j9.png",
+      "assets/game3_defesa-BYUrmrbC.png",
+      "assets/game3_escola-Bh4wlzRX.png",
+      "assets/game3_mudanca-DTOKFL8j.png",
+      "assets/game3_inibicao-DIs3IY3z.png",
+      "assets/game3_memoria-aHf71aq7.png"
+    ]
+  },
+  "src/games/game4/Game4Page.jsx": {
+    "file": "assets/Game4Page-B7k5FhJQ.js",
+    "name": "Game4Page",
+    "src": "src/games/game4/Game4Page.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_TherapeuticGameLayout-ItShZm-T.js",
+      "index.html",
+      "_vendor-games-BbrE81bZ.js",
+      "_game4-gAGDz6ZL.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js"
+    ],
+    "assets": [
+      "assets/game4_acordar-DLxdQB6y.png",
+      "assets/game4_escovar-C1MIDV3w.png",
+      "assets/game4_tomar-BTniVk4m.png",
+      "assets/game4_escola-D2UwDft7.png",
+      "assets/game4_brincar-kfYU9BtA.png",
+      "assets/game4_dormir-DfkiDW4N.png"
+    ]
+  },
+  "src/pages/AbaDashboard.jsx": {
+    "file": "assets/AbaDashboard-Dsn190q3.js",
+    "name": "AbaDashboard",
+    "src": "src/pages/AbaDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "src/DashboardABA.jsx",
+      "_vendor-charts-DjROEP7A.js",
+      "_logonovo-B8fpvhjk.js",
+      "_abaAiService-B3v2hJ5e.js",
+      "_vendor-ui-DE57BOUR.js",
+      "index.html",
+      "_DashboardABA-DtfJ3xxd.js"
+    ]
+  },
+  "src/pages/AbaPatient.jsx": {
+    "file": "assets/AbaPatient-yuJEzsGY.js",
+    "name": "AbaPatient",
+    "src": "src/pages/AbaPatient.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_DashboardABA-DtfJ3xxd.js",
+      "_abaAiService-B3v2hJ5e.js",
+      "_vendor-ui-DE57BOUR.js",
+      "index.html",
+      "src/pages/AbaReport.jsx",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "css": [
+      "assets/AbaPatient-CmsZegaD.css"
+    ]
+  },
+  "src/pages/AbaReport.jsx": {
+    "file": "assets/AbaReport--A3a76DL.js",
+    "name": "AbaReport",
+    "src": "src/pages/AbaReport.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_abaAiService-B3v2hJ5e.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/presentation-dashboard/PresentationCommunitySupport.jsx": {
+    "file": "assets/PresentationCommunitySupport-HWUrsRx1.js",
+    "name": "PresentationCommunitySupport",
+    "src": "src/presentation-dashboard/PresentationCommunitySupport.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logohoriz-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/presentation-dashboard/PresentationEmotionDetector.jsx": {
+    "file": "assets/PresentationEmotionDetector-DQ8RZWTE.js",
+    "name": "PresentationEmotionDetector",
+    "src": "src/presentation-dashboard/PresentationEmotionDetector.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/emotion-hero-CDBpeDYH.png",
+      "assets/emotion-detection-BqB7Z81u.png",
+      "assets/emotion-line-chart-4lkpnGkL.png",
+      "assets/emotion-bar-chart-CRiY4fYG.png",
+      "assets/emotion-insights-DnTQSVHG.png"
+    ]
+  },
+  "src/presentation-dashboard/PresentationIntegratedScheduling.jsx": {
+    "file": "assets/PresentationIntegratedScheduling-B2fgXYWH.js",
+    "name": "PresentationIntegratedScheduling",
+    "src": "src/presentation-dashboard/PresentationIntegratedScheduling.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logohoriz-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/presentation-dashboard/PresentationParentDashboard.jsx": {
+    "file": "assets/PresentationParentDashboard-BXKN_tH9.js",
+    "name": "PresentationParentDashboard",
+    "src": "src/presentation-dashboard/PresentationParentDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/presentation-dashboard/PresentationPatientDetails.jsx": {
+    "file": "assets/PresentationPatientDetails-DCvkfUSi.js",
+    "name": "PresentationPatientDetails",
+    "src": "src/presentation-dashboard/PresentationPatientDetails.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/dp 00-MlfrRJzj.png",
+      "assets/dp 01-BgM2zJVf.png",
+      "assets/dp 02-DWkAyb5J.png",
+      "assets/dp 04-DQUvZPtq.png",
+      "assets/dp 05-XPAIPZ5x.png"
+    ]
+  },
+  "src/presentation-dashboard/PresentationProfessionalDashboard.jsx": {
+    "file": "assets/PresentationProfessionalDashboard-DW_A66ae.js",
+    "name": "PresentationProfessionalDashboard",
+    "src": "src/presentation-dashboard/PresentationProfessionalDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/professional-hero-DuKjwb0i.png",
+      "assets/prof-dashboard-overview-B-k-QJCK.png",
+      "assets/prof-dashboard-patients-BQlxYSNd.png",
+      "assets/prof-dashboard-assistants-BFKgmkSs.png",
+      "assets/prof-dashboard-financial-37-HNdne.png",
+      "assets/prof-dashboard-monitoring-CL8grwE-.png"
+    ]
+  },
+  "src/presentation-dashboard/PresentationSecretaryDashboard.jsx": {
+    "file": "assets/PresentationSecretaryDashboard-N4gFOPSP.js",
+    "name": "PresentationSecretaryDashboard",
+    "src": "src/presentation-dashboard/PresentationSecretaryDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/secretary-main-B5zKGwho.png",
+      "assets/secretary-appointments-DzOF8Zeb.png",
+      "assets/secretary-patients-Cq15RbX_.png",
+      "assets/secretary-analytics-kTjtxR3C.png",
+      "assets/secretary-vision-DjXvItF3.png"
+    ]
+  },
+  "src/presentation-dashboard/PresentationServiceCertification.jsx": {
+    "file": "assets/PresentationServiceCertification-DKWIE_al.js",
+    "name": "PresentationServiceCertification",
+    "src": "src/presentation-dashboard/PresentationServiceCertification.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logohoriz-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/presentation-dashboard/PresentationServiceDashboard.jsx": {
+    "file": "assets/PresentationServiceDashboard-BtrJdNq0.js",
+    "name": "PresentationServiceDashboard",
+    "src": "src/presentation-dashboard/PresentationServiceDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-maps-H1tDn4eH.js",
+      "_logohoriz copy-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/presentation-dashboard/PresentationTriggerRecorder.jsx": {
+    "file": "assets/PresentationTriggerRecorder-Bfh_a_oW.js",
+    "name": "PresentationTriggerRecorder",
+    "src": "src/presentation-dashboard/PresentationTriggerRecorder.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logonovo-B8fpvhjk.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/recorder-main-DO4oHVHJ.png",
+      "assets/recorder-transcription-DZFLVXy_.png",
+      "assets/recorder-analysis-BmNwlE5V.png",
+      "assets/recorder-history-CrSfim7v.png",
+      "assets/recorder-quantitative-sooDaPgO.png"
+    ]
+  },
+  "src/presentation-dashboard/PresentationVirtualConsultations.jsx": {
+    "file": "assets/PresentationVirtualConsultations-CNhRhFcv.js",
+    "name": "PresentationVirtualConsultations",
+    "src": "src/presentation-dashboard/PresentationVirtualConsultations.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_logohoriz-BCLRz8jA.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/school/SchoolCameraDetails.jsx": {
+    "file": "assets/SchoolCameraDetails-CxHBiVUu.js",
+    "name": "SchoolCameraDetails",
+    "src": "src/school/SchoolCameraDetails.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolCameraMonitor.jsx": {
+    "file": "assets/SchoolCameraMonitor-CgKbtBEI.js",
+    "name": "SchoolCameraMonitor",
+    "src": "src/school/SchoolCameraMonitor.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_useSchoolMonitoringEngine-ZPAlORpu.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html",
+      "_emotionUtils-Bxrlb537.js"
+    ]
+  },
+  "src/school/SchoolCameras.jsx": {
+    "file": "assets/SchoolCameras-ibA-uB48.js",
+    "name": "SchoolCameras",
+    "src": "src/school/SchoolCameras.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_SchoolCameraGrid-DQ5xKw9R.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolClassrooms.jsx": {
+    "file": "assets/SchoolClassrooms-D-t_jqP0.js",
+    "name": "SchoolClassrooms",
+    "src": "src/school/SchoolClassrooms.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolDashboard.jsx": {
+    "file": "assets/SchoolDashboard-COitQ8YW.js",
+    "name": "SchoolDashboard",
+    "src": "src/school/SchoolDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolEvents.jsx": {
+    "file": "assets/SchoolEvents-CpKtnZ5r.js",
+    "name": "SchoolEvents",
+    "src": "src/school/SchoolEvents.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolLocations.jsx": {
+    "file": "assets/SchoolLocations-fKcOtWQ5.js",
+    "name": "SchoolLocations",
+    "src": "src/school/SchoolLocations.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolMonitoring.jsx": {
+    "file": "assets/SchoolMonitoring-BVcrsZij.js",
+    "name": "SchoolMonitoring",
+    "src": "src/school/SchoolMonitoring.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolMonitoringCentral-Cair3ZG9.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_SchoolShell-BACf98hb.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_SchoolCameraGrid-DQ5xKw9R.js",
+      "_useSchoolMonitoringEngine-ZPAlORpu.js",
+      "_emotionUtils-Bxrlb537.js"
+    ]
+  },
+  "src/school/SchoolMonitoringKiosk.jsx": {
+    "file": "assets/SchoolMonitoringKiosk-Dzo7TdVT.js",
+    "name": "SchoolMonitoringKiosk",
+    "src": "src/school/SchoolMonitoringKiosk.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolMonitoringCentral-Cair3ZG9.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_SchoolShell-BACf98hb.js",
+      "index.html",
+      "_vendor-ui-DE57BOUR.js",
+      "_SchoolCameraGrid-DQ5xKw9R.js",
+      "_useSchoolMonitoringEngine-ZPAlORpu.js",
+      "_emotionUtils-Bxrlb537.js"
+    ]
+  },
+  "src/school/SchoolReports.jsx": {
+    "file": "assets/SchoolReports-Cx4truRV.js",
+    "name": "SchoolReports",
+    "src": "src/school/SchoolReports.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolSettings.jsx": {
+    "file": "assets/SchoolSettings-CyL_Y6CM.js",
+    "name": "SchoolSettings",
+    "src": "src/school/SchoolSettings.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolStudentDetails.jsx": {
+    "file": "assets/SchoolStudentDetails-csm3Imc7.js",
+    "name": "SchoolStudentDetails",
+    "src": "src/school/SchoolStudentDetails.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_PatientFaceReferencePanel-B-U40W-X.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "_emotionService-CkDUeVzC.js",
+      "index.html",
+      "_emotionUtils-Bxrlb537.js"
+    ]
+  },
+  "src/school/SchoolStudents.jsx": {
+    "file": "assets/SchoolStudents-IpqYjn9Y.js",
+    "name": "SchoolStudents",
+    "src": "src/school/SchoolStudents.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/school/SchoolTeam.jsx": {
+    "file": "assets/SchoolTeam-m8J-RXz3.js",
+    "name": "SchoolTeam",
+    "src": "src/school/SchoolTeam.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_SchoolShell-BACf98hb.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js",
+      "index.html"
+    ]
+  },
+  "src/service_dashboard/ServiceDashboard01.jsx": {
+    "file": "assets/ServiceDashboard01-B0BDbQWC.js",
+    "name": "ServiceDashboard01",
+    "src": "src/service_dashboard/ServiceDashboard01.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-maps-H1tDn4eH.js",
+      "_logohoriz copy-BCLRz8jA.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ]
+  },
+  "src/service_dashboard/ServiceDashboard17.jsx": {
+    "file": "assets/ServiceDashboard17-DnYPqz8C.js",
+    "name": "ServiceDashboard17",
+    "src": "src/service_dashboard/ServiceDashboard17.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-maps-H1tDn4eH.js",
+      "_logohoriz copy-BCLRz8jA.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/17-sjQ2wYcM.jpg"
+    ]
+  },
+  "src/service_dashboard/ServiceDashboard18.jsx": {
+    "file": "assets/ServiceDashboard18-BDwWKqkR.js",
+    "name": "ServiceDashboard18",
+    "src": "src/service_dashboard/ServiceDashboard18.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-D5AOm95y.js",
+      "_vendor-maps-H1tDn4eH.js",
+      "_logonovo-B8fpvhjk.js",
+      "_vendor-ui-DE57BOUR.js",
+      "_vendor-charts-DjROEP7A.js"
+    ],
+    "assets": [
+      "assets/18-C0jQ6IvU.jpg"
+    ]
+  }
+}

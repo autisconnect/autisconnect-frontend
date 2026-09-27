@@ -2328,7 +2328,6 @@ p, span, div {
 .financial-dashboard .card .card-header,
 .secretary-dashboard .card .card-header,
 .emotion-detector-page .card .card-header,
-.stroke-risk-monitor-page .card .card-header,
 .trigger-recorder-page .card .card-header,
 .aba-module-page .card .card-header,
 .stereotypy-monitor-page .card .card-header {
@@ -2347,7 +2346,6 @@ p, span, div {
 .financial-dashboard .card .card-header h5,
 .secretary-dashboard .card .card-header h5,
 .emotion-detector-page .card .card-header h5,
-.stroke-risk-monitor-page .card .card-header h5,
 .trigger-recorder-page .card .card-header h5,
 .aba-module-page .card .card-header h5,
 .stereotypy-monitor-page .card .card-header h5  {
@@ -5639,3 +5637,4 @@ p, span, div {
 
 
 
+.app-route-loading{align-items:center;background:#f4f7fc;color:#163664;display:flex;flex-direction:column;gap:1rem;justify-content:center;min-height:100vh}.app-route-loading strong{font-size:.95rem}

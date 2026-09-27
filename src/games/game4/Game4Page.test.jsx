@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import Game4Page from './Game4Page';
 
 const { apiPostMock, ioMock, registryStore, createGameMock } = vi.hoisted(() => {
@@ -69,7 +69,7 @@ describe('Game4Page', () => {
     const onEvent = () => registryStore.get('onEvent');
     const onSessionComplete = () => registryStore.get('onSessionComplete');
 
-    await screen.findByText(/Routine Builder/i);
+    await screen.findByRole('heading', { level: 1, name: /Construtor de Rotinas/i });
 
     await act(async () => {
       onEvent()({
@@ -110,9 +110,9 @@ describe('Game4Page', () => {
     });
 
     expect(await screen.findByText(/Excelente Trabalho!/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Avancar para o Nivel 2/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Avançar para o Nível 2/i })).toBeEnabled();
     expect(screen.getByRole('button', { name: /Praticar Novamente/i })).toBeEnabled();
-    expect(screen.getByRole('button', { name: /Encerrar Sessao/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Encerrar Sessão/i })).toBeEnabled();
 
     expect(apiPostMock).toHaveBeenCalledWith('/games/game4/end-session', expect.any(Object));
   });

@@ -8,7 +8,6 @@ import logonovo from '../assets/logonovo.png';
 import dp00 from '../assets/dp 00.png'; // hero principal
 import dp01 from '../assets/dp 01.png'; // Visão Geral Completa
 import dp02 from '../assets/dp 02.png'; // Análise Emocional por IA
-import dp03 from '../assets/dp 03.png'; // Monitoramento de Risco de AVC
 import dp04 from '../assets/dp 04.png'; // Análise de Vocalizações
 import dp05 from '../assets/dp 05.png'; // Prescrições e Histórico
 
@@ -92,15 +91,6 @@ function PresentationPatientDetails() {
                 <Image src={dp02} fluid rounded className="mb-4" style={{ height: '220px', objectFit: 'cover' }} alt="Análise Emocional por IA" />
                 <h4 className="fw-bold">Análise Emocional por IA</h4>
                 <p>Gráficos de humor, picos emocionais, volatilidade e previsões com inteligência artificial avançada.</p>
-                </Card>
-            </Col>
-
-            {/* 03 - Monitoramento de Risco de AVC */}
-            <Col md={6} lg={4}>
-                <Card className="h-100 shadow-sm border-0 text-center p-4 hover-lift">
-                <Image src={dp03} fluid rounded className="mb-4" style={{ height: '220px', objectFit: 'cover' }} alt="Monitoramento de Risco de AVC" />
-                <h4 className="fw-bold">Monitoramento de Risco de AVC</h4>
-                <p>Detecção automática de assimetria facial com alertas em tempo real.</p>
                 </Card>
             </Col>
 

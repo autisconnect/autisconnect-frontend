@@ -20,7 +20,7 @@ import {
     Stars,
     Wallet2
 } from 'react-bootstrap-icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import apiClient from './services/api.js';
 import logohori from './assets/logonovo.png';
@@ -45,6 +45,18 @@ const profileOptions = [
         value: 'clinica',
         title: 'Clínica',
         description: 'Gerencie serviços e conexões profissionais em uma operação integrada.',
+        icon: Building
+    },
+    {
+        value: 'servicos_locais',
+        title: 'Comerciante',
+        description: 'Divulgue seus serviços e conecte seu negócio à comunidade AutisConnect.',
+        icon: Stars
+    },
+    {
+        value: 'school',
+        title: 'Escola',
+        description: 'Acompanhe alunos, turmas e ambientes escolares em uma plataforma integrada.',
         icon: Building
     }
 ];
@@ -112,9 +124,9 @@ const coverageOptions = [
 
 const parentPlans = [
     {
-        title: 'Plano Acompanhar+',
-        price: 'R$ 89,90',
-        planId: 'acompanhar_plus',
+        title: 'Plano Família',
+        price: 'R$ 69,90',
+        planId: 'organizar',
         features: ['Gerenciamento Completo', 'Todos os Monitoramentos com IA', 'Análise Preditiva e Insights']
     }
 ];
@@ -143,6 +155,62 @@ const professionalPlans = [
         price: 'R$ 499,90',
         planId: 'analisar_plus_500',
         features: ['Até 500 Pacientes', 'Acesso completo à IA']
+    }
+];
+
+const clinicPlans = [
+    {
+        title: 'Plano Clínica',
+        price: 'R$ 599,90',
+        planId: 'gerenciar',
+        features: ['Gestão integrada da clínica', 'Equipe, pacientes e atendimentos em um só lugar']
+    },
+    {
+        title: 'Plano Clínica Executive',
+        price: 'R$ 899,90',
+        planId: 'acompanhar_plus',
+        features: ['Todos os recursos do Plano Clínica', 'Indicadores e visão executiva da operação']
+    }
+];
+
+const merchantPlans = [
+    {
+        title: 'Plano Comerciante',
+        price: 'R$ 29,90',
+        planId: 'comerciante',
+        checkoutUrl: 'https://mpago.la/2keEdZj',
+        features: ['Presença na rede AutisConnect', 'Divulgação de serviços para a comunidade']
+    }
+];
+
+const schoolPlans = [
+    {
+        title: 'Plano School Start',
+        price: 'R$ 499,00',
+        planId: 'school_start',
+        checkoutUrl: 'https://mpago.la/2RgKYQg',
+        features: ['Estrutura inicial para gestão escolar', 'Acesso aos recursos AutisConnect School']
+    },
+    {
+        title: 'Plano School 25',
+        price: 'R$ 799,00',
+        planId: 'school_25',
+        checkoutUrl: 'https://mpago.la/1aU3PYG',
+        features: ['Estrutura para até 25 alunos', 'Acesso aos recursos AutisConnect School']
+    },
+    {
+        title: 'Plano School 50',
+        price: 'R$ 1.290,00',
+        planId: 'school_50',
+        checkoutUrl: 'https://mpago.la/1gtUr5W',
+        features: ['Estrutura para até 50 alunos', 'Acesso aos recursos AutisConnect School']
+    },
+    {
+        title: 'Plano School 100',
+        price: 'R$ 1.990,00',
+        planId: 'school_100',
+        checkoutUrl: 'https://mpago.la/2TgWpaX',
+        features: ['Estrutura para até 100 alunos', 'Acesso aos recursos AutisConnect School']
     }
 ];
 
@@ -296,7 +364,9 @@ function PasswordStrength({ password, passwordStrength }) {
     );
 }
 
-function PlanCard({ title, price, features, planId, onSelect, isLoading, isSelected }) {
+function PlanCard({ plan, onSelect, isLoading, isSelected }) {
+    const { title, price, features } = plan;
+
     return (
         <div className={`ac-signup-plan${isSelected ? ' is-selected' : ''}`}>
             <div className="ac-signup-plan__header">
@@ -312,7 +382,7 @@ function PlanCard({ title, price, features, planId, onSelect, isLoading, isSelec
                     </li>
                 ))}
             </ul>
-            <Button onClick={() => onSelect(planId)} disabled={isLoading} className="w-100">
+            <Button onClick={() => onSelect(plan)} disabled={isLoading} className="w-100">
                 {isLoading && isSelected ? (
                     <>
                         <Spinner as="span" animation="border" size="sm" className="me-2" />
@@ -340,8 +410,7 @@ function Signup() {
         cep: { status: 'idle', message: '' },
         cnpj: { status: 'idle', message: '' }
     });
-    const navigate = useNavigate();
-    const isBusinessUser = tipoUsuario === 'servicos_locais' || tipoUsuario === 'clinica';
+    const isBusinessUser = ['servicos_locais', 'clinica', 'school'].includes(tipoUsuario);
 
     const handleTipoUsuarioChange = (eventOrValue) => {
         const value = typeof eventOrValue === 'string' ? eventOrValue : eventOrValue.target.value;
@@ -374,22 +443,14 @@ function Signup() {
 
             await apiClient.post('/signup', payload);
 
-            if (isBusinessUser) {
-                setSuccess('Cadastro realizado com sucesso! Você já pode fazer o login.');
-                if (tipoUsuario === 'clinica') {
-                    setSuccess('Cadastro da clínica realizado com sucesso! Você já pode fazer o login.');
-                }
-                setTimeout(() => navigate('/login'), 3000);
-            } else {
-                const loginResponse = await apiClient.post('/auth/login', {
-                    username: formData.email,
-                    password: formData.password
-                });
-                localStorage.setItem('token', loginResponse.data.token);
+            const loginResponse = await apiClient.post('/auth/login', {
+                username: formData.email,
+                password: formData.password
+            });
+            localStorage.setItem('token', loginResponse.data.token);
 
-                setSuccess('Cadastro concluído! Agora, escolha seu plano para ativar a conta.');
-                setEtapa('planos');
-            }
+            setSuccess('Cadastro concluído! Agora, escolha seu plano para ativar a conta.');
+            setEtapa('planos');
         } catch (err) {
             console.error('Erro ao cadastrar:', err);
             setError(err.response?.data?.error || 'Erro de rede ao cadastrar.');
@@ -398,14 +459,19 @@ function Signup() {
         }
     };
 
-    const handleAssinarPlano = async (planId) => {
+    const handleAssinarPlano = async (plan) => {
+        const { planId, checkoutUrl } = plan;
         setSelectedPlan(planId);
         setIsLoading(true);
         setError('');
         try {
+            if (checkoutUrl) {
+                window.location.assign(checkoutUrl);
+                return;
+            }
+
             const response = await apiClient.post('/payment/create-subscription-checkout', { planId });
-            const { checkoutUrl } = response.data;
-            window.location.href = checkoutUrl;
+            window.location.assign(response.data.checkoutUrl);
         } catch (err) {
             console.error('Erro ao criar checkout:', err);
             setError(err.response?.data?.error || 'Não foi possível iniciar o processo de pagamento.');
@@ -567,8 +633,15 @@ function Signup() {
     };
 
     const currentProfile = profileOptions.find((item) => item.value === tipoUsuario);
-    const currentPlans = tipoUsuario === 'pais_responsavel' ? parentPlans : professionalPlans;
-    const submitButtonLabel = isBusinessUser ? 'Criar conta' : 'Continuar para planos';
+    const plansByUserType = {
+        pais_responsavel: parentPlans,
+        medicos_terapeutas: professionalPlans,
+        clinica: clinicPlans,
+        servicos_locais: merchantPlans,
+        school: schoolPlans
+    };
+    const currentPlans = plansByUserType[tipoUsuario] || [];
+    const submitButtonLabel = 'Continuar para planos';
     const passwordCriteria = getPasswordCriteria(formData.password || '');
 
     const renderLookupMessage = (key) => {
@@ -1322,10 +1395,7 @@ function Signup() {
                             {currentPlans.map((plan) => (
                                 <PlanCard
                                     key={plan.planId}
-                                    title={plan.title}
-                                    price={plan.price}
-                                    features={plan.features}
-                                    planId={plan.planId}
+                                    plan={plan}
                                     onSelect={handleAssinarPlano}
                                     isLoading={isLoading}
                                     isSelected={selectedPlan === plan.planId}

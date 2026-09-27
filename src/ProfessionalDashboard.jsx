@@ -48,6 +48,9 @@ import {
 } from 'chart.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
+import ContextSelector from './components/hospital/ContextSelector';
+import HospitalProfessionalDashboard from './components/hospital/HospitalProfessionalDashboard';
+import { useInstitutionContext } from './context/InstitutionContext';
 import apiClient from './services/api.js';
 import logonovo from './assets/logonovo.png';
 import './App.css';
@@ -142,6 +145,7 @@ function LoadingShell() {
 
 const ProfessionalDashboard = () => {
     const { user, logout } = useContext(AuthContext);
+    const { currentContext } = useInstitutionContext();
     const navigate = useNavigate();
     const { id: dashboardId } = useParams();
 
@@ -944,6 +948,11 @@ const ProfessionalDashboard = () => {
             return;
         }
 
+        if (currentContext?.type === 'hospital') {
+            setLoading(false);
+            return;
+        }
+
         if (user.tipo_usuario !== 'medicos_terapeutas' || (dashboardId && dashboardId !== user.id.toString())) {
             console.warn('Acesso negado ou ID da URL incorreto. Redirecionando...');
             navigate(`/professional-dashboard/${user.id}`);
@@ -971,12 +980,12 @@ const ProfessionalDashboard = () => {
         };
 
         fetchAllData();
-    }, [user, navigate, dashboardId]);
+    }, [user, navigate, dashboardId, currentContext?.key, currentContext?.type]);
 
     useEffect(() => {
-        if (!user || loading) return;
+        if (!user || loading || currentContext?.type === 'hospital') return;
         fetchPatients();
-    }, [statusFilter]);
+    }, [statusFilter, currentContext?.type]);
 
     const renderSidebarNavItem = (item, mobile = false) => {
         const Icon = item.icon;
@@ -1864,6 +1873,10 @@ const ProfessionalDashboard = () => {
         }
     };
 
+    if (currentContext?.type === 'hospital') {
+        return <HospitalProfessionalDashboard context={currentContext} />;
+    }
+
     if (loading) {
         return (
             <ErrorBoundary>
@@ -1875,6 +1888,11 @@ const ProfessionalDashboard = () => {
     return (
         <ErrorBoundary>
             <div className={`ac-prof-dashboard${isSidebarCollapsed ? ' ac-prof-dashboard--collapsed' : ''}`}>
+                {currentContext?.type === 'clinic' && (
+                    <div className="alert alert-info mx-3 mt-3 mb-0" role="status">
+                        Você está atuando no contexto da clínica <strong>{currentContext.name}</strong>. Os dados permanecem limitados aos pacientes com vínculo profissional.
+                    </div>
+                )}
                 <aside className="ac-prof-sidebar-shell">{renderSidebar()}</aside>
 
                 <Offcanvas
@@ -1907,6 +1925,7 @@ const ProfessionalDashboard = () => {
                         </div>
 
                         <div className="ac-prof-header__actions">
+                            <ContextSelector />
                             <button type="button" className="ac-prof-icon-button" onClick={() => setActiveTab('overview')} aria-label="Notificações">
                                 <Bell />
                                 {unreadNotifications > 0 ? <span className="ac-prof-icon-button__badge">{unreadNotifications}</span> : null}

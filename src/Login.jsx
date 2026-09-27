@@ -31,7 +31,7 @@ function Login() {
                 throw new Error('Resposta de login invalida do servidor.');
             }
 
-            login(token, user);
+            await login(token, user);
         } catch (err) {
             console.error('Erro ao fazer login:', err);
             const errorMessage = err.response?.data?.error || 'Erro de conexao. Verifique sua rede e a URL da API.';

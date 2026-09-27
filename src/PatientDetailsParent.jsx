@@ -31,7 +31,6 @@ import {
     Mic,
     PersonCircle,
     PlusCircle,
-    ShieldCheck,
     Stars,
     Wallet
 } from 'react-bootstrap-icons';
@@ -77,7 +76,6 @@ ChartJS.register(
 
 const ROUTES = {
     EMOTION_DETECTOR: '/emotion-detector',
-    STROKE_RISK_MONITOR: '/stroke-risk-monitor',
     TRIGGER_RECORDER: '/trigger-recorder',
     STEREOTYPY_MONITOR: '/stereotypy-monitor',
     ABA_MODULE: '/aba/patient'
@@ -85,7 +83,6 @@ const ROUTES = {
 
 const MONITORING_WINDOW_NAMES = {
     [ROUTES.EMOTION_DETECTOR]: 'autisconnect-emotion-detector',
-    [ROUTES.STROKE_RISK_MONITOR]: 'autisconnect-stroke-risk-monitor',
     [ROUTES.TRIGGER_RECORDER]: 'autisconnect-trigger-recorder',
     [ROUTES.STEREOTYPY_MONITOR]: 'autisconnect-stereotypy-monitor',
     [ROUTES.ABA_MODULE]: 'autisconnect-aba-patient'
@@ -121,11 +118,6 @@ const SECTION_META = {
         eyebrow: 'Comunicação',
         title: 'Comunicação & Vocalizações',
         description: 'Entenda padrões de comunicação registrados ao longo do acompanhamento.'
-    },
-    stroke: {
-        eyebrow: 'Monitoramento',
-        title: 'Monitoramento Facial',
-        description: 'Consulte indicadores de assimetria facial e sinais observados ao longo do período.'
     },
     games: {
         eyebrow: 'Desenvolvimento',
@@ -171,7 +163,6 @@ const PATIENT_NAVIGATION_GROUPS = [
         items: [
             { key: 'emotion', label: 'Emoções', icon: EmojiSmile },
             { key: 'trigger', label: 'Vocalizações', icon: Mic },
-            { key: 'stroke', label: 'Monitoramento Facial', icon: ShieldCheck }
         ]
     },
     {
@@ -297,7 +288,6 @@ const normalizePaymentDetails = (value, rawValue) => {
 };
 
 const normalizePaymentStatus = (value) => normalizeText(value) || 'Pendente';
-const normalizeRiskLevel = (value) => normalizeText(value) || 'Sem dados';
 const normalizeAppointmentType = (value) => normalizeText(value) || 'Regular';
 
 const safeDateFromRecord = (value, timeValue) => {
@@ -583,63 +573,6 @@ const generateAISummary = (analysis) => {
     return summary;
 };
 
-const analyzeStrokeRiskPatterns = (riskRecords) => {
-    if (!riskRecords || riskRecords.length === 0) {
-        return null;
-    }
-
-    const sortedRecords = [...riskRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
-    const totalCount = sortedRecords.length;
-    const lastRecord = sortedRecords[sortedRecords.length - 1];
-
-    const counts = sortedRecords.reduce((accumulator, record) => {
-        accumulator[record.risk_level] = (accumulator[record.risk_level] || 0) + 1;
-        return accumulator;
-    }, {});
-
-    const distribution = ['Baixo', 'Médio', 'Alto'].map((level) => ({
-        level,
-        percentage: ((counts[level] || 0) / totalCount * 100).toFixed(1)
-    }));
-
-    const recentHighRisk = sortedRecords.filter((record) => (
-        record.risk_level === 'Alto'
-            && new Date(record.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    ));
-
-    return {
-        lastRiskLevel: lastRecord.risk_level,
-        lastAsymmetryIndex: Number.parseFloat(lastRecord.asymmetry_index).toFixed(2),
-        distribution,
-        hasRecentHighRisk: recentHighRisk.length > 0
-    };
-};
-
-const generateStrokeAISummary = (analysis) => {
-    if (!analysis) {
-        return 'Aguardando dados de risco de AVC para gerar resumo.';
-    }
-
-    const { lastRiskLevel, distribution, hasRecentHighRisk } = analysis;
-    const highRiskPercentage = distribution.find((item) => item.level === 'Alto')?.percentage || 0;
-
-    let summary = `O nível de risco mais recente do paciente foi classificado como **${lastRiskLevel}**. `;
-
-    if (Number(highRiskPercentage) > 10) {
-        summary += `É importante notar que **${highRiskPercentage}%** das medições indicaram risco **alto**, sugerindo necessidade de acompanhamento contínuo. `;
-    } else {
-        summary += 'A maioria das medições indicou risco baixo a moderado no período analisado. ';
-    }
-
-    if (hasRecentHighRisk) {
-        summary += '**Alerta:** foram detectados episódios de risco **alto** na última semana, recomendando atenção aos sinais clínicos.';
-    } else {
-        summary += 'Não foram detectados episódios de risco alto na última semana.';
-    }
-
-    return summary;
-};
-
 const analyzeVocalizationPatterns = (vocalizationRecords) => {
     if (!vocalizationRecords || vocalizationRecords.length === 0) {
         return null;
@@ -688,18 +621,7 @@ const generateVocalizationAISummary = (analysis) => {
     return summary;
 };
 
-const processChartData = (strokeRisks, emotions, vocalizations) => {
-    const strokeChartData = {
-        labels: strokeRisks.map((record) => new Date(record.date).toLocaleDateString('pt-BR')),
-        datasets: [{
-            label: 'Índice de Assimetria Facial',
-            data: strokeRisks.map((record) => Number.parseFloat(record.asymmetry_index || 0)),
-            borderColor: '#dc2626',
-            backgroundColor: 'rgba(220, 38, 38, 0.12)',
-            fill: true,
-            tension: 0.35
-        }]
-    };
+const processChartData = (emotions, vocalizations) => {
 
     const emotionTypes = ['happy', 'sad', 'neutral', 'angry', 'surprised', 'fearful', 'disgusted'];
     const emotionColors = {
@@ -804,7 +726,6 @@ const processChartData = (strokeRisks, emotions, vocalizations) => {
     }
 
     return {
-        strokeData: strokeChartData,
         emotionData: emotionLineChartData,
         emotionDistributionData,
         vocalizationTrendData,
@@ -925,7 +846,6 @@ const PatientDetailsParent = () => {
 
     const [patient, setPatient] = useState(null);
     const [notes, setNotes] = useState([]);
-    const [strokeRisks, setStrokeRisks] = useState([]);
     const [emotions, setEmotions] = useState([]);
     const [prescriptions, setPrescriptions] = useState([]);
     const [newPrescription, setNewPrescription] = useState({
@@ -944,8 +864,6 @@ const PatientDetailsParent = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [prediction, setPrediction] = useState('Calculando previsão...');
     const [anomaly, setAnomaly] = useState(null);
-    const [strokePrediction, setStrokePrediction] = useState('Calculando previsão...');
-    const [strokeAnomaly, setStrokeAnomaly] = useState(null);
     const [vocalizations, setVocalizations] = useState([]);
     const [vocalizationPrediction, setVocalizationPrediction] = useState('Calculando previsão...');
     const [vocalizationAnomaly, setVocalizationAnomaly] = useState(null);
@@ -1053,14 +971,12 @@ const PatientDetailsParent = () => {
                 notesRes,
                 consultationsRes,
                 vocalizationsRes,
-                strokeRes,
                 emotionsRes
             ] = await Promise.all([
                 apiClient.get(`/parent/patient/${patientId}`),
                 apiClient.get(`/parent/patient/${patientId}/recommendations`),
                 apiClient.get(`/parent/patient/${patientId}/upcoming-appointments`),
                 apiClient.get(`/vocalizations/${patientId}`),
-                apiClient.get(`/stroke-risk/${patientId}`),
                 apiClient.get(`/emotions/${patientId}`)
             ]);
 
@@ -1109,13 +1025,6 @@ const PatientDetailsParent = () => {
                 })
                 : [];
 
-            const normalizedStrokeRisks = Array.isArray(strokeRes.data)
-                ? strokeRes.data.map((record) => ({
-                    ...record,
-                    risk_level: normalizeRiskLevel(record.risk_level)
-                }))
-                : [];
-
             const normalizedEmotions = Array.isArray(emotionsRes.data)
                 ? emotionsRes.data.map((record) => ({
                     ...record,
@@ -1135,7 +1044,6 @@ const PatientDetailsParent = () => {
             setNotes(normalizedNotes);
             setConsultations(normalizedConsultations);
             setVocalizations(normalizedVocalizations);
-            setStrokeRisks(normalizedStrokeRisks);
             setEmotions(normalizedEmotions);
         } catch (fetchError) {
             console.error('Erro ao carregar dados do paciente:', fetchError);
@@ -1373,23 +1281,6 @@ const PatientDetailsParent = () => {
     }, [emotions.length, patientId]);
 
     useEffect(() => {
-        if (patientId && strokeRisks.length > 0) {
-            const fetchStrokeAIAnalysis = async () => {
-                try {
-                    const aiResponse = await apiClient.get(`/iaemotions/analysis/${patientId}?type=stroke`);
-                    setStrokePrediction(normalizeText(aiResponse.data.predictionText || 'Previsão de risco gerada.'));
-                    setStrokeAnomaly(aiResponse.data.anomaly || null);
-                } catch (aiError) {
-                    console.error('Erro ao buscar análise de IA para risco de AVC:', aiError);
-                    setStrokePrediction('Não foi possível conectar ao serviço de análise de risco.');
-                }
-            };
-
-            fetchStrokeAIAnalysis();
-        }
-    }, [patientId, strokeRisks.length]);
-
-    useEffect(() => {
         if (patientId && vocalizations.length > 0) {
             const fetchVocalizationAI = async () => {
                 try {
@@ -1438,10 +1329,6 @@ const PatientDetailsParent = () => {
         () => filterRecordsByPeriod(emotions, periodFilter, (record) => record.timestamp),
         [emotions, periodFilter]
     );
-    const filteredStrokeRisks = useMemo(
-        () => filterRecordsByPeriod(strokeRisks, periodFilter, (record) => record.date),
-        [periodFilter, strokeRisks]
-    );
     const filteredVocalizations = useMemo(
         () => filterRecordsByPeriod(vocalizations, periodFilter, (record) => record.date),
         [periodFilter, vocalizations]
@@ -1461,21 +1348,16 @@ const PatientDetailsParent = () => {
         [...filteredEmotions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] || null
     ), [filteredEmotions]);
 
-    const latestStrokeRecord = useMemo(() => (
-        [...filteredStrokeRisks].sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null
-    ), [filteredStrokeRisks]);
-
     const latestVocalizationRecord = useMemo(() => (
         [...filteredVocalizations].sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null
     ), [filteredVocalizations]);
 
     const emotionAnalysis = useMemo(() => analyzeEmotionPatterns(filteredEmotions), [filteredEmotions]);
-    const strokeRiskAnalysis = useMemo(() => analyzeStrokeRiskPatterns(filteredStrokeRisks), [filteredStrokeRisks]);
     const vocalizationAnalysis = useMemo(() => analyzeVocalizationPatterns(filteredVocalizations), [filteredVocalizations]);
 
     const chartData = useMemo(
-        () => processChartData(filteredStrokeRisks, filteredEmotions, filteredVocalizations),
-        [filteredEmotions, filteredStrokeRisks, filteredVocalizations]
+        () => processChartData(filteredEmotions, filteredVocalizations),
+        [filteredEmotions, filteredVocalizations]
     );
 
     const lineOptions = useMemo(() => ({
@@ -1567,22 +1449,6 @@ const PatientDetailsParent = () => {
             });
         }
 
-        if (strokeRiskAnalysis?.hasRecentHighRisk) {
-            alerts.push({
-                tone: 'critical',
-                title: 'Risco elevado na última semana',
-                description: 'Foram identificados registros de risco alto no período recente. Vale compartilhar esta leitura com a equipe responsável.'
-            });
-        }
-
-        if (strokeAnomaly?.detected) {
-            alerts.push({
-                tone: 'critical',
-                title: 'Anomalia no monitoramento facial',
-                description: normalizeText(strokeAnomaly.message)
-            });
-        }
-
         if (vocalizationAnomaly?.detected) {
             alerts.push({
                 tone: 'warning',
@@ -1600,10 +1466,9 @@ const PatientDetailsParent = () => {
         }
 
         return alerts;
-    }, [anomaly, strokeAnomaly, strokeRiskAnalysis, triggers.length, vocalizationAnomaly]);
+    }, [anomaly, triggers.length, vocalizationAnomaly]);
 
     const emotionSummary = useMemo(() => generateAISummary(emotionAnalysis), [emotionAnalysis]);
-    const strokeSummary = useMemo(() => generateStrokeAISummary(strokeRiskAnalysis), [strokeRiskAnalysis]);
     const vocalizationSummary = useMemo(() => generateVocalizationAISummary(vocalizationAnalysis), [vocalizationAnalysis]);
 
     const mobileNavValue = activeTab;
@@ -1712,12 +1577,6 @@ const PatientDetailsParent = () => {
                     tone="emotion"
                 />
                 <MetricCard
-                    label="Risco atual"
-                    value={strokeRiskAnalysis ? strokeRiskAnalysis.lastRiskLevel : 'Sem dados'}
-                    hint={strokeRiskAnalysis ? `Índice ${strokeRiskAnalysis.lastAsymmetryIndex}` : 'Nenhuma medição disponível'}
-                    tone="risk"
-                />
-                <MetricCard
                     label="Gravações registradas"
                     value={vocalizationAnalysis ? vocalizationAnalysis.totalRecordings : 'Sem dados'}
                     hint={vocalizationAnalysis ? `Média ${vocalizationAnalysis.averageWordCount} palavras` : 'Nenhuma gravação disponível'}
@@ -1766,16 +1625,6 @@ const PatientDetailsParent = () => {
                             <article className="ac-parent-patient-insight-card">
                                 <header>
                                     <div>
-                                        <span className="ac-parent-patient-insight-card__badge">Análise com IA • Monitoramento</span>
-                                        <h4>Monitoramento facial</h4>
-                                    </div>
-                                    <ShieldCheck />
-                                </header>
-                                <p>{renderRichSummary(strokeSummary)}</p>
-                            </article>
-                            <article className="ac-parent-patient-insight-card">
-                                <header>
-                                    <div>
                                         <span className="ac-parent-patient-insight-card__badge">Análise com IA • Comunicação</span>
                                         <h4>Comunicação</h4>
                                     </div>
@@ -1805,23 +1654,6 @@ const PatientDetailsParent = () => {
                             )}
                         </ShellCard>
 
-                        <ShellCard
-                            eyebrow="Evolução"
-                            title="Índice de Assimetria Facial"
-                            subtitle="Indicadores de monitoramento não substituem avaliação médica."
-                            bodyClassName="ac-parent-patient-chart-card"
-                        >
-                            {chartData.strokeData?.labels?.length > 0 ? (
-                                <div className="ac-parent-patient-chart">
-                                    <Line data={chartData.strokeData} options={lineOptions} />
-                                </div>
-                            ) : (
-                                <EmptyState
-                                    title="Nenhuma medição disponível"
-                                    description="Nenhum registro de risco facial foi encontrado para o período selecionado."
-                                />
-                            )}
-                        </ShellCard>
                     </div>
                 </div>
 
@@ -1885,10 +1717,6 @@ const PatientDetailsParent = () => {
                             <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(ROUTES.EMOTION_DETECTOR)}>
                                 <EmojiSmile />
                                 <span>Emoções</span>
-                            </button>
-                            <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(ROUTES.STROKE_RISK_MONITOR)}>
-                                <ShieldCheck />
-                                <span>AVC</span>
                             </button>
                             <button type="button" className="ac-parent-patient-quick-tool" onClick={() => handleOpenMonitoringTool(ROUTES.TRIGGER_RECORDER)}>
                                 <Mic />
@@ -2195,92 +2023,6 @@ const PatientDetailsParent = () => {
         </div>
     );
 
-    const renderStrokeSection = () => (
-        <div className="ac-parent-patient-detail-grid">
-            <ShellCard
-                eyebrow="Resumo inteligente"
-                title="Monitoramento Facial"
-                subtitle="Indicadores de monitoramento não substituem avaliação médica."
-            >
-                <p className="ac-parent-patient-summary-text">{renderRichSummary(strokeSummary)}</p>
-            </ShellCard>
-
-            <div className="ac-parent-patient-chart-grid">
-                <ShellCard
-                    eyebrow="Visualização"
-                    title="Evolução do Índice de Assimetria Facial"
-                    subtitle="Leitura histórica das medições disponíveis no período."
-                    bodyClassName="ac-parent-patient-chart-card"
-                >
-                    {chartData.strokeData?.labels?.length > 0 ? (
-                        <div className="ac-parent-patient-chart">
-                            <Line data={chartData.strokeData} options={lineOptions} />
-                        </div>
-                    ) : (
-                        <EmptyState
-                            title="Nenhuma medição disponível"
-                            description="Nenhum registro de risco facial foi encontrado para este período."
-                        />
-                    )}
-                </ShellCard>
-
-                <ShellCard
-                    eyebrow="Análise"
-                    title="Distribuição Geral de Risco"
-                    subtitle="Leitura do último risco registrado e da distribuição geral do período."
-                >
-                    {strokeRiskAnalysis ? (
-                        <>
-                            <div className="ac-parent-patient-summary-block">
-                                <div className="ac-parent-patient-summary-block__top">
-                                    <strong>Risco mais recente</strong>
-                                    <StatusPill value={strokeRiskAnalysis.lastRiskLevel} />
-                                </div>
-                                <p>Índice de assimetria: {strokeRiskAnalysis.lastAsymmetryIndex}</p>
-                            </div>
-                            <div className="ac-parent-patient-insight-list">
-                                {strokeRiskAnalysis.distribution.map((item) => (
-                                    <div key={item.level} className="ac-parent-patient-insight-list__item">
-                                        <span>{item.level}</span>
-                                        <strong>{item.percentage}%</strong>
-                                    </div>
-                                ))}
-                            </div>
-                        </>
-                    ) : (
-                        <EmptyState
-                            title="Sem análise disponível"
-                            description="Ainda não há dados suficientes para gerar a análise de risco."
-                        />
-                    )}
-                </ShellCard>
-            </div>
-
-            <ShellCard
-                eyebrow="Tendência"
-                title="Projeções e sinais de atenção"
-                subtitle="Sinais preditivos assistivos para apoio à avaliação profissional."
-            >
-                <div className="ac-parent-patient-summary-block">
-                    <strong>Tendência observada</strong>
-                    <p>{normalizeText(strokePrediction)}</p>
-                </div>
-                {strokeAnomaly?.detected ? (
-                    <AlertCard
-                        tone="critical"
-                        title="Anomalia detectada"
-                        description={normalizeText(strokeAnomaly.message)}
-                    />
-                ) : (
-                    <EmptyState
-                        title="Sem anomalias sinalizadas"
-                        description="Até o momento, a análise de IA não destacou anomalias faciais relevantes."
-                    />
-                )}
-            </ShellCard>
-        </div>
-    );
-
     const renderGamesSection = () => (
         <div className="ac-games-container">
             <div className="ac-games-header">
@@ -2310,14 +2052,6 @@ const PatientDetailsParent = () => {
                 buttonLabel="Abrir detector"
                 onClick={() => handleOpenMonitoringTool(ROUTES.EMOTION_DETECTOR)}
                 tone="primary"
-            />
-            <MonitoringToolCard
-                icon={ShieldCheck}
-                title="Monitoramento de Risco de AVC"
-                description="Acesse o monitor facial para registrar medições de assimetria e sinais observacionais."
-                buttonLabel="Abrir monitor"
-                onClick={() => handleOpenMonitoringTool(ROUTES.STROKE_RISK_MONITOR)}
-                tone="warning"
             />
             <MonitoringToolCard
                 icon={Mic}
@@ -2688,8 +2422,6 @@ const PatientDetailsParent = () => {
             return renderEmotionSection();
         case 'trigger':
             return renderVocalizationSection();
-        case 'stroke':
-            return renderStrokeSection();
         case 'games':
             return renderGamesSection();
         case 'consultation':

@@ -1,0 +1,26 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Badge, Button, Form, Spinner } from 'react-bootstrap';
+import { ArrowClockwise, ClockHistory, FileEarmarkLock, Funnel, Person, ShieldCheck } from 'react-bootstrap-icons';
+import apiClient from '../../services/api';
+import './HospitalAudit.css';
+
+const initialFilters = { from: '', to: '', action: '', outcome: '', userId: '' };
+const outcomeLabel = { success: 'Sucesso', denied: 'Negado', failure: 'Falha' };
+const tone = { success: 'success', denied: 'warning', failure: 'danger' };
+const formatDate = (value) => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date(value)) : '—';
+
+export default function HospitalAudit({ hospitalId }) {
+  const [filters, setFilters] = useState(initialFilters); const [applied, setApplied] = useState(initialFilters);
+  const [data, setData] = useState(null); const [page, setPage] = useState(1); const [loading, setLoading] = useState(true); const [error, setError] = useState('');
+  const load = useCallback(async () => { setLoading(true); setError(''); try { setData((await apiClient.get(`/hospitals/${hospitalId}/audit`, { params: { ...Object.fromEntries(Object.entries(applied).filter(([, value]) => value)), page, limit: 25 } })).data); } catch (e) { setError(e.response?.data?.error || 'Não foi possível consultar a auditoria.'); } finally { setLoading(false); } }, [applied, hospitalId, page]);
+  useEffect(() => { load(); }, [load]);
+  const submit = (event) => { event.preventDefault(); setPage(1); setApplied(filters); };
+  return <section className="ach-audit"><header><div><span>SEGURANÇA E GOVERNANÇA</span><h2>Auditoria hospitalar</h2><p>Rastreabilidade institucional com isolamento, retenção e acesso restrito.</p></div><Button variant="outline-primary" onClick={load} disabled={loading}><ArrowClockwise /> Atualizar</Button></header>
+    {error ? <Alert variant="danger">{error}<Button size="sm" variant="outline-danger" onClick={load}>Tentar novamente</Button></Alert> : null}
+    <form className="ach-audit__filters" onSubmit={submit}><label>De<Form.Control type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} /></label><label>Até<Form.Control type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} /></label><label>Ação<Form.Control placeholder="Ex.: patient.access" value={filters.action} onChange={(e) => setFilters({ ...filters, action: e.target.value })} /></label><label>Resultado<Form.Select value={filters.outcome} onChange={(e) => setFilters({ ...filters, outcome: e.target.value })}><option value="">Todos</option><option value="success">Sucesso</option><option value="denied">Negado</option><option value="failure">Falha</option></Form.Select></label><label>Usuário<Form.Control inputMode="numeric" placeholder="ID" value={filters.userId} onChange={(e) => setFilters({ ...filters, userId: e.target.value.replace(/\D/g, '') })} /></label><Button type="submit"><Funnel /> Filtrar</Button></form>
+    <div className="ach-audit__summary"><article><FileEarmarkLock /><span><strong>{data?.pagination.total || 0}</strong>eventos encontrados</span></article><article><ClockHistory /><span><strong>{data?.retention.days || '—'} dias</strong>retenção configurada</span></article><article><ShieldCheck /><span><strong>Legal hold</strong>suportado pelo backend</span></article></div>
+    <article className="ach-audit__panel" aria-busy={loading}>{loading && !data ? <div className="ach-audit__loading" role="status" aria-live="polite"><Spinner animation="border" aria-hidden="true" /> Consultando trilha…</div> : <div className="ach-audit__table"><table><caption className="visually-hidden">Eventos da auditoria hospitalar</caption><thead><tr><th scope="col">Data/hora</th><th scope="col">Ação</th><th scope="col">Recurso</th><th scope="col">Ator</th><th scope="col">Resultado</th><th scope="col">Request ID</th><th scope="col">IP</th></tr></thead><tbody>{data?.items.map((item) => <tr key={item.id}><td>{formatDate(item.created_at)}</td><td><strong>{item.action}</strong><small>{item.http_method || ''} {item.route || ''}</small></td><td>{item.resource_type}<small>{item.resource_id || '—'}</small></td><td><Person aria-hidden="true" /> {item.user_id || 'Sistema'}</td><td><Badge bg={tone[item.outcome] || 'secondary'}>{outcomeLabel[item.outcome] || item.outcome}</Badge></td><td><code>{item.request_id ? `${item.request_id}`.slice(0, 12) : '—'}</code></td><td>{item.ip_address || '—'}</td></tr>)}</tbody></table>{!data?.items.length ? <p>Nenhum evento corresponde aos filtros.</p> : null}</div>}</article>
+    {data?.pagination.pages > 1 ? <nav className="ach-audit__pagination"><Button variant="outline-primary" disabled={page <= 1 || loading} onClick={() => setPage((old) => old - 1)}>Anterior</Button><span>Página {data.pagination.page} de {data.pagination.pages}</span><Button variant="outline-primary" disabled={page >= data.pagination.pages || loading} onClick={() => setPage((old) => old + 1)}>Próxima</Button></nav> : null}
+    <footer><ShieldCheck /><span>A auditoria registra metadados operacionais mínimos. Tokens, senhas, segredos e conteúdo clínico são removidos antes da persistência.</span></footer>
+  </section>;
+}

@@ -25,6 +25,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    const contextKey = sessionStorage.getItem('ac_current_context');
+    if (/^(hospital|clinic|school):[1-9]\d*$/.test(contextKey || '')) {
+      config.headers['X-AutisConnect-Context'] = contextKey;
+    } else {
+      delete config.headers['X-AutisConnect-Context'];
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -47,6 +53,7 @@ api.interceptors.response.use(
       if (status === 401) {
         console.log('Erro 401 detectado, redirecionando para /login');
         localStorage.removeItem('token');
+        sessionStorage.removeItem('ac_current_context');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }

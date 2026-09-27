@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:hospital:ui": "node scripts/verify-hospital-phase10-ui.mjs"
   },
   "dependencies": {
     "@radix-ui/react-progress": "^1.1.8",
