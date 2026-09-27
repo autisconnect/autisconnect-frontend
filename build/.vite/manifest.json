@@ -1,61 +1,277 @@
 {
-  "_AuthScaffold-DPlhEEMo.js": {
-    "file": "assets/AuthScaffold-DPlhEEMo.js",
+  "_AbstractModalHeader-CqfdKZMi.js": {
+    "file": "assets/AbstractModalHeader-CqfdKZMi.js",
+    "name": "AbstractModalHeader",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_AuthScaffold-wwtyeurh.js": {
+    "file": "assets/AuthScaffold-wwtyeurh.js",
     "name": "AuthScaffold",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
+      "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js"
+      "_activity-4aE_vMYO.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_heart-Bf1rbKBq.js",
+      "_shield-check-FdQpAKll.js",
+      "_arrow-left-D7HiGPxy.js"
+    ]
+  },
+  "_Badge-Ca6CsS-m.js": {
+    "file": "assets/Badge-Ca6CsS-m.js",
+    "name": "Badge",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_Card-DhZzyUYN.js": {
+    "file": "assets/Card-DhZzyUYN.js",
+    "name": "Card",
+    "imports": [
+      "index.html",
+      "_CardHeaderContext-DIOCe8u6.js"
+    ]
+  },
+  "_CardHeaderContext-DIOCe8u6.js": {
+    "file": "assets/CardHeaderContext-DIOCe8u6.js",
+    "name": "CardHeaderContext",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_Col-C80KkH-X.js": {
+    "file": "assets/Col-C80KkH-X.js",
+    "name": "Col",
+    "imports": [
+      "index.html"
     ]
   },
   "_ContextSelector-244DE9lr.css": {
     "file": "assets/ContextSelector-244DE9lr.css",
     "src": "_ContextSelector-244DE9lr.css"
   },
-  "_ContextSelector-Csc_E-WO.js": {
-    "file": "assets/ContextSelector-Csc_E-WO.js",
+  "_ContextSelector-i1SNJIqZ.js": {
+    "file": "assets/ContextSelector-i1SNJIqZ.js",
     "name": "ContextSelector",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_Form-BkxS2Rmj.js"
     ],
     "css": [
       "assets/ContextSelector-244DE9lr.css"
+    ]
+  },
+  "_DashboardABA-CIUpVHaL.js": {
+    "file": "assets/DashboardABA-CIUpVHaL.js",
+    "name": "DashboardABA",
+    "imports": [
+      "index.html",
+      "_Card-DhZzyUYN.js",
+      "_Badge-Ca6CsS-m.js",
+      "_abaAiService-TQXegy4D.js",
+      "_Table-BaIpEMcC.js"
+    ],
+    "css": [
+      "assets/DashboardABA-D0_17eZA.css"
     ]
   },
   "_DashboardABA-D0_17eZA.css": {
     "file": "assets/DashboardABA-D0_17eZA.css",
     "src": "_DashboardABA-D0_17eZA.css"
   },
-  "_DashboardABA-DtfJ3xxd.js": {
-    "file": "assets/DashboardABA-DtfJ3xxd.js",
-    "name": "DashboardABA",
-    "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_abaAiService-B3v2hJ5e.js"
-    ],
-    "css": [
-      "assets/DashboardABA-D0_17eZA.css"
-    ]
-  },
   "_DashboardExecutive-BOdFxg2q.css": {
     "file": "assets/DashboardExecutive-BOdFxg2q.css",
     "src": "_DashboardExecutive-BOdFxg2q.css"
+  },
+  "_Dropdown-CH-_p4P-.js": {
+    "file": "assets/Dropdown-CH-_p4P-.js",
+    "name": "Dropdown",
+    "imports": [
+      "index.html",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_NavbarContext-CFPrFmCC.js"
+    ]
+  },
+  "_ElementChildren-B2f8bwbG.js": {
+    "file": "assets/ElementChildren-B2f8bwbG.js",
+    "name": "ElementChildren",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_Form-BkxS2Rmj.js": {
+    "file": "assets/Form-BkxS2Rmj.js",
+    "name": "Form",
+    "imports": [
+      "index.html",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
+    ]
+  },
+  "_HospitalDashboard-Dv9KDykl.js": {
+    "file": "assets/HospitalDashboard-Dv9KDykl.js",
+    "name": "HospitalDashboard",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html",
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_logonovo-B8fpvhjk.js",
+      "_building-DDwcGfMs.js",
+      "_people-BLIw8OKe.js",
+      "_person-badge-CzisacXV.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_sliders-DTQocZSz.js",
+      "_shield-check-FdQpAKll.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_search-jJjMcuoN.js",
+      "_bell-BHFCL0Ib.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_Form-BkxS2Rmj.js",
+      "_heart-pulse-CvT5TSDC.js"
+    ],
+    "dynamicImports": [
+      "src/components/hospital/HospitalWorkforce.jsx",
+      "src/components/hospital/HospitalPatients.jsx",
+      "src/components/hospital/HospitalAppointments.jsx",
+      "src/components/hospital/HospitalAnalytics.jsx",
+      "src/components/hospital/HospitalIntegrationHub.jsx",
+      "src/components/hospital/HospitalAudit.jsx",
+      "src/components/hospital/HospitalPendingCenter.jsx",
+      "src/components/hospital/HospitalProfileDashboard.jsx",
+      "src/components/hospital/HospitalInstitutionalJourney.jsx",
+      "src/components/hospital/HospitalSettings.jsx"
+    ],
+    "css": [
+      "assets/HospitalDashboard-bkjhIxrM.css"
+    ]
+  },
+  "_HospitalDashboard-bkjhIxrM.css": {
+    "file": "assets/HospitalDashboard-bkjhIxrM.css",
+    "src": "_HospitalDashboard-bkjhIxrM.css"
+  },
+  "_Image-B2pll9HU.js": {
+    "file": "assets/Image-B2pll9HU.js",
+    "name": "Image",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_ListGroup-C9lxPAzV.js": {
+    "file": "assets/ListGroup-C9lxPAzV.js",
+    "name": "ListGroup",
+    "imports": [
+      "index.html",
+      "_warning-DqsI4WKF.js",
+      "_Nav-kTV_ghvj.js",
+      "_SelectableContext-ySJ6ANTV.js"
+    ]
   },
   "_Login-BpZqJTTY.css": {
     "file": "assets/Login-BpZqJTTY.css",
     "src": "_Login-BpZqJTTY.css"
   },
-  "_PatientFaceReferencePanel-B-U40W-X.js": {
-    "file": "assets/PatientFaceReferencePanel-B-U40W-X.js",
+  "_Modal-Dx3ET0UM.js": {
+    "file": "assets/Modal-Dx3ET0UM.js",
+    "name": "Modal",
+    "imports": [
+      "index.html",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js"
+    ]
+  },
+  "_Nav-D2XVaqNh.js": {
+    "file": "assets/Nav-D2XVaqNh.js",
+    "name": "Nav",
+    "imports": [
+      "index.html",
+      "_Nav-kTV_ghvj.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_SelectableContext-ySJ6ANTV.js"
+    ]
+  },
+  "_Nav-kTV_ghvj.js": {
+    "file": "assets/Nav-kTV_ghvj.js",
+    "name": "Nav",
+    "imports": [
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "index.html",
+      "_NavContext-VUXVuuvi.js",
+      "_SelectableContext-ySJ6ANTV.js"
+    ]
+  },
+  "_NavContext-VUXVuuvi.js": {
+    "file": "assets/NavContext-VUXVuuvi.js",
+    "name": "NavContext",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_Navbar-CKF6Eh1I.js": {
+    "file": "assets/Navbar-CKF6Eh1I.js",
+    "name": "Navbar",
+    "imports": [
+      "index.html",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js"
+    ]
+  },
+  "_NavbarContext-CFPrFmCC.js": {
+    "file": "assets/NavbarContext-CFPrFmCC.js",
+    "name": "NavbarContext",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_Offcanvas-Bj2zI_9x.js": {
+    "file": "assets/Offcanvas-Bj2zI_9x.js",
+    "name": "Offcanvas",
+    "imports": [
+      "index.html",
+      "_AbstractModalHeader-CqfdKZMi.js"
+    ]
+  },
+  "_OverlayTrigger-C8BSOenc.js": {
+    "file": "assets/OverlayTrigger-C8BSOenc.js",
+    "name": "OverlayTrigger",
+    "imports": [
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "index.html",
+      "_useWillUnmount-CeE8zY14.js",
+      "_warning-DqsI4WKF.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_Offcanvas-Bj2zI_9x.js"
+    ]
+  },
+  "_PatientFaceReferencePanel-BDqt_Dgn.js": {
+    "file": "assets/PatientFaceReferencePanel-BDqt_Dgn.js",
     "name": "PatientFaceReferencePanel",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_emotionService-CkDUeVzC.js",
+      "index.html",
+      "_emotionService-C9b1zvTy.js",
       "_emotionUtils-Bxrlb537.js",
-      "_vendor-ui-DE57BOUR.js"
+      "_shield-check-FdQpAKll.js",
+      "_cpu-CZ_Oq29L.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Modal-Dx3ET0UM.js"
     ],
     "css": [
       "assets/PatientFaceReferencePanel-DdEjeFE0.css"
@@ -69,33 +285,74 @@
     "file": "assets/ProfessionalDashboard-CKmJi49n.css",
     "src": "_ProfessionalDashboard-CKmJi49n.css"
   },
-  "_SchoolCameraGrid-DQ5xKw9R.js": {
-    "file": "assets/SchoolCameraGrid-DQ5xKw9R.js",
+  "_ProgressBar-CMKoEY60.js": {
+    "file": "assets/ProgressBar-CMKoEY60.js",
+    "name": "ProgressBar",
+    "imports": [
+      "index.html",
+      "_ElementChildren-B2f8bwbG.js"
+    ]
+  },
+  "_Row-CyiL5Qvc.js": {
+    "file": "assets/Row-CyiL5Qvc.js",
+    "name": "Row",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_SSRProvider-CHHLZ9aW.js": {
+    "file": "assets/SSRProvider-CHHLZ9aW.js",
+    "name": "SSRProvider",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_SchoolCameraGrid-BZCtG77U.js": {
+    "file": "assets/SchoolCameraGrid-BZCtG77U.js",
     "name": "SchoolCameraGrid",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_arrow-right-OwspzjBd.js",
+      "_play-circle-DHL3lU4o.js"
     ]
   },
-  "_SchoolMonitoringCentral-Cair3ZG9.js": {
-    "file": "assets/SchoolMonitoringCentral-Cair3ZG9.js",
+  "_SchoolMonitoringCentral-vRRHKn5w.js": {
+    "file": "assets/SchoolMonitoringCentral-vRRHKn5w.js",
     "name": "SchoolMonitoringCentral",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_SchoolCameraGrid-DQ5xKw9R.js",
-      "_useSchoolMonitoringEngine-ZPAlORpu.js",
-      "_vendor-ui-DE57BOUR.js"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_SchoolCameraGrid-BZCtG77U.js",
+      "_useSchoolMonitoringEngine-B6X3IUg-.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Form-BkxS2Rmj.js",
+      "_pause-circle-Du1Z-iH4.js",
+      "_play-circle-DHL3lU4o.js",
+      "_cpu-CZ_Oq29L.js",
+      "_eye-DXRMmU3O.js",
+      "_activity-4aE_vMYO.js"
     ]
   },
-  "_SchoolShell-BACf98hb.js": {
-    "file": "assets/SchoolShell-BACf98hb.js",
+  "_SchoolShell-CwhwH5XK.js": {
+    "file": "assets/SchoolShell-CwhwH5XK.js",
     "name": "SchoolShell",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js"
     ],
     "css": [
       "assets/SchoolShell-DqgQuhw3.css"
@@ -105,34 +362,240 @@
     "file": "assets/SchoolShell-DqgQuhw3.css",
     "src": "_SchoolShell-DqgQuhw3.css"
   },
-  "_TherapeuticGameLayout-CBUSoD_v.css": {
-    "file": "assets/TherapeuticGameLayout-CBUSoD_v.css",
-    "src": "_TherapeuticGameLayout-CBUSoD_v.css"
+  "_SelectableContext-ySJ6ANTV.js": {
+    "file": "assets/SelectableContext-ySJ6ANTV.js",
+    "name": "SelectableContext",
+    "imports": [
+      "index.html"
+    ]
   },
-  "_TherapeuticGameLayout-ItShZm-T.js": {
-    "file": "assets/TherapeuticGameLayout-ItShZm-T.js",
+  "_Tab-C9DNZ-qg.js": {
+    "file": "assets/Tab-C9DNZ-qg.js",
+    "name": "Tab",
+    "imports": [
+      "index.html",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_Nav-kTV_ghvj.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_AbstractModalHeader-CqfdKZMi.js"
+    ]
+  },
+  "_Table-BaIpEMcC.js": {
+    "file": "assets/Table-BaIpEMcC.js",
+    "name": "Table",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_Tabs-klobkv4d.js": {
+    "file": "assets/Tabs-klobkv4d.js",
+    "name": "Tabs",
+    "imports": [
+      "index.html",
+      "_Tab-C9DNZ-qg.js",
+      "_Nav-D2XVaqNh.js",
+      "_ElementChildren-B2f8bwbG.js"
+    ]
+  },
+  "_TherapeuticGameLayout-C2w8V3LR.js": {
+    "file": "assets/TherapeuticGameLayout-C2w8V3LR.js",
     "name": "TherapeuticGameLayout",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
+      "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js"
+      "_person-badge-CzisacXV.js",
+      "_speedometer2-Bl_nF9vx.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_arrow-left-D7HiGPxy.js"
     ],
     "css": [
       "assets/TherapeuticGameLayout-CBUSoD_v.css"
     ]
   },
-  "_abaAiService-B3v2hJ5e.js": {
-    "file": "assets/abaAiService-B3v2hJ5e.js",
+  "_TherapeuticGameLayout-CBUSoD_v.css": {
+    "file": "assets/TherapeuticGameLayout-CBUSoD_v.css",
+    "src": "_TherapeuticGameLayout-CBUSoD_v.css"
+  },
+  "_abaAiService-TQXegy4D.js": {
+    "file": "assets/abaAiService-TQXegy4D.js",
     "name": "abaAiService",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_vendor-ui-DE57BOUR.js",
+      "index.html",
+      "_Card-DhZzyUYN.js",
+      "_Badge-Ca6CsS-m.js",
+      "_ProgressBar-CMKoEY60.js"
+    ]
+  },
+  "_activity-4aE_vMYO.js": {
+    "file": "assets/activity-4aE_vMYO.js",
+    "name": "activity",
+    "imports": [
       "index.html"
     ]
   },
-  "_emotionService-CkDUeVzC.js": {
-    "file": "assets/emotionService-CkDUeVzC.js",
+  "_arrow-clockwise-BJ0khWzL.js": {
+    "file": "assets/arrow-clockwise-BJ0khWzL.js",
+    "name": "arrow-clockwise",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_arrow-left-D7HiGPxy.js": {
+    "file": "assets/arrow-left-D7HiGPxy.js",
+    "name": "arrow-left",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_arrow-repeat-AIp8Gbdl.js": {
+    "file": "assets/arrow-repeat-AIp8Gbdl.js",
+    "name": "arrow-repeat",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_arrow-right-OwspzjBd.js": {
+    "file": "assets/arrow-right-OwspzjBd.js",
+    "name": "arrow-right",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_bar-chart-line-DEHVqB2T.js": {
+    "file": "assets/bar-chart-line-DEHVqB2T.js",
+    "name": "bar-chart-line",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_bell-BHFCL0Ib.js": {
+    "file": "assets/bell-BHFCL0Ib.js",
+    "name": "bell",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_box-arrow-right-COEOifcE.js": {
+    "file": "assets/box-arrow-right-COEOifcE.js",
+    "name": "box-arrow-right",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_building-DDwcGfMs.js": {
+    "file": "assets/building-DDwcGfMs.js",
+    "name": "building",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_calendar2-check-DWz7yxC6.js": {
+    "file": "assets/calendar2-check-DWz7yxC6.js",
+    "name": "calendar2-check",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_calendar3-McUrJexj.js": {
+    "file": "assets/calendar3-McUrJexj.js",
+    "name": "calendar3",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_camera-video-9PYW_Bx-.js": {
+    "file": "assets/camera-video-9PYW_Bx-.js",
+    "name": "camera-video",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_cash-coin-B8x5Dxhc.js": {
+    "file": "assets/cash-coin-B8x5Dxhc.js",
+    "name": "cash-coin",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_check-circle-fill-3x66PXzs.js": {
+    "file": "assets/check-circle-fill-3x66PXzs.js",
+    "name": "check-circle-fill",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_check-circle-k14HG9_M.js": {
+    "file": "assets/check-circle-k14HG9_M.js",
+    "name": "check-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_check2-circle-D6xYnj_I.js": {
+    "file": "assets/check2-circle-D6xYnj_I.js",
+    "name": "check2-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_chevron-right-CYiqwb1g.js": {
+    "file": "assets/chevron-right-CYiqwb1g.js",
+    "name": "chevron-right",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_clipboard2-pulse-FJbDPX-h.js": {
+    "file": "assets/clipboard2-pulse-FJbDPX-h.js",
+    "name": "clipboard2-pulse",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_clock-U6-OfaZI.js": {
+    "file": "assets/clock-U6-OfaZI.js",
+    "name": "clock",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_clock-history-DbcDeHKb.js": {
+    "file": "assets/clock-history-DbcDeHKb.js",
+    "name": "clock-history",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_cpu-CZ_Oq29L.js": {
+    "file": "assets/cpu-CZ_Oq29L.js",
+    "name": "cpu",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_diagram-3-Cw2cbRzh.js": {
+    "file": "assets/diagram-3-Cw2cbRzh.js",
+    "name": "diagram-3",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_download-BUXFI45t.js": {
+    "file": "assets/download-BUXFI45t.js",
+    "name": "download",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_emoji-smile-S0QMbKoQ.js": {
+    "file": "assets/emoji-smile-S0QMbKoQ.js",
+    "name": "emoji-smile",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_emotionService-C9b1zvTy.js": {
+    "file": "assets/emotionService-C9b1zvTy.js",
     "name": "emotionService",
     "imports": [
       "index.html"
@@ -141,6 +604,62 @@
   "_emotionUtils-Bxrlb537.js": {
     "file": "assets/emotionUtils-Bxrlb537.js",
     "name": "emotionUtils"
+  },
+  "_envelope-CY188tIo.js": {
+    "file": "assets/envelope-CY188tIo.js",
+    "name": "envelope",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_exclamation-triangle-D3Yag4CL.js": {
+    "file": "assets/exclamation-triangle-D3Yag4CL.js",
+    "name": "exclamation-triangle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_exclamation-triangle-fill-BjfPxMW9.js": {
+    "file": "assets/exclamation-triangle-fill-BjfPxMW9.js",
+    "name": "exclamation-triangle-fill",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_eye-DXRMmU3O.js": {
+    "file": "assets/eye-DXRMmU3O.js",
+    "name": "eye",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_file-earmark-bar-graph-DrghbiPE.js": {
+    "file": "assets/file-earmark-bar-graph-DrghbiPE.js",
+    "name": "file-earmark-bar-graph",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_file-earmark-medical-BmxTGkQY.js": {
+    "file": "assets/file-earmark-medical-BmxTGkQY.js",
+    "name": "file-earmark-medical",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_file-earmark-text-DXY2cqPl.js": {
+    "file": "assets/file-earmark-text-DXY2cqPl.js",
+    "name": "file-earmark-text",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_funnel-CYbcen0-.js": {
+    "file": "assets/funnel-CYbcen0-.js",
+    "name": "funnel",
+    "imports": [
+      "index.html"
+    ]
   },
   "_game4-gAGDz6ZL.js": {
     "file": "assets/game4-gAGDz6ZL.js",
@@ -153,17 +672,135 @@
     "file": "assets/gamesSection-DVB8KPMm.css",
     "src": "_gamesSection-DVB8KPMm.css"
   },
-  "_gamesSection-cHqJROn2.js": {
-    "file": "assets/gamesSection-cHqJROn2.js",
+  "_gamesSection-N43XtAVt.js": {
+    "file": "assets/gamesSection-N43XtAVt.js",
     "name": "gamesSection",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_emoji-smile-S0QMbKoQ.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Badge-Ca6CsS-m.js",
+      "_index-Dl-4zZjz.js",
+      "_graph-up-CPqaGAkl.js",
+      "_clock-U6-OfaZI.js",
+      "_Table-BaIpEMcC.js"
     ],
     "css": [
       "assets/gamesSection-DVB8KPMm.css"
+    ]
+  },
+  "_gear-BXMK8msk.js": {
+    "file": "assets/gear-BXMK8msk.js",
+    "name": "gear",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_geo-alt-BCnlK4YA.js": {
+    "file": "assets/geo-alt-BCnlK4YA.js",
+    "name": "geo-alt",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_graph-up-CPqaGAkl.js": {
+    "file": "assets/graph-up-CPqaGAkl.js",
+    "name": "graph-up",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_graph-up-arrow-CbZqwVMI.js": {
+    "file": "assets/graph-up-arrow-CbZqwVMI.js",
+    "name": "graph-up-arrow",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_heart-Bf1rbKBq.js": {
+    "file": "assets/heart-Bf1rbKBq.js",
+    "name": "heart",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_heart-pulse-CvT5TSDC.js": {
+    "file": "assets/heart-pulse-CvT5TSDC.js",
+    "name": "heart-pulse",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_house-door-gzWJTSPO.js": {
+    "file": "assets/house-door-gzWJTSPO.js",
+    "name": "house-door",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_index-Dl-4zZjz.js": {
+    "file": "assets/index-Dl-4zZjz.js",
+    "name": "index",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_index-nUstqXCa.js": {
+    "file": "assets/index-nUstqXCa.js",
+    "name": "index",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_info-circle-CagRm1eH.js": {
+    "file": "assets/info-circle-CagRm1eH.js",
+    "name": "info-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_journal-text-B3kRTlgF.js": {
+    "file": "assets/journal-text-B3kRTlgF.js",
+    "name": "journal-text",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_leaflet-D_8iOx2O.js": {
+    "file": "assets/leaflet-D_8iOx2O.js",
+    "name": "leaflet",
+    "imports": [
+      "index.html"
+    ],
+    "css": [
+      "assets/leaflet-Dgihpmma.css"
+    ]
+  },
+  "_leaflet-Dgihpmma.css": {
+    "file": "assets/leaflet-Dgihpmma.css",
+    "src": "_leaflet-Dgihpmma.css"
+  },
+  "_link-45deg-D6K3SRXM.js": {
+    "file": "assets/link-45deg-D6K3SRXM.js",
+    "name": "link-45deg",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_list-CT51jdFi.js": {
+    "file": "assets/list-CT51jdFi.js",
+    "name": "list",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_lock-BL0ns852.js": {
+    "file": "assets/lock-BL0ns852.js",
+    "name": "lock",
+    "imports": [
+      "index.html"
     ]
   },
   "_logohoriz copy-BCLRz8jA.js": {
@@ -187,76 +824,174 @@
       "assets/logonovo-CEN8qT_q.png"
     ]
   },
-  "_useSchoolMonitoringEngine-ZPAlORpu.js": {
-    "file": "assets/useSchoolMonitoringEngine-ZPAlORpu.js",
+  "_mic-Bxslvnbe.js": {
+    "file": "assets/mic-Bxslvnbe.js",
+    "name": "mic",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_pause-circle-Du1Z-iH4.js": {
+    "file": "assets/pause-circle-Du1Z-iH4.js",
+    "name": "pause-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_pencil-square-V_CWWfOS.js": {
+    "file": "assets/pencil-square-V_CWWfOS.js",
+    "name": "pencil-square",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_people-BLIw8OKe.js": {
+    "file": "assets/people-BLIw8OKe.js",
+    "name": "people",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_people-fill-BUkJWPqY.js": {
+    "file": "assets/people-fill-BUkJWPqY.js",
+    "name": "people-fill",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_person-badge-CzisacXV.js": {
+    "file": "assets/person-badge-CzisacXV.js",
+    "name": "person-badge",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_person-circle-Bax9Qe-3.js": {
+    "file": "assets/person-circle-Bax9Qe-3.js",
+    "name": "person-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_person-plus-BPLA-6eV.js": {
+    "file": "assets/person-plus-BPLA-6eV.js",
+    "name": "person-plus",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_play-circle-DHL3lU4o.js": {
+    "file": "assets/play-circle-DHL3lU4o.js",
+    "name": "play-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_plus-circle-IdEGamNN.js": {
+    "file": "assets/plus-circle-IdEGamNN.js",
+    "name": "plus-circle",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_plus-lg-B0CfQwHU.js": {
+    "file": "assets/plus-lg-B0CfQwHU.js",
+    "name": "plus-lg",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_search-jJjMcuoN.js": {
+    "file": "assets/search-jJjMcuoN.js",
+    "name": "search",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_shield-check-FdQpAKll.js": {
+    "file": "assets/shield-check-FdQpAKll.js",
+    "name": "shield-check",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_sliders-DTQocZSz.js": {
+    "file": "assets/sliders-DTQocZSz.js",
+    "name": "sliders",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_speedometer2-Bl_nF9vx.js": {
+    "file": "assets/speedometer2-Bl_nF9vx.js",
+    "name": "speedometer2",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_star-fill-CUZ8uEnR.js": {
+    "file": "assets/star-fill-CUZ8uEnR.js",
+    "name": "star-fill",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_stars-CooFarm4.js": {
+    "file": "assets/stars-CooFarm4.js",
+    "name": "stars",
+    "imports": [
+      "index.html"
+    ]
+  },
+  "_useSchoolMonitoringEngine-B6X3IUg-.js": {
+    "file": "assets/useSchoolMonitoringEngine-B6X3IUg-.js",
     "name": "useSchoolMonitoringEngine",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
       "_emotionUtils-Bxrlb537.js"
     ]
   },
-  "_vendor-charts-DjROEP7A.js": {
-    "file": "assets/vendor-charts-DjROEP7A.js",
-    "name": "vendor-charts",
+  "_useWillUnmount-CeE8zY14.js": {
+    "file": "assets/useWillUnmount-CeE8zY14.js",
+    "name": "useWillUnmount",
     "imports": [
-      "_vendor-react-D5AOm95y.js"
+      "index.html"
     ]
   },
-  "_vendor-games-BbrE81bZ.js": {
-    "file": "assets/vendor-games-BbrE81bZ.js",
-    "name": "vendor-games",
+  "_wallet2-BOeYOqXH.js": {
+    "file": "assets/wallet2-BOeYOqXH.js",
+    "name": "wallet2",
     "imports": [
-      "_vendor-charts-DjROEP7A.js"
+      "index.html"
     ]
   },
-  "_vendor-maps-Dgihpmma.css": {
-    "file": "assets/vendor-maps-Dgihpmma.css",
-    "src": "_vendor-maps-Dgihpmma.css"
-  },
-  "_vendor-maps-H1tDn4eH.js": {
-    "file": "assets/vendor-maps-H1tDn4eH.js",
-    "name": "vendor-maps",
+  "_warning-DqsI4WKF.js": {
+    "file": "assets/warning-DqsI4WKF.js",
+    "name": "warning",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js"
-    ],
-    "css": [
-      "assets/vendor-maps-Dgihpmma.css"
+      "index.html"
     ]
   },
-  "_vendor-react-D5AOm95y.js": {
-    "file": "assets/vendor-react-D5AOm95y.js",
-    "name": "vendor-react",
+  "_whatsapp-Cx7sOj6q.js": {
+    "file": "assets/whatsapp-Cx7sOj6q.js",
+    "name": "whatsapp",
     "imports": [
-      "_vendor-charts-DjROEP7A.js"
+      "index.html"
     ]
   },
-  "_vendor-ui-DE57BOUR.js": {
-    "file": "assets/vendor-ui-DE57BOUR.js",
-    "name": "vendor-ui",
+  "_x-circle-CK_2Emec.js": {
+    "file": "assets/x-circle-CK_2Emec.js",
+    "name": "x-circle",
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js"
-    ],
-    "css": [
-      "assets/vendor-ui-DJSy8M6b.css"
+      "index.html"
     ]
-  },
-  "_vendor-ui-DJSy8M6b.css": {
-    "file": "assets/vendor-ui-DJSy8M6b.css",
-    "src": "_vendor-ui-DJSy8M6b.css"
   },
   "index.html": {
-    "file": "assets/index-BNo3BRvk.js",
+    "file": "assets/index-CSoIF3_j.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
-    "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
-    ],
     "dynamicImports": [
       "src/Home.jsx",
       "src/Login.jsx",
@@ -265,7 +1000,7 @@
       "src/ResetPassword.jsx",
       "src/ParentDashboard.jsx",
       "src/ProfessionalDashboard.jsx",
-      "src/HospitalDashboard.jsx",
+      "_HospitalDashboard-Dv9KDykl.js",
       "src/HospitalPatient360Page.jsx",
       "src/ClinicDashboard.jsx",
       "src/FinancialDashboard.jsx",
@@ -322,7 +1057,7 @@
       "src/presentation-dashboard/PresentationPatientDetails.jsx"
     ],
     "css": [
-      "assets/index-CrdhFNNU.css"
+      "assets/index-DUf5ExZX.css"
     ],
     "assets": [
       "assets/logonovo-CEN8qT_q.png",
@@ -330,15 +1065,56 @@
     ]
   },
   "src/ClinicDashboard.jsx": {
-    "file": "assets/ClinicDashboard-ByFZAafe.js",
+    "file": "assets/ClinicDashboard-COMD6A1Z.js",
     "name": "ClinicDashboard",
     "src": "src/ClinicDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js",
+      "_people-fill-BUkJWPqY.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_wallet2-BOeYOqXH.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_bell-BHFCL0Ib.js",
+      "_clock-history-DbcDeHKb.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_person-circle-Bax9Qe-3.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Form-BkxS2Rmj.js",
+      "_Tab-C9DNZ-qg.js",
+      "_Nav-D2XVaqNh.js",
+      "_graph-up-arrow-CbZqwVMI.js",
+      "_cash-coin-B8x5Dxhc.js",
+      "_shield-check-FdQpAKll.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_check2-circle-D6xYnj_I.js",
+      "_plus-circle-IdEGamNN.js",
+      "_Table-BaIpEMcC.js",
+      "_pencil-square-V_CWWfOS.js",
+      "_funnel-CYbcen0-.js",
+      "_Modal-Dx3ET0UM.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_house-door-gzWJTSPO.js",
+      "_gear-BXMK8msk.js",
+      "_arrow-right-OwspzjBd.js",
+      "_OverlayTrigger-C8BSOenc.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Nav-kTV_ghvj.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "css": [
       "assets/ClinicDashboard-C7rebOKp.css"
@@ -348,31 +1124,73 @@
     ]
   },
   "src/DashboardABA.jsx": {
-    "file": "assets/DashboardABA-CHLRULqJ.js",
+    "file": "assets/DashboardABA-URiwnzAn.js",
     "name": "DashboardABA",
     "src": "src/DashboardABA.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
+      "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_abaAiService-B3v2hJ5e.js",
-      "_DashboardABA-DtfJ3xxd.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "_abaAiService-TQXegy4D.js",
+      "_DashboardABA-CIUpVHaL.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_clock-history-DbcDeHKb.js",
+      "_journal-text-B3kRTlgF.js",
+      "_stars-CooFarm4.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_shield-check-FdQpAKll.js",
+      "_exclamation-triangle-fill-BjfPxMW9.js",
+      "_info-circle-CagRm1eH.js",
+      "_check-circle-fill-3x66PXzs.js",
+      "_Card-DhZzyUYN.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_Badge-Ca6CsS-m.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Table-BaIpEMcC.js"
     ]
   },
   "src/DashboardExecutive/DashboardExecutive.jsx": {
-    "file": "assets/DashboardExecutive-CfK3HnOw.js",
+    "file": "assets/DashboardExecutive-Cfjy4Bf-.js",
     "name": "DashboardExecutive",
     "src": "src/DashboardExecutive/DashboardExecutive.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_Badge-Ca6CsS-m.js",
+      "_Card-DhZzyUYN.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Form-BkxS2Rmj.js",
+      "_Table-BaIpEMcC.js",
+      "_Modal-Dx3ET0UM.js",
+      "_index-Dl-4zZjz.js",
+      "_Nav-D2XVaqNh.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_activity-4aE_vMYO.js",
+      "_people-BLIw8OKe.js",
+      "_list-CT51jdFi.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_logonovo-B8fpvhjk.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_house-door-gzWJTSPO.js",
+      "_bell-BHFCL0Ib.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_gear-BXMK8msk.js",
+      "_cpu-CZ_Oq29L.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_Nav-kTV_ghvj.js",
+      "_NavContext-VUXVuuvi.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js"
     ],
     "dynamicImports": [
       "src/DashboardExecutive/ExecutiveDashboardCharts.jsx"
@@ -385,26 +1203,37 @@
     ]
   },
   "src/DashboardExecutive/ExecutiveDashboardCharts.jsx": {
-    "file": "assets/ExecutiveDashboardCharts-9Ue3SYtQ.js",
+    "file": "assets/ExecutiveDashboardCharts-DsQthEJA.js",
     "name": "ExecutiveDashboardCharts",
     "src": "src/DashboardExecutive/ExecutiveDashboardCharts.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_vendor-ui-DE57BOUR.js"
+      "index.html",
+      "_index-Dl-4zZjz.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Badge-Ca6CsS-m.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/DashboardTherapeutic/TherapeuticDashboard.jsx": {
-    "file": "assets/TherapeuticDashboard-Dq4qS2i_.js",
+    "file": "assets/TherapeuticDashboard-DC3Bz9fp.js",
     "name": "TherapeuticDashboard",
     "src": "src/DashboardTherapeutic/TherapeuticDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_people-fill-BUkJWPqY.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Form-BkxS2Rmj.js",
+      "_Table-BaIpEMcC.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js"
     ],
     "css": [
       "assets/TherapeuticDashboard-CMD4MWce.css",
@@ -415,16 +1244,44 @@
     ]
   },
   "src/FinancialDashboard.jsx": {
-    "file": "assets/FinancialDashboard-DPFbNT3p.js",
+    "file": "assets/FinancialDashboard-D0gt7AuP.js",
     "name": "FinancialDashboard",
     "src": "src/FinancialDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
+      "_index-Dl-4zZjz.js",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js"
+      "_graph-up-CPqaGAkl.js",
+      "_wallet2-BOeYOqXH.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_cash-coin-B8x5Dxhc.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_person-circle-Bax9Qe-3.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Card-DhZzyUYN.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Form-BkxS2Rmj.js",
+      "_funnel-CYbcen0-.js",
+      "_Table-BaIpEMcC.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_people-BLIw8OKe.js",
+      "_file-earmark-text-DXY2cqPl.js",
+      "_OverlayTrigger-C8BSOenc.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "css": [
       "assets/FinancialDashboard-BaQQyAOV.css",
@@ -435,17 +1292,24 @@
     ]
   },
   "src/ForgotPassword.jsx": {
-    "file": "assets/ForgotPassword-BUbc0wQ_.js",
+    "file": "assets/ForgotPassword-BhXe4NXi.js",
     "name": "ForgotPassword",
     "src": "src/ForgotPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_AuthScaffold-DPlhEEMo.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_AuthScaffold-wwtyeurh.js",
+      "_Form-BkxS2Rmj.js",
+      "_envelope-CY188tIo.js",
+      "_logonovo-B8fpvhjk.js",
+      "_activity-4aE_vMYO.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_heart-Bf1rbKBq.js",
+      "_shield-check-FdQpAKll.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/Login-BpZqJTTY.css"
@@ -455,17 +1319,35 @@
     ]
   },
   "src/Home.jsx": {
-    "file": "assets/Home-ZQZ2k88m.js",
+    "file": "assets/Home-CUjaf86M.js",
     "name": "Home",
     "src": "src/Home.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
       "_logonovo-B8fpvhjk.js",
       "_game4-gAGDz6ZL.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_arrow-right-OwspzjBd.js",
+      "_heart-Bf1rbKBq.js",
+      "_Card-DhZzyUYN.js",
+      "_graph-up-CPqaGAkl.js",
+      "_check-circle-k14HG9_M.js",
+      "_Form-BkxS2Rmj.js",
+      "_search-jJjMcuoN.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_Badge-Ca6CsS-m.js",
+      "_star-fill-CUZ8uEnR.js",
+      "_people-BLIw8OKe.js",
+      "_whatsapp-Cx7sOj6q.js",
+      "_envelope-CY188tIo.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_file-earmark-text-DXY2cqPl.js",
+      "_sliders-DTQocZSz.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js"
     ],
     "css": [
       "assets/Home-bMvPV7qm.css"
@@ -480,62 +1362,70 @@
       "assets/game3-B7FN4nTs.png"
     ]
   },
-  "src/HospitalDashboard.jsx": {
-    "file": "assets/HospitalDashboard-BrgZGlx9.js",
-    "name": "HospitalDashboard",
-    "src": "src/HospitalDashboard.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "index.html",
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_ContextSelector-Csc_E-WO.js",
-      "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js"
-    ],
-    "dynamicImports": [
-      "src/components/hospital/HospitalWorkforce.jsx",
-      "src/components/hospital/HospitalPatients.jsx",
-      "src/components/hospital/HospitalAppointments.jsx",
-      "src/components/hospital/HospitalAnalytics.jsx",
-      "src/components/hospital/HospitalIntegrationHub.jsx",
-      "src/components/hospital/HospitalAudit.jsx",
-      "src/components/hospital/HospitalPendingCenter.jsx",
-      "src/components/hospital/HospitalProfileDashboard.jsx",
-      "src/components/hospital/HospitalInstitutionalJourney.jsx",
-      "src/components/hospital/HospitalSettings.jsx"
-    ],
-    "css": [
-      "assets/HospitalDashboard-bkjhIxrM.css"
-    ]
-  },
   "src/HospitalPatient360Page.jsx": {
-    "file": "assets/HospitalPatient360Page-D8Fn-iY_.js",
+    "file": "assets/HospitalPatient360Page-BoOpk_Vs.js",
     "name": "HospitalPatient360Page",
     "src": "src/HospitalPatient360Page.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_diagram-3-Cw2cbRzh.js",
+      "_activity-4aE_vMYO.js",
+      "_clock-history-DbcDeHKb.js",
+      "_calendar3-McUrJexj.js",
+      "_heart-pulse-CvT5TSDC.js",
+      "_check-circle-k14HG9_M.js",
+      "_exclamation-triangle-D3Yag4CL.js",
+      "_plus-lg-B0CfQwHU.js",
+      "_file-earmark-medical-BmxTGkQY.js",
+      "_Badge-Ca6CsS-m.js",
+      "_pencil-square-V_CWWfOS.js",
+      "_check2-circle-D6xYnj_I.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_people-BLIw8OKe.js",
+      "_download-BUXFI45t.js",
+      "_house-door-gzWJTSPO.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_journal-text-B3kRTlgF.js",
+      "_stars-CooFarm4.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_shield-check-FdQpAKll.js",
+      "_person-badge-CzisacXV.js",
+      "_mic-Bxslvnbe.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/HospitalPatient360Page-DtDX7x_Y.css"
     ]
   },
   "src/Login.jsx": {
-    "file": "assets/Login-DcuxVRPh.js",
+    "file": "assets/Login-BBSYMYPD.js",
     "name": "Login",
     "src": "src/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_AuthScaffold-DPlhEEMo.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_AuthScaffold-wwtyeurh.js",
+      "_Form-BkxS2Rmj.js",
+      "_envelope-CY188tIo.js",
+      "_lock-BL0ns852.js",
+      "_eye-DXRMmU3O.js",
+      "_logonovo-B8fpvhjk.js",
+      "_activity-4aE_vMYO.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_heart-Bf1rbKBq.js",
+      "_shield-check-FdQpAKll.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/Login-BpZqJTTY.css"
@@ -545,16 +1435,47 @@
     ]
   },
   "src/ParentDashboard.jsx": {
-    "file": "assets/ParentDashboard-CrOHo8us.js",
+    "file": "assets/ParentDashboard-Ca0VjLU_.js",
     "name": "ParentDashboard",
     "src": "src/ParentDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_Form-BkxS2Rmj.js",
+      "_list-CT51jdFi.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_person-circle-Bax9Qe-3.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_house-door-gzWJTSPO.js",
+      "_graph-up-CPqaGAkl.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_Card-DhZzyUYN.js",
+      "_arrow-right-OwspzjBd.js",
+      "_OverlayTrigger-C8BSOenc.js",
+      "_calendar3-McUrJexj.js",
+      "_shield-check-FdQpAKll.js",
+      "_plus-circle-IdEGamNN.js",
+      "_search-jJjMcuoN.js",
+      "_sliders-DTQocZSz.js",
+      "_star-fill-CUZ8uEnR.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "css": [
       "assets/ParentDashboard-BkpWzxi4.css"
@@ -564,20 +1485,49 @@
     ]
   },
   "src/PatientDetails.jsx": {
-    "file": "assets/PatientDetails-BxO_bEQM.js",
+    "file": "assets/PatientDetails-DUDLL9P7.js",
     "name": "PatientDetails",
     "src": "src/PatientDetails.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-charts-DjROEP7A.js",
-      "_PatientFaceReferencePanel-B-U40W-X.js",
-      "_gamesSection-cHqJROn2.js",
+      "_index-Dl-4zZjz.js",
+      "_PatientFaceReferencePanel-BDqt_Dgn.js",
+      "_gamesSection-N43XtAVt.js",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_emotionService-CkDUeVzC.js",
-      "_emotionUtils-Bxrlb537.js"
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_Form-BkxS2Rmj.js",
+      "_journal-text-B3kRTlgF.js",
+      "_plus-circle-IdEGamNN.js",
+      "_house-door-gzWJTSPO.js",
+      "_activity-4aE_vMYO.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_mic-Bxslvnbe.js",
+      "_file-earmark-medical-BmxTGkQY.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_person-circle-Bax9Qe-3.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_graph-up-CPqaGAkl.js",
+      "_exclamation-triangle-D3Yag4CL.js",
+      "_Table-BaIpEMcC.js",
+      "_arrow-right-OwspzjBd.js",
+      "_emotionService-C9b1zvTy.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_shield-check-FdQpAKll.js",
+      "_cpu-CZ_Oq29L.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Card-DhZzyUYN.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_Badge-Ca6CsS-m.js",
+      "_clock-U6-OfaZI.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "css": [
       "assets/PatientDetails-CHsaVurH.css"
@@ -587,22 +1537,52 @@
     ]
   },
   "src/PatientDetailsParent.jsx": {
-    "file": "assets/PatientDetailsParent-yCxmUqAZ.js",
+    "file": "assets/PatientDetailsParent-ChMR6ymM.js",
     "name": "PatientDetailsParent",
     "src": "src/PatientDetailsParent.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-charts-DjROEP7A.js",
+      "_index-Dl-4zZjz.js",
       "src/pages/AbaReport.jsx",
-      "_PatientFaceReferencePanel-B-U40W-X.js",
-      "_gamesSection-cHqJROn2.js",
+      "_PatientFaceReferencePanel-BDqt_Dgn.js",
+      "_gamesSection-N43XtAVt.js",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_abaAiService-B3v2hJ5e.js",
-      "_emotionService-CkDUeVzC.js",
-      "_emotionUtils-Bxrlb537.js"
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_Form-BkxS2Rmj.js",
+      "_journal-text-B3kRTlgF.js",
+      "_plus-circle-IdEGamNN.js",
+      "_house-door-gzWJTSPO.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_mic-Bxslvnbe.js",
+      "_file-earmark-medical-BmxTGkQY.js",
+      "_activity-4aE_vMYO.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_person-circle-Bax9Qe-3.js",
+      "_Table-BaIpEMcC.js",
+      "_exclamation-triangle-D3Yag4CL.js",
+      "_arrow-right-OwspzjBd.js",
+      "_abaAiService-TQXegy4D.js",
+      "_Card-DhZzyUYN.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_Badge-Ca6CsS-m.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_emotionService-C9b1zvTy.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_shield-check-FdQpAKll.js",
+      "_cpu-CZ_Oq29L.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_graph-up-CPqaGAkl.js",
+      "_clock-U6-OfaZI.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "css": [
       "assets/PatientDetailsParent-rYrXQjEf.css"
@@ -612,43 +1592,80 @@
     ]
   },
   "src/PaymentFailure.jsx": {
-    "file": "assets/PaymentFailure-K-xUos_D.js",
+    "file": "assets/PaymentFailure-UHCLrP28.js",
     "name": "PaymentFailure",
     "src": "src/PaymentFailure.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logohoriz-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_logohoriz-BCLRz8jA.js",
+      "_Card-DhZzyUYN.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/PaymentSuccess.jsx": {
-    "file": "assets/PaymentSuccess-MG8HmQqD.js",
+    "file": "assets/PaymentSuccess-u9yDheWf.js",
     "name": "PaymentSuccess",
     "src": "src/PaymentSuccess.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logohoriz-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_logohoriz-BCLRz8jA.js",
+      "_Card-DhZzyUYN.js",
+      "_check-circle-fill-3x66PXzs.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/ProfessionalDashboard.jsx": {
-    "file": "assets/ProfessionalDashboard-Dtl6DapN.js",
+    "file": "assets/ProfessionalDashboard-D-FTYiDl.js",
     "name": "ProfessionalDashboard",
     "src": "src/ProfessionalDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_ContextSelector-Csc_E-WO.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_logonovo-B8fpvhjk.js"
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_people-BLIw8OKe.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_activity-4aE_vMYO.js",
+      "_journal-text-B3kRTlgF.js",
+      "_heart-pulse-CvT5TSDC.js",
+      "_file-earmark-text-DXY2cqPl.js",
+      "_Badge-Ca6CsS-m.js",
+      "_shield-check-FdQpAKll.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_logonovo-B8fpvhjk.js",
+      "_graph-up-CPqaGAkl.js",
+      "_wallet2-BOeYOqXH.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_bell-BHFCL0Ib.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_person-circle-Bax9Qe-3.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_Card-DhZzyUYN.js",
+      "_plus-circle-IdEGamNN.js",
+      "_arrow-right-OwspzjBd.js",
+      "_OverlayTrigger-C8BSOenc.js",
+      "_Table-BaIpEMcC.js",
+      "_search-jJjMcuoN.js",
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "css": [
       "assets/ProfessionalDashboard-BLn48_nn.css",
@@ -659,30 +1676,47 @@
     ]
   },
   "src/PublicServiceProfile.jsx": {
-    "file": "assets/PublicServiceProfile-B5YJGJ0B.js",
+    "file": "assets/PublicServiceProfile-BUvDz08u.js",
     "name": "PublicServiceProfile",
     "src": "src/PublicServiceProfile.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_arrow-left-D7HiGPxy.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_star-fill-CUZ8uEnR.js",
+      "_whatsapp-Cx7sOj6q.js",
+      "_envelope-CY188tIo.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_Badge-Ca6CsS-m.js",
+      "_check-circle-k14HG9_M.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/ResetPassword.jsx": {
-    "file": "assets/ResetPassword-ChZi9AM9.js",
+    "file": "assets/ResetPassword-d1LjkvvL.js",
     "name": "ResetPassword",
     "src": "src/ResetPassword.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_AuthScaffold-DPlhEEMo.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_AuthScaffold-wwtyeurh.js",
+      "_Form-BkxS2Rmj.js",
+      "_lock-BL0ns852.js",
+      "_eye-DXRMmU3O.js",
+      "_logonovo-B8fpvhjk.js",
+      "_activity-4aE_vMYO.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_heart-Bf1rbKBq.js",
+      "_shield-check-FdQpAKll.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/Login-BpZqJTTY.css"
@@ -692,16 +1726,36 @@
     ]
   },
   "src/SecretaryDashboard.jsx": {
-    "file": "assets/SecretaryDashboard-t1fpA7E2.js",
+    "file": "assets/SecretaryDashboard-B56mKgei.js",
     "name": "SecretaryDashboard",
     "src": "src/SecretaryDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-charts-DjROEP7A.js",
+      "_index-Dl-4zZjz.js",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js"
+      "_Offcanvas-Bj2zI_9x.js",
+      "_bell-BHFCL0Ib.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_plus-circle-IdEGamNN.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_chevron-right-CYiqwb1g.js",
+      "_house-door-gzWJTSPO.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_people-BLIw8OKe.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_Table-BaIpEMcC.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js"
     ],
     "css": [
       "assets/SecretaryDashboard-N22f_XHX.css"
@@ -711,16 +1765,37 @@
     ]
   },
   "src/ServiceDashboard.jsx": {
-    "file": "assets/ServiceDashboard-ClS6TUY_.js",
+    "file": "assets/ServiceDashboard-BlMEq99z.js",
     "name": "ServiceDashboard",
     "src": "src/ServiceDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
+      "_index-nUstqXCa.js",
       "_logohoriz copy-BCLRz8jA.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_Navbar-CKF6Eh1I.js",
+      "_Nav-D2XVaqNh.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_Tab-C9DNZ-qg.js",
+      "_Form-BkxS2Rmj.js",
+      "_ListGroup-C9lxPAzV.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Table-BaIpEMcC.js",
+      "_Modal-Dx3ET0UM.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_Nav-kTV_ghvj.js",
+      "_NavContext-VUXVuuvi.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "assets": [
       "assets/UsersPhoto18-DGe89Nvn.jpg",
@@ -728,16 +1803,32 @@
     ]
   },
   "src/Signup.jsx": {
-    "file": "assets/Signup-GrY0o6W7.js",
+    "file": "assets/Signup-Bg0Efq33.js",
     "name": "Signup",
     "src": "src/Signup.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_people-BLIw8OKe.js",
+      "_building-DDwcGfMs.js",
+      "_stars-CooFarm4.js",
+      "_shield-check-FdQpAKll.js",
+      "_graph-up-CPqaGAkl.js",
+      "_heart-Bf1rbKBq.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_Form-BkxS2Rmj.js",
+      "_arrow-right-OwspzjBd.js",
+      "_wallet2-BOeYOqXH.js",
+      "_check-circle-fill-3x66PXzs.js",
+      "_exclamation-triangle-D3Yag4CL.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_envelope-CY188tIo.js",
+      "_lock-BL0ns852.js",
+      "_eye-DXRMmU3O.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/Signup-BuFGXBV0.css",
@@ -748,28 +1839,45 @@
     ]
   },
   "src/StereotypyMonitor.jsx": {
-    "file": "assets/StereotypyMonitor-Bfooq2sC.js",
+    "file": "assets/StereotypyMonitor-CsdIiRhP.js",
     "name": "StereotypyMonitor",
     "src": "src/StereotypyMonitor.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Badge-Ca6CsS-m.js",
+      "_activity-4aE_vMYO.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_Card-DhZzyUYN.js",
+      "_play-circle-DHL3lU4o.js",
+      "_pause-circle-Du1Z-iH4.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_Form-BkxS2Rmj.js",
+      "_Table-BaIpEMcC.js",
+      "_stars-CooFarm4.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js"
     ]
   },
   "src/TriggerRecorder.jsx": {
-    "file": "assets/TriggerRecorder-j6Jc43_e.js",
+    "file": "assets/TriggerRecorder-BtLy4lUx.js",
     "name": "TriggerRecorder",
     "src": "src/TriggerRecorder.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_exclamation-triangle-D3Yag4CL.js",
+      "_check-circle-k14HG9_M.js",
+      "_mic-Bxslvnbe.js",
+      "_info-circle-CagRm1eH.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/TriggerRecorder-Dpbt_2kM.css"
@@ -1032,221 +2140,413 @@
     "src": "src/assets/servico02.png"
   },
   "src/components/hospital/HospitalAnalytics.jsx": {
-    "file": "assets/HospitalAnalytics-CUEmL_R6.js",
+    "file": "assets/HospitalAnalytics-B6L7IT6R.js",
     "name": "HospitalAnalytics",
     "src": "src/components/hospital/HospitalAnalytics.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_people-BLIw8OKe.js",
+      "_person-badge-CzisacXV.js",
+      "_download-BUXFI45t.js"
     ],
     "css": [
       "assets/HospitalAnalytics-DSdZc0Xv.css"
     ]
   },
   "src/components/hospital/HospitalAppointments.jsx": {
-    "file": "assets/HospitalAppointments-BIFTshG6.js",
+    "file": "assets/HospitalAppointments-BwyrHb_O.js",
     "name": "HospitalAppointments",
     "src": "src/components/hospital/HospitalAppointments.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_calendar2-check-DWz7yxC6.js",
+      "_plus-lg-B0CfQwHU.js",
+      "_clock-U6-OfaZI.js",
+      "_check-circle-k14HG9_M.js",
+      "_x-circle-CK_2Emec.js",
+      "_search-jJjMcuoN.js",
+      "_Form-BkxS2Rmj.js",
+      "_Badge-Ca6CsS-m.js",
+      "_HospitalDashboard-Dv9KDykl.js",
+      "_Modal-Dx3ET0UM.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js",
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_logonovo-B8fpvhjk.js",
+      "_people-BLIw8OKe.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_sliders-DTQocZSz.js",
+      "_shield-check-FdQpAKll.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_bell-BHFCL0Ib.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_heart-pulse-CvT5TSDC.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "css": [
       "assets/HospitalAppointments-CXBbJfHG.css"
     ]
   },
   "src/components/hospital/HospitalAudit.jsx": {
-    "file": "assets/HospitalAudit-7PvQCkXt.js",
+    "file": "assets/HospitalAudit-BNW9BggP.js",
     "name": "HospitalAudit",
     "src": "src/components/hospital/HospitalAudit.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Form-BkxS2Rmj.js",
+      "_funnel-CYbcen0-.js",
+      "_clock-history-DbcDeHKb.js",
+      "_shield-check-FdQpAKll.js",
+      "_Badge-Ca6CsS-m.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/HospitalAudit-OoJ2HVs-.css"
     ]
   },
   "src/components/hospital/HospitalInstitutionalJourney.jsx": {
-    "file": "assets/HospitalInstitutionalJourney-JNmdvByV.js",
+    "file": "assets/HospitalInstitutionalJourney-DoD-V6Vl.js",
     "name": "HospitalInstitutionalJourney",
     "src": "src/components/hospital/HospitalInstitutionalJourney.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_arrow-repeat-AIp8Gbdl.js",
+      "_Form-BkxS2Rmj.js",
+      "_Badge-Ca6CsS-m.js",
+      "_HospitalDashboard-Dv9KDykl.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js",
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_logonovo-B8fpvhjk.js",
+      "_people-BLIw8OKe.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_sliders-DTQocZSz.js",
+      "_shield-check-FdQpAKll.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_search-jJjMcuoN.js",
+      "_bell-BHFCL0Ib.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_heart-pulse-CvT5TSDC.js"
     ],
     "css": [
       "assets/HospitalInstitutionalJourney-C7dxBPBo.css"
     ]
   },
   "src/components/hospital/HospitalIntegrationHub.jsx": {
-    "file": "assets/HospitalIntegrationHub-DXdvi68u.js",
+    "file": "assets/HospitalIntegrationHub-fW8BmW-_.js",
     "name": "HospitalIntegrationHub",
     "src": "src/components/hospital/HospitalIntegrationHub.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_plus-circle-IdEGamNN.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_check-circle-k14HG9_M.js",
+      "_link-45deg-D6K3SRXM.js",
+      "_Badge-Ca6CsS-m.js",
+      "_x-circle-CK_2Emec.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/HospitalIntegrationHub-uXT5Q8Ac.css"
     ]
   },
   "src/components/hospital/HospitalPatients.jsx": {
-    "file": "assets/HospitalPatients-CybSK7AM.js",
+    "file": "assets/HospitalPatients-HjlE0Gz7.js",
     "name": "HospitalPatients",
     "src": "src/components/hospital/HospitalPatients.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_people-BLIw8OKe.js",
+      "_person-plus-BPLA-6eV.js",
+      "_search-jJjMcuoN.js",
+      "_Form-BkxS2Rmj.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_Badge-Ca6CsS-m.js",
+      "_HospitalDashboard-Dv9KDykl.js",
+      "_pencil-square-V_CWWfOS.js",
+      "_Modal-Dx3ET0UM.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js",
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_logonovo-B8fpvhjk.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_sliders-DTQocZSz.js",
+      "_shield-check-FdQpAKll.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_bell-BHFCL0Ib.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_heart-pulse-CvT5TSDC.js",
+      "_useWillUnmount-CeE8zY14.js"
     ],
     "css": [
       "assets/HospitalPatients-Dxt-ii1M.css"
     ]
   },
   "src/components/hospital/HospitalPendingCenter.jsx": {
-    "file": "assets/HospitalPendingCenter-BgO4l96L.js",
+    "file": "assets/HospitalPendingCenter-B0spVHFD.js",
     "name": "HospitalPendingCenter",
     "src": "src/components/hospital/HospitalPendingCenter.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_arrow-repeat-AIp8Gbdl.js",
+      "_HospitalDashboard-Dv9KDykl.js",
+      "_search-jJjMcuoN.js",
+      "_Form-BkxS2Rmj.js",
+      "_Badge-Ca6CsS-m.js",
+      "_clock-history-DbcDeHKb.js",
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_logonovo-B8fpvhjk.js",
+      "_people-BLIw8OKe.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_sliders-DTQocZSz.js",
+      "_shield-check-FdQpAKll.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_bell-BHFCL0Ib.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_heart-pulse-CvT5TSDC.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/HospitalPendingCenter-3az0MAoR.css"
     ]
   },
   "src/components/hospital/HospitalProfileDashboard.jsx": {
-    "file": "assets/HospitalProfileDashboard-CgzE3B-b.js",
+    "file": "assets/HospitalProfileDashboard-CjcLyo8H.js",
     "name": "HospitalProfileDashboard",
     "src": "src/components/hospital/HospitalProfileDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_speedometer2-Bl_nF9vx.js",
+      "_arrow-right-OwspzjBd.js",
+      "_HospitalDashboard-Dv9KDykl.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_people-BLIw8OKe.js",
+      "_Badge-Ca6CsS-m.js",
+      "_index-Dl-4zZjz.js",
+      "_ContextSelector-i1SNJIqZ.js",
+      "_building-DDwcGfMs.js",
+      "_person-badge-CzisacXV.js",
+      "_Form-BkxS2Rmj.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js",
+      "_logonovo-B8fpvhjk.js",
+      "_file-earmark-bar-graph-DrghbiPE.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_sliders-DTQocZSz.js",
+      "_shield-check-FdQpAKll.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_search-jJjMcuoN.js",
+      "_bell-BHFCL0Ib.js",
+      "_clipboard2-pulse-FJbDPX-h.js",
+      "_heart-pulse-CvT5TSDC.js"
     ],
     "css": [
       "assets/HospitalProfileDashboard-DMwlP_VN.css"
     ]
   },
   "src/components/hospital/HospitalSettings.jsx": {
-    "file": "assets/HospitalSettings-67SttAVu.js",
+    "file": "assets/HospitalSettings-n6mQla0K.js",
     "name": "HospitalSettings",
     "src": "src/components/hospital/HospitalSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_Card-DhZzyUYN.js",
+      "_shield-check-FdQpAKll.js",
+      "_Table-BaIpEMcC.js",
+      "_Badge-Ca6CsS-m.js",
+      "_x-circle-CK_2Emec.js",
+      "_Form-BkxS2Rmj.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js"
     ]
   },
   "src/components/hospital/HospitalWorkforce.jsx": {
-    "file": "assets/HospitalWorkforce-Ch_IwTMZ.js",
+    "file": "assets/HospitalWorkforce-CWGkdPDr.js",
     "name": "HospitalWorkforce",
     "src": "src/components/hospital/HospitalWorkforce.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_plus-lg-B0CfQwHU.js",
+      "_Tabs-klobkv4d.js",
+      "_Tab-C9DNZ-qg.js",
+      "_person-badge-CzisacXV.js",
+      "_Badge-Ca6CsS-m.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_people-BLIw8OKe.js",
+      "_person-plus-BPLA-6eV.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_Nav-D2XVaqNh.js",
+      "_Nav-kTV_ghvj.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_NavContext-VUXVuuvi.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/HospitalWorkforce-fzDni5Zj.css"
     ]
   },
   "src/emotion-tracking/EmotionChart.jsx": {
-    "file": "assets/EmotionChart-CsIEUSal.js",
+    "file": "assets/EmotionChart-CjeJ6S81.js",
     "name": "EmotionChart",
     "src": "src/emotion-tracking/EmotionChart.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js"
     ]
   },
   "src/emotion-tracking/EmotionDetectorVerified.jsx": {
-    "file": "assets/EmotionDetectorVerified-D1yZMEC8.js",
+    "file": "assets/EmotionDetectorVerified-CfnqHyft.js",
     "name": "EmotionDetectorVerified",
     "src": "src/emotion-tracking/EmotionDetectorVerified.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js",
-      "_emotionService-CkDUeVzC.js",
-      "_emotionUtils-Bxrlb537.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js",
+      "_logonovo-B8fpvhjk.js",
+      "_emotionService-C9b1zvTy.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_activity-4aE_vMYO.js",
+      "_cpu-CZ_Oq29L.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_clock-history-DbcDeHKb.js",
+      "_exclamation-triangle-fill-BjfPxMW9.js",
+      "_shield-check-FdQpAKll.js",
+      "_Card-DhZzyUYN.js",
+      "_stars-CooFarm4.js",
+      "_Form-BkxS2Rmj.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_Badge-Ca6CsS-m.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_warning-DqsI4WKF.js",
+      "_Col-C80KkH-X.js"
     ],
     "css": [
       "assets/EmotionDetectorVerified-BbGFHaBr.css"
     ]
   },
   "src/emotion-tracking/EmotionTrackingDashboard.jsx": {
-    "file": "assets/EmotionTrackingDashboard-BFXaulKW.js",
+    "file": "assets/EmotionTrackingDashboard-0GRQwgRI.js",
     "name": "EmotionTrackingDashboard",
     "src": "src/emotion-tracking/EmotionTrackingDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
+      "index.html",
       "src/emotion-tracking/EmotionChart.jsx",
       "src/emotion-tracking/SessionsGraph.jsx",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js"
     ]
   },
   "src/emotion-tracking/SessionsGraph.jsx": {
-    "file": "assets/SessionsGraph-nkypSw4M.js",
+    "file": "assets/SessionsGraph-BfhNHnNt.js",
     "name": "SessionsGraph",
     "src": "src/emotion-tracking/SessionsGraph.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js"
+      "_index-Dl-4zZjz.js"
     ]
   },
   "src/games/game1/Game1Page.jsx": {
-    "file": "assets/Game1Page-Dc72dcIh.js",
+    "file": "assets/Game1Page-DuYVjpfR.js",
     "name": "Game1Page",
     "src": "src/games/game1/Game1Page.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_TherapeuticGameLayout-ItShZm-T.js",
       "index.html",
-      "_vendor-games-BbrE81bZ.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_TherapeuticGameLayout-C2w8V3LR.js",
+      "_Modal-Dx3ET0UM.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_arrow-repeat-AIp8Gbdl.js",
+      "_x-circle-CK_2Emec.js",
+      "_logonovo-B8fpvhjk.js",
+      "_person-badge-CzisacXV.js",
+      "_speedometer2-Bl_nF9vx.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js"
     ],
     "assets": [
       "assets/game1_1-Nf7DUuLq.jpg",
@@ -1257,18 +2557,23 @@
     ]
   },
   "src/games/game2/Game2Page.jsx": {
-    "file": "assets/Game2Page-Df8OwG5H.js",
+    "file": "assets/Game2Page-BCIonGH_.js",
     "name": "Game2Page",
     "src": "src/games/game2/Game2Page.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_TherapeuticGameLayout-ItShZm-T.js",
       "index.html",
-      "_vendor-games-BbrE81bZ.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_TherapeuticGameLayout-C2w8V3LR.js",
+      "_Modal-Dx3ET0UM.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_arrow-repeat-AIp8Gbdl.js",
+      "_x-circle-CK_2Emec.js",
+      "_logonovo-B8fpvhjk.js",
+      "_person-badge-CzisacXV.js",
+      "_speedometer2-Bl_nF9vx.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js"
     ],
     "assets": [
       "assets/game2_cama-BNH3nv8A.jpg",
@@ -1279,18 +2584,23 @@
     ]
   },
   "src/games/game3/Game3Page.jsx": {
-    "file": "assets/Game3Page-D773Hq0U.js",
+    "file": "assets/Game3Page-D6OERMOF.js",
     "name": "Game3Page",
     "src": "src/games/game3/Game3Page.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_TherapeuticGameLayout-ItShZm-T.js",
       "index.html",
-      "_vendor-games-BbrE81bZ.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_TherapeuticGameLayout-C2w8V3LR.js",
+      "_Modal-Dx3ET0UM.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_arrow-repeat-AIp8Gbdl.js",
+      "_x-circle-CK_2Emec.js",
+      "_logonovo-B8fpvhjk.js",
+      "_person-badge-CzisacXV.js",
+      "_speedometer2-Bl_nF9vx.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js"
     ],
     "assets": [
       "assets/game3_jornada-CpO2G6j9.png",
@@ -1302,19 +2612,24 @@
     ]
   },
   "src/games/game4/Game4Page.jsx": {
-    "file": "assets/Game4Page-B7k5FhJQ.js",
+    "file": "assets/Game4Page-DtCAPGiL.js",
     "name": "Game4Page",
     "src": "src/games/game4/Game4Page.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_TherapeuticGameLayout-ItShZm-T.js",
       "index.html",
-      "_vendor-games-BbrE81bZ.js",
+      "_TherapeuticGameLayout-C2w8V3LR.js",
       "_game4-gAGDz6ZL.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js"
+      "_Modal-Dx3ET0UM.js",
+      "_emoji-smile-S0QMbKoQ.js",
+      "_arrow-repeat-AIp8Gbdl.js",
+      "_x-circle-CK_2Emec.js",
+      "_logonovo-B8fpvhjk.js",
+      "_person-badge-CzisacXV.js",
+      "_speedometer2-Bl_nF9vx.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js"
     ],
     "assets": [
       "assets/game4_acordar-DLxdQB6y.png",
@@ -1326,77 +2641,132 @@
     ]
   },
   "src/pages/AbaDashboard.jsx": {
-    "file": "assets/AbaDashboard-Dsn190q3.js",
+    "file": "assets/AbaDashboard-Wc9Ucmb6.js",
     "name": "AbaDashboard",
     "src": "src/pages/AbaDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "src/DashboardABA.jsx",
-      "_vendor-charts-DjROEP7A.js",
-      "_logonovo-B8fpvhjk.js",
-      "_abaAiService-B3v2hJ5e.js",
-      "_vendor-ui-DE57BOUR.js",
       "index.html",
-      "_DashboardABA-DtfJ3xxd.js"
+      "src/DashboardABA.jsx",
+      "_logonovo-B8fpvhjk.js",
+      "_abaAiService-TQXegy4D.js",
+      "_Card-DhZzyUYN.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_Badge-Ca6CsS-m.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_DashboardABA-CIUpVHaL.js",
+      "_Table-BaIpEMcC.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_diagram-3-Cw2cbRzh.js",
+      "_clock-history-DbcDeHKb.js",
+      "_journal-text-B3kRTlgF.js",
+      "_stars-CooFarm4.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_shield-check-FdQpAKll.js",
+      "_exclamation-triangle-fill-BjfPxMW9.js",
+      "_info-circle-CagRm1eH.js",
+      "_check-circle-fill-3x66PXzs.js"
     ]
   },
   "src/pages/AbaPatient.jsx": {
-    "file": "assets/AbaPatient-yuJEzsGY.js",
+    "file": "assets/AbaPatient-Bo89rRfM.js",
     "name": "AbaPatient",
     "src": "src/pages/AbaPatient.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_DashboardABA-DtfJ3xxd.js",
-      "_abaAiService-B3v2hJ5e.js",
-      "_vendor-ui-DE57BOUR.js",
       "index.html",
+      "_DashboardABA-CIUpVHaL.js",
+      "_abaAiService-TQXegy4D.js",
+      "_Card-DhZzyUYN.js",
+      "_Form-BkxS2Rmj.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Modal-Dx3ET0UM.js",
+      "_ListGroup-C9lxPAzV.js",
       "src/pages/AbaReport.jsx",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_bar-chart-line-DEHVqB2T.js",
+      "_clock-history-DbcDeHKb.js",
+      "_graph-up-arrow-CbZqwVMI.js",
+      "_stars-CooFarm4.js",
+      "_shield-check-FdQpAKll.js",
+      "_journal-text-B3kRTlgF.js",
+      "_file-earmark-medical-BmxTGkQY.js",
+      "_arrow-left-D7HiGPxy.js",
+      "_Table-BaIpEMcC.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_Nav-kTV_ghvj.js",
+      "_NavContext-VUXVuuvi.js",
+      "_SelectableContext-ySJ6ANTV.js"
     ],
     "css": [
       "assets/AbaPatient-CmsZegaD.css"
     ]
   },
   "src/pages/AbaReport.jsx": {
-    "file": "assets/AbaReport--A3a76DL.js",
+    "file": "assets/AbaReport-DlnHhPNl.js",
     "name": "AbaReport",
     "src": "src/pages/AbaReport.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_abaAiService-B3v2hJ5e.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_abaAiService-TQXegy4D.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Card-DhZzyUYN.js",
+      "_ProgressBar-CMKoEY60.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/presentation-dashboard/PresentationCommunitySupport.jsx": {
-    "file": "assets/PresentationCommunitySupport-HWUrsRx1.js",
+    "file": "assets/PresentationCommunitySupport-65IyEkiK.js",
     "name": "PresentationCommunitySupport",
     "src": "src/presentation-dashboard/PresentationCommunitySupport.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logohoriz-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logohoriz-BCLRz8jA.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/presentation-dashboard/PresentationEmotionDetector.jsx": {
-    "file": "assets/PresentationEmotionDetector-DQ8RZWTE.js",
+    "file": "assets/PresentationEmotionDetector-ZbR4QCGF.js",
     "name": "PresentationEmotionDetector",
     "src": "src/presentation-dashboard/PresentationEmotionDetector.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logonovo-B8fpvhjk.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logonovo-B8fpvhjk.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "assets": [
       "assets/emotion-hero-CDBpeDYH.png",
@@ -1407,42 +2777,65 @@
     ]
   },
   "src/presentation-dashboard/PresentationIntegratedScheduling.jsx": {
-    "file": "assets/PresentationIntegratedScheduling-B2fgXYWH.js",
+    "file": "assets/PresentationIntegratedScheduling-CjIUtw6M.js",
     "name": "PresentationIntegratedScheduling",
     "src": "src/presentation-dashboard/PresentationIntegratedScheduling.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logohoriz-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logohoriz-BCLRz8jA.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/presentation-dashboard/PresentationParentDashboard.jsx": {
-    "file": "assets/PresentationParentDashboard-BXKN_tH9.js",
+    "file": "assets/PresentationParentDashboard-DZyP7pQP.js",
     "name": "PresentationParentDashboard",
     "src": "src/presentation-dashboard/PresentationParentDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logonovo-B8fpvhjk.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logonovo-B8fpvhjk.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/presentation-dashboard/PresentationPatientDetails.jsx": {
-    "file": "assets/PresentationPatientDetails-DCvkfUSi.js",
+    "file": "assets/PresentationPatientDetails-BAn69Qzi.js",
     "name": "PresentationPatientDetails",
     "src": "src/presentation-dashboard/PresentationPatientDetails.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logonovo-B8fpvhjk.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_logonovo-B8fpvhjk.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "assets": [
       "assets/dp 00-MlfrRJzj.png",
@@ -1453,16 +2846,24 @@
     ]
   },
   "src/presentation-dashboard/PresentationProfessionalDashboard.jsx": {
-    "file": "assets/PresentationProfessionalDashboard-DW_A66ae.js",
+    "file": "assets/PresentationProfessionalDashboard-CdOAxdgW.js",
     "name": "PresentationProfessionalDashboard",
     "src": "src/presentation-dashboard/PresentationProfessionalDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logonovo-B8fpvhjk.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logonovo-B8fpvhjk.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "assets": [
       "assets/professional-hero-DuKjwb0i.png",
@@ -1474,16 +2875,24 @@
     ]
   },
   "src/presentation-dashboard/PresentationSecretaryDashboard.jsx": {
-    "file": "assets/PresentationSecretaryDashboard-N4gFOPSP.js",
+    "file": "assets/PresentationSecretaryDashboard-B0Jhcrsp.js",
     "name": "PresentationSecretaryDashboard",
     "src": "src/presentation-dashboard/PresentationSecretaryDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logonovo-B8fpvhjk.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logonovo-B8fpvhjk.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "assets": [
       "assets/secretary-main-B5zKGwho.png",
@@ -1494,43 +2903,67 @@
     ]
   },
   "src/presentation-dashboard/PresentationServiceCertification.jsx": {
-    "file": "assets/PresentationServiceCertification-DKWIE_al.js",
+    "file": "assets/PresentationServiceCertification-B_B5QlT4.js",
     "name": "PresentationServiceCertification",
     "src": "src/presentation-dashboard/PresentationServiceCertification.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logohoriz-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logohoriz-BCLRz8jA.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/presentation-dashboard/PresentationServiceDashboard.jsx": {
-    "file": "assets/PresentationServiceDashboard-BtrJdNq0.js",
+    "file": "assets/PresentationServiceDashboard-CVQraEtB.js",
     "name": "PresentationServiceDashboard",
     "src": "src/presentation-dashboard/PresentationServiceDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-maps-H1tDn4eH.js",
-      "_logohoriz copy-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_leaflet-D_8iOx2O.js",
+      "_index-nUstqXCa.js",
+      "_logohoriz copy-BCLRz8jA.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/presentation-dashboard/PresentationTriggerRecorder.jsx": {
-    "file": "assets/PresentationTriggerRecorder-Bfh_a_oW.js",
+    "file": "assets/PresentationTriggerRecorder-sAsWGmMt.js",
     "name": "PresentationTriggerRecorder",
     "src": "src/presentation-dashboard/PresentationTriggerRecorder.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logonovo-B8fpvhjk.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logonovo-B8fpvhjk.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ],
     "assets": [
       "assets/recorder-main-DO4oHVHJ.png",
@@ -1541,254 +2974,630 @@
     ]
   },
   "src/presentation-dashboard/PresentationVirtualConsultations.jsx": {
-    "file": "assets/PresentationVirtualConsultations-CNhRhFcv.js",
+    "file": "assets/PresentationVirtualConsultations-cGOUBwVD.js",
     "name": "PresentationVirtualConsultations",
     "src": "src/presentation-dashboard/PresentationVirtualConsultations.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_logohoriz-BCLRz8jA.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_index-nUstqXCa.js",
+      "_logohoriz-BCLRz8jA.js",
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Card-DhZzyUYN.js",
+      "_Image-B2pll9HU.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_CardHeaderContext-DIOCe8u6.js"
     ]
   },
   "src/school/SchoolCameraDetails.jsx": {
-    "file": "assets/SchoolCameraDetails-CxHBiVUu.js",
+    "file": "assets/SchoolCameraDetails-D_sfSOvX.js",
     "name": "SchoolCameraDetails",
     "src": "src/school/SchoolCameraDetails.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_play-circle-DHL3lU4o.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js"
     ]
   },
   "src/school/SchoolCameraMonitor.jsx": {
-    "file": "assets/SchoolCameraMonitor-CgKbtBEI.js",
+    "file": "assets/SchoolCameraMonitor-BQlZKwtx.js",
     "name": "SchoolCameraMonitor",
     "src": "src/school/SchoolCameraMonitor.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_useSchoolMonitoringEngine-ZPAlORpu.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
       "index.html",
-      "_emotionUtils-Bxrlb537.js"
+      "_SchoolShell-CwhwH5XK.js",
+      "_useSchoolMonitoringEngine-B6X3IUg-.js",
+      "_Form-BkxS2Rmj.js",
+      "_play-circle-DHL3lU4o.js",
+      "_pause-circle-Du1Z-iH4.js",
+      "_clock-history-DbcDeHKb.js",
+      "_cpu-CZ_Oq29L.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js",
+      "_useWillUnmount-CeE8zY14.js"
     ]
   },
   "src/school/SchoolCameras.jsx": {
-    "file": "assets/SchoolCameras-ibA-uB48.js",
+    "file": "assets/SchoolCameras-7A_uZDk9.js",
     "name": "SchoolCameras",
     "src": "src/school/SchoolCameras.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_SchoolCameraGrid-DQ5xKw9R.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_SchoolCameraGrid-BZCtG77U.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_pencil-square-V_CWWfOS.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_plus-circle-IdEGamNN.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_arrow-right-OwspzjBd.js",
+      "_play-circle-DHL3lU4o.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js"
     ]
   },
   "src/school/SchoolClassrooms.jsx": {
-    "file": "assets/SchoolClassrooms-D-t_jqP0.js",
+    "file": "assets/SchoolClassrooms-bkXJ7kwa.js",
     "name": "SchoolClassrooms",
     "src": "src/school/SchoolClassrooms.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_plus-circle-IdEGamNN.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js"
     ]
   },
   "src/school/SchoolDashboard.jsx": {
-    "file": "assets/SchoolDashboard-COitQ8YW.js",
+    "file": "assets/SchoolDashboard-DWVk8xdL.js",
     "name": "SchoolDashboard",
     "src": "src/school/SchoolDashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "index.html"
+      "index.html",
+      "_index-Dl-4zZjz.js",
+      "_SchoolShell-CwhwH5XK.js",
+      "_people-BLIw8OKe.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_activity-4aE_vMYO.js",
+      "_calendar2-check-DWz7yxC6.js",
+      "_arrow-right-OwspzjBd.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_bell-BHFCL0Ib.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js"
     ]
   },
   "src/school/SchoolEvents.jsx": {
-    "file": "assets/SchoolEvents-CpKtnZ5r.js",
+    "file": "assets/SchoolEvents-ChpzK7A3.js",
     "name": "SchoolEvents",
     "src": "src/school/SchoolEvents.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Form-BkxS2Rmj.js",
+      "_activity-4aE_vMYO.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js",
+      "_useWillUnmount-CeE8zY14.js"
     ]
   },
   "src/school/SchoolLocations.jsx": {
-    "file": "assets/SchoolLocations-fKcOtWQ5.js",
+    "file": "assets/SchoolLocations-B_NAWMJ-.js",
     "name": "SchoolLocations",
     "src": "src/school/SchoolLocations.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_pencil-square-V_CWWfOS.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_plus-circle-IdEGamNN.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js"
     ]
   },
   "src/school/SchoolMonitoring.jsx": {
-    "file": "assets/SchoolMonitoring-BVcrsZij.js",
+    "file": "assets/SchoolMonitoring-CgwJzdHq.js",
     "name": "SchoolMonitoring",
     "src": "src/school/SchoolMonitoring.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolMonitoringCentral-Cair3ZG9.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_SchoolShell-BACf98hb.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_SchoolCameraGrid-DQ5xKw9R.js",
-      "_useSchoolMonitoringEngine-ZPAlORpu.js",
-      "_emotionUtils-Bxrlb537.js"
+      "_SchoolMonitoringCentral-vRRHKn5w.js",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_SchoolCameraGrid-BZCtG77U.js",
+      "_arrow-right-OwspzjBd.js",
+      "_play-circle-DHL3lU4o.js",
+      "_useSchoolMonitoringEngine-B6X3IUg-.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Form-BkxS2Rmj.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js",
+      "_pause-circle-Du1Z-iH4.js",
+      "_cpu-CZ_Oq29L.js",
+      "_eye-DXRMmU3O.js",
+      "_activity-4aE_vMYO.js"
     ]
   },
   "src/school/SchoolMonitoringKiosk.jsx": {
-    "file": "assets/SchoolMonitoringKiosk-Dzo7TdVT.js",
+    "file": "assets/SchoolMonitoringKiosk-CJK9exZa.js",
     "name": "SchoolMonitoringKiosk",
     "src": "src/school/SchoolMonitoringKiosk.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolMonitoringCentral-Cair3ZG9.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_SchoolShell-BACf98hb.js",
       "index.html",
-      "_vendor-ui-DE57BOUR.js",
-      "_SchoolCameraGrid-DQ5xKw9R.js",
-      "_useSchoolMonitoringEngine-ZPAlORpu.js",
-      "_emotionUtils-Bxrlb537.js"
+      "_SchoolMonitoringCentral-vRRHKn5w.js",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_SchoolCameraGrid-BZCtG77U.js",
+      "_arrow-right-OwspzjBd.js",
+      "_play-circle-DHL3lU4o.js",
+      "_useSchoolMonitoringEngine-B6X3IUg-.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Form-BkxS2Rmj.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js",
+      "_pause-circle-Du1Z-iH4.js",
+      "_cpu-CZ_Oq29L.js",
+      "_eye-DXRMmU3O.js",
+      "_activity-4aE_vMYO.js"
     ]
   },
   "src/school/SchoolReports.jsx": {
-    "file": "assets/SchoolReports-Cx4truRV.js",
+    "file": "assets/SchoolReports-CW9IXzSL.js",
     "name": "SchoolReports",
     "src": "src/school/SchoolReports.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "index.html"
+      "index.html",
+      "_index-Dl-4zZjz.js",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Form-BkxS2Rmj.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js"
     ]
   },
   "src/school/SchoolSettings.jsx": {
-    "file": "assets/SchoolSettings-CyL_Y6CM.js",
+    "file": "assets/SchoolSettings-C_DlVE6l.js",
     "name": "SchoolSettings",
     "src": "src/school/SchoolSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Form-BkxS2Rmj.js",
+      "_gear-BXMK8msk.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js"
     ]
   },
   "src/school/SchoolStudentDetails.jsx": {
-    "file": "assets/SchoolStudentDetails-csm3Imc7.js",
+    "file": "assets/SchoolStudentDetails-BUGEQo8C.js",
     "name": "SchoolStudentDetails",
     "src": "src/school/SchoolStudentDetails.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_PatientFaceReferencePanel-B-U40W-X.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "_emotionService-CkDUeVzC.js",
       "index.html",
-      "_emotionUtils-Bxrlb537.js"
+      "_PatientFaceReferencePanel-BDqt_Dgn.js",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Tabs-klobkv4d.js",
+      "_Tab-C9DNZ-qg.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_clock-history-DbcDeHKb.js",
+      "_journal-text-B3kRTlgF.js",
+      "_emotionService-C9b1zvTy.js",
+      "_emotionUtils-Bxrlb537.js",
+      "_shield-check-FdQpAKll.js",
+      "_cpu-CZ_Oq29L.js",
+      "_arrow-clockwise-BJ0khWzL.js",
+      "_Modal-Dx3ET0UM.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_Nav-D2XVaqNh.js",
+      "_Nav-kTV_ghvj.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_ElementChildren-B2f8bwbG.js"
     ]
   },
   "src/school/SchoolStudents.jsx": {
-    "file": "assets/SchoolStudents-IpqYjn9Y.js",
+    "file": "assets/SchoolStudents-DIF4HiBx.js",
     "name": "SchoolStudents",
     "src": "src/school/SchoolStudents.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_Form-BkxS2Rmj.js",
+      "_search-jJjMcuoN.js",
+      "_Table-BaIpEMcC.js",
+      "_Modal-Dx3ET0UM.js",
+      "_link-45deg-D6K3SRXM.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_person-badge-CzisacXV.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js",
+      "_useWillUnmount-CeE8zY14.js"
     ]
   },
   "src/school/SchoolTeam.jsx": {
-    "file": "assets/SchoolTeam-m8J-RXz3.js",
+    "file": "assets/SchoolTeam-oSbdE_Xm.js",
     "name": "SchoolTeam",
     "src": "src/school/SchoolTeam.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_SchoolShell-BACf98hb.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js",
-      "index.html"
+      "index.html",
+      "_SchoolShell-CwhwH5XK.js",
+      "_person-badge-CzisacXV.js",
+      "_Table-BaIpEMcC.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_plus-circle-IdEGamNN.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_list-CT51jdFi.js",
+      "_Dropdown-CH-_p4P-.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_NavContext-VUXVuuvi.js",
+      "_warning-DqsI4WKF.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_house-door-gzWJTSPO.js",
+      "_people-BLIw8OKe.js",
+      "_geo-alt-BCnlK4YA.js",
+      "_camera-video-9PYW_Bx-.js",
+      "_bell-BHFCL0Ib.js",
+      "_bar-chart-line-DEHVqB2T.js",
+      "_gear-BXMK8msk.js",
+      "_box-arrow-right-COEOifcE.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js",
+      "_Col-C80KkH-X.js"
     ]
   },
   "src/service_dashboard/ServiceDashboard01.jsx": {
-    "file": "assets/ServiceDashboard01-B0BDbQWC.js",
+    "file": "assets/ServiceDashboard01-CWE_Js68.js",
     "name": "ServiceDashboard01",
     "src": "src/service_dashboard/ServiceDashboard01.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-maps-H1tDn4eH.js",
+      "index.html",
+      "_leaflet-D_8iOx2O.js",
+      "_index-nUstqXCa.js",
       "_logohoriz copy-BCLRz8jA.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Tab-C9DNZ-qg.js",
+      "_Nav-D2XVaqNh.js",
+      "_Card-DhZzyUYN.js",
+      "_ListGroup-C9lxPAzV.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Table-BaIpEMcC.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_Nav-kTV_ghvj.js",
+      "_NavContext-VUXVuuvi.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js"
     ]
   },
   "src/service_dashboard/ServiceDashboard17.jsx": {
-    "file": "assets/ServiceDashboard17-DnYPqz8C.js",
+    "file": "assets/ServiceDashboard17-B_y1dE1L.js",
     "name": "ServiceDashboard17",
     "src": "src/service_dashboard/ServiceDashboard17.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-maps-H1tDn4eH.js",
+      "index.html",
+      "_leaflet-D_8iOx2O.js",
+      "_index-nUstqXCa.js",
       "_logohoriz copy-BCLRz8jA.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Tab-C9DNZ-qg.js",
+      "_Nav-D2XVaqNh.js",
+      "_Card-DhZzyUYN.js",
+      "_ListGroup-C9lxPAzV.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_Nav-kTV_ghvj.js",
+      "_NavContext-VUXVuuvi.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js"
     ],
     "assets": [
       "assets/17-sjQ2wYcM.jpg"
     ]
   },
   "src/service_dashboard/ServiceDashboard18.jsx": {
-    "file": "assets/ServiceDashboard18-BDwWKqkR.js",
+    "file": "assets/ServiceDashboard18-DsOF5qcu.js",
     "name": "ServiceDashboard18",
     "src": "src/service_dashboard/ServiceDashboard18.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-react-D5AOm95y.js",
-      "_vendor-maps-H1tDn4eH.js",
+      "index.html",
+      "_leaflet-D_8iOx2O.js",
+      "_index-nUstqXCa.js",
       "_logonovo-B8fpvhjk.js",
-      "_vendor-ui-DE57BOUR.js",
-      "_vendor-charts-DjROEP7A.js"
+      "_Navbar-CKF6Eh1I.js",
+      "_Row-CyiL5Qvc.js",
+      "_Col-C80KkH-X.js",
+      "_Tab-C9DNZ-qg.js",
+      "_Nav-D2XVaqNh.js",
+      "_Card-DhZzyUYN.js",
+      "_ListGroup-C9lxPAzV.js",
+      "_Badge-Ca6CsS-m.js",
+      "_Modal-Dx3ET0UM.js",
+      "_Form-BkxS2Rmj.js",
+      "_SelectableContext-ySJ6ANTV.js",
+      "_NavbarContext-CFPrFmCC.js",
+      "_Offcanvas-Bj2zI_9x.js",
+      "_AbstractModalHeader-CqfdKZMi.js",
+      "_SSRProvider-CHHLZ9aW.js",
+      "_Nav-kTV_ghvj.js",
+      "_NavContext-VUXVuuvi.js",
+      "_CardHeaderContext-DIOCe8u6.js",
+      "_warning-DqsI4WKF.js",
+      "_useWillUnmount-CeE8zY14.js",
+      "_ElementChildren-B2f8bwbG.js"
     ],
     "assets": [
       "assets/18-C0jQ6IvU.jpg"
