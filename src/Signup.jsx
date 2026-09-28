@@ -28,6 +28,19 @@ import './App.css';
 import './Login.css';
 import './Signup.css';
 
+const LEGAL_DOCUMENTS = Object.freeze({
+    terms: {
+        version: '1.0',
+        sha256: '6E9BB5C4A3DC94A7842AE992F4EB2E7352F004EBB8D257B564C49923A48C0BD1',
+        url: '/legal/termos-de-uso-autisconnect-v1.0.pdf'
+    },
+    privacy: {
+        version: '1.0',
+        sha256: '7D87748378E26834B457191B5D43E042D7C185601518074AA2E413362F4B70AF',
+        url: '/legal/politica-de-privacidade-autisconnect-v1.0.pdf'
+    }
+});
+
 const profileOptions = [
     {
         value: 'pais_responsavel',
@@ -406,6 +419,10 @@ function Signup() {
     const [isLoading, setIsLoading] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState({ value: 0, variant: 'danger', text: 'Senha muito fraca' });
     const [showPassword, setShowPassword] = useState(false);
+    const [legalChecks, setLegalChecks] = useState({
+        termsAccepted: false,
+        privacyAcknowledged: false
+    });
     const [lookupFeedback, setLookupFeedback] = useState({
         cep: { status: 'idle', message: '' },
         cnpj: { status: 'idle', message: '' }
@@ -432,6 +449,11 @@ function Signup() {
         setError('');
         setSuccess('');
 
+        if (!legalChecks.termsAccepted || !legalChecks.privacyAcknowledged) {
+            setError('Para continuar aos planos, aceite os Termos de Uso e confirme a ciência da Política de Privacidade.');
+            return;
+        }
+
         if (passwordStrength.value < 30) {
             setError('Por favor, escolha uma senha mais forte.');
             return;
@@ -439,7 +461,23 @@ function Signup() {
 
         setIsLoading(true);
         try {
-            const payload = { ...formData, username: formData.email, tipo_usuario: tipoUsuario };
+            const payload = {
+                ...formData,
+                username: formData.email,
+                tipo_usuario: tipoUsuario,
+                legal_acceptances: {
+                    terms: {
+                        accepted: true,
+                        version: LEGAL_DOCUMENTS.terms.version,
+                        sha256: LEGAL_DOCUMENTS.terms.sha256
+                    },
+                    privacy: {
+                        acknowledged: true,
+                        version: LEGAL_DOCUMENTS.privacy.version,
+                        sha256: LEGAL_DOCUMENTS.privacy.sha256
+                    }
+                }
+            };
 
             await apiClient.post('/signup', payload);
 
@@ -1349,18 +1387,77 @@ function Signup() {
         </>
     );
 
+    const handleLegalCheckChange = (field) => (event) => {
+        const checked = event.target.checked;
+        setLegalChecks((previous) => ({ ...previous, [field]: checked }));
+        if (checked) {
+            setError('');
+        }
+    };
+
     const renderFormulario = () => (
         <Form className="ac-signup-form" onSubmit={handleSubmitCadastro}>
             {tipoUsuario === 'pais_responsavel' ? renderParentForm() : null}
             {tipoUsuario === 'medicos_terapeutas' ? renderProfessionalForm() : null}
             {isBusinessUser ? renderBusinessForm() : null}
 
+            <section className="ac-signup-legal" aria-labelledby="signup-legal-title">
+                <div className="ac-signup-legal__header">
+                    <span className="ac-signup-section__eyebrow">Documentos jurídicos</span>
+                    <h3 id="signup-legal-title">Confirme antes de seguir para os planos</h3>
+                    <p>Os dois documentos podem ser abertos em uma nova aba para leitura.</p>
+                </div>
+
+                <label className={`ac-signup-legal__item${legalChecks.termsAccepted ? ' is-checked' : ''}`}>
+                    <Form.Check.Input
+                        type="checkbox"
+                        checked={legalChecks.termsAccepted}
+                        onChange={handleLegalCheckChange('termsAccepted')}
+                        required
+                        aria-describedby="signup-terms-help"
+                    />
+                    <span id="signup-terms-help">
+                        Li e aceito os{' '}
+                        <a href={LEGAL_DOCUMENTS.terms.url} target="_blank" rel="noopener noreferrer">
+                            Termos de Uso do AutisConnect
+                        </a>{' '}
+                        (versão {LEGAL_DOCUMENTS.terms.version}).
+                    </span>
+                </label>
+
+                <label className={`ac-signup-legal__item${legalChecks.privacyAcknowledged ? ' is-checked' : ''}`}>
+                    <Form.Check.Input
+                        type="checkbox"
+                        checked={legalChecks.privacyAcknowledged}
+                        onChange={handleLegalCheckChange('privacyAcknowledged')}
+                        required
+                        aria-describedby="signup-privacy-help"
+                    />
+                    <span id="signup-privacy-help">
+                        Declaro ciência da{' '}
+                        <a href={LEGAL_DOCUMENTS.privacy.url} target="_blank" rel="noopener noreferrer">
+                            Política de Privacidade e Proteção de Dados
+                        </a>{' '}
+                        (versão {LEGAL_DOCUMENTS.privacy.version}). Esta ciência não constitui consentimento genérico para tratamento de dados.
+                    </span>
+                </label>
+
+                {!legalChecks.termsAccepted || !legalChecks.privacyAcknowledged ? (
+                    <p className="ac-signup-legal__pending" role="status">
+                        Marque as duas opções para habilitar “Continuar para planos”.
+                    </p>
+                ) : null}
+            </section>
+
             <div className="ac-signup-form__actions">
                 <Button variant="outline-secondary" type="button" onClick={() => setEtapa('selecao_tipo')}>
                     <ArrowLeft className="me-2" />
                     Voltar para perfil
                 </Button>
-                <Button type="submit" disabled={isLoading}>
+                <Button
+                    type="submit"
+                    disabled={isLoading || !legalChecks.termsAccepted || !legalChecks.privacyAcknowledged}
+                >
                     {isLoading ? (
                         <>
                             <Spinner as="span" animation="border" size="sm" className="me-2" />
@@ -1556,6 +1653,14 @@ function Signup() {
                                 <Link to="/login" className="ac-login-inline-link ac-login-inline-link--strong">
                                     Entrar
                                 </Link>
+                                <span aria-hidden="true">•</span>
+                                <a href={LEGAL_DOCUMENTS.terms.url} target="_blank" rel="noopener noreferrer" className="ac-login-inline-link">
+                                    Termos de Uso
+                                </a>
+                                <span aria-hidden="true">•</span>
+                                <a href={LEGAL_DOCUMENTS.privacy.url} target="_blank" rel="noopener noreferrer" className="ac-login-inline-link">
+                                    Privacidade
+                                </a>
                             </div>
                         </div>
 
