@@ -27,6 +27,7 @@ import {
     HouseDoor,
     JournalText,
     List,
+    LockFill,
     Mic,
     PersonCircle,
     PlusCircle,
@@ -100,6 +101,12 @@ const PAYMENT_STATUS_OPTIONS = ['Pendente', 'Pago', 'Atrasado', 'Isento'];
 const PAYMENT_METHOD_OPTIONS = ['Pix', 'Crédito', 'Débito', 'Dinheiro', 'Plano de Saúde', 'Outros'];
 const APPOINTMENT_TYPE_OPTIONS = ['Regular', 'Inicial', 'Acompanhamento', 'Avaliação', 'Terapia'];
 const PLAN_NAMES = ['Hapvida', 'Bradesco Saúde', 'SulAmérica', 'Unimed', 'Amil'];
+const MEDICAL_RECORD_TYPES = ['Evolução clínica', 'Avaliação', 'Atendimento', 'Terapia', 'ABA', 'Fonoaudiologia', 'Psicologia', 'Terapia ocupacional', 'Enfermagem', 'Relatório', 'Outro'];
+const createEmptyMedicalRecord = () => {
+    const now = new Date();
+    const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+    return { date, time: now.toTimeString().slice(0, 5), type: 'Evolução clínica', title: '', clinical_analysis: '', observations: '', conduct: '', family_visible: false };
+};
 
 const SECTION_META = {
     overview: {
@@ -142,6 +149,11 @@ const SECTION_META = {
         title: 'Notas',
         description: 'Observações registradas durante a evolução do paciente.'
     },
+    medicalRecord: {
+        eyebrow: 'Clínico',
+        title: 'Prontuário',
+        description: 'Histórico clínico e evolutivo do paciente, com controle de compartilhamento.'
+    },
     'monitoring-tools': {
         eyebrow: 'Ferramentas',
         title: 'Monitoramentos',
@@ -182,6 +194,7 @@ const PATIENT_NAVIGATION_GROUPS = [
         items: [
             { key: 'consultation', label: 'Atendimentos', icon: CalendarCheck },
             { key: 'prescription', label: 'Prescrições', icon: FileEarmarkMedical },
+            { key: 'medicalRecord', label: 'Prontuário', icon: ClipboardPulse },
             { key: 'notes', label: 'Notas', icon: JournalText }
         ]
     }
@@ -963,6 +976,13 @@ const PatientDetails = () => {
 
     const [patient, setPatient] = useState(null);
     const [notes, setNotes] = useState([]);
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [medicalRecordsLoading, setMedicalRecordsLoading] = useState(false);
+    const [medicalRecordsError, setMedicalRecordsError] = useState('');
+    const [medicalRecordSaving, setMedicalRecordSaving] = useState(false);
+    const [showMedicalRecordModal, setShowMedicalRecordModal] = useState(false);
+    const [editingMedicalRecord, setEditingMedicalRecord] = useState(null);
+    const [medicalRecordForm, setMedicalRecordForm] = useState(createEmptyMedicalRecord);
     const [emotions, setEmotions] = useState([]);
     const [stereotypies, setStereotypies] = useState([]);
     const [prescriptions, setPrescriptions] = useState([]);
@@ -1266,6 +1286,73 @@ const PatientDetails = () => {
         }
     }, [navigate, patientId, user]);
 
+    const fetchMedicalRecords = useCallback(async () => {
+        if (!patientId || !user?.id) return;
+        setMedicalRecordsLoading(true);
+        setMedicalRecordsError('');
+        try {
+            const response = await apiClient.get(`/professional/${user.id}/patients/${patientId}/medical-records`);
+            setMedicalRecords(Array.isArray(response.data) ? response.data : []);
+        } catch (fetchError) {
+            setMedicalRecordsError(normalizeText(fetchError.response?.data?.error || 'Não foi possível carregar o prontuário.'));
+        } finally {
+            setMedicalRecordsLoading(false);
+        }
+    }, [patientId, user?.id]);
+
+    useEffect(() => { fetchMedicalRecords(); }, [fetchMedicalRecords]);
+
+    const openMedicalRecordModal = (record = null) => {
+        setEditingMedicalRecord(record);
+        setMedicalRecordForm(record ? {
+            date: record.date || '', time: record.time || '', type: record.type || 'Evolução clínica',
+            title: record.title || '', clinical_analysis: record.clinical_analysis || '',
+            observations: record.observations || '', conduct: record.conduct || '',
+            family_visible: Boolean(record.family_visible)
+        } : createEmptyMedicalRecord());
+        setShowMedicalRecordModal(true);
+    };
+
+    const handleMedicalRecordSave = async (event) => {
+        event.preventDefault();
+        if (!medicalRecordForm.date || !medicalRecordForm.type || !medicalRecordForm.title.trim() || !medicalRecordForm.clinical_analysis.trim()) {
+            setMedicalRecordsError('Data, tipo, título e análise clínica são obrigatórios.');
+            return;
+        }
+        setMedicalRecordSaving(true);
+        setMedicalRecordsError('');
+        const endpoint = `/professional/${user.id}/patients/${patientId}/medical-records`;
+        try {
+            const response = editingMedicalRecord
+                ? await apiClient.put(`${endpoint}/${editingMedicalRecord.id}`, medicalRecordForm)
+                : await apiClient.post(endpoint, medicalRecordForm);
+            const savedRecord = response.data;
+            setMedicalRecords((records) => editingMedicalRecord
+                ? records.map((record) => record.id === savedRecord.id ? savedRecord : record)
+                : [savedRecord, ...records]);
+            setShowMedicalRecordModal(false);
+            setEditingMedicalRecord(null);
+            setSuccessMessage(editingMedicalRecord ? 'Registro do prontuário atualizado.' : 'Registro adicionado ao prontuário.');
+            clearSuccessAfterDelay();
+        } catch (saveError) {
+            setMedicalRecordsError(normalizeText(saveError.response?.data?.error || 'Não foi possível salvar o registro.'));
+        } finally {
+            setMedicalRecordSaving(false);
+        }
+    };
+
+    const handleMedicalRecordDelete = async (record) => {
+        if (!window.confirm('Tem certeza que deseja excluir este registro do prontuário?')) return;
+        try {
+            await apiClient.delete(`/professional/${user.id}/patients/${patientId}/medical-records/${record.id}`);
+            setMedicalRecords((records) => records.filter((item) => item.id !== record.id));
+            setSuccessMessage('Registro excluído do prontuário.');
+            clearSuccessAfterDelay();
+        } catch (deleteError) {
+            setMedicalRecordsError(normalizeText(deleteError.response?.data?.error || 'Não foi possível excluir o registro.'));
+        }
+    };
+
     const handleFieldUpdate = async (appointmentId, field, value) => {
         const normalizedValue = field === 'status'
             ? normalizeAppointmentStatus(value)
@@ -1541,6 +1628,9 @@ const PatientDetails = () => {
         [consultations, periodFilter]
     );
 
+    const sortedMedicalRecords = useMemo(() => (
+        [...medicalRecords].sort((a, b) => new Date(`${b.date}T${b.time || '00:00'}`) - new Date(`${a.date}T${a.time || '00:00'}`))
+    ), [medicalRecords]);
     const sortedNotes = useMemo(() => (
         [...notes].sort((a, b) => new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at))
     ), [notes]);
@@ -2969,6 +3059,50 @@ const PatientDetails = () => {
         </ShellCard>
     );
 
+    const renderMedicalRecordSection = () => (
+        <ShellCard
+            eyebrow="Clínico"
+            title="Prontuário do Paciente"
+            subtitle="Registre e acompanhe a evolução clínica, análises e condutas realizadas pela equipe."
+            actions={<Button className="ac-patient-primary-button" onClick={() => openMedicalRecordModal()}><PlusCircle className="me-2" /> Novo registro</Button>}
+        >
+            {medicalRecordsError ? <Alert variant="danger" dismissible onClose={() => setMedicalRecordsError('')}>{medicalRecordsError}</Alert> : null}
+            {medicalRecordsLoading ? <div className="ac-patient-medical-record-state">Carregando prontuário...</div> : null}
+            {!medicalRecordsLoading && !medicalRecordsError && sortedMedicalRecords.length === 0 ? (
+                <EmptyState title="Nenhum registro no prontuário" description="Os registros clínicos adicionados pela equipe aparecerão aqui." />
+            ) : null}
+            {!medicalRecordsLoading && sortedMedicalRecords.length > 0 ? (
+                <div className="ac-patient-medical-record-list">
+                    {sortedMedicalRecords.map((record) => (
+                        <article className="ac-patient-medical-record-card" key={record.id}>
+                            <div className="ac-patient-medical-record-card__header">
+                                <div><span className="ac-patient-medical-record-card__type">{record.type}</span><h3>{record.title}</h3></div>
+                                {String(record.professional_id) === String(user?.id) ? (
+                                    <div className="ac-patient-inline-actions">
+                                        <Button size="sm" className="ac-patient-secondary-button" onClick={() => openMedicalRecordModal(record)}>Editar</Button>
+                                        <Button size="sm" className="ac-patient-danger-button" onClick={() => handleMedicalRecordDelete(record)}>Excluir</Button>
+                                    </div>
+                                ) : null}
+                            </div>
+                            <div className="ac-patient-medical-record-card__meta">
+                                <span>{formatDate(record.date)}{record.time ? ` • ${record.time.slice(0, 5)}` : ''}</span>
+                                <span>{record.professional_name || professionalName}</span>
+                            </div>
+                            <div className="ac-patient-medical-record-card__body">
+                                <section><strong>Análise clínica profissional</strong><p>{record.clinical_analysis}</p></section>
+                                {record.observations ? <section><strong>Observações</strong><p>{record.observations}</p></section> : null}
+                                {record.conduct ? <section><strong>Conduta / orientações</strong><p>{record.conduct}</p></section> : null}
+                            </div>
+                            <div className={`ac-patient-medical-record-card__visibility ${record.family_visible ? 'is-shared' : ''}`}>
+                                {record.family_visible ? <><PersonCircle aria-hidden="true" /> Compartilhado com a família</> : <><LockFill aria-hidden="true" /> Uso profissional — não compartilhado com a família</>}
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            ) : null}
+        </ShellCard>
+    );
+
     const renderNotesSection = () => (
         <ShellCard
             eyebrow="Clínico"
@@ -3243,6 +3377,8 @@ const PatientDetails = () => {
             return renderConsultationsSection();
         case 'prescription':
             return renderPrescriptionSection();
+        case 'medicalRecord':
+            return renderMedicalRecordSection();
         case 'notes':
             return renderNotesSection();
         case 'monitoring-tools':
@@ -3481,6 +3617,27 @@ const PatientDetails = () => {
                 </Modal.Footer>
             </Modal>
 
+            <Modal show={showMedicalRecordModal} onHide={() => setShowMedicalRecordModal(false)} size="lg" className="ac-patient-modal">
+                <Modal.Header closeButton><Modal.Title>{editingMedicalRecord ? 'Editar registro do prontuário' : 'Novo registro do prontuário'}</Modal.Title></Modal.Header>
+                <Form onSubmit={handleMedicalRecordSave}>
+                    <Modal.Body>
+                        {medicalRecordsError ? <Alert variant="danger">{medicalRecordsError}</Alert> : null}
+                        <Row>
+                            <Col sm={6}><Form.Group className="mb-3"><Form.Label>Data *</Form.Label><Form.Control type="date" required value={medicalRecordForm.date} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, date: event.target.value }))} /></Form.Group></Col>
+                            <Col sm={6}><Form.Group className="mb-3"><Form.Label>Hora</Form.Label><Form.Control type="time" value={medicalRecordForm.time} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, time: event.target.value }))} /></Form.Group></Col>
+                        </Row>
+                        <Form.Group className="mb-3"><Form.Label>Tipo de registro *</Form.Label><Form.Select required value={medicalRecordForm.type} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, type: event.target.value }))}>{MEDICAL_RECORD_TYPES.map((type) => <option key={type}>{type}</option>)}</Form.Select></Form.Group>
+                        <Form.Group className="mb-3"><Form.Label>Título *</Form.Label><Form.Control required maxLength={200} value={medicalRecordForm.title} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, title: event.target.value }))} /></Form.Group>
+                        <Form.Group className="mb-3"><Form.Label>Análise clínica *</Form.Label><Form.Control as="textarea" rows={4} required value={medicalRecordForm.clinical_analysis} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, clinical_analysis: event.target.value }))} /></Form.Group>
+                        <Form.Group className="mb-3"><Form.Label>Observações</Form.Label><Form.Control as="textarea" rows={3} value={medicalRecordForm.observations} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, observations: event.target.value }))} /></Form.Group>
+                        <Form.Group className="mb-3"><Form.Label>Conduta / orientações</Form.Label><Form.Control as="textarea" rows={3} value={medicalRecordForm.conduct} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, conduct: event.target.value }))} /></Form.Group>
+                        <Form.Check type="switch" className="ac-patient-medical-record-family-switch" id="medical-record-family-visible" label="Compartilhar com a família" checked={medicalRecordForm.family_visible} onChange={(event) => setMedicalRecordForm((form) => ({ ...form, family_visible: event.target.checked }))} />
+                        <small className="text-muted">Quando ativado, este registro poderá ser visualizado pelo responsável no dashboard da família.</small>
+                    </Modal.Body>
+                    <Modal.Footer><Button className="ac-patient-secondary-button" type="button" onClick={() => setShowMedicalRecordModal(false)}>Cancelar</Button><Button variant="primary" className="ac-patient-primary-button ac-patient-medical-record-save" type="submit" disabled={medicalRecordSaving}>{medicalRecordSaving ? 'Salvando...' : 'Salvar registro'}</Button></Modal.Footer>
+                </Form>
+            </Modal>
+
             <Modal show={showNoteModal} onHide={() => setShowNoteModal(false)} className="ac-patient-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>Adicionar Nota</Modal.Title>
@@ -3697,7 +3854,7 @@ const PatientDetails = () => {
                         <Button className="ac-patient-secondary-button" onClick={() => setShowConsultationModal(false)}>
                             Cancelar
                         </Button>
-                        <Button className="ac-patient-primary-button" type="submit">
+                        <Button variant="primary" className="ac-patient-primary-button ac-patient-consultation-save" type="submit">
                             Salvar Atendimento
                         </Button>
                     </Modal.Footer>

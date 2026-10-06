@@ -164,12 +164,10 @@ const ProfessionalDashboard = () => {
     const [showEditPatientModal, setShowEditPatientModal] = useState(false);
     const [showAssistantModal, setShowAssistantModal] = useState(false);
     const [editingPatient, setEditingPatient] = useState(null);
-    const [showNoteModal, setShowNoteModal] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('todos');
     const [assistantStatusFilter, setAssistantStatusFilter] = useState('todos');
-    const [newNote, setNewNote] = useState({ title: '', content: '' });
     const [loading, setLoading] = useState(true);
     const [loadingCharts, setLoadingCharts] = useState(false);
     const [loadingPatients] = useState(false);
@@ -597,25 +595,6 @@ const ProfessionalDashboard = () => {
         }
     };
 
-    const handleAddNote = async (event) => {
-        event.preventDefault();
-
-        if (!user || !selectedPatient) {
-            setError('Usuário ou paciente não selecionado.');
-            return;
-        }
-
-        try {
-            await apiClient.post(`/professional/${user.id}/patients/${selectedPatient.id}/notes`, newNote);
-            setSuccessMessage('Nota adicionada com sucesso!');
-            setNewNote({ title: '', content: '' });
-            setShowNoteModal(false);
-            fetchPatientNotes(selectedPatient.id);
-        } catch (err) {
-            handleApiError(err, 'adicionar nota');
-        }
-    };
-
     const fetchPatientNotes = async (patientId) => {
         if (!user || !patientId) {
             setError('Não foi possível buscar as notas: ID do usuário ou do paciente está faltando.');
@@ -635,22 +614,6 @@ const ProfessionalDashboard = () => {
                 ...previous,
                 notes: []
             }));
-        }
-    };
-
-    const handleUpdateStatus = async (patientId, newStatus) => {
-        if (!user) return;
-
-        try {
-            await apiClient.put(`/professional/${user.id}/patients/${patientId}/status`, { status: newStatus });
-            setSuccessMessage('Status do paciente atualizado!');
-            await fetchPatients();
-
-            if (selectedPatient && selectedPatient.id === patientId) {
-                setSelectedPatient((previous) => ({ ...previous, status: newStatus }));
-            }
-        } catch (err) {
-            handleApiError(err, 'atualizar status do paciente');
         }
     };
 
@@ -1553,32 +1516,6 @@ const ProfessionalDashboard = () => {
                                     </p>
                                 </div>
 
-                                <div className="ac-prof-patient-panel__actions">
-                                    <Button variant="outline-primary" onClick={() => handlePatientSelect(selectedPatient)}>
-                                        Abrir prontuário
-                                    </Button>
-                                    <Button
-                                        variant="outline-secondary"
-                                        onClick={() => {
-                                            setEditingPatient(selectedPatient);
-                                            setShowEditPatientModal(true);
-                                        }}
-                                    >
-                                        Editar
-                                    </Button>
-                                    <Button
-                                        variant={selectedPatient.status === 'ativo' ? 'outline-secondary' : 'primary'}
-                                        onClick={() =>
-                                            handleUpdateStatus(selectedPatient.id, selectedPatient.status === 'ativo' ? 'inativo' : 'ativo')
-                                        }
-                                    >
-                                        {selectedPatient.status === 'ativo' ? 'Desativar' : 'Ativar'}
-                                    </Button>
-                                    <Button variant="primary" onClick={() => setShowNoteModal(true)}>
-                                        Adicionar nota
-                                    </Button>
-                                </div>
-
                                 <div className="ac-prof-patient-panel__section">
                                     <div className="ac-prof-card__header ac-prof-card__header--compact">
                                         <div>
@@ -2253,41 +2190,6 @@ const ProfessionalDashboard = () => {
                                 Cancelar
                             </Button>
                             <Button type="submit">Salvar atendimento</Button>
-                        </Modal.Footer>
-                    </Form>
-                </Modal>
-
-                <Modal show={showNoteModal} onHide={() => setShowNoteModal(false)} className="ac-prof-modal">
-                    <Modal.Header closeButton>
-                        <Modal.Title>Adicionar nota</Modal.Title>
-                    </Modal.Header>
-                    <Form onSubmit={handleAddNote}>
-                        <Modal.Body>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Título *</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={newNote.title}
-                                    onChange={(event) => setNewNote({ ...newNote, title: event.target.value })}
-                                    required
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Conteúdo *</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={5}
-                                    value={newNote.content}
-                                    onChange={(event) => setNewNote({ ...newNote, content: event.target.value })}
-                                    required
-                                />
-                            </Form.Group>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="outline-secondary" onClick={() => setShowNoteModal(false)}>
-                                Cancelar
-                            </Button>
-                            <Button type="submit">Adicionar nota</Button>
                         </Modal.Footer>
                     </Form>
                 </Modal>

@@ -143,6 +143,11 @@ const SECTION_META = {
         title: 'Recomendações e Orientações',
         description: 'Acompanhe recomendações compartilhadas com a família durante a evolução.'
     },
+    medicalRecord: {
+        eyebrow: 'Cuidado',
+        title: 'Prontuário compartilhado',
+        description: 'Evoluções e análises da equipe profissional compartilhadas com a família.'
+    },
     'monitoring-tools': {
         eyebrow: 'Ferramentas',
         title: 'Monitoramentos',
@@ -182,6 +187,7 @@ const PATIENT_NAVIGATION_GROUPS = [
         items: [
             { key: 'consultation', label: 'Atendimentos', icon: CalendarCheck },
             { key: 'prescription', label: 'Prescrições', icon: FileEarmarkMedical },
+            { key: 'medicalRecord', label: 'Prontuário compartilhado', icon: ClipboardPulse },
             { key: 'notes', label: 'Orientações', icon: JournalText }
         ]
     },
@@ -924,6 +930,10 @@ const PatientDetailsParent = () => {
 
     const [patient, setPatient] = useState(null);
     const [notes, setNotes] = useState([]);
+    const [medicalRecords, setMedicalRecords] = useState([]);
+    const [medicalRecordsLoading, setMedicalRecordsLoading] = useState(false);
+    const [medicalRecordsError, setMedicalRecordsError] = useState('');
+    const [medicalRecordsReloadToken, setMedicalRecordsReloadToken] = useState(0);
     const [emotions, setEmotions] = useState([]);
     const [stereotypies, setStereotypies] = useState([]);
     const [prescriptions, setPrescriptions] = useState([]);
@@ -981,6 +991,34 @@ const PatientDetailsParent = () => {
     const canManageConsultations = !isParentRole;
     const canCreateNotes = !isParentRole;
     const canManagePrescriptions = !isParentRole;
+
+    useEffect(() => {
+        if (!isParentRole || !patientId) return;
+        let cancelled = false;
+        setMedicalRecordsLoading(true);
+        setMedicalRecordsError('');
+        apiClient.get(`/parent/patient/${patientId}/medical-records`)
+            .then((response) => {
+                if (cancelled) return;
+                const records = Array.isArray(response.data) ? response.data : [];
+                setMedicalRecords(records
+                    .filter((record) => record?.family_visible === true || record?.family_visible === 1 || record?.family_visible === '1')
+                    .map((record) => ({
+                        ...record,
+                        type: normalizeText(record.type) || 'Registro profissional',
+                        title: normalizeText(record.title) || 'Registro clínico',
+                        professional_name: normalizeText(record.professional_name) || 'Profissional não informado',
+                        clinical_analysis: normalizeText(record.clinical_analysis),
+                        observations: normalizeText(record.observations),
+                        conduct: normalizeText(record.conduct)
+                    })));
+            })
+            .catch(() => {
+                if (!cancelled) setMedicalRecordsError('Não foi possível carregar as evoluções compartilhadas neste momento.');
+            })
+            .finally(() => { if (!cancelled) setMedicalRecordsLoading(false); });
+        return () => { cancelled = true; };
+    }, [isParentRole, medicalRecordsReloadToken, patientId]);
     const viewerName = normalizeText(user?.nome_completo || user?.name || user?.username || (isParentRole ? 'Responsável' : 'Usuário'));
     const patientStatus = normalizeText(patient?.status || patient?.patient_status || patient?.situacao || '');
     const patientSupportLevel = normalizeText(patient?.nivel_suporte || patient?.support_level || '');
@@ -2517,6 +2555,46 @@ const PatientDetailsParent = () => {
         </ShellCard>
     );
 
+    const renderSharedMedicalRecordsSection = () => (
+        <ShellCard
+            eyebrow="Cuidado"
+            title="Prontuário compartilhado"
+            subtitle="Evoluções e análises da equipe profissional compartilhadas com a família."
+            actions={medicalRecordsError ? (
+                <Button className="ac-parent-patient-secondary-button" onClick={() => setMedicalRecordsReloadToken((value) => value + 1)}>
+                    Tentar novamente
+                </Button>
+            ) : null}
+        >
+            {medicalRecordsError ? <Alert variant="danger" className="mb-3">{medicalRecordsError}</Alert> : null}
+            {medicalRecordsLoading ? <div className="py-3">Carregando registros compartilhados...</div> : null}
+            {!medicalRecordsLoading && !medicalRecordsError && medicalRecords.length === 0 ? (
+                <EmptyState
+                    title="Nenhuma evolução compartilhada"
+                    description="Os registros que os profissionais compartilharem com a família aparecerão aqui."
+                />
+            ) : null}
+            {!medicalRecordsLoading && medicalRecords.length > 0 ? (
+                <div className="ac-parent-patient-note-stack">
+                    {[...medicalRecords].sort((a, b) => new Date(`${b.date || b.created_at || ''}T${b.time || '00:00'}`) - new Date(`${a.date || a.created_at || ''}T${a.time || '00:00'}`)).map((record) => (
+                        <article className="ac-parent-patient-note-card" key={record.id}>
+                            <div className="ac-parent-patient-note-card__top">
+                                <strong>{record.title}</strong>
+                                <small>{formatDateTime(record.date || record.created_at, record.time)}</small>
+                            </div>
+                            <StatusPill value={record.type} />
+                            <small className="d-block my-2">Profissional: {record.professional_name}</small>
+                            <strong>Análise profissional</strong>
+                            <p>{record.clinical_analysis || 'Sem análise compartilhada.'}</p>
+                            {record.observations ? <><strong>Observações</strong><p>{record.observations}</p></> : null}
+                            {record.conduct ? <><strong>Conduta / orientações</strong><p>{record.conduct}</p></> : null}
+                        </article>
+                    ))}
+                </div>
+            ) : null}
+        </ShellCard>
+    );
+
     const renderPrescriptionSection = () => (
         <div className="ac-parent-patient-detail-grid">
             <div className="printable-prescription">
@@ -2677,6 +2755,8 @@ const PatientDetailsParent = () => {
             return renderConsultationsSection();
         case 'prescription':
             return renderPrescriptionSection();
+        case 'medicalRecord':
+            return isParentRole ? renderSharedMedicalRecordsSection() : renderOverview();
         case 'notes':
             return renderNotesSection();
         case 'monitoring-tools':
